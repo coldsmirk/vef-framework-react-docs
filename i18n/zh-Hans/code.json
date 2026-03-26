@@ -1,0 +1,276 @@
+{
+  "homepage.meta.title": {
+    "message": "首页"
+  },
+  "homepage.meta.description": {
+    "message": "VEF Framework React 是一个约定驱动的 React 框架，用于构建企业级管理系统，内置路由、认证、CRUD 构建器和主题系统。"
+  },
+  "homepage.stats.framework.label": {
+    "message": "UI 框架"
+  },
+  "homepage.stats.language.label": {
+    "message": "开发语言"
+  },
+  "homepage.stats.bundler.label": {
+    "message": "构建工具"
+  },
+  "homepage.stats.styling.label": {
+    "message": "组件库"
+  },
+  "homepage.hero.kicker": {
+    "message": "约定驱动、企业级 React 框架"
+  },
+  "homepage.hero.description": {
+    "message": "通过声明式路由、内置认证、CRUD 页面构建器和全套组件库来构建企业管理系统。"
+  },
+  "homepage.hero.primary": {
+    "message": "阅读快速开始"
+  },
+  "homepage.hero.secondary": {
+    "message": "查看路由模型"
+  },
+  "homepage.hero.panel.title": {
+    "message": "应用入口"
+  },
+  "homepage.hero.panel.pointOne": {
+    "message": "应用通过声明式配置统一管理路由、认证和主题。"
+  },
+  "homepage.hero.panel.pointTwo": {
+    "message": "内置 CRUD 构建器、表单引擎和权限系统，消除重复样板代码。"
+  },
+  "homepage.hero.panel.pointThree": {
+    "message": "约定优于配置：合理的默认值，完整的覆盖能力。"
+  },
+  "homepage.workflow.eyebrow": {
+    "message": "心智模型"
+  },
+  "homepage.workflow.title": {
+    "message": "从配置开始，而不是从零开始"
+  },
+  "homepage.workflow.subtitle": {
+    "message": "顺着框架的形状来理解 VEF React 最容易：配置应用、定义路由，然后用内置模块组合页面。"
+  },
+  "homepage.workflow.one.title": {
+    "message": "配置应用"
+  },
+  "homepage.workflow.one.description": {
+    "message": "从 `createApp()` 开始，在一个入口点中提供路由、认证、国际化、主题和布局配置。"
+  },
+  "homepage.workflow.two.title": {
+    "message": "定义页面与路由"
+  },
+  "homepage.workflow.two.description": {
+    "message": "使用约定式文件路由或显式路由配置。每个页面都自带权限、布局和元数据。"
+  },
+  "homepage.workflow.three.title": {
+    "message": "用内置模块组合"
+  },
+  "homepage.workflow.three.description": {
+    "message": "利用内置的 CRUD 页面、表单构建器、表格组件和 Hook 来快速交付功能，无需手写样板代码。"
+  },
+  "homepage.features.eyebrow": {
+    "message": "核心能力"
+  },
+  "homepage.features.title": {
+    "message": "最值得优先掌握的框架表面"
+  },
+  "homepage.features.subtitle": {
+    "message": "这些能力覆盖了管理系统中最常见的需求，会最早出现在真实项目里。"
+  },
+  "homepage.feature.route.title": {
+    "message": "约定式路由"
+  },
+  "homepage.feature.route.description": {
+    "message": "基于文件或配置的路由系统，内置路由守卫、懒加载、面包屑和嵌套布局。"
+  },
+  "homepage.feature.crud.title": {
+    "message": "CRUD 页面构建器"
+  },
+  "homepage.feature.crud.description": {
+    "message": "表格页、表单页、详情页和树形页通过类型化配置组合而成，支持搜索、分页和批量操作。"
+  },
+  "homepage.feature.auth.title": {
+    "message": "认证与权限"
+  },
+  "homepage.feature.auth.description": {
+    "message": "内置 OIDC/JWT 认证流程、路由守卫、按钮级权限控制和数据范围集成。"
+  },
+  "homepage.feature.form.title": {
+    "message": "动态表单引擎"
+  },
+  "homepage.feature.form.description": {
+    "message": "Schema 驱动的表单系统，支持验证、条件字段、自定义组件和布局控制。"
+  },
+  "homepage.feature.i18n.title": {
+    "message": "国际化"
+  },
+  "homepage.feature.i18n.description": {
+    "message": "一级国际化支持，包含语言切换、命名空间翻译和 RTL 布局。"
+  },
+  "homepage.feature.theme.title": {
+    "message": "主题与布局"
+  },
+  "homepage.feature.theme.description": {
+    "message": "可定制主题，支持 CSS 变量、多种布局模式、暗色模式和响应式设计。"
+  },
+  "homepage.paths.eyebrow": {
+    "message": "建议入口"
+  },
+  "homepage.paths.title": {
+    "message": "沿最短路径进入有效上下文"
+  },
+  "homepage.paths.subtitle": {
+    "message": "这些页面是理解 VEF React 应用结构以及核心 API 用法的最快路径。"
+  },
+  "homepage.paths.install.title": {
+    "message": "安装与配置"
+  },
+  "homepage.paths.install.description": {
+    "message": "搭建项目、配置 Vite，并安装最小依赖。"
+  },
+  "homepage.paths.quick.title": {
+    "message": "写出第一个页面"
+  },
+  "homepage.paths.quick.description": {
+    "message": "跟着最小可运行示例，真正渲染出一个管理页面。"
+  },
+  "homepage.paths.routing.title": {
+    "message": "理解路由"
+  },
+  "homepage.paths.routing.description": {
+    "message": "把路由、布局、守卫和权限的关系一次看清。"
+  },
+  "homepage.paths.crud.title": {
+    "message": "用 CRUD 构建器扩展"
+  },
+  "homepage.paths.crud.description": {
+    "message": "从手写页面进阶到声明式表格/表单构建器与 Hook 组合。"
+  },
+  "theme.ErrorPageContent.title": {
+    "message": "页面已崩溃",
+    "description": "The title of the fallback page when the page crashed"
+  },
+  "theme.NotFound.title": {
+    "message": "找不到页面",
+    "description": "The title of the 404 page"
+  },
+  "theme.NotFound.p1": {
+    "message": "我们找不到您要找的页面。",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "请联系将您链接到原始 URL 的站点所有者，并告知他们链接已损坏。",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "theme.admonition.note": {
+    "message": "备注",
+    "description": "The default label used for the Note admonition (:::note)"
+  },
+  "theme.admonition.tip": {
+    "message": "提示",
+    "description": "The default label used for the Tip admonition (:::tip)"
+  },
+  "theme.admonition.danger": {
+    "message": "危险",
+    "description": "The default label used for the Danger admonition (:::danger)"
+  },
+  "theme.admonition.info": {
+    "message": "信息",
+    "description": "The default label used for the Info admonition (:::info)"
+  },
+  "theme.admonition.caution": {
+    "message": "警告",
+    "description": "The default label used for the Caution admonition (:::caution)"
+  },
+  "theme.admonition.warning": {
+    "message": "警告",
+    "description": "The default label used for the Warning admonition (:::warning)"
+  },
+  "theme.common.editThisPage": {
+    "message": "编辑此页",
+    "description": "The link label to edit the current page"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "收起侧边栏",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "展开侧边栏",
+    "description": "The title attribute for expand button of doc sidebar"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "跳到主要内容",
+    "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "切换浅色和深色模式（当前为{mode}）",
+    "description": "The ARIA label for the navbar color mode toggle"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "深色模式",
+    "description": "The name for the dark color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "浅色模式",
+    "description": "The name for the light color mode"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "文档分页导航",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "上一页",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.paginator.next": {
+    "message": "下一页",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "文档侧边栏",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← 返回主菜单",
+    "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "本页总览",
+    "description": "The label used by the button to toggle the collapsible TOC"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "切换导航栏",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.SearchBar.label": {
+    "message": "搜索",
+    "description": "The ARIA label and placeholder for search button"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "标签：",
+    "description": "The label alongside a tag list"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "{count} 篇文档带有标签",
+    "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged}「{tagName}」",
+    "description": "The title of the page for a docs tag"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "版本：{versionLabel}"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": "于 {date} ",
+    "description": "The words used to describe on which date a page has been last updated"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": "由 {user} ",
+    "description": "The words used to describe by who the page has been last updated"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "最后{byUser}{atDate}更新",
+    "description": "The sentence used to display when a page has been last updated, and by who"
+  }
+}
