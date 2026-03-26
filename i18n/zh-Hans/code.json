@@ -21,13 +21,13 @@
     "message": "约定驱动、企业级 React 框架"
   },
   "homepage.hero.description": {
-    "message": "通过声明式路由、内置认证、CRUD 页面构建器和全套组件库来构建企业管理系统。"
+    "message": "文档聚焦如何使用 `@vef-framework/*` 导出的 API 来构建应用，覆盖路由、请求、表单、CRUD 页面以及审批流集成。"
   },
   "homepage.hero.primary": {
-    "message": "阅读快速开始"
+    "message": "阅读总览"
   },
   "homepage.hero.secondary": {
-    "message": "查看路由模型"
+    "message": "打开快速开始"
   },
   "homepage.hero.panel.title": {
     "message": "应用入口"
@@ -42,109 +42,133 @@
     "message": "约定优于配置：合理的默认值，完整的覆盖能力。"
   },
   "homepage.workflow.eyebrow": {
-    "message": "心智模型"
+    "message": "主流程"
   },
   "homepage.workflow.title": {
-    "message": "从配置开始，而不是从零开始"
+    "message": "先建立应用骨架，再在其上构建业务"
   },
   "homepage.workflow.subtitle": {
-    "message": "顺着框架的形状来理解 VEF React 最容易：配置应用、定义路由，然后用内置模块组合页面。"
+    "message": "理解 VEF 最有效的方式，是按真实应用的形状来：先启动骨架、再组装运行时，然后在其上构建页面。"
   },
   "homepage.workflow.one.title": {
-    "message": "配置应用"
+    "message": "建立基础层"
   },
   "homepage.workflow.one.description": {
-    "message": "从 `createApp()` 开始，在一个入口点中提供路由、认证、国际化、主题和布局配置。"
+    "message": "通过 defineViteConfig、ESLint 和 Stylelint 一次性建立工程基础。"
   },
   "homepage.workflow.two.title": {
-    "message": "定义页面与路由"
+    "message": "组装主运行时"
   },
   "homepage.workflow.two.description": {
-    "message": "使用约定式文件路由或显式路由配置。每个页面都自带权限、布局和元数据。"
+    "message": "创建 apiClient、router 和应用入口，让认证、权限、query 和路由协同工作。"
   },
   "homepage.workflow.three.title": {
-    "message": "用内置模块组合"
+    "message": "在其上构建页面"
   },
   "homepage.workflow.three.description": {
-    "message": "利用内置的 CRUD 页面、表单构建器、表格组件和 Hook 来快速交付功能，无需手写样板代码。"
+    "message": "普通页面使用 Page，数据密集页面使用 ProTable，CRUD 流程使用 CrudPage 与 createCrudKit。"
+  },
+  "homepage.stats.appLayer.label": {
+    "message": "应用层"
+  },
+  "homepage.stats.appLayer.summary": {
+    "message": "启动 · 路由 · 布局 · CRUD"
+  },
+  "homepage.stats.uiLayer.label": {
+    "message": "UI 层"
+  },
+  "homepage.stats.uiLayer.summary": {
+    "message": "表单 · 选项 · 图表 · 图标"
+  },
+  "homepage.stats.dataLayer.label": {
+    "message": "数据层"
+  },
+  "homepage.stats.dataLayer.summary": {
+    "message": "请求 · 查询 · store · atom"
+  },
+  "homepage.stats.tooling.label": {
+    "message": "工程工具"
+  },
+  "homepage.stats.tooling.summary": {
+    "message": "Vite · ESLint · Stylelint · Commitlint"
   },
   "homepage.features.eyebrow": {
-    "message": "核心能力"
+    "message": "核心表面"
   },
   "homepage.features.title": {
-    "message": "最值得优先掌握的框架表面"
+    "message": "这些 API 表面最值得先掌握"
   },
   "homepage.features.subtitle": {
-    "message": "这些能力覆盖了管理系统中最常见的需求，会最早出现在真实项目里。"
+    "message": "这些能力覆盖了最常见的应用任务，也是框架中最核心、最稳定的部分。"
   },
-  "homepage.feature.route.title": {
-    "message": "约定式路由"
+  "homepage.feature.starter.title": {
+    "message": "应用入口与布局"
   },
-  "homepage.feature.route.description": {
-    "message": "基于文件或配置的路由系统，内置路由守卫、懒加载、面包屑和嵌套布局。"
+  "homepage.feature.starter.description": {
+    "message": "createApp、createRouter、登录路由、无权限路由、Page、ProTable 和 CrudPage 都位于应用主骨架中。"
+  },
+  "homepage.feature.core.title": {
+    "message": "请求、缓存与状态"
+  },
+  "homepage.feature.core.description": {
+    "message": "ApiClient、useQuery、useMutation、createStore、createComponentStore 和 atom 构成页面级数据层。"
+  },
+  "homepage.feature.components.title": {
+    "message": "组件、表单与主题"
+  },
+  "homepage.feature.components.description": {
+    "message": "组件体系已经与主题、通知、表单字段、权限和选项转换深度集成。"
   },
   "homepage.feature.crud.title": {
-    "message": "CRUD 页面构建器"
+    "message": "可复用 CRUD 页面"
   },
   "homepage.feature.crud.description": {
-    "message": "表格页、表单页、详情页和树形页通过类型化配置组合而成，支持搜索、分页和批量操作。"
+    "message": "为搜索区、表格、表单场景、删除流程和批量操作提供统一 API。"
   },
-  "homepage.feature.auth.title": {
-    "message": "认证与权限"
+  "homepage.feature.hooks.title": {
+    "message": "页面级辅助 Hooks"
   },
-  "homepage.feature.auth.description": {
-    "message": "内置 OIDC/JWT 认证流程、路由守卫、按钮级权限控制和数据范围集成。"
+  "homepage.feature.hooks.description": {
+    "message": "数据字典、选项转换、权限检查、加载态判断和常用交互 hooks 都集中从这里导出。"
   },
-  "homepage.feature.form.title": {
-    "message": "动态表单引擎"
+  "homepage.feature.flow.title": {
+    "message": "审批流编辑器"
   },
-  "homepage.feature.form.description": {
-    "message": "Schema 驱动的表单系统，支持验证、条件字段、自定义组件和布局控制。"
-  },
-  "homepage.feature.i18n.title": {
-    "message": "国际化"
-  },
-  "homepage.feature.i18n.description": {
-    "message": "一级国际化支持，包含语言切换、命名空间翻译和 RTL 布局。"
-  },
-  "homepage.feature.theme.title": {
-    "message": "主题与布局"
-  },
-  "homepage.feature.theme.description": {
-    "message": "可定制主题，支持 CSS 变量、多种布局模式、暗色模式和响应式设计。"
+  "homepage.feature.flow.description": {
+    "message": "可以独立嵌入，并通过插件扩展用户、角色、部门和表单字段等能力。"
   },
   "homepage.paths.eyebrow": {
-    "message": "建议入口"
+    "message": "推荐入口"
   },
   "homepage.paths.title": {
-    "message": "沿最短路径进入有效上下文"
+    "message": "一条更实用的阅读路径"
   },
   "homepage.paths.subtitle": {
-    "message": "这些页面是理解 VEF React 应用结构以及核心 API 用法的最快路径。"
+    "message": "这四个页面是理解框架结构并快速进入实现工作的最好起点。"
   },
   "homepage.paths.install.title": {
-    "message": "安装与配置"
+    "message": "从安装开始"
   },
   "homepage.paths.install.description": {
-    "message": "搭建项目、配置 Vite，并安装最小依赖。"
+    "message": "先确认依赖、运行环境和最小项目骨架。"
   },
   "homepage.paths.quick.title": {
-    "message": "写出第一个页面"
+    "message": "查看最小应用骨架"
   },
   "homepage.paths.quick.description": {
-    "message": "跟着最小可运行示例，真正渲染出一个管理页面。"
-  },
-  "homepage.paths.routing.title": {
-    "message": "理解路由"
-  },
-  "homepage.paths.routing.description": {
-    "message": "把路由、布局、守卫和权限的关系一次看清。"
+    "message": "顺着 createApp、createApiClient 和 createRouter 走完整个最小启动链路。"
   },
   "homepage.paths.crud.title": {
-    "message": "用 CRUD 构建器扩展"
+    "message": "阅读 CRUD 页面指南"
   },
   "homepage.paths.crud.description": {
-    "message": "从手写页面进阶到声明式表格/表单构建器与 Hook 组合。"
+    "message": "这是理解管理后台搜索区、表格和表单场景的一个很好入口。"
+  },
+  "homepage.paths.reference.title": {
+    "message": "浏览包级 API 地图"
+  },
+  "homepage.paths.reference.description": {
+    "message": "当你从需求反推应该看哪个包、哪个入口时，这页最有帮助。"
   },
   "theme.ErrorPageContent.title": {
     "message": "页面已崩溃",
