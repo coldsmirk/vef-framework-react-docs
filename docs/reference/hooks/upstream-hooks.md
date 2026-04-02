@@ -5,7 +5,7 @@ title: Upstream Hook Exports
 
 # Upstream Hook Exports
 
-These exports exist so business projects can import common hooks through `@vef-framework/hooks` instead of managing several third-party entry points directly.
+These exports exist so business projects can import common hooks through `@vef-framework-react/hooks` instead of managing several third-party entry points directly.
 
 ## Wrapped Media and Environment Hooks
 

@@ -25,7 +25,7 @@ In most projects, the first two are used most often.
 ## Global Store: `createStore()`
 
 ```ts
-import { createStore } from "@vef-framework/core";
+import { createStore } from "@vef-framework-react/core";
 
 interface CounterState {
   count: number;
@@ -45,7 +45,7 @@ export const useCounterStore = createStore<CounterState>(set => ({
 ## Persisted Store: `createPersistedStore()`
 
 ```ts
-import { createPersistedStore } from "@vef-framework/core";
+import { createPersistedStore } from "@vef-framework-react/core";
 
 interface ThemeState {
   colorScheme: "light" | "dark";
@@ -73,8 +73,8 @@ export const useThemeStore = createPersistedStore<ThemeState>(
 A configuration-page-style setup often looks like this:
 
 ```ts
-import { createComponentStore } from "@vef-framework/core";
-import { EventEmitter } from "@vef-framework/shared";
+import { createComponentStore } from "@vef-framework-react/core";
+import { EventEmitter } from "@vef-framework-react/shared";
 
 interface ConfigPageEvents {
   submit: undefined;
@@ -107,7 +107,7 @@ export const {
 For single modals, drawers, or local detail state, Jotai is often the lighter option.
 
 ```tsx
-import { atom, useAtomValue, useSetAtom } from "@vef-framework/core";
+import { atom, useAtomValue, useSetAtom } from "@vef-framework-react/core";
 
 const modalAtom = atom({
   open: false,

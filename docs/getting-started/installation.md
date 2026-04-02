@@ -10,7 +10,7 @@ To use VEF, four categories of dependencies are usually involved:
 1. React runtime
 2. VEF core packages
 3. Routing through `@tanstack/react-router`
-4. Build and lint tooling through `@vef-framework/dev`
+4. Build and lint tooling through `@vef-framework-react/dev`
 
 ## Runtime Requirements
 
@@ -29,25 +29,25 @@ For a typical admin-style application, the following packages are commonly insta
 
 ```bash
 pnpm add react react-dom @tanstack/react-router
-pnpm add @vef-framework/core @vef-framework/components @vef-framework/hooks @vef-framework/shared @vef-framework/starter
-pnpm add -D vite typescript @types/react @types/react-dom @vef-framework/dev eslint stylelint lint-staged husky @commitlint/cli
+pnpm add @vef-framework-react/core @vef-framework-react/components @vef-framework-react/hooks @vef-framework-react/shared @vef-framework-react/starter
+pnpm add -D vite typescript @types/react @types/react-dom @vef-framework-react/dev eslint stylelint lint-staged husky @commitlint/cli
 ```
 
 If the project also needs the approval flow editor:
 
 ```bash
-pnpm add @vef-framework/approval-flow-editor
+pnpm add @vef-framework-react/approval-flow-editor
 ```
 
 ## Which Packages Are Usually Needed
 
 | Scenario | Packages |
 | --- | --- |
-| Only requests and query | `@vef-framework/core` |
-| Only components and form wrappers | `@vef-framework/components` |
-| Full admin-style application skeleton | `@vef-framework/starter` + `components` + `core` + `hooks` + `shared` |
-| Shared project tooling | `@vef-framework/dev` |
-| Approval flow designer integration | `@vef-framework/approval-flow-editor` |
+| Only requests and query | `@vef-framework-react/core` |
+| Only components and form wrappers | `@vef-framework-react/components` |
+| Full admin-style application skeleton | `@vef-framework-react/starter` + `components` + `core` + `hooks` + `shared` |
+| Shared project tooling | `@vef-framework-react/dev` |
+| Approval flow designer integration | `@vef-framework-react/approval-flow-editor` |
 
 In most applications, `starter` is used together with `components`, `core`, `hooks`, and `shared`.
 
@@ -59,16 +59,16 @@ The following dependency set is close to what a real project would look like:
 {
   "dependencies": {
     "@tanstack/react-router": "^1.168.3",
-    "@vef-framework/components": "^2",
-    "@vef-framework/core": "^2",
-    "@vef-framework/hooks": "^2",
-    "@vef-framework/shared": "^2",
-    "@vef-framework/starter": "^2",
+    "@vef-framework-react/components": "^2",
+    "@vef-framework-react/core": "^2",
+    "@vef-framework-react/hooks": "^2",
+    "@vef-framework-react/shared": "^2",
+    "@vef-framework-react/starter": "^2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@vef-framework/dev": "^2",
+    "@vef-framework-react/dev": "^2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.2",
@@ -84,7 +84,7 @@ VEF packages expose source or build outputs through custom export conditions, so
 The following setup works well in application projects:
 
 ```ts title="vite.config.ts"
-import { defineViteConfig } from "@vef-framework/dev";
+import { defineViteConfig } from "@vef-framework-react/dev";
 
 export default defineViteConfig({
   react: {
@@ -95,7 +95,7 @@ export default defineViteConfig({
 
 ## Basic TypeScript Configuration
 
-If you use the `tsconfig` exported by `@vef-framework/dev`, it can be reused directly.  
+If you use the `tsconfig` exported by `@vef-framework-react/dev`, it can be reused directly.  
 If you prefer to write your own config, these settings should at least be aligned:
 
 ```json
@@ -106,7 +106,7 @@ If you prefer to write your own config, these settings should at least be aligne
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "strict": true,
-    "types": ["vite/client", "@vef-framework/dev/types"]
+    "types": ["vite/client", "@vef-framework-react/dev/types"]
   }
 }
 ```

@@ -5,7 +5,7 @@ title: Hooks Package Overview
 
 # Hooks Package Overview
 
-`@vef-framework/hooks` contains two groups of exports:
+`@vef-framework-react/hooks` contains two groups of exports:
 
 1. page-level hooks maintained by VEF
 2. third-party hooks re-exported through one stable package entry

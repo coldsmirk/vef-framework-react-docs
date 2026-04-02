@@ -5,7 +5,7 @@ title: Charts
 
 # Charts
 
-VEF exposes charting support through `@vef-framework/components`, with the following core exports:
+VEF exposes charting support through `@vef-framework-react/components`, with the following core exports:
 
 - `Chart`
 - `useChart`
@@ -15,9 +15,9 @@ VEF exposes charting support through `@vef-framework/components`, with the follo
 ## Basic Usage
 
 ```tsx
-import type { ChartOption } from "@vef-framework/components";
+import type { ChartOption } from "@vef-framework-react/components";
 
-import { Chart } from "@vef-framework/components";
+import { Chart } from "@vef-framework-react/components";
 
 const option: ChartOption = {
   xAxis: { type: "category", data: ["Mon", "Tue", "Wed"] },

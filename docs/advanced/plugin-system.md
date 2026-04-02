@@ -5,15 +5,15 @@ title: Approval Flow Editor Plugin System
 
 # Approval Flow Editor Plugin System
 
-`@vef-framework/approval-flow-editor` is an independent business component package.  
+`@vef-framework-react/approval-flow-editor` is an independent business component package.  
 Its most important host-side integration point is the `plugins` prop rather than styling.
 
 ## Basic Usage
 
 ```tsx
-import type { FlowDefinition } from "@vef-framework/approval-flow-editor";
+import type { FlowDefinition } from "@vef-framework-react/approval-flow-editor";
 
-import { ApprovalFlowEditor } from "@vef-framework/approval-flow-editor";
+import { ApprovalFlowEditor } from "@vef-framework-react/approval-flow-editor";
 
 const [definition, setDefinition] = useState<FlowDefinition>(initialValue);
 

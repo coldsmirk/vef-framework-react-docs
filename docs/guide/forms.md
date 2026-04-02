@@ -5,7 +5,7 @@ title: Forms
 
 # Forms
 
-VEF form capabilities mainly come from `@vef-framework/components`, and the two main entry points are:
+VEF form capabilities mainly come from `@vef-framework-react/components`, and the two main entry points are:
 
 - `useForm()`
 - `useFormContext()`
@@ -15,8 +15,8 @@ It can be understood as an enterprise-oriented UI wrapper around TanStack Form.
 ## Typical Usage
 
 ```tsx
-import { Grid, useDataOptionsSelect, useFormContext } from "@vef-framework/components";
-import { z } from "@vef-framework/shared";
+import { Grid, useDataOptionsSelect, useFormContext } from "@vef-framework-react/components";
+import { z } from "@vef-framework-react/shared";
 
 const validators = {
   name: z.string("Required").min(2, "At least 2 characters"),
@@ -51,7 +51,7 @@ export function UserForm() {
 ## `useForm()` Creates the Form Instance
 
 ```tsx
-import { useForm } from "@vef-framework/components";
+import { useForm } from "@vef-framework-react/components";
 
 const {
   Form,
@@ -78,7 +78,7 @@ const { AppField } = useFormContext<FormValues>();
 ## Validation with `z`
 
 ```tsx
-import { z } from "@vef-framework/shared";
+import { z } from "@vef-framework-react/shared";
 
 const validators = {
   username: z.string("Required").min(2, "At least 2 characters").max(16, "At most 16 characters"),

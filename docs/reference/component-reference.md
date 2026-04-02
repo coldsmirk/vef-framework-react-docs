@@ -5,7 +5,7 @@ title: Component Export Index
 
 # Component Export Index
 
-`@vef-framework/components` has a wide export surface. This page groups those exports by usage scenario so they are easier to scan.
+`@vef-framework-react/components` has a wide export surface. This page groups those exports by usage scenario so they are easier to scan.
 
 ## Display
 

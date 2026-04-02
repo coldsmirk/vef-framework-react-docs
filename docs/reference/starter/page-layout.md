@@ -5,6 +5,8 @@ title: Page Layout and Form Containers
 
 # Page Layout and Form Containers
 
+> **Note (v2.1.6):** `Page`, `FlexCard`, `FormModal`, and `FormDrawer` have moved to `@vef-framework-react/components`. Import them from there instead of `starter`.
+
 ## `App`
 
 The application root component that connects:

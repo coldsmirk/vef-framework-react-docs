@@ -15,7 +15,7 @@ Authentication in VEF mainly involves three parts:
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
-import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework/starter";
+import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework-react/starter";
 
 import { apiClient } from "../../api";
 import { login } from "../../apis/auth";

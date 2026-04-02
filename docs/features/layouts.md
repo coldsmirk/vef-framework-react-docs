@@ -15,7 +15,7 @@ VEF page layout is centered around two layers:
 For pages that are not CRUD pages and do not require highly custom layout behavior, `Page` is usually the first container to use:
 
 ```tsx
-import { Page } from "@vef-framework/starter";
+import { Page } from "@vef-framework-react/components";
 
 <Page title="System Monitor">
   Page content

@@ -5,7 +5,7 @@ title: 表单
 
 # 表单
 
-VEF 的表单能力主要来自 `@vef-framework/components`，核心入口只有两个:
+VEF 的表单能力主要来自 `@vef-framework-react/components`，核心入口只有两个:
 
 - `useForm()`
 - `useFormContext()`
@@ -15,8 +15,8 @@ VEF 的表单能力主要来自 `@vef-framework/components`，核心入口只有
 ## 最常见的使用姿势
 
 ```tsx
-import { Grid, useDataOptionsSelect, useFormContext } from "@vef-framework/components";
-import { z } from "@vef-framework/shared";
+import { Grid, useDataOptionsSelect, useFormContext } from "@vef-framework-react/components";
+import { z } from "@vef-framework-react/shared";
 
 const validators = {
   name: z.string("必须").min(2, "最少2个字符"),
@@ -51,7 +51,7 @@ export function UserForm() {
 ## `useForm()` 负责创建表单实例
 
 ```tsx
-import { useForm } from "@vef-framework/components";
+import { useForm } from "@vef-framework-react/components";
 
 const {
   Form,
@@ -78,7 +78,7 @@ const { AppField } = useFormContext<FormValues>();
 ## 校验推荐用 `z`
 
 ```tsx
-import { z } from "@vef-framework/shared";
+import { z } from "@vef-framework-react/shared";
 
 const validators = {
   username: z.string("必须").min(2, "最少2个字符").max(16, "最多16个字符"),

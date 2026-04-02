@@ -7,7 +7,7 @@ title: Package API Map
 
 This page does not dive into implementation details. Its purpose is to answer a simpler question: when a certain need appears, which package should be inspected first?
 
-## `@vef-framework/starter`
+## `@vef-framework-react/starter`
 
 Best suited for:
 
@@ -26,7 +26,7 @@ Start with:
 - `CrudPage`
 - `createCrudKit`
 
-## `@vef-framework/components`
+## `@vef-framework-react/components`
 
 Best suited for:
 
@@ -50,7 +50,7 @@ Start with:
 - `Icon`
 - `Chart`
 
-## `@vef-framework/core`
+## `@vef-framework-react/core`
 
 Best suited for:
 
@@ -68,7 +68,7 @@ Start with:
 - `atom`
 - `checkPermission`
 
-## `@vef-framework/hooks`
+## `@vef-framework-react/hooks`
 
 Best suited for:
 
@@ -85,7 +85,7 @@ Start with:
 - `useHasMutating`
 - `useAuthorizedItems`
 
-## `@vef-framework/shared`
+## `@vef-framework-react/shared`
 
 Best suited for:
 
@@ -102,7 +102,7 @@ Start with:
 - `flattenTree`
 - `mapTree`
 
-## `@vef-framework/dev`
+## `@vef-framework-react/dev`
 
 Best suited for:
 
@@ -118,7 +118,7 @@ Start with:
 - `defineStylelintConfig`
 - `defineCommitlintConfig`
 
-## `@vef-framework/approval-flow-editor`
+## `@vef-framework-react/approval-flow-editor`
 
 Best suited for:
 

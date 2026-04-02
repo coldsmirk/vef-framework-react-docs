@@ -5,7 +5,7 @@ title: 上游直出 Hooks
 
 # 上游直出 Hooks
 
-这些导出主要是为了让业务项目可以统一从 `@vef-framework/hooks` 取常用 hooks，而不是到处散装引依赖。
+这些导出主要是为了让业务项目可以统一从 `@vef-framework-react/hooks` 取常用 hooks，而不是到处散装引依赖。
 
 ## 环境与媒体查询包装
 
@@ -64,5 +64,5 @@ title: 上游直出 Hooks
 
 使用建议:
 
-- 只要框架已经转出了同名能力，优先从 `@vef-framework/hooks` 统一导入
+- 只要框架已经转出了同名能力，优先从 `@vef-framework-react/hooks` 统一导入
 - 如果你需要看完整参数细节，以官方文档为准

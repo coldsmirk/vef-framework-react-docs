@@ -5,7 +5,7 @@ title: Ant Design Pass-Through Components
 
 # Ant Design Pass-Through Components
 
-This page covers exports from `@vef-framework/components` that mainly stay aligned with Ant Design behavior. For these exports, props and core behavior should be treated as Ant Design-compatible unless otherwise noted.
+This page covers exports from `@vef-framework-react/components` that mainly stay aligned with Ant Design behavior. For these exports, props and core behavior should be treated as Ant Design-compatible unless otherwise noted.
 
 ## Navigation and Layout
 

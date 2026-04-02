@@ -15,7 +15,7 @@ VEF 提供两种最常用的图标入口:
 适合你在代码里直接引用 Lucide 图标组件时使用:
 
 ```tsx
-import { Icon } from "@vef-framework/components";
+import { Icon } from "@vef-framework-react/components";
 import { PlusIcon } from "lucide-react";
 
 <Icon component={PlusIcon} />
@@ -26,7 +26,7 @@ import { PlusIcon } from "lucide-react";
 适合图标名由配置或后端返回的场景，比如菜单系统。
 
 ```tsx
-import { DynamicIcon } from "@vef-framework/components";
+import { DynamicIcon } from "@vef-framework-react/components";
 
 <DynamicIcon name="users" />
 ```

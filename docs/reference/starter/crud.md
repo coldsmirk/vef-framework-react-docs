@@ -5,6 +5,8 @@ title: CRUD and Table Stack
 
 # CRUD and Table Stack
 
+> **Note (v2.1.6):** `ProSearch`, `ProTable`, `Crud`, `CrudPage`, and `createCrudKit` have moved to `@vef-framework-react/components`. Import them from there instead of `starter`.
+
 ## `ProSearch`
 
 Search-form container for:

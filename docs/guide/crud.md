@@ -5,7 +5,7 @@ title: CRUD Pages
 
 # CRUD Pages
 
-One of the most productive parts of `@vef-framework/starter` is the combination of `CrudPage` and `createCrudKit()`.  
+One of the most productive parts of `@vef-framework-react/components` is the combination of `CrudPage` and `createCrudKit()`.  
 The goal is not only to reduce table boilerplate, but to standardize search, list loading, form scenes, delete flows, batch actions, and page-local state.
 
 ## What a CRUD Page Combines
@@ -96,7 +96,7 @@ renderForm={scene => <Form scene={scene} />}
 `createCrudKit()` locks a page's own generic types into a reusable local toolkit:
 
 ```ts
-import { createCrudKit } from "@vef-framework/starter";
+import { createCrudKit } from "@vef-framework-react/components";
 
 export const {
   useCrudStore,

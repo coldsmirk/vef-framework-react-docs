@@ -5,15 +5,15 @@ title: 审批流编辑器插件系统
 
 # 审批流编辑器插件系统
 
-`@vef-framework/approval-flow-editor` 是一个独立业务组件包。  
+`@vef-framework-react/approval-flow-editor` 是一个独立业务组件包。  
 它最重要的宿主集成点不是样式，而是 `plugins`。
 
 ## 基本用法
 
 ```tsx
-import type { FlowDefinition } from "@vef-framework/approval-flow-editor";
+import type { FlowDefinition } from "@vef-framework-react/approval-flow-editor";
 
-import { ApprovalFlowEditor } from "@vef-framework/approval-flow-editor";
+import { ApprovalFlowEditor } from "@vef-framework-react/approval-flow-editor";
 
 const [definition, setDefinition] = useState<FlowDefinition>(initialValue);
 

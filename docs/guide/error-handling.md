@@ -51,7 +51,7 @@ VEF's `HttpClient` handles the first case for you, which removes a lot of repeti
 Login and token-refresh endpoints usually need to skip automatic auth headers:
 
 ```ts
-import { skipAuthenticationHeader, skipAuthenticationValue } from "@vef-framework/core";
+import { skipAuthenticationHeader, skipAuthenticationValue } from "@vef-framework-react/core";
 
 headers: {
   [skipAuthenticationHeader]: skipAuthenticationValue

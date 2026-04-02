@@ -5,7 +5,7 @@ title: 路由
 
 # 路由
 
-VEF 的路由能力建立在 `@tanstack/react-router` 之上，但你平时真正高频使用的是 `@vef-framework/starter` 提供的一组辅助 API:
+VEF 的路由能力建立在 `@tanstack/react-router` 之上，但你平时真正高频使用的是 `@vef-framework-react/starter` 提供的一组辅助 API:
 
 - `createRouter()`
 - `createRootRouteOptions()`
@@ -35,7 +35,7 @@ flowchart TD
 最外层 router 实例通常这样创建:
 
 ```ts
-import { createRouter } from "@vef-framework/starter";
+import { createRouter } from "@vef-framework-react/starter";
 
 import { routeTree } from "./router.gen";
 import { routerContext } from "./context";
@@ -70,7 +70,7 @@ interface RouterContext {
 实际项目里通常会先给一个占位对象:
 
 ```ts
-import type { RouterContext } from "@vef-framework/starter";
+import type { RouterContext } from "@vef-framework-react/starter";
 
 export const routerContext: RouterContext = {
   router: undefined!
@@ -82,10 +82,10 @@ export const routerContext: RouterContext = {
 根路由的职责非常单纯: 根据当前路由上下文和菜单信息计算文档标题。
 
 ```tsx
-import type { RouterContext } from "@vef-framework/starter";
+import type { RouterContext } from "@vef-framework-react/starter";
 
 import { createRootRouteWithContext } from "@tanstack/react-router";
-import { createRootRouteOptions } from "@vef-framework/starter";
+import { createRootRouteOptions } from "@vef-framework-react/starter";
 
 export const Route = createRootRouteWithContext<RouterContext>()(
   createRootRouteOptions({
@@ -100,10 +100,10 @@ export const Route = createRootRouteWithContext<RouterContext>()(
 你应该把“已登录后才能访问”的后台页面都挂在这里。
 
 ```tsx
-import type { UserInfo } from "@vef-framework/starter";
+import type { UserInfo } from "@vef-framework-react/starter";
 
 import { createFileRoute } from "@tanstack/react-router";
-import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework/starter";
+import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework-react/starter";
 
 import { apiClient } from "../../api";
 import { getUserInfo, logout } from "../../apis/auth";
@@ -139,7 +139,7 @@ export const Route = createFileRoute(INDEX_ROUTE_ID)(
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
-import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework/starter";
+import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework-react/starter";
 
 import { apiClient } from "../../api";
 import { login } from "../../apis/auth";
@@ -155,7 +155,7 @@ export const Route = createFileRoute(LOGIN_ROUTE_ID)(
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
-import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework/starter";
+import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework-react/starter";
 
 export const Route = createFileRoute(ACCESS_DENIED_ROUTE_ID)(
   createAccessDeniedRouteOptions()

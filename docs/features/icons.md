@@ -15,7 +15,7 @@ VEF exposes two icon entry points most often used in application code:
 Use `Icon` when a Lucide icon component is referenced directly in code:
 
 ```tsx
-import { Icon } from "@vef-framework/components";
+import { Icon } from "@vef-framework-react/components";
 import { PlusIcon } from "lucide-react";
 
 <Icon component={PlusIcon} />
@@ -26,7 +26,7 @@ import { PlusIcon } from "lucide-react";
 Use `DynamicIcon` when icon names come from configuration or backend data, such as menu metadata.
 
 ```tsx
-import { DynamicIcon } from "@vef-framework/components";
+import { DynamicIcon } from "@vef-framework-react/components";
 
 <DynamicIcon name="users" />
 ```

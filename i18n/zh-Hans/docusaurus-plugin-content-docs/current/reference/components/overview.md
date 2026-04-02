@@ -5,7 +5,9 @@ title: Components 包总览
 
 # Components 包总览
 
-`@vef-framework/components` 是页面层最直接会接触到的包。为了避免文档重复翻译一遍 Ant Design，这一组参考文档按两类能力拆开:
+`@vef-framework-react/components` 是页面层最直接会接触到的包。为了避免文档重复翻译一遍 Ant Design，这一组参考文档按两类能力拆开:
+
+> **v2.1.6：** `Page`、`FlexCard`、`FormModal`、`FormDrawer`、`ProSearch`、`ProTable`、`Crud`、`CrudPage` 和 `createCrudKit` 已从 `starter` 迁移到本包。
 
 1. **VEF 自研或增强导出**
 2. **Antd 透传导出**

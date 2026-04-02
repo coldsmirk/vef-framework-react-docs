@@ -10,7 +10,7 @@ VEF 并不要求你永远只使用框架内置字段。
 
 ## 先看已有扩展点
 
-`@vef-framework/components` 在表单层导出了:
+`@vef-framework-react/components` 在表单层导出了:
 
 - `withForm`
 - `withFieldGroup`

@@ -15,7 +15,7 @@ VEF 里“请求怎么写”有一条非常明确的推荐路径:
 ## 先创建全局 `apiClient`
 
 ```ts
-import { createApiClient } from "@vef-framework/starter";
+import { createApiClient } from "@vef-framework-react/starter";
 
 export const apiClient = createApiClient({
   http: {
@@ -38,8 +38,8 @@ export const apiClient = createApiClient({
 ```ts
 export const findUserPage = apiClient.createQueryFn(
   "find_user_page",
-  ({ post }) => async queryParams => {
-    const result = await post("/api/user/page", {
+  http => async queryParams => {
+    const result = await http.post("/api/user/page", {
       data: queryParams
     });
 
@@ -62,7 +62,7 @@ useQuery({
 ```ts
 export const createUser = apiClient.createMutationFn(
   "create_user",
-  ({ post }) => params => post("/api/user/create", {
+  http => params => http.post("/api/user/create", {
     data: params
   })
 );
@@ -71,7 +71,7 @@ export const createUser = apiClient.createMutationFn(
 ## 组件内: `useQuery()` 与 `useMutation()`
 
 ```tsx
-import { useMutation, useQuery } from "@vef-framework/core";
+import { useMutation, useQuery } from "@vef-framework-react/core";
 
 const pageResult = useQuery({
   queryKey: [findUserPage.key, searchParams],
@@ -107,16 +107,16 @@ await apiClient.executeMutation({
 `starter.extractQueryParams()` 是 VEF 里非常常见的辅助函数，专门用来从查询参数里拆分页、排序和业务参数。
 
 ```ts
-import type { PaginatedQueryParams } from "@vef-framework/starter";
+import type { PaginatedQueryParams } from "@vef-framework-react/starter";
 
-import { extractQueryParams } from "@vef-framework/starter";
+import { extractQueryParams } from "@vef-framework-react/starter";
 
 export const findUserPage = apiClient.createQueryFn(
   "find_user_page",
-  ({ post }) => async (queryParams: PaginatedQueryParams<UserSearch>) => {
+  http => async (queryParams: PaginatedQueryParams<UserSearch>) => {
     const { params, pagination } = extractQueryParams(queryParams);
 
-    const result = await post("/api/user/page", {
+    const result = await http.post("/api/user/page", {
       data: {
         ...params,
         pagination
@@ -131,7 +131,7 @@ export const findUserPage = apiClient.createQueryFn(
 ## 跳过认证请求
 
 ```ts
-import { skipAuthenticationHeader, skipAuthenticationValue } from "@vef-framework/core";
+import { skipAuthenticationHeader, skipAuthenticationValue } from "@vef-framework-react/core";
 ```
 
 用法如下:

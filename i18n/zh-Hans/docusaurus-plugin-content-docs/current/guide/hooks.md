@@ -5,7 +5,7 @@ title: Hooks
 
 # Hooks
 
-`@vef-framework/hooks` 不是“杂项工具箱”，它主要补的是页面层会高频遇到、但又不适合塞进组件或 store 的能力。
+`@vef-framework-react/hooks` 不是“杂项工具箱”，它主要补的是页面层会高频遇到、但又不适合塞进组件或 store 的能力。
 
 ## 最值得优先掌握的 hooks
 
@@ -107,7 +107,7 @@ const isCreatingUser = useHasMutating(createUser.key);
 
 ## 其它常用导出
 
-`@vef-framework/hooks` 还整理并复导出了不少来自 Mantine、AI SDK、热键库的能力，常见的包括:
+`@vef-framework-react/hooks` 还整理并复导出了不少来自 Mantine、AI SDK、热键库的能力，常见的包括:
 
 - `useDebouncedValue`
 - `useElementSize`

@@ -41,7 +41,7 @@ const canEdit = useIsAuthorized(["sys:user:update", "sys:user:write"], "any");
 ## 组件级权限控制
 
 ```tsx
-import { PermissionGate } from "@vef-framework/components";
+import { PermissionGate } from "@vef-framework-react/components";
 
 <PermissionGate permTokens="sys:user:create">
   <Button type="primary">新增用户</Button>

@@ -15,7 +15,7 @@ import {
 This page documents the VEF CSS custom properties intended for day-to-day styling work. It covers {variables.length} variables and focuses on the usage contract: which token family to reach for, where to read it from, and how to keep page styles aligned with the framework.
 
 :::tip
-If your app is bootstrapped through `starter.createApp().render()`, these variables are already injected onto `:root`. If you mount the component layer manually, keep `@vef-framework/components` `ConfigProvider` in place so the global variables are emitted.
+If your app is bootstrapped through `starter.createApp().render()`, these variables are already injected onto `:root`. If you mount the component layer manually, keep `@vef-framework-react/components` `ConfigProvider` in place so the global variables are emitted.
 :::
 
 :::note
@@ -82,7 +82,7 @@ This is the best default for:
 
 ## `globalCssVars` in Emotion or object styles
 
-`globalCssVars` is the JS/TS alias layer exported by `@vef-framework/components`. It maps CSS variable names into camelCase fields, for example:
+`globalCssVars` is the JS/TS alias layer exported by `@vef-framework-react/components`. It maps CSS variable names into camelCase fields, for example:
 
 | CSS custom property | JS alias |
 | --- | --- |
@@ -93,7 +93,7 @@ This is the best default for:
 
 ```tsx
 import { css } from "@emotion/react";
-import { globalCssVars } from "@vef-framework/components";
+import { globalCssVars } from "@vef-framework-react/components";
 
 const panelStyle = css({
   padding: globalCssVars.spacingMd,
@@ -111,7 +111,7 @@ Use this when your style already lives in TS or JS. It keeps the token name cons
 `useThemeTokens()` returns the resolved Ant Design token object for the current theme. Reach for it when a runtime library needs concrete values rather than CSS variable strings.
 
 ```tsx
-import { useThemeTokens } from "@vef-framework/components";
+import { useThemeTokens } from "@vef-framework-react/components";
 
 export function MetricsChart() {
   const { colorPrimary, colorTextSecondary } = useThemeTokens();

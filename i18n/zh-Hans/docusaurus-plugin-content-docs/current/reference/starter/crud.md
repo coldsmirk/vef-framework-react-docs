@@ -5,6 +5,8 @@ title: CRUD 与表格体系
 
 # CRUD 与表格体系
 
+> **注意（v2.1.6）：** `ProSearch`、`ProTable`、`Crud`、`CrudPage` 和 `createCrudKit` 已迁移到 `@vef-framework-react/components`，请从那里导入。
+
 ## `ProSearch`
 
 搜索表单容器，负责基础搜索区、高级搜索区、搜索按钮和重置逻辑。

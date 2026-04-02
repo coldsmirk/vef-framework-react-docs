@@ -7,7 +7,7 @@ title: 包级 API 地图
 
 这一页不展开讲内部实现，只告诉你“遇到什么需求，应该先去哪个包找哪个导出”。
 
-## `@vef-framework/starter`
+## `@vef-framework-react/starter`
 
 适合解决:
 
@@ -26,7 +26,7 @@ title: 包级 API 地图
 - `CrudPage`
 - `createCrudKit`
 
-## `@vef-framework/components`
+## `@vef-framework-react/components`
 
 适合解决:
 
@@ -50,7 +50,7 @@ title: 包级 API 地图
 - `Icon`
 - `Chart`
 
-## `@vef-framework/core`
+## `@vef-framework-react/core`
 
 适合解决:
 
@@ -68,7 +68,7 @@ title: 包级 API 地图
 - `atom`
 - `checkPermission`
 
-## `@vef-framework/hooks`
+## `@vef-framework-react/hooks`
 
 适合解决:
 
@@ -85,7 +85,7 @@ title: 包级 API 地图
 - `useHasMutating`
 - `useAuthorizedItems`
 
-## `@vef-framework/shared`
+## `@vef-framework-react/shared`
 
 适合解决:
 
@@ -102,7 +102,7 @@ title: 包级 API 地图
 - `flattenTree`
 - `mapTree`
 
-## `@vef-framework/dev`
+## `@vef-framework-react/dev`
 
 适合解决:
 
@@ -118,7 +118,7 @@ title: 包级 API 地图
 - `defineStylelintConfig`
 - `defineCommitlintConfig`
 
-## `@vef-framework/approval-flow-editor`
+## `@vef-framework-react/approval-flow-editor`
 
 适合解决:
 

@@ -5,7 +5,7 @@ title: Hooks
 
 # Hooks
 
-`@vef-framework/hooks` is not just a miscellaneous utilities package. It mainly provides page-level hooks that appear frequently in real applications but do not fit naturally inside components or stores.
+`@vef-framework-react/hooks` is not just a miscellaneous utilities package. It mainly provides page-level hooks that appear frequently in real applications but do not fit naturally inside components or stores.
 
 ## Core Hooks to Know First
 
@@ -107,7 +107,7 @@ These two hooks are especially useful for:
 
 ## Other Frequently Used Exports
 
-`@vef-framework/hooks` also re-exports several widely used hooks from Mantine, the AI SDK, and hotkey libraries, including:
+`@vef-framework-react/hooks` also re-exports several widely used hooks from Mantine, the AI SDK, and hotkey libraries, including:
 
 - `useDebouncedValue`
 - `useElementSize`

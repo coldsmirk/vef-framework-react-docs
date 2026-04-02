@@ -5,7 +5,7 @@ title: Hooks 包总览
 
 # Hooks 包总览
 
-`@vef-framework/hooks` 由两部分组成:
+`@vef-framework-react/hooks` 由两部分组成:
 
 1. **VEF 自己维护的页面层 hooks**
 2. **统一出口的上游 hooks**

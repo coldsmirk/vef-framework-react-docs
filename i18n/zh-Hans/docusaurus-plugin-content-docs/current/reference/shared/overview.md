@@ -5,7 +5,7 @@ title: Shared 包总览
 
 # Shared 包总览
 
-`@vef-framework/shared` 是整个框架的“通用能力底座”。  
+`@vef-framework-react/shared` 是整个框架的“通用能力底座”。  
 它主要包含四类导出:
 
 1. 类型工具

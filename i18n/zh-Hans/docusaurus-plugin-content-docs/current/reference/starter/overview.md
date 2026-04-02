@@ -1,36 +1,31 @@
 ---
 sidebar_position: 1
-title: Starter 包总览
+title: Starter 包概览
 ---
 
-# Starter 包总览
+# Starter 包概览
 
-`@vef-framework/starter` 是把 VEF 真正“拼成一个应用”的那层包。
+`@vef-framework-react/starter` 是将 VEF 变成完整应用外壳的包。
 
-它主要负责四件事:
+它主要涵盖两个方面：
 
-1. 应用启动
-2. 路由与布局
-3. 页面级通用组件
-4. CRUD 场景抽象
+1. 应用启动与路由
+2. 应用外壳组件（布局、登录、错误页面）
 
-## 推荐阅读顺序
+> **注意（v2.1.6）：** `Page`、`FlexCard`、`FormModal`、`FormDrawer`、`ProSearch`、`ProTable`、`Crud`、`CrudPage` 和 `createCrudKit` 已从 `starter` 迁移到 `@vef-framework-react/components`。
 
-1. [应用启动与路由](./bootstrap-and-routing.md)
-2. [页面、布局与表单容器](./page-layout.md)
-3. [CRUD 与表格体系](./crud.md)
+## 建议阅读顺序
+
+1. [启动与路由](./bootstrap-and-routing.md)
+2. [页面布局与表单容器](./page-layout.md)
+3. [CRUD 与表格栈](./crud.md)
 4. [Store、常量与类型](./stores-and-types.md)
 
-## 包内最常用导出
+## 常用导出
 
-| 导出 | 用途 |
-| --- | --- |
-| `createApp` | 启动应用 |
-| `createApiClient` | 创建应用级 API 客户端 |
-| `createRouter` | 创建路由实例 |
-| `createRootRouteOptions` | 根路由 |
-| `createLayoutRouteOptions` | 布局和守卫 |
-| `Page` | 普通业务页容器 |
-| `ProTable` | 页面级表格 |
-| `CrudPage` | 标准 CRUD 页面 |
-| `createCrudKit` | 页面局部 CRUD 类型工具 |
+- `createApp`
+- `createApiClient`
+- `createRouter`
+- `createRootRouteOptions`
+- `createLayoutRouteOptions`
+- `setupAppVersionNotification`

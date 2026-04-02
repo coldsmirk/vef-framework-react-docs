@@ -5,7 +5,7 @@ title: Components
 
 # Components
 
-`@vef-framework/components` is the layer most directly used by page code.  
+`@vef-framework-react/components` is the layer most directly used by page code.  
 It is not only a re-export of Ant Design. It also adds the theme system, notifications, form integration, permission-aware rendering, icons, and chart support expected in VEF applications.
 
 ## Core Entry Points
@@ -23,7 +23,7 @@ It is not only a re-export of Ant Design. It also adds the theme system, notific
 
 ## Why Most Pages Import UI from Here
 
-In VEF projects, pages usually import UI directly from `@vef-framework/components` instead of composing multiple third-party libraries manually:
+In VEF projects, pages usually import UI directly from `@vef-framework-react/components` instead of composing multiple third-party libraries manually:
 
 1. the visual system is already aligned with the rest of the framework
 2. several components are already integrated with options data, permissions, and icons
@@ -43,7 +43,7 @@ That means page components usually do not need to wrap another global Provider m
 ## Common Page Composition
 
 ```tsx
-import { Button, Card, Group, Tag, Text } from "@vef-framework/components";
+import { Button, Card, Group, Tag, Text } from "@vef-framework-react/components";
 
 export function UserCard() {
   return (
@@ -84,7 +84,7 @@ VEF exposes consistent feedback helpers that work well with the framework reques
 For button-level or section-level permission gating:
 
 ```tsx
-import { PermissionGate } from "@vef-framework/components";
+import { PermissionGate } from "@vef-framework-react/components";
 
 <PermissionGate permTokens="sys:user:create">
   <Button type="primary">Create User</Button>
@@ -98,7 +98,7 @@ Function children can also be used when rendering depends on the permission resu
 Use `Icon` when a Lucide icon component is referenced directly in code:
 
 ```tsx
-import { Icon } from "@vef-framework/components";
+import { Icon } from "@vef-framework-react/components";
 import { PlusIcon } from "lucide-react";
 
 <Icon component={PlusIcon} />
@@ -107,7 +107,7 @@ import { PlusIcon } from "lucide-react";
 Use `DynamicIcon` when icon names come from configuration or backend data:
 
 ```tsx
-import { DynamicIcon } from "@vef-framework/components";
+import { DynamicIcon } from "@vef-framework-react/components";
 
 <DynamicIcon name="users" />
 ```

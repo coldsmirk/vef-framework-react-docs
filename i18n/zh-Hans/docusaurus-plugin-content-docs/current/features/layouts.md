@@ -15,7 +15,7 @@ VEF 在页面布局上有两层核心能力:
 如果一个页面不是 CRUD 页，也不是特别复杂的自定义布局，通常直接从 `Page` 开始:
 
 ```tsx
-import { Page } from "@vef-framework/starter";
+import { Page } from "@vef-framework-react/components";
 
 <Page title="系统监控">
   页面内容

@@ -10,7 +10,7 @@ When the built-in field set is not enough, the preferred path is to extend the e
 
 ## Existing Extension Points
 
-The form layer in `@vef-framework/components` exposes:
+The form layer in `@vef-framework-react/components` exposes:
 
 - `withForm`
 - `withFieldGroup`

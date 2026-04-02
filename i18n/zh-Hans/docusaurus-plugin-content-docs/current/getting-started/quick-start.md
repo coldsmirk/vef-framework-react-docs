@@ -34,7 +34,7 @@ sequenceDiagram
 ## 第一步: 配置 Vite
 
 ```ts title="vite.config.ts"
-import { defineViteConfig } from "@vef-framework/dev";
+import { defineViteConfig } from "@vef-framework-react/dev";
 
 export default defineViteConfig({
   react: {
@@ -49,7 +49,7 @@ export default defineViteConfig({
 业务项目里通常只需要补 HTTP 相关配置。
 
 ```ts title="src/api/index.ts"
-import { createApiClient } from "@vef-framework/starter";
+import { createApiClient } from "@vef-framework-react/starter";
 
 export const apiClient = createApiClient({
   http: {
@@ -79,15 +79,15 @@ export const apiClient = createApiClient({
 VEF 推荐通过 `apiClient.createQueryFn()` 和 `apiClient.createMutationFn()` 暴露业务 API。
 
 ```ts title="src/apis/auth.ts"
-import type { AuthTokens } from "@vef-framework/core";
-import type { LoginParams } from "@vef-framework/starter";
+import type { AuthTokens } from "@vef-framework-react/core";
+import type { LoginParams } from "@vef-framework-react/starter";
 
 import { apiClient } from "../api";
 
 export const login = apiClient.createMutationFn(
   "login",
-  ({ post }) => async (params: LoginParams) => {
-    const result = await post<AuthTokens>("/api/login", {
+  http => async (params: LoginParams) => {
+    const result = await http.post<AuthTokens>("/api/login", {
       data: params
     });
 
@@ -102,10 +102,10 @@ export const login = apiClient.createMutationFn(
 ## 第四步: 创建根路由和布局路由
 
 ```tsx title="src/pages/__root.tsx"
-import type { RouterContext } from "@vef-framework/starter";
+import type { RouterContext } from "@vef-framework-react/starter";
 
 import { createRootRouteWithContext } from "@tanstack/react-router";
-import { createRootRouteOptions } from "@vef-framework/starter";
+import { createRootRouteOptions } from "@vef-framework-react/starter";
 
 export const Route = createRootRouteWithContext<RouterContext>()(
   createRootRouteOptions({
@@ -115,10 +115,10 @@ export const Route = createRootRouteWithContext<RouterContext>()(
 ```
 
 ```tsx title="src/pages/_layout/route.tsx"
-import type { UserInfo } from "@vef-framework/starter";
+import type { UserInfo } from "@vef-framework-react/starter";
 
 import { createFileRoute } from "@tanstack/react-router";
-import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework/starter";
+import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework-react/starter";
 
 import { apiClient } from "../api";
 import { getUserInfo, logout } from "../apis/auth";
@@ -149,7 +149,7 @@ export const Route = createFileRoute(INDEX_ROUTE_ID)(
 
 ```tsx title="src/pages/_common/login.tsx"
 import { createFileRoute } from "@tanstack/react-router";
-import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework/starter";
+import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework-react/starter";
 
 import { apiClient } from "../api";
 import { login } from "../apis/auth";
@@ -163,7 +163,7 @@ export const Route = createFileRoute(LOGIN_ROUTE_ID)(
 
 ```tsx title="src/pages/_common/access-denied.tsx"
 import { createFileRoute } from "@tanstack/react-router";
-import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework/starter";
+import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework-react/starter";
 
 export const Route = createFileRoute(ACCESS_DENIED_ROUTE_ID)(
   createAccessDeniedRouteOptions()
@@ -173,7 +173,7 @@ export const Route = createFileRoute(ACCESS_DENIED_ROUTE_ID)(
 ## 第六步: 创建 router
 
 ```ts title="src/router/context.ts"
-import type { RouterContext } from "@vef-framework/starter";
+import type { RouterContext } from "@vef-framework-react/starter";
 
 export const routerContext: RouterContext = {
   router: undefined!
@@ -181,7 +181,7 @@ export const routerContext: RouterContext = {
 ```
 
 ```ts title="src/router/index.ts"
-import { createRouter } from "@vef-framework/starter";
+import { createRouter } from "@vef-framework-react/starter";
 
 import { routeTree } from "./routeTree.gen";
 import { routerContext } from "./context";
@@ -198,7 +198,7 @@ export default router;
 ## 第七步: 渲染应用
 
 ```ts title="src/main.ts"
-import { createApp } from "@vef-framework/starter";
+import { createApp } from "@vef-framework-react/starter";
 
 import { apiClient } from "./api";
 import router from "./router";
@@ -224,9 +224,9 @@ createApp().render({
 
 ```tsx title="src/pages/_layout/index/route.tsx"
 import { createFileRoute } from "@tanstack/react-router";
-import { Button, Card, Text } from "@vef-framework/components";
-import { useQuery } from "@vef-framework/core";
-import { Page } from "@vef-framework/starter";
+import { Button, Card, Text } from "@vef-framework-react/components";
+import { useQuery } from "@vef-framework-react/core";
+import { Page } from "@vef-framework-react/components";
 
 import { getDashboard } from "../../../apis/dashboard";
 

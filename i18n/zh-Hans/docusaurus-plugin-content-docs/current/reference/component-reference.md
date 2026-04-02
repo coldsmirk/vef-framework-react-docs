@@ -5,7 +5,7 @@ title: 组件导出索引
 
 # 组件导出索引
 
-`@vef-framework/components` 的导出面很大，这一页按使用场景分组，方便你回查。
+`@vef-framework-react/components` 的导出面很大，这一页按使用场景分组，方便你回查。
 
 ## 基础展示
 

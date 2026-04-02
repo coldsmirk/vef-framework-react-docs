@@ -5,7 +5,7 @@ title: Theming and Styling
 
 # Theming and Styling
 
-VEF theme capabilities are primarily provided by `@vef-framework/components`, and they are already wired when the application is bootstrapped through `createApp()`.
+VEF theme capabilities are primarily provided by `@vef-framework-react/components`, and they are already wired when the application is bootstrapped through `createApp()`.
 
 For the complete CSS custom property catalog used in CSS Modules, SCSS, and CSS-in-JS, see [CSS Variables Reference](../reference/css-variables-reference).
 
@@ -21,7 +21,7 @@ For the complete CSS custom property catalog used in CSS Modules, SCSS, and CSS-
 ## Reading Theme Tokens in Page Code
 
 ```tsx
-import { useThemeTokens } from "@vef-framework/components";
+import { useThemeTokens } from "@vef-framework-react/components";
 
 const { colorPrimary } = useThemeTokens();
 ```
@@ -46,7 +46,7 @@ The important distinction is that `globalCssVars` still returns CSS variable str
 ## Dark Mode Detection
 
 ```tsx
-import { useIsDarkMode } from "@vef-framework/components";
+import { useIsDarkMode } from "@vef-framework-react/components";
 
 const isDarkMode = useIsDarkMode();
 ```

@@ -7,8 +7,8 @@ title: Tables
 
 VEF has two table layers:
 
-1. `@vef-framework/components` exports `Table`
-2. `@vef-framework/starter` exports `ProTable`
+1. `@vef-framework-react/components` exports `Table`
+2. `@vef-framework-react/components` exports `ProTable`
 
 Use `Table` when data only needs to be displayed.  
 Use `ProTable` when query integration, pagination, column settings, operation columns, and selection state are needed.
@@ -21,7 +21,7 @@ Related helpers:
 - `pageSizeOptions`
 
 ```tsx
-import { Table, usePaginationProps } from "@vef-framework/components";
+import { Table, usePaginationProps } from "@vef-framework-react/components";
 
 const pagination = usePaginationProps({
   total,
@@ -46,7 +46,7 @@ const pagination = usePaginationProps({
 - header / footer slots
 
 ```tsx
-import { ProTable } from "@vef-framework/starter";
+import { ProTable } from "@vef-framework-react/components";
 
 <ProTable
   isPaginated

@@ -31,7 +31,12 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "prism-react-renderer": "2.4.1",
-    "typescript": "6.0.2"
+    "typescript": "6.0.2",
+    "@vef-framework-react/components": "^2.1.6",
+    "@vef-framework-react/core": "^2.1.6",
+    "@vef-framework-react/hooks": "^2.1.6",
+    "@vef-framework-react/shared": "^2.1.6",
+    "@vef-framework-react/starter": "^2.1.6"
   },
   "browserslist": {
     "production": [

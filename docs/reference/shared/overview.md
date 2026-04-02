@@ -5,7 +5,7 @@ title: Shared Package Overview
 
 # Shared Package Overview
 
-`@vef-framework/shared` is the general-purpose foundation package of the framework. It mainly contains:
+`@vef-framework-react/shared` is the general-purpose foundation package of the framework. It mainly contains:
 
 1. type utilities
 2. date, formatting, and validation helpers

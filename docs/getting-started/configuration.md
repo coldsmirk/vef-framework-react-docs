@@ -5,7 +5,7 @@ title: Configuration
 
 # Configuration
 
-If you use `@vef-framework/dev`, the project tooling layer does not need to be assembled from scratch.  
+If you use `@vef-framework-react/dev`, the project tooling layer does not need to be assembled from scratch.  
 VEF already wraps common frontend tooling such as Vite, ESLint, Stylelint, and Commitlint as reusable exports.
 
 ## Vite Configuration
@@ -13,7 +13,7 @@ VEF already wraps common frontend tooling such as Vite, ESLint, Stylelint, and C
 The most common setup looks like this:
 
 ```ts title="vite.config.ts"
-import { defineViteConfig } from "@vef-framework/dev";
+import { defineViteConfig } from "@vef-framework-react/dev";
 
 export default defineViteConfig({
   react: {
@@ -36,7 +36,7 @@ export default defineViteConfig({
 ## ESLint Configuration
 
 ```ts title="eslint.config.ts"
-import { defineEslintConfig } from "@vef-framework/dev";
+import { defineEslintConfig } from "@vef-framework-react/dev";
 
 export default defineEslintConfig();
 ```
@@ -44,7 +44,7 @@ export default defineEslintConfig();
 ## Stylelint Configuration
 
 ```js title="stylelint.config.js"
-import { defineStylelintConfig } from "@vef-framework/dev";
+import { defineStylelintConfig } from "@vef-framework-react/dev";
 
 export default defineStylelintConfig();
 ```
@@ -52,14 +52,14 @@ export default defineStylelintConfig();
 ## Commitlint Configuration
 
 ```ts title="commitlint.config.ts"
-import { defineCommitlintConfig } from "@vef-framework/dev";
+import { defineCommitlintConfig } from "@vef-framework-react/dev";
 
 export default defineCommitlintConfig();
 ```
 
 ## Environment Variable Conventions
 
-The Vite configuration exported by `@vef-framework/dev` prioritizes the `env/` directory and recognizes two prefixes:
+The Vite configuration exported by `@vef-framework-react/dev` prioritizes the `env/` directory and recognizes two prefixes:
 
 | Prefix | Purpose |
 | --- | --- |
@@ -92,6 +92,6 @@ Common variables are typically used like this:
 ## Validation Checklist
 
 1. `pnpm dev` starts successfully.
-2. `@vef-framework/*` packages resolve correctly.
+2. `@vef-framework-react/*` packages resolve correctly.
 3. Emotion styles and component styles load correctly.
 4. ESLint and Stylelint can run locally.

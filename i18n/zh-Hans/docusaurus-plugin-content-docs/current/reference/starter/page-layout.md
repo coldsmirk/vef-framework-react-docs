@@ -5,6 +5,8 @@ title: 页面、布局与表单容器
 
 # 页面、布局与表单容器
 
+> **注意（v2.1.6）：** `Page`、`FlexCard`、`FormModal` 和 `FormDrawer` 已迁移到 `@vef-framework-react/components`，请从那里导入。
+
 ## `App`
 
 应用根组件。负责串起:

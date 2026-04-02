@@ -5,7 +5,7 @@ title: Routing
 
 # Routing
 
-VEF routing is built on top of `@tanstack/react-router`, but the APIs used most often in application code come from `@vef-framework/starter`:
+VEF routing is built on top of `@tanstack/react-router`, but the APIs used most often in application code come from `@vef-framework-react/starter`:
 
 - `createRouter()`
 - `createRootRouteOptions()`
@@ -35,7 +35,7 @@ flowchart TD
 The top-level router instance is usually created like this:
 
 ```ts
-import { createRouter } from "@vef-framework/starter";
+import { createRouter } from "@vef-framework-react/starter";
 
 import { routeTree } from "./router.gen";
 import { routerContext } from "./context";
@@ -70,7 +70,7 @@ interface RouterContext {
 In most projects, a placeholder object is defined first:
 
 ```ts
-import type { RouterContext } from "@vef-framework/starter";
+import type { RouterContext } from "@vef-framework-react/starter";
 
 export const routerContext: RouterContext = {
   router: undefined!
@@ -82,10 +82,10 @@ export const routerContext: RouterContext = {
 The root route computes the document title from route context and menu metadata.
 
 ```tsx
-import type { RouterContext } from "@vef-framework/starter";
+import type { RouterContext } from "@vef-framework-react/starter";
 
 import { createRootRouteWithContext } from "@tanstack/react-router";
-import { createRootRouteOptions } from "@vef-framework/starter";
+import { createRootRouteOptions } from "@vef-framework-react/starter";
 
 export const Route = createRootRouteWithContext<RouterContext>()(
   createRootRouteOptions({
@@ -99,10 +99,10 @@ export const Route = createRootRouteWithContext<RouterContext>()(
 The layout route is the core of the VEF routing layer. Authenticated admin pages usually sit under this route.
 
 ```tsx
-import type { UserInfo } from "@vef-framework/starter";
+import type { UserInfo } from "@vef-framework-react/starter";
 
 import { createFileRoute } from "@tanstack/react-router";
-import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework/starter";
+import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework-react/starter";
 
 import { apiClient } from "../../api";
 import { getUserInfo, logout } from "../../apis/auth";
@@ -138,7 +138,7 @@ This handles:
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
-import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework/starter";
+import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework-react/starter";
 
 import { apiClient } from "../../api";
 import { login } from "../../apis/auth";
@@ -154,7 +154,7 @@ export const Route = createFileRoute(LOGIN_ROUTE_ID)(
 
 ```tsx
 import { createFileRoute } from "@tanstack/react-router";
-import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework/starter";
+import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework-react/starter";
 
 export const Route = createFileRoute(ACCESS_DENIED_ROUTE_ID)(
   createAccessDeniedRouteOptions()

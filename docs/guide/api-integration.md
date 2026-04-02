@@ -15,7 +15,7 @@ In VEF applications, request handling usually follows a clear path:
 ## Create a Global `apiClient`
 
 ```ts
-import { createApiClient } from "@vef-framework/starter";
+import { createApiClient } from "@vef-framework-react/starter";
 
 export const apiClient = createApiClient({
   http: {
@@ -38,8 +38,8 @@ export const apiClient = createApiClient({
 ```ts
 export const findUserPage = apiClient.createQueryFn(
   "find_user_page",
-  ({ post }) => async queryParams => {
-    const result = await post("/api/user/page", {
+  http => async queryParams => {
+    const result = await http.post("/api/user/page", {
       data: queryParams
     });
 
@@ -62,7 +62,7 @@ useQuery({
 ```ts
 export const createUser = apiClient.createMutationFn(
   "create_user",
-  ({ post }) => params => post("/api/user/create", {
+  http => params => http.post("/api/user/create", {
     data: params
   })
 );
@@ -71,7 +71,7 @@ export const createUser = apiClient.createMutationFn(
 ## Inside Components
 
 ```tsx
-import { useMutation, useQuery } from "@vef-framework/core";
+import { useMutation, useQuery } from "@vef-framework-react/core";
 
 const pageResult = useQuery({
   queryKey: [findUserPage.key, searchParams],
@@ -107,16 +107,16 @@ await apiClient.executeMutation({
 `starter.extractQueryParams()` is commonly used to split query input into business parameters, pagination, and sorting:
 
 ```ts
-import type { PaginatedQueryParams } from "@vef-framework/starter";
+import type { PaginatedQueryParams } from "@vef-framework-react/starter";
 
-import { extractQueryParams } from "@vef-framework/starter";
+import { extractQueryParams } from "@vef-framework-react/starter";
 
 export const findUserPage = apiClient.createQueryFn(
   "find_user_page",
-  ({ post }) => async (queryParams: PaginatedQueryParams<UserSearch>) => {
+  http => async (queryParams: PaginatedQueryParams<UserSearch>) => {
     const { params, pagination } = extractQueryParams(queryParams);
 
-    const result = await post("/api/user/page", {
+    const result = await http.post("/api/user/page", {
       data: {
         ...params,
         pagination
@@ -131,7 +131,7 @@ export const findUserPage = apiClient.createQueryFn(
 ## Skip Authentication for Specific Requests
 
 ```ts
-import { skipAuthenticationHeader, skipAuthenticationValue } from "@vef-framework/core";
+import { skipAuthenticationHeader, skipAuthenticationValue } from "@vef-framework-react/core";
 ```
 
 ```ts

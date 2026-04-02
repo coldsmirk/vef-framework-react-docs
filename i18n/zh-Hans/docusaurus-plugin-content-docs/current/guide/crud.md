@@ -5,7 +5,7 @@ title: CRUD 页面
 
 # CRUD 页面
 
-`@vef-framework/starter` 里最有生产力的 API 之一，就是 `CrudPage` 与 `createCrudKit()`。  
+`@vef-framework-react/components` 里最有生产力的 API 之一，就是 `CrudPage` 与 `createCrudKit()`。  
 它们的目标不是让你“少写一个表格”，而是让列表页、搜索、弹窗表单、删除、批量操作和页面局部状态都走一条统一路径。
 
 ## 一页 CRUD 到底由哪些部分组成
@@ -101,7 +101,7 @@ renderForm={scene => <Form scene={scene} />}
 `createCrudKit()` 负责把页面自己的泛型信息固定下来，避免你在很多局部组件里重复写类型参数。
 
 ```ts
-import { createCrudKit } from "@vef-framework/starter";
+import { createCrudKit } from "@vef-framework-react/components";
 
 export const {
   useCrudStore,

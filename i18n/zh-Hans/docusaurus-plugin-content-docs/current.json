@@ -11,6 +11,26 @@
     "message": "核心指南",
     "description": "The label for category 'Core Guides' in sidebar 'docsSidebar'"
   },
+  "sidebar.docsSidebar.category.Components": {
+    "message": "组件",
+    "description": "The label for category 'Components' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.link.Ant Design Components": {
+    "message": "Ant Design 组件",
+    "description": "The label for link 'Ant Design Components' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Ant Design Components": {
+    "message": "Ant Design 组件",
+    "description": "The label for category 'Ant Design Components' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Animation": {
+    "message": "动画组件",
+    "description": "The label for category 'Animation' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.AI Components (X)": {
+    "message": "AI 组件（X 系列）",
+    "description": "The label for category 'AI Components (X)' in sidebar 'docsSidebar'"
+  },
   "sidebar.docsSidebar.category.Security": {
     "message": "安全",
     "description": "The label for category 'Security' in sidebar 'docsSidebar'"

@@ -5,7 +5,7 @@ title: 组件
 
 # 组件
 
-`@vef-framework/components` 是整个框架最直接面向业务页面的一层。  
+`@vef-framework-react/components` 是整个框架最直接面向业务页面的一层。  
 它不是简单地“把 Ant Design 重新导出一遍”，而是在保留主流组件心智模型的前提下，补上了 VEF 需要的主题、消息通知、表单适配、权限控制、图标与图表能力。
 
 ## 先记住这几个入口
@@ -23,7 +23,7 @@ title: 组件
 
 ## 为什么大多数页面只需要从这里导入 UI
 
-在 VEF 项目里，页面层通常直接从 `@vef-framework/components` 导入组件，而不是自己再拼很多第三方组件组合。原因有三点:
+在 VEF 项目里，页面层通常直接从 `@vef-framework-react/components` 导入组件，而不是自己再拼很多第三方组件组合。原因有三点:
 
 1. 样式主题已经和框架其他能力对齐。
 2. 一些组件已经和数据选项、权限、图标等能力自然打通。
@@ -43,7 +43,7 @@ title: 组件
 ## 页面里最常见的组件组合
 
 ```tsx
-import { Button, Card, Group, Tag, Text } from "@vef-framework/components";
+import { Button, Card, Group, Tag, Text } from "@vef-framework-react/components";
 
 export function UserCard() {
   return (
@@ -86,7 +86,7 @@ VEF 统一导出了消息和通知方法，页面里可以直接调用:
 按钮级权限控制推荐直接用:
 
 ```tsx
-import { PermissionGate } from "@vef-framework/components";
+import { PermissionGate } from "@vef-framework-react/components";
 
 <PermissionGate permTokens="sys:user:create">
   <Button type="primary">新增用户</Button>
@@ -100,7 +100,7 @@ import { PermissionGate } from "@vef-framework/components";
 `Icon` 适合把 Lucide 图标安全地接进 VEF 组件体系:
 
 ```tsx
-import { Icon } from "@vef-framework/components";
+import { Icon } from "@vef-framework-react/components";
 import { PlusIcon } from "lucide-react";
 
 <Icon component={PlusIcon} />

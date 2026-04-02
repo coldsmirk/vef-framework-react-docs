@@ -15,7 +15,7 @@ import {
 这一页面向日常开发中的样式编写，集中说明 VEF 可直接使用的 CSS 自定义属性。当前共收录 {variables.length} 个变量，重点回答三个问题：应该优先选哪一类变量、应该从哪个入口读取，以及怎样让页面样式和框架整体视觉保持一致。
 
 :::tip
-如果应用是通过 `starter.createApp().render()` 启动的，这些变量会自动注入到 `:root`。如果你是手动挂载组件层，请保留 `@vef-framework/components` 的 `ConfigProvider`，这样全局变量才会正常输出。
+如果应用是通过 `starter.createApp().render()` 启动的，这些变量会自动注入到 `:root`。如果你是手动挂载组件层，请保留 `@vef-framework-react/components` 的 `ConfigProvider`，这样全局变量才会正常输出。
 :::
 
 :::note
@@ -82,7 +82,7 @@ flowchart TD
 
 ## 在 Emotion 或对象样式里使用 `globalCssVars`
 
-`globalCssVars` 是 `@vef-framework/components` 导出的 JS/TS 别名层。它把 CSS 变量映射成 camelCase 字段，例如：
+`globalCssVars` 是 `@vef-framework-react/components` 导出的 JS/TS 别名层。它把 CSS 变量映射成 camelCase 字段，例如：
 
 | CSS 自定义属性 | JS 别名 |
 | --- | --- |
@@ -93,7 +93,7 @@ flowchart TD
 
 ```tsx
 import { css } from "@emotion/react";
-import { globalCssVars } from "@vef-framework/components";
+import { globalCssVars } from "@vef-framework-react/components";
 
 const panelStyle = css({
   padding: globalCssVars.spacingMd,
@@ -111,7 +111,7 @@ const panelStyle = css({
 `useThemeTokens()` 返回的是当前主题下已经解析完成的 Ant Design token 对象。只要你面对的是运行时库，需要的是实际颜色值或尺寸值，而不是 CSS 变量字符串，就应该优先用它。
 
 ```tsx
-import { useThemeTokens } from "@vef-framework/components";
+import { useThemeTokens } from "@vef-framework-react/components";
 
 export function MetricsChart() {
   const { colorPrimary, colorTextSecondary } = useThemeTokens();

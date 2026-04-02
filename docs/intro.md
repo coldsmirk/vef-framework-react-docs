@@ -29,13 +29,13 @@ The following order works well for most readers:
 
 | Package | When You Reach for It | Common Exports |
 | --- | --- | --- |
-| `@vef-framework/starter` | Application bootstrap, routing, login pages, layouts, and CRUD pages | `createApp`, `createRouter`, `createApiClient`, `CrudPage`, `Page`, `ProTable` |
-| `@vef-framework/components` | Page UI, forms, tables, notifications, icons, and charts | `Button`, `Table`, `useForm`, `useDataOptionsSelect`, `PermissionGate`, `Chart` |
-| `@vef-framework/core` | Requests, query, stores, atoms, permission checks, and SSE | `ApiClient`, `useQuery`, `useMutation`, `createStore`, `createComponentStore`, `atom` |
-| `@vef-framework/hooks` | Page-level helper hooks | `useDataDictQuery`, `useHasMutating`, `useAuthorizedItems`, `useDebouncedValue` |
-| `@vef-framework/shared` | Common types, validation, formatting, tree utilities, and event emitters | `z`, `EventEmitter`, `formatDate`, `flattenTree`, `withPinyin` |
-| `@vef-framework/dev` | Vite, ESLint, Stylelint, and Commitlint configuration | `defineViteConfig`, `defineEslintConfig`, `defineStylelintConfig`, `defineCommitlintConfig` |
-| `@vef-framework/approval-flow-editor` | Approval flow design inside business applications | `ApprovalFlowEditor`, `toFlowDefinition`, `fromFlowDefinition` |
+| `@vef-framework-react/starter` | Application bootstrap, routing, login pages, layouts, and CRUD pages | `createApp`, `createRouter`, `createApiClient`, `CrudPage`, `Page`, `ProTable` |
+| `@vef-framework-react/components` | Page UI, forms, tables, notifications, icons, and charts | `Button`, `Table`, `useForm`, `useDataOptionsSelect`, `PermissionGate`, `Chart` |
+| `@vef-framework-react/core` | Requests, query, stores, atoms, permission checks, and SSE | `ApiClient`, `useQuery`, `useMutation`, `createStore`, `createComponentStore`, `atom` |
+| `@vef-framework-react/hooks` | Page-level helper hooks | `useDataDictQuery`, `useHasMutating`, `useAuthorizedItems`, `useDebouncedValue` |
+| `@vef-framework-react/shared` | Common types, validation, formatting, tree utilities, and event emitters | `z`, `EventEmitter`, `formatDate`, `flattenTree`, `withPinyin` |
+| `@vef-framework-react/dev` | Vite, ESLint, Stylelint, and Commitlint configuration | `defineViteConfig`, `defineEslintConfig`, `defineStylelintConfig`, `defineCommitlintConfig` |
+| `@vef-framework-react/approval-flow-editor` | Approval flow design inside business applications | `ApprovalFlowEditor`, `toFlowDefinition`, `fromFlowDefinition` |
 
 ## Typical Application Composition
 
@@ -54,11 +54,11 @@ flowchart TD
 
 In most projects, the application flow looks like this:
 
-1. Use `@vef-framework/dev` to establish the build and linting baseline.
-2. Use `@vef-framework/starter` to assemble the application entry, router, and layouts.
-3. Use `@vef-framework/core` to define request functions, state containers, and query logic.
-4. Use `@vef-framework/components` and `@vef-framework/hooks` to build pages.
-5. Use `@vef-framework/shared` for validation, formatting, and data transformation.
+1. Use `@vef-framework-react/dev` to establish the build and linting baseline.
+2. Use `@vef-framework-react/starter` to assemble the application entry, router, and layouts.
+3. Use `@vef-framework-react/core` to define request functions, state containers, and query logic.
+4. Use `@vef-framework-react/components` and `@vef-framework-react/hooks` to build pages.
+5. Use `@vef-framework-react/shared` for validation, formatting, and data transformation.
 
 ## Recommended Development Style
 
