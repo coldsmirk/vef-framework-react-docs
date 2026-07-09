@@ -58,6 +58,24 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    // WORKAROUND: mermaid's transitive dependency vscode-languageserver-types
+    // ships a UMD build using dynamic require(), which Rspack (faster) flags as
+    // a "Critical dependency" warning. It is a false positive that does not
+    // affect the generated site. Remove this plugin once the upstream chain
+    // (mermaid -> langium -> vscode-languageserver-types) no longer emits it.
+    function suppressMermaidUmdWarning() {
+      return {
+        name: "suppress-mermaid-umd-warning",
+        configureWebpack() {
+          return {
+            ignoreWarnings: [{ module: /vscode-languageserver-types/ }],
+          };
+        },
+      };
+    },
+  ],
+
   themeConfig: {
     image: "img/logo.svg",
     colorMode: {
