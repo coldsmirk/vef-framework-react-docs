@@ -1,6 +1,6 @@
 ---
-sidebar_position: 3
 title: Performance
+description: Practical performance habits for tables, queries, state selection, and option search in VEF applications.
 ---
 
 # Performance

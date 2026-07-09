@@ -1,5 +1,6 @@
 ---
-sidebar_position: 14
+title: "ScrollArea"
+description: "A custom scrollable container with styled scrollbars and scroll event callbacks."
 ---
 
 # ScrollArea
@@ -78,6 +79,7 @@ export default function Demo() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `scrollbars` | `'both' \| 'vertical' \| 'horizontal'` | `'both'` | Which scrollbar axes to render |
 | `scrollbarSize` | `Length` | `'10px'` | Scrollbar track width/height |
 | `scrollbarPadding` | `Length` | `'2px'` | Scrollbar padding |
 | `type` | `'auto' \| 'always' \| 'scroll' \| 'hover'` | `'hover'` | Scrollbar visibility mode |

@@ -1,12 +1,13 @@
 ---
-sidebar_position: 108
+title: "LogoIcon"
+description: "以 SVG 组件形式提供的 VEF 框架 Logo。"
 ---
 
 # LogoIcon
 
-VEF 框架的 Logo SVG 组件。
+以 SVG 组件形式提供的 VEF 框架 Logo。
 
-> **VEF 专属组件。** 在 `@vef-framework-react/components` v2.1.6 中新增。
+> **VEF 专属组件。** 自 `@vef-framework-react/components` v2.1.6 起新增。
 
 ## 基础用法
 
@@ -26,8 +27,8 @@ export default function AppLogo() {
 
 ## API
 
-| 属性 | 类型 | 说明 |
-|------|------|------|
-| `primaryColor` | `string` | Logo 主色 |
+| Prop | Type | 说明 |
+|------|------|-------------|
+| `primaryColor` | `string` | Logo 的主色 |
 
-同时支持所有标准 SVG 属性（`width`、`height`、`className`、`style` 等）。
+同时也支持所有标准 SVG 属性（如 `width`、`height`、`className`、`style` 等）。

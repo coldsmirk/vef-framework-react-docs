@@ -1,5 +1,6 @@
 ---
-sidebar_position: 29
+title: "TypingAnimation"
+description: "Animates text with a typewriter effect, revealing characters one by one."
 ---
 
 # TypingAnimation

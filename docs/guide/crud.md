@@ -1,12 +1,11 @@
 ---
-sidebar_position: 3
 title: CRUD Pages
+description: How CrudPage and createCrudKit combine search, tables, scene forms, and delete flows into one page-level abstraction.
 ---
 
 # CRUD Pages
 
-One of the most productive parts of `@vef-framework-react/components` is the combination of `CrudPage` and `createCrudKit()`.  
-The goal is not only to reduce table boilerplate, but to standardize search, list loading, form scenes, delete flows, batch actions, and page-local state.
+One of the most productive parts of `@vef-framework-react/components` is the combination of `CrudPage` and `createCrudKit()`. The goal is not only to reduce table boilerplate, but to standardize search, list loading, form scenes, delete flows, batch actions, and page-local state. This page focuses on why the pieces are shaped the way they are; the full prop reference lives in [Crud and CrudPage](../components/crud.md).
 
 ## What a CRUD Page Combines
 
@@ -50,32 +49,7 @@ flowchart TD
 
 ## When `CrudPage` Fits Best
 
-`CrudPage` is usually a good fit when a page combines:
-
-- list queries
-- search areas
-- create or update forms
-- single-row delete
-- batch operations
-
-If the page is only a read-only table, `ProTable` is often enough.
-
-## Common Props
-
-| Prop | Purpose |
-| --- | --- |
-| `queryFn` | list query function |
-| `tableColumns` | table columns |
-| `rowKey` | row key |
-| `basicSearch` | basic search area |
-| `advancedSearch` | advanced search area |
-| `renderForm` | render form by scene |
-| `formMutationFns` | submit functions by scene |
-| `deleteMutationFn` | single delete |
-| `deleteManyMutationFn` | batch delete |
-| `toolbarActions` | toolbar actions |
-| `operationColumn` | row action column |
-| `sceneDefaultFormValues` | default values by scene |
+`CrudPage` is usually a good fit when a page combines list queries, search areas, create or update forms, single-row delete, and batch operations. If the page is only a read-only table, `ProTable` on its own is often enough — see [Tables](./tables.md).
 
 ## Why `renderForm(scene)` Matters
 
@@ -85,7 +59,7 @@ CRUD forms rarely have only one shape. Create and update flows usually differ in
 - defaults applied only on create
 - some fields disabled on update
 
-That is why the form is rendered by scene:
+That is why the form is rendered by scene instead of being one static form:
 
 ```tsx
 renderForm={scene => <Form scene={scene} />}
@@ -107,37 +81,12 @@ export const {
 } = createCrudKit<User, UserSearch, UserFormSceneValues>();
 ```
 
-After that:
-
-- search components can read strongly typed search values
-- toolbar buttons can access selected rows directly
-- row operation columns can access `openForm`, `delete`, and `refetchQuery`
+After that, search components can read strongly typed search values, toolbar buttons can access selected rows directly, and row operation columns can access `openForm`, `delete`, and `refetchQuery` without threading generics through every component that touches the page.
 
 ## Behavior Notes
 
-A few behaviors are worth knowing when working with `CrudPage`:
-
-- After `delete` or `deleteMany` succeed, `CrudPage` automatically clears the internal selection state. Toolbar buttons that depend on `selectedRows` will re-disable on their own — no manual reset is needed.
-- Per-scene action renderers (`renderFormActions[scene]`) receive `(formApi, defaults)`, where `defaults` exposes the framework's default `submitButton` and `resetButton`. Custom layouts can keep the standard buttons by composing them:
-
-```tsx
-renderFormActions={{
-  create: (_formApi, { submitButton, resetButton }) => (
-    <Group gap="small">
-      {resetButton}
-      {submitButton}
-    </Group>
-  )
-}}
-```
+Selection-clearing after `delete`/`deleteMany`, and the per-scene `formActionsRenderers` signature, are documented in full in [Crud and CrudPage](../components/crud.md).
 
 ## Reuse Strategy
 
-The most reusable pieces are usually:
-
-- the page query function
-- the page-local `createCrudKit()` result
-- the search component
-- the form component
-
-This keeps pages consistent without making them overly rigid.
+The most reusable pieces are usually the page query function, the page-local `createCrudKit()` result, the search component, and the form component. This keeps pages consistent without making them overly rigid.

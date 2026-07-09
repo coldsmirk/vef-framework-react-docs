@@ -1,5 +1,6 @@
 ---
-sidebar_position: 106
+title: "TreeSelect"
+description: "A tree-structured dropdown selector."
 ---
 
 # TreeSelect
@@ -37,7 +38,7 @@ export default function Demo() {
 
 ## VEF Enhancement: `useDataOptionsTreeSelect`
 
-Load tree data from an async source with built-in loading state and optional pinyin filtering:
+Load tree data from an async source with built-in loading state and optional pinyin filtering. Fetch options are nested under `queryOptions` (the same shape TanStack Query's `useQuery` accepts); `useDataOptionsTreeSelect`-specific options sit alongside it.
 
 ```tsx
 import { TreeSelect, useDataOptionsTreeSelect } from '@vef-framework-react/components';
@@ -49,8 +50,10 @@ async function fetchOrgs() {
 
 export default function Demo() {
   const treeSelectProps = useDataOptionsTreeSelect({
-    queryKey: ['orgs'],
-    queryFn: fetchOrgs,
+    queryOptions: {
+      queryKey: ['orgs'],
+      queryFn: fetchOrgs,
+    },
     filterable: true,
   });
 
@@ -62,9 +65,15 @@ export default function Demo() {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `queryKey` | `QueryKey` | required | TanStack Query cache key |
-| `queryFn` | `() => Promise<TData[]>` | required | Async data fetcher |
+| `queryOptions` | `UseQueryOptions<TQueryFnData[], TData[], TParams>` | required | TanStack Query options (`queryKey`, `queryFn`, and the rest of `useQuery`'s options) |
 | `filterable` | `boolean` | `false` | Enable client-side text/pinyin filtering |
 | `onFetch` | `(data: TData[]) => void` | — | Callback after data is fetched |
+| `labelKey` | `string \| (item: TData) => string` | `"label"` | Field mapping for the node label |
+| `valueKey` | `string \| (item: TData) => Key` | `"value"` | Field mapping for the node value |
+| `disabledKey` | `string \| (item: TData) => boolean \| undefined` | `"disabled"` | Field mapping for the disabled state |
+| `descriptionKey` | `string \| (item: TData) => string \| undefined` | `"description"` | Field mapping for the node description |
+| `childrenKey` | `string \| (item: TData) => TData[] \| undefined` | `"children"` | Field mapping for nested children (recursively transformed) |
+
+Each `*Key` option accepts either a string path (e.g. `"user.name"`) or an extractor function.
 
 For all other props, see [Ant Design TreeSelect documentation](https://ant.design/components/tree-select/).

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 104
+title: "Upload"
+description: "File upload component with optional image cropping support."
 ---
 
 # Upload
@@ -66,6 +67,6 @@ Extends Ant Design `UploadProps`, plus:
 |------|------|---------|-------------|
 | `enableCrop` | `boolean` | `false` | Enable image cropping before upload |
 | `cropperProps` | `ImgCropProps` (without `children`) | — | Image cropper configuration |
-| `pastable` | `boolean` | `false` | Allow pasting images from clipboard |
+| `pastable` | `boolean` | `true` | Allow pasting images from clipboard (VEF flips antd's default of `false`) |
 
 For all other props, see [Ant Design Upload documentation](https://ant.design/components/upload/).

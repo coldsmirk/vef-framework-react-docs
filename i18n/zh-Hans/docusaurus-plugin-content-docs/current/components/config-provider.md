@@ -1,18 +1,19 @@
 ---
-sidebar_position: 22
+title: "ConfigProvider"
+description: "VEF 的全局配置提供者，在 Ant Design 的 `ConfigProvider` 基础上扩展了 VEF 专属的主题支持，包括暗色模式、语义化颜色覆盖和全局 CSS 变量。"
 ---
 
-# ConfigProvider 全局配置
+# ConfigProvider
 
-VEF 的全局配置提供者，在 Ant Design `ConfigProvider` 基础上增加了 VEF 特有的主题支持，包括暗色模式、语义色覆盖和全局 CSS 变量。
+VEF 的全局配置提供者，在 Ant Design 的 `ConfigProvider` 基础上扩展了 VEF 专属的主题支持，包括暗色模式、语义化颜色覆盖和全局 CSS 变量。
 
-> **VEF 特有组件**，扩展自 Ant Design `ConfigProvider`。
+> **VEF 专属组件。** 扩展自 Ant Design 的 `ConfigProvider`。
 
 ## 何时使用
 
-- 在应用根节点配置全局主题。
+- 在应用根节点设置全局主题。
 - 启用暗色模式。
-- 覆盖语义色。
+- 覆盖语义化颜色。
 - 注入全局 CSS 变量。
 
 ## 基础用法
@@ -46,18 +47,24 @@ export default function App({ isDark }: { isDark: boolean }) {
 ## 自定义颜色
 
 ```tsx
-<ConfigProvider
-  theme={{
-    colors: {
-      primary: 'blue',
-      success: 'green',
-      warning: 'gold',
-      error: 'red',
-    },
-  }}
->
-  <YourApp />
-</ConfigProvider>
+import { ConfigProvider } from '@vef-framework-react/components';
+
+export default function App() {
+  return (
+    <ConfigProvider
+      theme={{
+        colors: {
+          primary: 'blue',
+          success: 'green',
+          warning: 'gold',
+          error: 'red',
+        },
+      }}
+    >
+      <YourApp />
+    </ConfigProvider>
+  );
+}
 ```
 
 ## 全局 CSS 变量
@@ -82,7 +89,7 @@ import { useIsDarkMode } from '@vef-framework-react/components';
 
 export default function MyComponent() {
   const isDark = useIsDarkMode();
-  return <div style={{ color: isDark ? '#fff' : '#000' }}>内容</div>;
+  return <div style={{ color: isDark ? '#fff' : '#000' }}>Content</div>;
 }
 ```
 
@@ -90,26 +97,26 @@ export default function MyComponent() {
 
 ### ConfigProviderProps
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
 | `theme` | `ThemeConfig` | — | 主题配置 |
 | `children` | `ReactNode` | — | 应用内容 |
 
 ### ThemeConfig
 
-| 字段 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
+| Field | Type | Default | 说明 |
+|-------|------|---------|-------------|
 | `isDarkMode` | `boolean` | `false` | 启用暗色模式 |
-| `colors` | `Partial<Record<SemanticColor, string>>` | — | 覆盖语义色 |
-| `globalCssVars` | `Record<'--vef-${string}', string \| number>` | — | 全局 CSS 变量（必须以 `--vef-` 开头） |
+| `colors` | `Partial<Record<SemanticColor, string>>` | — | 覆盖语义化颜色 |
+| `globalCssVars` | `Record<'--vef-${string}', string \| number>` | — | 全局 CSS 变量（必须以 `--vef-` 为前缀） |
 | `globalStyle` | `CSSInterpolation` | — | 全局 CSS-in-JS 样式 |
 
 ### `useIsDarkMode()`
 
-返回 `boolean`——当前是否为暗色模式。
+返回 `boolean` 类型——当暗色模式当前处于激活状态时为 `true`。
 
 ## 最佳实践
 
-- 将 `ConfigProvider` 放在应用根节点，包裹所有内容。
+- 将 `ConfigProvider` 放置在应用的根节点，包裹所有内容。
 - 在需要适配当前主题的组件中使用 `useIsDarkMode()`。
-- CSS 变量名必须以 `--vef-` 开头，避免冲突。
+- CSS 变量名必须以 `--vef-` 开头，以避免冲突。

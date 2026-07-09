@@ -1,5 +1,6 @@
 ---
-sidebar_position: 105
+title: "ProTable"
+description: "A page-level table abstraction with built-in query, pagination, row selection, column settings, and operation columns."
 ---
 
 # ProTable
@@ -40,7 +41,7 @@ export default function UserTable() {
       operationColumn={{
         width: 120,
         render: (row) => (
-          <OperationButton permTokens="user:edit" onClick={() => openEdit(row)}>
+          <OperationButton requiredPermissions="user:edit" onClick={() => openEdit(row)}>
             Edit
           </OperationButton>
         )
@@ -99,13 +100,19 @@ tableRef.current?.refetch();
 | `isPaginated` | `boolean` | `true` | Enable/disable pagination |
 | `showSequenceColumn` | `boolean` | `true` | Show row number column |
 | `virtual` | `boolean` | `false` | Enable virtual scrolling |
+| `striped` | `boolean` | `false` | Render zebra-striped rows |
 | `columnSettings` | `ColumnSettingsConfig \| false` | `{}` | Column visibility settings |
 | `operationColumn` | `OperationColumnConfig<TRow>` | — | Per-row action column |
 | `rowSelection` | `RowSelectionConfig<TRow> \| true` | — | Row selection config |
+| `selectedRowKeys` | `Key[]` | — | Controlled selected row keys |
+| `size` | `'large' \| 'medium' \| 'small'` | — | Table density (`'middle'` is a deprecated alias for `'medium'`) |
 | `title` | `ReactNode` | — | Title above the table |
 | `header` | `ReactNode` | — | Content above the title |
 | `summary` | `ReactNode` | — | Content below the table |
 | `footer` | `ReactNode` | — | Footer content |
+| `className` | `string` | — | Class for the table container |
+| `style` | `CSSProperties` | — | Inline style for the table container |
+| `onRowClick` | `(row, index, event) => void` | — | Row click handler (ignored inside the operation column) |
 | `onSelectedRowKeysChange` | `(keys, rows) => void` | — | Selection change callback |
 
 ### `ColumnSettingsConfig`
@@ -122,10 +129,12 @@ interface ColumnSettingsConfig {
 interface OperationColumnConfig<TRow> {
   width?: Length;
   title?: ReactNode;
-  permTokens?: string[];
+  requiredPermissions?: string[];
   render: (row: TRow, index: number) => ReactNode;
 }
 ```
+
+`requiredPermissions` hides the entire operation column (header included) when the current user doesn't hold any of the listed permission tokens.
 
 ### `ProTableSubscriber`
 

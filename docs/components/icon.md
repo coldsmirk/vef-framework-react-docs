@@ -1,5 +1,6 @@
 ---
-sidebar_position: 21
+title: "Icon"
+description: "A wrapper component for rendering Lucide icon components with consistent sizing and styling."
 ---
 
 # Icon
@@ -20,7 +21,7 @@ import { Icon } from '@vef-framework-react/components';
 import { Settings } from 'lucide-react';
 
 export default function Demo() {
-  return <Icon component={Settings} size={20} color="#666" />;
+  return <Icon component={Settings} />;
 }
 ```
 
@@ -48,7 +49,7 @@ export default function Nav() {
     <ul>
       {navItems.map((item) => (
         <li key={item.label}>
-          <Icon component={item.IconComponent} size={16} />
+          <Icon component={item.IconComponent} />
           <span>{item.label}</span>
         </li>
       ))}
@@ -63,12 +64,13 @@ export default function Nav() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `component` | `ComponentType<LucideProps>` | required | The Lucide icon component to render |
-| `size` | `number \| string` | `24` | Icon size |
-| `color` | `string` | — | Icon color |
+| `component` | `ComponentType<LucideProps>` | — | The Lucide icon component to render. Mutually exclusive with `iconNode` — exactly one of the two is required. |
+| `iconNode` | `IconNode` | — | Raw Lucide icon node data to render. Mutually exclusive with `component` — exactly one of the two is required. |
 | `strokeWidth` | `number` | `2` | Stroke width |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
+
+Icon size and color are not configurable via props — the icon always renders at `1.2em` and inherits `color` from its parent.
 
 ## Best Practices
 

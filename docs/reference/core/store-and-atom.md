@@ -1,6 +1,6 @@
 ---
-sidebar_position: 4
 title: Store and Atom
+description: createStore, createPersistedStore, createComponentStore, and Jotai atom signatures.
 ---
 
 # Store and Atom
@@ -154,6 +154,7 @@ const config = useConfigStore(useDeep(state => state.config));
 | `PersistenceOptions<TState, TSelectedState>` | Options for `createPersistedStore` |
 | `StoreProviderProps<TInitialState>` | Props for the component store provider |
 | `UseStore<TState>` | Hook signature for `useStore` |
+| `ReturnedComponentStoreResult<TState, TInitialState>` | Return type of `createComponentStore` — `{ StoreProvider, useStoreApi, useStore }` |
 
 ---
 

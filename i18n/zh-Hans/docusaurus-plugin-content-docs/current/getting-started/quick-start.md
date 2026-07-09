@@ -1,18 +1,18 @@
 ---
-sidebar_position: 2
 title: 快速开始
+description: 串联 Vite、API 客户端、路由和第一个路由，让一个最小的 VEF 应用跑起来。
 ---
 
 # 快速开始
 
-这一节展示一套最小但真实的 VEF 应用骨架。读完后可以建立以下几项基础认知:
+本页将带你完成一个最小但真实可用的 VEF 应用骨架。读完之后，你应该能更容易识别出应用的主流程:
 
-1. 应用入口怎么写
-2. `apiClient` 怎么建
-3. `router` 怎么建
-4. 页面如何拿到框架能力
+1. 应用入口是如何编写的
+2. `apiClient` 是如何创建的
+3. `router` 是如何创建的
+4. 页面是如何访问框架能力的
 
-## 最小可运行链路
+## 最小可运行流程
 
 ```mermaid
 sequenceDiagram
@@ -45,8 +45,8 @@ export default defineViteConfig({
 
 ## 第二步: 创建 API 客户端
 
-`starter` 提供的 `createApiClient()` 已经帮你把 token 存储、未认证处理、权限不足处理以及消息通知接好了。  
-业务项目里通常只需要补 HTTP 相关配置。
+`starter` 导出的 `createApiClient()` 已经接好了 token 存储、未认证处理、拒绝访问处理和全局消息反馈。  
+在大多数应用中，只需要补充 HTTP 相关的配置。
 
 ```ts title="src/api/index.ts"
 import { createApiClient } from "@vef-framework-react/starter";
@@ -74,9 +74,9 @@ export const apiClient = createApiClient({
 });
 ```
 
-## 第三步: 声明请求函数
+## 第三步: 定义请求函数
 
-VEF 推荐通过 `apiClient.createQueryFn()` 和 `apiClient.createMutationFn()` 暴露业务 API。
+VEF 应用通常通过 `apiClient.createQueryFn()` 和 `apiClient.createMutationFn()` 暴露领域 API。
 
 ```ts title="src/apis/auth.ts"
 import type { AuthTokens } from "@vef-framework-react/core";
@@ -101,7 +101,7 @@ export const login = apiClient.createMutationFn(
 
 ## 第四步: 创建根路由和布局路由
 
-```tsx title="src/pages/__root.tsx"
+```ts title="src/pages/__root.ts"
 import type { RouterContext } from "@vef-framework-react/starter";
 
 import { createRootRouteWithContext } from "@tanstack/react-router";
@@ -145,7 +145,7 @@ export const Route = createFileRoute(INDEX_ROUTE_ID)(
 );
 ```
 
-## 第五步: 登录路由与拒绝访问路由
+## 第五步: 创建登录路由和拒绝访问路由
 
 ```tsx title="src/pages/_common/login.tsx"
 import { createFileRoute } from "@tanstack/react-router";
@@ -170,7 +170,7 @@ export const Route = createFileRoute(ACCESS_DENIED_ROUTE_ID)(
 );
 ```
 
-## 第六步: 创建 router
+## 第六步: 创建路由器
 
 ```ts title="src/router/context.ts"
 import type { RouterContext } from "@vef-framework-react/starter";
@@ -220,13 +220,12 @@ createApp().render({
 });
 ```
 
-## 第八步: 写一个真实页面
+## 第八步: 添加一个真实页面
 
 ```tsx title="src/pages/_layout/index/route.tsx"
 import { createFileRoute } from "@tanstack/react-router";
-import { Button, Card, Text } from "@vef-framework-react/components";
+import { Button, Card, Page, Text, Title } from "@vef-framework-react/components";
 import { useQuery } from "@vef-framework-react/core";
-import { Page } from "@vef-framework-react/components";
 
 import { getDashboard } from "../../../apis/dashboard";
 
@@ -241,10 +240,11 @@ function RouteComponent() {
   });
 
   return (
-    <Page title="首页">
+    <Page margin>
+      <Title level={3}>Home</Title>
       <Card>
-        <Text>{dashboard.data?.message ?? "欢迎使用 VEF"}</Text>
-        <Button type="primary">开始开发</Button>
+        <Text>{dashboard.data?.message ?? "Welcome to VEF"}</Text>
+        <Button type="primary">Start Building</Button>
       </Card>
     </Page>
   );
@@ -253,9 +253,10 @@ function RouteComponent() {
 
 ## 后续阅读
 
-可继续阅读:
+上面的骨架渲染了一个页面，但还没有和真实的列表、表单或表格打交道。接下来可以阅读:
 
-1. [项目结构](./project-structure.md)
+1. [你的第一个 CRUD 页面](./first-crud-page.md) —— 把这个骨架变成一个可用的列表+表单页面
 2. [工程配置](./configuration.md)
-3. [路由](../guide/routing.md)
-4. [API 集成](../guide/api-integration.md)
+3. [项目结构](./project-structure.md)
+4. [路由与布局](../guide/routing.md)
+5. [数据请求](../guide/data-fetching.md)

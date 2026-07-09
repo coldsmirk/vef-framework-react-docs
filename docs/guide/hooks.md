@@ -1,11 +1,11 @@
 ---
-sidebar_position: 6
 title: Hooks
+description: The full VEF hook catalog — permission checks, data dictionaries, uploads, loading state, and deep/shallow comparison helpers.
 ---
 
 # Hooks
 
-`@vef-framework-react/hooks` is not just a miscellaneous utilities package. It mainly provides page-level hooks that appear frequently in real applications but do not fit naturally inside components or stores.
+`@vef-framework-react/hooks` is not just a miscellaneous utilities package. It mainly provides page-level hooks that appear frequently in real applications but do not fit naturally inside components or stores, plus a small set of re-exported third-party hooks so business code has one stable import source. For exact TypeScript signatures, see [VEF Hooks](../reference/hooks/vef-hooks.md) and [Upstream Hook Exports](../reference/hooks/upstream-hooks.md); this page is the catalog of what exists and when to reach for it.
 
 ## Core Hooks to Know First
 
@@ -16,6 +16,7 @@ title: Hooks
 | `useCheckPermission` | Get a reusable permission-check function |
 | `useIsAuthorized` | Check whether current permissions satisfy a condition |
 | `useAuthorizedItems` | Filter configuration items by permission |
+| `useUpload` | Drive a single resumable chunked upload |
 | `useHasFetching` | Check whether a class of queries is still loading |
 | `useHasMutating` | Check whether a class of mutations is still running |
 
@@ -38,11 +39,11 @@ Notes:
 - `useDictionaryQuery(keys, options?)` returns a native `UseQueryResult<TData>`; `data` is `undefined` until the request finishes successfully.
 - `options.enabled` defers the request, e.g. while upstream parameters are not ready.
 - `options.select` lets callers reshape the resolved alias map. Its identity is forwarded to React Query, so stabilize `keys` and `select` with module scope, `as const`, `useMemo`, or `useCallback` to avoid invalidating memoization on every render.
-- For typical select usage prefer `useDictionaryOptionsSelect`, which wraps `useDictionaryQuery` and produces ready-to-spread `SelectProps` per alias.
+- For typical select usage prefer `useDictionaryOptionsSelect` (in `@vef-framework-react/components`, see [Data Dictionaries](./data-dictionaries.md)), which wraps `useDictionaryQuery` and produces ready-to-spread `SelectProps` per alias.
 
 ## `useDataOptionsQuery`
 
-When backend data is not already shaped as `label/value`, this hook provides a consistent conversion layer.
+When backend data is not already shaped as `label`/`value`, this hook provides a consistent conversion layer.
 
 ```tsx
 const roleOptions = useDataOptionsQuery({
@@ -55,11 +56,7 @@ const roleOptions = useDataOptionsQuery({
 });
 ```
 
-It returns:
-
-- `options`
-- query state fields
-- the rest of the underlying query result
+It returns `options`, query state fields, and the rest of the underlying query result.
 
 ## Permission Hooks
 
@@ -81,14 +78,32 @@ const canEdit = useIsAuthorized(["sys:user:update", "sys:user:write"], "any");
 
 ### `useAuthorizedItems`
 
-This is especially useful for menus, button configs, and action lists that are declared first and filtered later.
+Especially useful for menus, button configs, and action lists that are declared first and filtered later.
 
 ```tsx
 const visibleActions = useAuthorizedItems([
-  { key: "create", permTokens: "sys:user:create" },
-  { key: "delete", permTokens: "sys:user:delete" }
+  { key: "create", requiredPermissions: "sys:user:create" },
+  { key: "delete", requiredPermissions: "sys:user:delete" }
 ]);
 ```
+
+See [Permissions](./permissions.md) for the full permission model these hooks share with `PermissionGate` and route guards.
+
+## `useUpload`
+
+Drives a single chunked, resumable upload through the framework's storage RPC and exposes a reactive snapshot plus imperative controls:
+
+```tsx
+const { upload, abort, progress, status, isUploading } = useUpload({
+  onSuccess: result => console.log(result.key)
+});
+
+await upload(file);
+```
+
+`useUpload` is intentionally scoped to one upload per consumer. For batch uploads running in parallel, use the headless `Uploader` class from `@vef-framework-react/core` directly.
+
+For a form-attached upload field, see [Upload](../components/upload.md); reach for the headless `useUpload`/`Uploader` shown above for large or resumable uploads outside a form.
 
 ## Loading-State Hooks
 
@@ -104,22 +119,38 @@ const isUserPageFetching = useHasFetching(findUserPage.key, searchParams);
 const isCreatingUser = useHasMutating(createUser.key);
 ```
 
-These two hooks are especially useful for:
+These two hooks are especially useful for page-level loading coordination, disabling actions while requests are running, and avoiding duplicate submissions.
 
-- page-level loading coordination
-- disabling actions while requests are running
-- avoiding duplicate submissions
+## Deep and Shallow Comparison Hooks
+
+Dependency arrays that contain objects or arrays defeat React's default reference equality. Reach for one of these instead, matched to the hook it wraps:
+
+- for `useMemo`, use `useDeepMemo` / `useShallowMemo`
+- for `useCallback`, use `useDeepCallback` / `useShallowCallback`
+- for `useEffect` (and the `useLayoutEffect` / isomorphic-effect variants), use `useDeepEffect` / `useShallowEffect`
+- to stabilize a dependency array directly, without wrapping another hook, use `useDeepCompare` / `useShallowCompare`
+
+Reach for the shallow variants first — they are cheaper — and only move to the deep variants when dependencies are nested objects or arrays that change by value, not by reference. See [VEF Hooks](../reference/hooks/vef-hooks.md) for the full signature list, including the layout and isomorphic effect variants.
+
+## Event and Environment Hooks
+
+- for a `document`-level listener that never sees a stale closure, use `useDocumentEvent`
+- to subscribe to an `EventEmitter` (from `@vef-framework-react/shared`), use `useEmitterEvent`
+- to read the latest prop/state value inside a stable callback, use `useLatest`
+- for high-frequency updates like scroll or resize, batch state with `useRafState`
+- to create a value once and keep it stable across renders, use `useSingleton`
+- for responsive layout, track raw viewport size with `useViewportSize` or resolve named breakpoints with `useBreakpoints`
+
+See [VEF Hooks](../reference/hooks/vef-hooks.md) for exact signatures.
 
 ## Other Frequently Used Exports
 
-`@vef-framework-react/hooks` also re-exports several widely used hooks from Mantine, the AI SDK, and hotkey libraries, including:
+`@vef-framework-react/hooks` also re-exports several widely used hooks from Mantine and `react-hotkeys-hook`, including:
 
-- `useDebouncedValue`
-- `useElementSize`
-- `useDocumentTitle`
-- `useInterval`
-- `useMediaQuery`
-- `useHotkeys`
-- `useChat`
+- `useDebouncedValue`, `useDebouncedCallback`, `useDebouncedState`
+- `useElementSize`, `useResizeObserver`, `useIntersection`
+- `useDocumentTitle`, `useMediaQuery`, `useColorScheme`, `useReducedMotion`
+- `useInterval`, `useTimeout`, `usePrevious`, `useMutationObserverTarget`
+- `useHotkeys`, `useHotkeysContext`, `useRecordHotkeys`, `HotkeysProvider`
 
-Their main value is consistency: the project can import these capabilities from the framework layer instead of exposing several separate third-party entry points in business code.
+Their main value is consistency: the project can import these capabilities from the framework's hooks layer instead of exposing several separate third-party entry points in business code. See [Upstream Hook Exports](../reference/hooks/upstream-hooks.md) for the complete list and upstream documentation links.

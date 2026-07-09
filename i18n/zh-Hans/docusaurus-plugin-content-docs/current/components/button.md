@@ -1,18 +1,19 @@
 ---
-sidebar_position: 2
+title: "Button"
+description: "点击时触发一个操作。"
 ---
 
-# Button 按钮
+# Button
 
-点击后触发操作。
+点击时触发一个操作。
 
-> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Button](https://ant.design/components/button-cn/)
+> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Button](https://ant.design/components/button/)
 
 ## 何时使用
 
-- 触发一个即时操作。
-- 触发页面跳转。
-- 提交表单。
+- 需要触发一个后台操作时。
+- 需要触发一个导航操作时。
+- 需要提交表单时。
 
 ## 基础用法
 
@@ -22,7 +23,7 @@ import { Button } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Button type="primary" onClick={() => console.log('clicked')}>
-      主要按钮
+      Primary Button
     </Button>
   );
 }
@@ -36,11 +37,11 @@ import { Button, Space } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Space>
-      <Button type="primary">主要按钮</Button>
-      <Button>默认按钮</Button>
-      <Button type="dashed">虚线按钮</Button>
-      <Button type="text">文本按钮</Button>
-      <Button type="link">链接按钮</Button>
+      <Button type="primary">Primary</Button>
+      <Button>Default</Button>
+      <Button type="dashed">Dashed</Button>
+      <Button type="text">Text</Button>
+      <Button type="link">Link</Button>
     </Space>
   );
 }
@@ -54,9 +55,9 @@ import { Button, Space } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Space align="center">
-      <Button type="primary" size="large">大号</Button>
-      <Button type="primary">默认</Button>
-      <Button type="primary" size="small">小号</Button>
+      <Button type="primary" size="large">Large</Button>
+      <Button type="primary">Default</Button>
+      <Button type="primary" size="small">Small</Button>
     </Space>
   );
 }
@@ -80,7 +81,7 @@ export default function Demo() {
         setTimeout(() => setLoading(false), 2000);
       }}
     >
-      点击加载
+      Click to Load
     </Button>
   );
 }
@@ -94,9 +95,9 @@ import { Button, Space } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Space>
-      <Button danger>危险默认</Button>
-      <Button type="primary" danger>危险主要</Button>
-      <Button type="dashed" danger>危险虚线</Button>
+      <Button danger>Danger Default</Button>
+      <Button type="primary" danger>Danger Primary</Button>
+      <Button type="dashed" danger>Danger Dashed</Button>
     </Space>
   );
 }
@@ -104,28 +105,28 @@ export default function Demo() {
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `type` | `'primary' \| 'default' \| 'dashed' \| 'text' \| 'link'` | `'default'` | 按钮类型 |
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | 按钮尺寸 |
-| `loading` | `boolean \| { delay?: number }` | `false` | 加载状态 |
-| `disabled` | `boolean` | `false` | 禁用状态 |
-| `danger` | `boolean` | `false` | 危险状态 |
-| `ghost` | `boolean` | `false` | 幽灵属性，背景透明 |
-| `block` | `boolean` | `false` | 宽度撑满父元素 |
-| `icon` | `ReactNode` | — | 图标 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `type` | `'primary' \| 'default' \| 'dashed' \| 'text' \| 'link'` | `'default'` | 按钮样式类型 |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | 按钮尺寸（`'middle'` 是 `'medium'` 的废弃别名） |
+| `loading` | `boolean \| { delay?: number }` | `false` | 显示加载状态 |
+| `disabled` | `boolean` | `false` | 禁用按钮 |
+| `danger` | `boolean` | `false` | 设置为危险状态 |
+| `ghost` | `boolean` | `false` | 使背景透明 |
+| `block` | `boolean` | `false` | 让按钮宽度自适应父容器 |
+| `icon` | `ReactNode` | — | 图标元素 |
 | `iconPosition` | `'start' \| 'end'` | `'start'` | 图标位置 |
 | `shape` | `'default' \| 'circle' \| 'round'` | `'default'` | 按钮形状 |
-| `href` | `string` | — | 跳转地址（渲染为 `<a>`） |
-| `target` | `string` | — | 同 `<a>` 的 target |
-| `htmlType` | `'button' \| 'submit' \| 'reset'` | `'button'` | 原生 button 类型 |
-| `onClick` | `(event) => void` | — | 点击回调 |
+| `href` | `string` | — | 跳转链接（渲染为 `<a>`） |
+| `target` | `string` | — | 与 `<a>` 的 target 属性相同 |
+| `htmlType` | `'button' \| 'submit' \| 'reset'` | `'button'` | 原生按钮类型 |
+| `onClick` | `(event) => void` | — | 点击事件处理函数 |
 
-> 如需异步操作自动 loading 和确认对话框，请使用 [`ActionButton`](./action-button)。
+> 对于需要自动加载状态和确认对话框的异步操作，请改用 [`ActionButton`](./action-button)。
 
 ## 最佳实践
 
-- 一个页面只使用一个 `type="primary"` 的主要按钮，避免视觉混乱。
-- 删除等破坏性操作使用 `danger` 属性。
-- 仅有图标的按钮配合 Tooltip 使用 [`IconButton`](./icon-button)。
-- 需要权限控制的按钮使用 `OperationButton`。
+- 页面中的主要操作使用 `type="primary"`，避免出现多个主按钮。
+- 删除等破坏性操作使用 `danger`。
+- 带有提示信息的纯图标按钮，使用 [`IconButton`](./icon-button)。
+- 需要权限校验的按钮，使用 [`OperationButton`](./operation-button.md)。

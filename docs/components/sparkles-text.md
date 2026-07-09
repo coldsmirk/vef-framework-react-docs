@@ -1,5 +1,6 @@
 ---
-sidebar_position: 27
+title: "SparklesText"
+description: "Renders text with animated sparkle particles around it."
 ---
 
 # SparklesText

@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
 title: Context Providers
+description: AppContextProvider, ApiClientProvider, DisabledProvider, createContextWithSelector, and the common types they carry.
 ---
 
 # Context Providers
@@ -17,7 +17,7 @@ import { AppContextProvider } from "@vef-framework-react/core";
 <AppContextProvider
   value={{
     hasPermission: token => permissionStore.has(token),
-    dataDictQueryFn: findDataDict,
+    dictionaryQueryFn: findDataDict,
     fileBaseUrl: "https://cdn.example.com"
   }}
 >
@@ -32,7 +32,7 @@ In application code, this is usually set up through `starter.createApp().render(
 | Field | Type | Description |
 | --- | --- | --- |
 | `hasPermission` | `(token: string) => boolean` | Permission check function |
-| `dataDictQueryFn` | `QueryFunction<DataOption[], string>` | Data dictionary query function |
+| `dictionaryQueryFn` | `QueryFunction<Record<string, DataOption[]>, string[]>` | Query function for fetching data-dictionary entries; accepts an array of dictionary keys and returns a record mapping each key to its options |
 | `fileBaseUrl` | `string` | Base URL for file access |
 
 ### `useAppContext`
@@ -184,12 +184,10 @@ type DataOption<T = {}, M = {}> = T & {
 
 ### `DataOptionWithPinyin<T, M>`
 
-Extends `DataOption` with pinyin fields for Chinese character search:
+Extends `DataOption` (minus `children`, which is redeclared with the pinyin-carrying element type) with pinyin fields for Chinese character search:
 
 ```ts
-type DataOptionWithPinyin<T = {}, M = {}> = {
-  label: string;
-  value: Key;
+type DataOptionWithPinyin<T = {}, M = {}> = Except<DataOption<T, M>, "children"> & {
   labelPinyin: string;
   labelPinyinInitials: string;
   descriptionPinyin?: string;

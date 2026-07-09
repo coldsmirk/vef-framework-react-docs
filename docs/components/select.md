@@ -1,5 +1,6 @@
 ---
-sidebar_position: 4
+title: "Select"
+description: "A dropdown selector for choosing one or multiple values from a list."
 ---
 
 # Select
@@ -84,7 +85,7 @@ export default function Demo() {
 
 ## VEF Enhancement: `useDataOptionsSelect`
 
-VEF provides `useDataOptionsSelect` to load options from an async data source with built-in loading state, pinyin search support, and caching.
+VEF provides `useDataOptionsSelect` to load options from an async data source with built-in loading state, pinyin search support, and caching. Fetch options are nested under `queryOptions` (the same shape TanStack Query's `useQuery` accepts); `useDataOptionsSelect`-specific options sit alongside it.
 
 ```tsx
 import { Select, useDataOptionsSelect } from '@vef-framework-react/components';
@@ -96,8 +97,10 @@ async function fetchCities() {
 
 export default function Demo() {
   const selectProps = useDataOptionsSelect({
-    queryKey: ['cities'],
-    queryFn: fetchCities,
+    queryOptions: {
+      queryKey: ['cities'],
+      queryFn: fetchCities,
+    },
     filterable: true, // enables pinyin/text filtering
   });
 
@@ -109,14 +112,42 @@ export default function Demo() {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `queryKey` | `QueryKey` | required | TanStack Query cache key |
-| `queryFn` | `() => Promise<TData[]>` | required | Async data fetcher |
+| `queryOptions` | `UseQueryOptions<TQueryFnData[], TData[], TParams>` | required | TanStack Query options (`queryKey`, `queryFn`, and the rest of `useQuery`'s options) |
 | `filterable` | `boolean` | `false` | Enable client-side text/pinyin filtering |
 | `onFetch` | `(data: TData[]) => void` | — | Callback after data is fetched |
-| `select` | `(data: TData) => DataOption` | — | Transform raw data to `DataOption` |
-| `params` | `TParams` | — | Query parameters (triggers refetch on change) |
+| `labelKey` | `string \| (item: TData) => string` | `"label"` | Field mapping for the option label |
+| `valueKey` | `string \| (item: TData) => Key` | `"value"` | Field mapping for the option value |
+| `disabledKey` | `string \| (item: TData) => boolean \| undefined` | `"disabled"` | Field mapping for the disabled state |
+| `descriptionKey` | `string \| (item: TData) => string \| undefined` | `"description"` | Field mapping for the option description |
+| `childrenKey` | `string \| (item: TData) => TData[] \| undefined` | `"children"` | Field mapping for nested option children (recursively transformed) |
+
+Each `*Key` option accepts either a string path (e.g. `"user.name"`) or an extractor function.
 
 The hook returns `SelectProps` that can be spread directly onto `<Select>`.
+
+## VEF Enhancement: `useDictionaryOptionsSelect`
+
+For data-dictionary-backed options, `useDictionaryOptionsSelect` wraps `useDictionaryQuery` and returns ready-to-spread `SelectProps` per alias:
+
+```tsx
+import { Select, useDictionaryOptionsSelect } from '@vef-framework-react/components';
+
+export default function Demo() {
+  const { gender, status } = useDictionaryOptionsSelect({
+    gender: 'common.gender',
+    status: { key: 'common.status', filterable: true },
+  });
+
+  return (
+    <>
+      <Select style={{ width: 200 }} {...gender} />
+      <Select style={{ width: 200 }} {...status} />
+    </>
+  );
+}
+```
+
+The first argument maps each alias to a dictionary key string, or `{ key, filterable? }` to override filtering per alias. The optional second argument, `{ filterable }`, sets the default for aliases that don't specify their own. See [Data Dictionaries](../guide/data-dictionaries.md).
 
 ## API
 
@@ -132,7 +163,7 @@ The hook returns `SelectProps` that can be spread directly onto `<Select>`.
 | `showSearch` | `boolean` | `false` | Enable search |
 | `allowClear` | `boolean` | `false` | Show clear button |
 | `filterOption` | `boolean \| function` | `true` | Filter function |
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | Select size |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Select size (`'middle'` is a deprecated alias for `'medium'`) |
 | `status` | `'error' \| 'warning'` | — | Validation status |
 | `variant` | `'outlined' \| 'filled' \| 'borderless'` | `'outlined'` | Visual variant |
 | `onChange` | `(value, option) => void` | — | Change handler |
@@ -143,4 +174,10 @@ The hook returns `SelectProps` that can be spread directly onto `<Select>`.
 
 - Use `useDataOptionsSelect` for remote data to avoid manual loading state management.
 - Set `allowClear` for optional fields.
-- For form usage, use `form.Field.Select` which integrates with the VEF form system.
+- For form usage, use the [`Form`](./form) field component, which integrates with the VEF form system:
+
+```tsx
+<form.AppField name="city">
+  {(field) => <field.Select label="City" options={options} />}
+</form.AppField>
+```

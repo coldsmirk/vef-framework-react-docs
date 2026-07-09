@@ -1,17 +1,18 @@
 ---
-sidebar_position: 17
+title: "IconButton"
+description: "仅包含图标的按钮，支持可选的提示信息。"
 ---
 
-# IconButton 图标按钮
+# IconButton
 
-带可选 Tooltip 的纯图标按钮。
+仅包含图标的按钮，支持可选的提示信息。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design 的一部分。
 
 ## 何时使用
 
-- 表格、工具栏或卡片中空间有限的紧凑操作按钮。
-- 图标含义明确但需要 Tooltip 提升无障碍体验时。
+- 表格、工具栏或卡片等空间有限场景下的紧凑型操作按钮。
+- 图标含义已足够清晰，但提示信息能进一步提升可访问性时。
 
 ## 基础用法
 
@@ -23,14 +24,14 @@ export default function Demo() {
   return (
     <IconButton
       icon={<Pencil />}
-      tip="编辑"
+      tip="Edit"
       onClick={() => console.log('edit')}
     />
   );
 }
 ```
 
-## 自定义 Tooltip 位置
+## 自定义提示框位置
 
 ```tsx
 import { IconButton } from '@vef-framework-react/components';
@@ -40,7 +41,7 @@ export default function Demo() {
   return (
     <IconButton
       icon={<Trash2 />}
-      tip="删除"
+      tip="Delete"
       placement="bottom"
       onClick={() => console.log('delete')}
     />
@@ -48,12 +49,12 @@ export default function Demo() {
 }
 ```
 
-## 延迟显示 Tooltip
+## 延迟显示提示框
 
 ```tsx
 <IconButton
   icon={<Settings />}
-  tip="设置"
+  tip="Settings"
   tipDelay={500}
 />
 ```
@@ -62,18 +63,18 @@ export default function Demo() {
 
 ```tsx
 {
-  title: '操作',
+  title: 'Actions',
   width: 80,
   render: (_, record) => (
     <Space>
       <IconButton
         icon={<Pencil size={14} />}
-        tip="编辑"
+        tip="Edit"
         onClick={() => openEdit(record)}
       />
       <IconButton
         icon={<Trash2 size={14} />}
-        tip="删除"
+        tip="Delete"
         onClick={() => confirmDelete(record)}
       />
     </Space>
@@ -83,21 +84,21 @@ export default function Demo() {
 
 ## API
 
-`IconButton` 继承 `Button` 属性（除 `icon`、`iconPosition`、`type`、`htmlType`、`autoInsertSpace`、`color`、`variant`、`ghost`、`danger`、`block`），另有：
+`IconButton` 继承了 `Button` 的属性（`icon`、`iconPosition`、`type`、`htmlType`、`autoInsertSpace`、`color`、`variant`、`ghost`、`danger` 和 `block` 除外），并新增以下属性：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `icon` | `ReactElement<LucideProps>` | 必填 | Lucide 图标元素 |
-| `tip` | `ReactNode` | — | Tooltip 内容 |
-| `tipDelay` | `number` | — | Tooltip 显示延迟（毫秒） |
-| `placement` | `TooltipPlacement` | — | Tooltip 位置 |
-| `size` | `'large' \| 'middle' \| 'small'` | — | 按钮尺寸 |
-| `disabled` | `boolean` | `false` | 禁用状态 |
-| `loading` | `boolean` | `false` | 加载状态 |
-| `onClick` | `(e) => void` | — | 点击回调 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `icon` | `ReactElement<LucideProps>` | required | Lucide 图标元素 |
+| `tip` | `ReactNode` | — | 提示框内容 |
+| `tipDelay` | `number` | — | 提示框显示延迟（毫秒） |
+| `placement` | `TooltipPlacement` | — | 提示框弹出位置 |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | 按钮尺寸（`'middle'` 是 `'medium'` 的废弃别名） |
+| `disabled` | `boolean` | `false` | 禁用按钮 |
+| `loading` | `boolean` | `false` | 显示加载状态 |
+| `onClick` | `(e) => void` | — | 点击事件处理函数 |
 
 ## 最佳实践
 
-- 始终提供 `tip`，满足无障碍要求——屏幕阅读器和键盘用户依赖它。
-- 使用 `lucide-react` 中的 Lucide 图标（已是 `@vef-framework-react/components` 的依赖）。
-- 需要权限检查的图标按钮，用 `PermissionGate` 包裹或使用 `OperationButton`。
+- 务必提供 `tip` 以保证可访问性——屏幕阅读器和键盘用户都依赖它。
+- 使用来自 `lucide-react` 的 Lucide 图标（`@vef-framework-react/components` 已依赖该库）。
+- 对于需要权限校验的图标按钮，使用 `PermissionGate` 包裹，或直接使用 `OperationButton`。

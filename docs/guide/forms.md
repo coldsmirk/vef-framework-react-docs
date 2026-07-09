@@ -1,6 +1,6 @@
 ---
-sidebar_position: 4
 title: Forms
+description: How VEF's form layer composes useForm, field components, and data-driven options into a typical page form.
 ---
 
 # Forms
@@ -10,7 +10,7 @@ VEF form capabilities mainly come from `@vef-framework-react/components`, and th
 - `useForm()`
 - `useFormContext()`
 
-It can be understood as an enterprise-oriented UI wrapper around TanStack Form.
+It can be understood as an enterprise-oriented UI wrapper around TanStack Form. The full field-component list and every shared `FormItemProps` field live in [Form](../components/form.md); this page focuses on how a form is put together.
 
 ## Typical Usage
 
@@ -75,6 +75,8 @@ When a form is split into separate components, a new form instance is usually no
 const { AppField } = useFormContext<FormValues>();
 ```
 
+This is the pattern to reach for once a form grows beyond a single component — a search bar, a scene-specific form body, and a footer of actions can each pull `AppField` from the same form context instead of threading form state through props.
+
 ## Validation with `z`
 
 ```tsx
@@ -86,9 +88,11 @@ const validators = {
 };
 ```
 
+`@vef-framework-react/shared` re-exports a project-configured Zod instance, so validators stay consistent with the rest of the codebase without an extra dependency.
+
 ## Feeding Data into Option Fields
 
-VEF applications usually avoid fetching inside field components. Instead, hooks generate props that can be spread directly into controls.
+VEF applications usually avoid fetching inside field components. Instead, hooks generate props that can be spread directly into controls, keeping data sourcing and field rendering as separate concerns.
 
 ### Select
 
@@ -124,22 +128,14 @@ const { gender } = useDictionaryOptionsSelect({
 // <field.Select {...gender} />
 ```
 
-`useDictionaryOptionsSelect(keys, options?)` returns a `{ alias: SelectProps }` map. Pass `{ filterable: true }` (or per-key `{ key: { key: "...", filterable: true } }`) to enable pinyin search.
+`useDictionaryOptionsSelect(keys, options?)` returns a `{ alias: SelectProps }` map. Pass `{ filterable: true }` (or per-key `{ key: { key: "...", filterable: true } }`) to enable pinyin search — see [Data Dictionaries](./data-dictionaries.md) for where the underlying data comes from.
 
-## Common Field Types
+## Why the Split Matters
 
-- `field.Input`
-- `field.Password`
-- `field.TextArea`
-- `field.Select`
-- `field.TreeSelect`
-- `field.Bool`
-- `field.Upload`
-- `field.DatePicker`
-- `field.InputNumber`
+Keeping data sourcing (`useDataOptionsSelect()`, `useDictionaryOptionsSelect()`, ...) separate from field rendering (`AppField`) and layout (`Grid`) means:
 
-It is usually better to keep data sourcing and field rendering separate:
+- option-loading logic can be reused across a create form, an edit form, and a search bar
+- a field component never needs to know whether its options come from a dictionary, a query, or a tree
+- swapping a field's data source does not touch its layout or validation
 
-- `useDataOptionsSelect()` (or `useDictionaryOptionsSelect()` for dictionary-based selects) fetches or builds options
-- `AppField` binds field state
-- `Grid` handles layout
+For the full set of available field components (`field.Input`, `field.Select`, `field.Bool`, and the rest), see [Form](../components/form.md).

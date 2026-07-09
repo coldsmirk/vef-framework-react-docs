@@ -1,38 +1,42 @@
 ---
-sidebar_position: 7
 title: 状态管理
+description: 针对某一类具体状态，在 Zustand 风格 store、Jotai atom 和状态机之间做选择。
 ---
 
 # 状态管理
 
-VEF 在状态管理上不是只押注一个库，而是给了三类不同用途的导出:
+VEF 不强制要求使用单一的状态管理风格，而是针对不同类型的状态提供不同的工具：
 
 - Zustand 风格 store
 - Jotai atom
 - XState 状态机
 
-实际项目里最常用的是前两类。
+在大多数项目中，前两者是最常用的。本篇是一份选型指南；完整的 API——每个选项、类型导出以及 `PersistenceOptions` 字段——见 [Store 与 Atom](../reference/core/store-and-atom.md)。
 
-## 先给结论
+## 快速对照
 
 | 需求 | 推荐 API |
 | --- | --- |
 | 全局应用状态 | `createStore()` / `createPersistedStore()` |
-| 组件树内部局部状态 | `createComponentStore()` |
-| 一次性弹窗或局部交互状态 | `atom()` |
-| 复杂状态流转 | `createMachine()` |
+| 组件树内部的局部共享状态 | `createComponentStore()` |
+| 一次性弹窗或交互状态 | `atom()` |
+| 复杂的状态流转 | `createMachine()` |
 
-## 全局 store: `createStore()`
+## 全局 Store：`createStore()`
+
+`createStore()` 要求状态类型包含一个 `name: string` 字段：
 
 ```ts
 import { createStore } from "@vef-framework-react/core";
 
 interface CounterState {
+  name: string;
   count: number;
   increment: () => void;
 }
 
 export const useCounterStore = createStore<CounterState>(set => ({
+  name: "counter",
   count: 0,
   increment: () => {
     set(state => {
@@ -42,7 +46,9 @@ export const useCounterStore = createStore<CounterState>(set => ({
 }));
 ```
 
-## 持久化 store: `createPersistedStore()`
+## 持久化 Store：`createPersistedStore()`
+
+`createPersistedStore()` 不要求状态本身包含 `name` 字段——store 的存储 key 改为来自 `persistenceOptions.name`：
 
 ```ts
 import { createPersistedStore } from "@vef-framework-react/core";
@@ -68,9 +74,9 @@ export const useThemeStore = createPersistedStore<ThemeState>(
 );
 ```
 
-## 组件作用域 store: `createComponentStore()`
+## 组件作用域 Store：`createComponentStore()`
 
-配置页场景通常可以按下面的方式组织:
+一个配置页风格的场景通常是这样的：
 
 ```ts
 import { createComponentStore } from "@vef-framework-react/core";
@@ -102,9 +108,11 @@ export const {
 );
 ```
 
+这里第一个参数（`"ConfigPage"`）是 store 的名称——用于 React context 的 display name 和开发模式下的错误信息——它和状态本身的任何字段是分开的。
+
 ## Atom 状态
 
-对于单个弹窗、抽屉、详情模态框之类的状态，Jotai 往往更轻。
+对于单个模态框、抽屉，或局部详情状态，Jotai 往往是更轻量的选择。
 
 ```tsx
 import { atom, useAtomValue, useSetAtom } from "@vef-framework-react/core";
@@ -115,12 +123,12 @@ const modalAtom = atom({
 });
 ```
 
-## 一条经验规则
+## 经验法则
 
-优先级通常是:
+实践中，优先级顺序通常是这样的：
 
-1. 局部瞬时 UI 状态: `useState`
-2. 局部共享状态: `atom`
-3. 页面级共享状态: `createComponentStore`
-4. 全局共享状态: `createStore` / `createPersistedStore`
-5. 复杂业务流: 状态机
+1. 局部瞬时 UI 状态：`useState`
+2. 局部共享状态：`atom`
+3. 页面作用域的共享状态：`createComponentStore`
+4. 全局共享状态：`createStore()` / `createPersistedStore()`
+5. 复杂的、由流程驱动的状态：状态机

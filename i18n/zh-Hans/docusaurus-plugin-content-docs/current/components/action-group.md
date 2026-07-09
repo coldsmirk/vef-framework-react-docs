@@ -1,18 +1,19 @@
 ---
-sidebar_position: 9
+title: "ActionGroup"
+description: "根据声明式的配置数组渲染一组操作按钮，支持基于上下文的按钮可见性控制和权限校验。"
 ---
 
-# ActionGroup 操作组
+# ActionGroup
 
-从声明式配置数组渲染一组操作按钮，支持上下文感知的按钮显隐和权限检查。
+根据声明式的配置数组渲染一组操作按钮，支持基于上下文的按钮可见性控制和权限校验。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design 的一部分。
 
 ## 何时使用
 
-- 表格行操作列，按钮因行数据不同而变化。
-- 工具栏中有一组固定操作。
-- 希望将按钮定义为数据而非 JSX 的场景。
+- 每行按钮各不相同的表格行操作列。
+- 具有一组固定操作的工具栏。
+- 任何希望以数据而非 JSX 方式定义按钮的场景。
 
 ## 基础用法
 
@@ -23,16 +24,16 @@ import type { ActionButtonConfig } from '@vef-framework-react/components';
 const buttons: ActionButtonConfig[] = [
   {
     key: 'edit',
-    label: '编辑',
+    label: 'Edit',
     onClick: async () => { await openEditModal(); },
   },
   {
     key: 'delete',
-    label: '删除',
+    label: 'Delete',
     danger: true,
     confirmable: true,
-    confirmTitle: '删除记录',
-    confirmDescription: '此操作不可撤销。',
+    confirmTitle: 'Delete Record',
+    confirmDescription: 'This cannot be undone.',
     onClick: async () => { await deleteRecord(); },
   },
 ];
@@ -44,7 +45,7 @@ export default function Demo() {
 
 ## 上下文感知按钮
 
-传入 `context`（如表格行数据）使按钮配置感知上下文：
+传入 `context` 属性（例如表格行记录）即可让按钮配置具备上下文感知能力：
 
 ```tsx
 import { ActionGroup } from '@vef-framework-react/components';
@@ -58,27 +59,27 @@ interface User {
 const buttons: ActionButtonConfig<User>[] = [
   {
     key: 'edit',
-    label: '编辑',
+    label: 'Edit',
     onClick: async (ctx) => { await editUser(ctx.id); },
   },
   {
     key: 'activate',
-    label: '启用',
+    label: 'Activate',
     hidden: (ctx) => ctx.status === 'active',
     onClick: async (ctx) => { await activateUser(ctx.id); },
   },
   {
     key: 'deactivate',
-    label: '禁用',
+    label: 'Deactivate',
     hidden: (ctx) => ctx.status === 'inactive',
     danger: true,
     onClick: async (ctx) => { await deactivateUser(ctx.id); },
   },
 ];
 
-// 在表格列 render 中：
+// In a table column render:
 {
-  title: '操作',
+  title: 'Actions',
   render: (_, record) => (
     <ActionGroup<User> buttons={buttons} context={record} />
   ),
@@ -102,34 +103,34 @@ const buttons: ActionButtonConfig<User>[] = [
 
 ### ActionGroupProps
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `buttons` | `ActionButtonConfig<TContext>[]` | 必填 | 按钮配置数组 |
-| `size` | `'large' \| 'middle' \| 'small'` | — | 应用于所有按钮的尺寸 |
-| `context` | `TContext` | — | 传递给按钮回调的上下文值 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `buttons` | `ActionButtonConfig<TContext>[]` | required | 按钮配置数组 |
+| `size` | `'large' \| 'medium' \| 'small'` | — | 应用于所有按钮的尺寸（`'middle'` 是 `'medium'` 的废弃别名） |
+| `context` | `TContext` | — | 传递给按钮回调函数的上下文值 |
 | `renderWrapper` | `(buttonsNode: ReactNode) => ReactNode` | — | 自定义包装器渲染函数 |
 
 ### ActionButtonConfig
 
-| 字段 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `key` | `string` | 必填 | 唯一标识 |
-| `label` | `ReactNode` | — | 按钮文字 |
+| Field | Type | Default | 说明 |
+|-------|------|---------|-------------|
+| `key` | `string` | required | 唯一标识 |
+| `label` | `ReactNode` | — | 按钮文本 |
 | `type` | `ButtonType` | — | 按钮类型 |
 | `danger` | `boolean` | `false` | 危险样式 |
 | `disabled` | `boolean \| (ctx) => boolean` | `false` | 禁用条件 |
 | `hidden` | `boolean \| (ctx) => boolean` | `false` | 隐藏条件 |
-| `confirmable` | `boolean` | `false` | 需要确认 |
-| `confirmMode` | `'popover' \ | 'dialog'` | `'popover'` | 确认 UI 样式 |
+| `confirmable` | `boolean` | `false` | 是否需要确认 |
+| `confirmMode` | `'popover' \| 'dialog'` | `'popover'` | 确认框 UI 样式 |
 | `confirmTitle` | `ReactNode` | — | 确认标题 |
-| `confirmDescription` | `ReactNode` | — | 确认描述 |
-| `permTokens` | `string \| string[]` | — | 所需权限令牌 |
-| `checkMode` | `'any' \| 'all'` | `'any'` | 权限检查模式 |
-| `onClick` | `(ctx?: TContext) => Awaitable<void>` | — | 点击回调 |
+| `confirmDescription` | `ReactNode` | — | 确认描述文本 |
+| `requiredPermissions` | `string \| string[]` | — | 所需权限令牌 |
+| `checkMode` | `'any' \| 'all'` | `'any'` | 权限校验模式 |
+| `onClick` | `(ctx?: TContext) => Awaitable<void>` | — | 点击事件处理函数 |
 | `icon` | `ReactNode` | — | 按钮图标 |
 
 ## 最佳实践
 
-- 在组件外部定义按钮配置，避免每次渲染重新创建。
-- 对不适用于某条记录的按钮使用 `hidden`（而非 `disabled`）。
-- 使用 `permTokens` 自动隐藏用户无权限的按钮。
+- 在组件外部定义按钮配置，避免每次渲染时重新创建。
+- 使用 `hidden`（而非 `disabled`）来移除不适用于某条记录的按钮。
+- 使用 `requiredPermissions` 自动隐藏用户没有权限的按钮。

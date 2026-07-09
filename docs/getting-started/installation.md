@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1
 title: Installation
+description: Install VEF's packages, configure Vite and TypeScript, and set up the recommended npm scripts.
 ---
 
 # Installation
@@ -19,9 +19,9 @@ The repository currently aligns with the following versions:
 | Item | Recommended |
 | --- | --- |
 | Node.js | `>= 22` |
-| pnpm | `10.x` |
+| pnpm | `11.x` |
 | React | `19.x` |
-| TypeScript | `5.9+` or newer |
+| TypeScript | `>= 5.9` (the repo currently builds with `6.x`) |
 
 ## Minimal Installation
 
@@ -33,10 +33,12 @@ pnpm add @vef-framework-react/core @vef-framework-react/components @vef-framewor
 pnpm add -D vite typescript @types/react @types/react-dom @vef-framework-react/dev eslint stylelint lint-staged husky @commitlint/cli
 ```
 
-If the project also needs the approval flow editor:
+If the project also embeds one of the visual editors, add it on top of the base install:
 
 ```bash
+pnpm add @vef-framework-react/form-editor
 pnpm add @vef-framework-react/approval-flow-editor
+pnpm add @vef-framework-react/approval-form-bridge
 ```
 
 ## Which Packages Are Usually Needed
@@ -47,9 +49,11 @@ pnpm add @vef-framework-react/approval-flow-editor
 | Only components and form wrappers | `@vef-framework-react/components` |
 | Full admin-style application skeleton | `@vef-framework-react/starter` + `components` + `core` + `hooks` + `shared` |
 | Shared project tooling | `@vef-framework-react/dev` |
+| Visual form designer integration | `@vef-framework-react/form-editor` |
 | Approval flow designer integration | `@vef-framework-react/approval-flow-editor` |
+| Projecting a form-editor schema into an approval flow | `@vef-framework-react/approval-form-bridge` |
 
-In most applications, `starter` is used together with `components`, `core`, `hooks`, and `shared`.
+In most applications, `starter` is used together with `components`, `core`, `hooks`, and `shared`. The three editor packages are opt-in and independent of each other — add only the ones the application actually embeds.
 
 ## Example `package.json`
 
@@ -58,21 +62,21 @@ The following dependency set is close to what a real project would look like:
 ```json
 {
   "dependencies": {
-    "@tanstack/react-router": "^1.168.3",
-    "@vef-framework-react/components": "^2",
-    "@vef-framework-react/core": "^2",
-    "@vef-framework-react/hooks": "^2",
-    "@vef-framework-react/shared": "^2",
-    "@vef-framework-react/starter": "^2",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "@tanstack/react-router": "^1.170.17",
+    "@vef-framework-react/components": "^2.9.0",
+    "@vef-framework-react/core": "^2.9.0",
+    "@vef-framework-react/hooks": "^2.9.0",
+    "@vef-framework-react/shared": "^2.9.0",
+    "@vef-framework-react/starter": "^2.9.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@vef-framework-react/dev": "^2",
-    "@types/react": "^19.2.14",
+    "@vef-framework-react/dev": "^2.9.0",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.2"
+    "typescript": "^6.0.3",
+    "vite": "^8.1.3"
   }
 }
 ```

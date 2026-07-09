@@ -1,12 +1,13 @@
 ---
-sidebar_position: 107
+title: "Typography"
+description: "文本展示类组件：`Title`、`Text`、`Paragraph` 和 `Link`。"
 ---
 
-# Typography 排版
+# Typography
 
-文本展示组件：`Title`（标题）、`Text`（文本）、`Paragraph`（段落）、`Link`（链接）。
+文本展示类组件：`Title`、`Text`、`Paragraph` 和 `Link`。
 
-> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Typography](https://ant.design/components/typography-cn/)
+> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Typography](https://ant.design/components/typography/)
 
 ## 基础用法
 
@@ -16,11 +17,11 @@ import { Title, Text, Paragraph, Link } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <>
-      <Title>一级标题</Title>
-      <Title level={2}>二级标题</Title>
+      <Title>h1. Heading</Title>
+      <Title level={2}>h2. Heading</Title>
       <Paragraph>
-        这是一段文字，包含 <Text strong>加粗</Text> 和{' '}
-        <Text type="danger">危险</Text> 样式。
+        This is a paragraph with <Text strong>bold</Text> and{' '}
+        <Text type="danger">danger</Text> text.
       </Paragraph>
       <Link href="https://ant.design">Ant Design</Link>
     </>
@@ -28,7 +29,7 @@ export default function Demo() {
 }
 ```
 
-## 文本类型
+## 文本变体
 
 ```tsx
 import { Text, Space } from '@vef-framework-react/components';
@@ -36,17 +37,17 @@ import { Text, Space } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Space direction="vertical">
-      <Text>默认</Text>
-      <Text type="secondary">次要</Text>
-      <Text type="success">成功</Text>
-      <Text type="warning">警告</Text>
-      <Text type="danger">危险</Text>
-      <Text disabled>禁用</Text>
-      <Text strong>加粗</Text>
-      <Text italic>斜体</Text>
-      <Text underline>下划线</Text>
-      <Text delete>删除线</Text>
-      <Text code>代码</Text>
+      <Text>Default</Text>
+      <Text type="secondary">Secondary</Text>
+      <Text type="success">Success</Text>
+      <Text type="warning">Warning</Text>
+      <Text type="danger">Danger</Text>
+      <Text disabled>Disabled</Text>
+      <Text strong>Bold</Text>
+      <Text italic>Italic</Text>
+      <Text underline>Underline</Text>
+      <Text delete>Strikethrough</Text>
+      <Text code>Code</Text>
     </Space>
   );
 }
@@ -59,7 +60,7 @@ import { Paragraph } from '@vef-framework-react/components';
 import { useState } from 'react';
 
 export default function Demo() {
-  const [text, setText] = useState('可编辑段落');
+  const [text, setText] = useState('Editable paragraph');
   return (
     <Paragraph editable={{ onChange: setText }}>{text}</Paragraph>
   );
@@ -68,26 +69,28 @@ export default function Demo() {
 
 ## API
 
+`Title`、`Text`、`Paragraph` 和 `Link` 都是纯 `antd` 重导出（`Typography.Title` / `Typography.Text` / `Typography.Paragraph` / `Typography.Link`），没有任何 VEF 专属属性。下表仅列出最常用的属性；每个组件的完整属性列表（包括此处未列出的 `Link`）请参阅 [Ant Design Typography 文档](https://ant.design/components/typography/)。
+
 ### Title
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `level` | `1 \| 2 \| 3 \| 4 \| 5` | `1` | 重要程度，对应 h1-h5 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `level` | `1 \| 2 \| 3 \| 4 \| 5` | `1` | 标题级别 |
 | `type` | `'secondary' \| 'success' \| 'warning' \| 'danger'` | — | 文本类型 |
-| `copyable` | `boolean \| CopyConfig` | `false` | 是否可拷贝 |
-| `ellipsis` | `boolean \| EllipsisConfig` | `false` | 自动溢出省略 |
+| `copyable` | `boolean \| CopyConfig` | `false` | 启用复制 |
+| `ellipsis` | `boolean \| EllipsisConfig` | `false` | 溢出省略 |
 
 ### Text / Paragraph
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
 | `type` | `'secondary' \| 'success' \| 'warning' \| 'danger'` | — | 文本类型 |
-| `strong` | `boolean` | `false` | 是否加粗 |
-| `italic` | `boolean` | `false` | 是否斜体 |
-| `underline` | `boolean` | `false` | 是否有下划线样式 |
-| `delete` | `boolean` | `false` | 是否有删除线样式 |
-| `code` | `boolean` | `false` | 是否有代码样式 |
-| `disabled` | `boolean` | `false` | 是否禁用 |
-| `copyable` | `boolean \| CopyConfig` | `false` | 是否可拷贝 |
-| `editable` | `boolean \| EditConfig` | `false` | 是否可编辑 |
-| `ellipsis` | `boolean \| EllipsisConfig` | `false` | 自动溢出省略 |
+| `strong` | `boolean` | `false` | 加粗 |
+| `italic` | `boolean` | `false` | 斜体 |
+| `underline` | `boolean` | `false` | 下划线 |
+| `delete` | `boolean` | `false` | 删除线 |
+| `code` | `boolean` | `false` | 代码样式 |
+| `disabled` | `boolean` | `false` | 禁用样式 |
+| `copyable` | `boolean \| CopyConfig` | `false` | 启用复制 |
+| `editable` | `boolean \| EditConfig` | `false` | 启用编辑 |
+| `ellipsis` | `boolean \| EllipsisConfig` | `false` | 溢出省略 |

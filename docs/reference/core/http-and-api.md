@@ -1,6 +1,6 @@
 ---
-sidebar_position: 2
 title: HTTP and API Client
+description: HttpClient and ApiClient signatures, options, and the query/mutation function factories.
 ---
 
 # HTTP and API Client
@@ -15,12 +15,12 @@ The low-level HTTP client built on Axios. It handles:
 - file upload and download
 - path parameter replacement
 
-### Creating an `HttpClient`
+### `HttpClientOptions`
+
+`HttpClient` is not constructed directly — `createHttpClient` is an internal factory, not exported from the package root. Applications configure these options as `ApiClientOptions.http` and pass them to `createApiClient` (see below):
 
 ```ts
-import { createHttpClient } from "@vef-framework-react/core";
-
-const http = createHttpClient({
+const httpOptions = {
   baseUrl: "/api",
   timeout: 30_000,
   okCode: 0,
@@ -28,15 +28,17 @@ const http = createHttpClient({
   getAuthTokens: () => tokenStore.getTokens(),
   setAuthTokens: tokens => tokenStore.setTokens(tokens),
   refreshToken: async tokens => {
-    const result = await http.post("/auth/refresh", { data: tokens });
-    return result.data;
+    const response = await fetch("/api/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tokens)
+    });
+    return response.json();
   },
   onUnauthenticated: () => router.navigate({ to: "/login" }),
   showErrorMessage: message => notification.error(message)
-});
+};
 ```
-
-### `HttpClientOptions`
 
 | Option | Type | Description |
 | --- | --- | --- |

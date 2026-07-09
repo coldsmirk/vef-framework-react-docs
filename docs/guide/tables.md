@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
 title: Tables
+description: When to reach for the display-only Table versus the query-integrated ProTable.
 ---
 
 # Tables
@@ -10,12 +10,11 @@ VEF has two table layers, both exported from `@vef-framework-react/components`:
 1. `Table` — display only
 2. `ProTable` — page-level table integrated with query, pagination, selection, and column settings
 
-Use `Table` when data only needs to be displayed.  
-Use `ProTable` when query integration, pagination, column settings, operation columns, and selection state are needed.
+The decision between them comes down to one question: does the table own its own data fetching, or does the page already have the rows in hand?
 
 ## When `Table` Is Enough
 
-Related helpers:
+Use `Table` when data only needs to be displayed — the rows already exist in the component (from a parent query, a computed value, or a small static list) and the table itself has no fetching or pagination responsibility. Related helpers:
 
 - `usePaginationProps()`
 - `pageSizeOptions`
@@ -34,16 +33,9 @@ const pagination = usePaginationProps({
 <Table columns={columns} dataSource={rows} pagination={pagination} />;
 ```
 
-## `ProTable` Is the Page-Level Table
+## When `ProTable` Fits Better
 
-`ProTable` combines:
-
-- query functions
-- paginated or non-paginated modes
-- row selection state
-- column settings
-- operation columns
-- header / footer slots
+Use `ProTable` when query integration, pagination, column settings, operation columns, or selection state are needed. `ProTable` combines a query function, paginated or non-paginated modes, row selection state, column settings, operation columns, and header/footer slots into one component:
 
 ```tsx
 import { ProTable } from "@vef-framework-react/components";
@@ -57,20 +49,9 @@ import { ProTable } from "@vef-framework-react/components";
 />;
 ```
 
-## Common `ProTable` Props
+Because `queryFn` is the same shape used in [Data Fetching](./data-fetching.md), a query function written for `useQuery()` can usually back a `ProTable` without changes.
 
-| Prop | Purpose |
-| --- | --- |
-| `columns` | Column definitions |
-| `queryFn` | Data query function |
-| `isPaginated` | Pagination toggle |
-| `rowKey` | Row key |
-| `queryParams` | Additional query params |
-| `rowSelection` | Row selection support |
-| `columnSettings` | Column settings and persistence |
-| `operationColumn` | Row-level operation column |
-| `header` | Table header slot |
-| `footer` | Table footer slot |
+The full prop table — including `columnSettings`, `operationColumn`, `rowSelection`, and the rest — lives in [ProTable](../components/pro-table.md).
 
 ## Persisted Column Settings
 
@@ -89,15 +70,8 @@ If not needed:
 
 ## `ProTableSubscriber`
 
-When footer content or a local action only needs table-local state, `ProTableSubscriber` is usually more suitable than introducing extra external state.
+When footer content or a local action only needs table-local state, `ProTableSubscriber` is usually more suitable than introducing extra external state. See [ProTable](../components/pro-table.md) for its API.
 
 ## `ProTable` and `CrudPage`
 
-At a conceptual level, `CrudPage` is:
-
-- `Page`
-- `Crud`
-- `ProTable`
-- form modal or drawer handling
-
-combined into one page-level abstraction.
+At a conceptual level, `CrudPage` is `Page` + `Crud` (`ProSearch` + `ProTable` + scene forms) combined into one page-level abstraction. If a page needs search, forms, and delete flows on top of the table, reach for `CrudPage` directly instead of composing `ProTable` by hand — see [CRUD Pages](./crud.md).

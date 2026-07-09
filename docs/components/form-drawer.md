@@ -1,5 +1,6 @@
 ---
-sidebar_position: 103
+title: "FormDrawer"
+description: "A drawer panel that combines form state, mutation execution, and submit/reset actions. Same API as `FormModal` but rendered as a side drawer."
 ---
 
 # FormDrawer
@@ -60,6 +61,7 @@ export default function EditUserDrawer({ open, onClose }) {
 | `resizable` | `boolean` | — | Whether the drawer is resizable |
 | `defaultValues` | `TValues` | — | Initial form values |
 | `disabled` | `boolean` | `false` | Disable the form |
+| `formComponent` | `ElementType` | `"form"` | Element type for the inner form wrapper |
 | `mutationFn` | `MutationFunction<ApiResult<TData>, TValues>` | — | Mutation to execute on submit |
 | `mutationMeta` | `MutationMeta` | — | Mutation metadata |
 | `beforeSubmit` | `(values) => Awaitable<TValues>` | — | Transform values before submission |
@@ -67,7 +69,7 @@ export default function EditUserDrawer({ open, onClose }) {
 | `onSubmit` | `(values) => Awaitable<void>` | — | Custom submit handler |
 | `onReset` | `(defaultValues?) => void` | — | Called on form reset |
 | `onClose` | `() => void` | — | Called when drawer closes |
-| `renderActions` | `(formApi) => ReactNode` | — | Custom footer actions |
-| `submitButtonProps` | `SubmitButtonProps` | — | Submit button customization |
-| `resetButtonProps` | `ResetButtonProps \| false` | — | Reset button customization; `false` to hide |
+| `renderActions` | `(formApi, defaults: { submitButton, resetButton }) => ReactNode` | — | Custom footer actions; `defaults` carries the default submit/reset buttons to reuse alongside custom ones |
+| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Submit button customization (only used when `renderActions` is not provided) |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` to hide (only used when `renderActions` is not provided) |
 | `children` | `ReactNode \| (formApi) => ReactNode` | — | Form content |

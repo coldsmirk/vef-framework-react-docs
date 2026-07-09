@@ -1,9 +1,9 @@
 ---
-sidebar_position: 1
-title: Routing
+title: Routing & Layout
+description: How VEF wires TanStack Router routes together with the application shell and page containers.
 ---
 
-# Routing
+# Routing & Layout
 
 VEF routing is built on top of `@tanstack/react-router`, but the APIs used most often in application code come from `@vef-framework-react/starter`:
 
@@ -13,7 +13,7 @@ VEF routing is built on top of `@tanstack/react-router`, but the APIs used most 
 - `createLoginRouteOptions()`
 - `createAccessDeniedRouteOptions()`
 
-These helpers standardize concerns that appear repeatedly in admin applications: page titles, login redirects, permission checks, menu wiring, and default error states.
+These helpers standardize concerns that appear repeatedly in admin applications: page titles, login redirects, permission checks, menu wiring, and default error states. This guide covers how the pieces fit together and where layout components enter the picture. For the full option table of every helper, see [Bootstrap and Routing](../reference/starter/bootstrap-and-routing.md).
 
 ## Typical Route Structure
 
@@ -32,8 +32,6 @@ flowchart TD
 
 ## What `createRouter()` Covers
 
-The top-level router instance is usually created like this:
-
 ```ts
 import { createRouter } from "@vef-framework-react/starter";
 
@@ -47,27 +45,9 @@ const router = createRouter({
 });
 ```
 
-It already wires:
+It already wires `hash` / `browser` history creation, global pending / error / not-found components, route transition progress handling, default error notifications, tab state synchronization, and automatic response to unauthenticated and access-denied events.
 
-- `hash` / `browser` history creation
-- global pending / error / not-found components
-- route transition progress handling
-- default error notifications
-- tab state synchronization
-- automatic response to unauthenticated and access-denied events
-
-## What Goes into `RouterContext`
-
-The framework currently expects `RouterContext` to include at least:
-
-```ts
-interface RouterContext {
-  router: AnyRouter;
-  routeTitle?: string;
-}
-```
-
-In most projects, a placeholder object is defined first:
+The framework expects `RouterContext` to include at least a `router` field. In most projects a placeholder object is defined first:
 
 ```ts
 import type { RouterContext } from "@vef-framework-react/starter";
@@ -77,26 +57,14 @@ export const routerContext: RouterContext = {
 };
 ```
 
-## Root Route: `createRootRouteOptions()`
+## The Layout Route Is the Core of the Routing Layer
 
-The root route computes the document title from route context and menu metadata.
+Authenticated admin pages usually sit under a single layout route built with `createLayoutRouteOptions()`. It handles:
 
-```tsx
-import type { RouterContext } from "@vef-framework-react/starter";
-
-import { createRootRouteWithContext } from "@tanstack/react-router";
-import { createRootRouteOptions } from "@vef-framework-react/starter";
-
-export const Route = createRootRouteWithContext<RouterContext>()(
-  createRootRouteOptions({
-    appTitle: "VEF Demo"
-  })
-);
-```
-
-## Layout Route: `createLayoutRouteOptions()`
-
-The layout route is the core of the VEF routing layer. Authenticated admin pages usually sit under this route.
+1. authentication checks
+2. user-info and menu loading
+3. writing menu state and permission tokens into `useAppStore`
+4. redirecting unauthorized paths to the access-denied route
 
 ```tsx
 import type { UserInfo } from "@vef-framework-react/starter";
@@ -106,10 +74,6 @@ import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework-react/s
 
 import { apiClient } from "../../api";
 import { getUserInfo, logout } from "../../apis/auth";
-
-async function handleLogout(): Promise<void> {
-  await apiClient.executeMutation({ mutationFn: logout });
-}
 
 function fetchUserInfo(): Promise<UserInfo> {
   return apiClient.fetchQuery({
@@ -121,49 +85,42 @@ function fetchUserInfo(): Promise<UserInfo> {
 export const Route = createFileRoute(INDEX_ROUTE_ID)(
   createLayoutRouteOptions({
     title: "Admin System",
-    onLogout: handleLogout,
+    onLogout: () => apiClient.executeMutation({ mutationFn: logout }),
     fetchUserInfo
   })
 );
 ```
 
-This handles:
+The root route (`createRootRouteOptions()`), login route (`createLoginRouteOptions()`), and access-denied route (`createAccessDeniedRouteOptions()`) follow the same shape — wrap a `createFileRoute()` call with the matching options helper. See [Bootstrap and Routing](../reference/starter/bootstrap-and-routing.md) for every option each helper accepts, and [Authentication](./authentication.md) for how login wiring specifically fits in.
 
-1. authentication checks
-2. user-info and menu loading
-3. writing menu state and permission tokens into `useAppStore`
-4. redirecting unauthorized pages
+## Layout Mental Model
 
-## Login Route: `createLoginRouteOptions()`
+Routing decides which page renders; layout components decide how it is framed. VEF splits that into two layers:
 
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework-react/starter";
+- **Application-level layout** — `Layout` / `BaseLayout` (from `@vef-framework-react/starter`). This is the persistent shell: menu, user section, tabs, and the content area. It is generally not written from scratch — `createLayoutRouteOptions()` assembles it from the props passed to it (`title`, `onLogout`, and the rest of `LayoutProps`).
+- **Page-level containers** — `Page` / `FlexCard` (from `@vef-framework-react/components`). These live inside the shell and frame a single page's content.
 
-import { apiClient } from "../../api";
-import { login } from "../../apis/auth";
+### `Page`
 
-export const Route = createFileRoute(LOGIN_ROUTE_ID)(
-  createLoginRouteOptions({
-    onLogin: params => apiClient.executeMutation({ mutationFn: login, params })
-  })
-);
-```
-
-## Access-Denied Route: `createAccessDeniedRouteOptions()`
+For pages that are not CRUD pages and do not require highly custom layout behavior, `Page` is usually the first container to use:
 
 ```tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework-react/starter";
+import { Page } from "@vef-framework-react/components";
 
-export const Route = createFileRoute(ACCESS_DENIED_ROUTE_ID)(
-  createAccessDeniedRouteOptions()
-);
+<Page title="System Monitor">
+  Page content
+</Page>
 ```
+
+It supports a `title`, header/footer slots, left and right side panels, and page-level margin control. `CrudPage` (see [CRUD Pages](./crud.md)) is also built on `Page`, which is one of the reasons CRUD pages and regular business pages feel visually consistent.
+
+### `FlexCard`
+
+`FlexCard` is useful when a page needs a more flexible card-style container, especially for split layouts such as list + detail or tree + form.
 
 ## Recommended Usage
 
 - Keep the root route focused on document titles and top-level shell concerns.
 - Let the layout route own authentication, menus, permissions, and user loading.
-- Keep page routes focused on page behavior.
+- Keep page routes focused on page behavior; use `Page` for regular business pages and `FlexCard` for split panels and tree-table layouts.
 - Prefer the framework event chain for unauthenticated and access-denied redirects instead of scattering manual `navigate()` calls across pages.

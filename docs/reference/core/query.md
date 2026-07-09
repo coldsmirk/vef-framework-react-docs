@@ -1,27 +1,23 @@
 ---
-sidebar_position: 3
 title: Query and Mutation
+description: The VEF-flavored TanStack Query re-exports, QueryClientOptions, and mutation meta extensions.
 ---
 
 # Query and Mutation
 
 `@vef-framework-react/core` re-exports TanStack React Query with VEF-specific type wrappers and a pre-configured `QueryClient`.
 
-## `createQueryClient`
+## `QueryClientOptions`
 
-Creates a `QueryClient` with mutation cache and default options.
+`QueryClient` is not constructed directly — `createQueryClient` is an internal factory, not exported from the package root. Applications configure these options as `ApiClientOptions.query` and pass them to `createApiClient` (see [HTTP and API Client](./http-and-api.md)):
 
 ```ts
-import { createQueryClient } from "@vef-framework-react/core";
-
-const queryClient = createQueryClient({
+const queryOptions = {
   staleTime: 5_000,
   gcTime: 300_000,
   showSuccessMessage: message => notification.success(message)
-});
+};
 ```
-
-### `QueryClientOptions`
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

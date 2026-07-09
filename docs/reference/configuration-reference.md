@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1
 title: Configuration Quick Reference
+description: Dry option tables for createApp, createApiClient, createRouter, the route-option helpers, and defineViteConfig.
 ---
 
 # Configuration Quick Reference

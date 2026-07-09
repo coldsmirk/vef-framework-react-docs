@@ -1,11 +1,11 @@
 ---
-sidebar_position: 1
-title: 路由
+title: 路由与布局
+description: VEF 如何将 TanStack Router 的路由与应用外壳、页面容器组合在一起。
 ---
 
-# 路由
+# 路由与布局
 
-VEF 的路由能力建立在 `@tanstack/react-router` 之上，但你平时真正高频使用的是 `@vef-framework-react/starter` 提供的一组辅助 API:
+VEF 的路由建立在 `@tanstack/react-router` 之上，但业务代码中最常用到的 API 来自 `@vef-framework-react/starter`：
 
 - `createRouter()`
 - `createRootRouteOptions()`
@@ -13,14 +13,14 @@ VEF 的路由能力建立在 `@tanstack/react-router` 之上，但你平时真�
 - `createLoginRouteOptions()`
 - `createAccessDeniedRouteOptions()`
 
-这几组 API 的目标很明确: **把后台系统里反复出现的标题、登录跳转、权限校验、菜单装配和默认错误态统一起来**。
+这些辅助函数把后台应用里反复出现的问题标准化：页面标题、登录跳转、权限校验、菜单装配以及默认错误态。本篇指南介绍这些部分如何组合在一起，以及布局组件在其中扮演的角色。每个辅助函数的完整选项表见 [应用启动与路由](../reference/starter/bootstrap-and-routing.md)。
 
-## 一条标准路由链路
+## 典型的路由结构
 
 ```mermaid
 flowchart TD
     A[createRootRouteOptions] --> B[createLayoutRouteOptions]
-    B --> C[业务页面 route.tsx]
+    B --> C[Business Page route.tsx]
     B --> D[createLoginRouteOptions]
     B --> E[createAccessDeniedRouteOptions]
     F[createRouter] --> A
@@ -30,9 +30,7 @@ flowchart TD
     F --> E
 ```
 
-## `createRouter()` 负责什么
-
-最外层 router 实例通常这样创建:
+## `createRouter()` 涵盖了什么
 
 ```ts
 import { createRouter } from "@vef-framework-react/starter";
@@ -47,27 +45,9 @@ const router = createRouter({
 });
 ```
 
-它帮你接好了这些默认行为:
+它已经接好了 `hash` / `browser` history 的创建、全局 pending / error / not-found 组件、路由切换进度处理、默认错误通知、标签页状态同步，以及对未认证和无权限事件的自动响应。
 
-- `hash` / `browser` history 的创建
-- 全局 pending / error / not-found 组件
-- 路由切换进度条
-- 默认错误通知
-- 标签页状态同步
-- 监听“未认证”和“无权限”事件并自动跳转
-
-## `RouterContext` 里应该放什么
-
-当前框架约定的 `RouterContext` 至少包含:
-
-```ts
-interface RouterContext {
-  router: AnyRouter;
-  routeTitle?: string;
-}
-```
-
-实际项目里通常会先给一个占位对象:
+框架要求 `RouterContext` 至少包含一个 `router` 字段。多数项目会先定义一个占位对象：
 
 ```ts
 import type { RouterContext } from "@vef-framework-react/starter";
@@ -77,27 +57,14 @@ export const routerContext: RouterContext = {
 };
 ```
 
-## 根路由: `createRootRouteOptions()`
+## 布局路由是路由层的核心
 
-根路由的职责非常单纯: 根据当前路由上下文和菜单信息计算文档标题。
+已认证的后台页面通常挂在由 `createLayoutRouteOptions()` 构建的单个布局路由之下。它负责处理：
 
-```tsx
-import type { RouterContext } from "@vef-framework-react/starter";
-
-import { createRootRouteWithContext } from "@tanstack/react-router";
-import { createRootRouteOptions } from "@vef-framework-react/starter";
-
-export const Route = createRootRouteWithContext<RouterContext>()(
-  createRootRouteOptions({
-    appTitle: "VEF Demo"
-  })
-);
-```
-
-## 布局路由: `createLayoutRouteOptions()`
-
-布局路由是 VEF 路由层最关键的一层。  
-你应该把“已登录后才能访问”的后台页面都挂在这里。
+1. 认证检查
+2. 用户信息与菜单加载
+3. 将菜单状态和权限令牌写入 `useAppStore`
+4. 将无权限路径重定向到无权限页面
 
 ```tsx
 import type { UserInfo } from "@vef-framework-react/starter";
@@ -108,10 +75,6 @@ import { createLayoutRouteOptions, INDEX_ROUTE_ID } from "@vef-framework-react/s
 import { apiClient } from "../../api";
 import { getUserInfo, logout } from "../../apis/auth";
 
-async function handleLogout(): Promise<void> {
-  await apiClient.executeMutation({ mutationFn: logout });
-}
-
 function fetchUserInfo(): Promise<UserInfo> {
   return apiClient.fetchQuery({
     queryKey: [getUserInfo.key, { appId: "admin" }],
@@ -121,50 +84,43 @@ function fetchUserInfo(): Promise<UserInfo> {
 
 export const Route = createFileRoute(INDEX_ROUTE_ID)(
   createLayoutRouteOptions({
-    title: "后台系统",
-    onLogout: handleLogout,
+    title: "Admin System",
+    onLogout: () => apiClient.executeMutation({ mutationFn: logout }),
     fetchUserInfo
   })
 );
 ```
 
-它自动完成:
+根路由（`createRootRouteOptions()`）、登录路由（`createLoginRouteOptions()`）和无权限路由（`createAccessDeniedRouteOptions()`）遵循同样的形态——用对应的选项辅助函数包裹一次 `createFileRoute()` 调用即可。每个辅助函数接受的完整选项见 [应用启动与路由](../reference/starter/bootstrap-and-routing.md)；登录逻辑具体如何接入见 [认证](./authentication.md)。
 
-1. 登录态检查
-2. 用户信息与菜单加载
-3. 菜单树和权限点写入 `useAppStore`
-4. 无权限页面跳转
+## 布局的心智模型
 
-## 登录路由: `createLoginRouteOptions()`
+路由决定渲染哪个页面；布局组件决定页面如何被框住。VEF 把它拆成两层：
 
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework-react/starter";
+- **应用级布局** —— `Layout` / `BaseLayout`（来自 `@vef-framework-react/starter`）。这是持久化的外壳：菜单、用户区域、标签页和内容区。它通常不需要从零编写——`createLayoutRouteOptions()` 会根据传入的属性（`title`、`onLogout` 以及 `LayoutProps` 的其余部分）自动装配。
+- **页面级容器** —— `Page` / `FlexCard`（来自 `@vef-framework-react/components`）。它们位于外壳内部，负责框住单个页面的内容。
 
-import { apiClient } from "../../api";
-import { login } from "../../apis/auth";
+### `Page`
 
-export const Route = createFileRoute(LOGIN_ROUTE_ID)(
-  createLoginRouteOptions({
-    onLogin: params => apiClient.executeMutation({ mutationFn: login, params })
-  })
-);
-```
-
-## 权限不足路由: `createAccessDeniedRouteOptions()`
+对于非 CRUD 页面、也不需要高度自定义布局行为的页面，`Page` 通常是首选容器：
 
 ```tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework-react/starter";
+import { Page } from "@vef-framework-react/components";
 
-export const Route = createFileRoute(ACCESS_DENIED_ROUTE_ID)(
-  createAccessDeniedRouteOptions()
-);
+<Page title="System Monitor">
+  Page content
+</Page>
 ```
 
-## 推荐实践
+它支持 `title`、页头/页脚插槽、左右侧边栏，以及页面级的间距控制。`CrudPage`（见 [CRUD 页面](./crud.md)）同样构建在 `Page` 之上，这也是 CRUD 页面和普通业务页面视觉上保持一致的原因之一。
 
-- 根路由只做标题与全局壳层托底。
-- 布局路由只做登录态、菜单、权限和用户信息加载。
-- 页面路由尽量只关心页面本身。
-- 未认证和无权限跳转尽量走框架事件链，不要页面里散落 `navigate()`。
+### `FlexCard`
+
+当页面需要更灵活的卡片式容器时，`FlexCard` 会很有用，尤其适合列表 + 详情、树 + 表单这类分栏布局。
+
+## 推荐用法
+
+- 让根路由只关注文档标题和顶层外壳相关事宜。
+- 让布局路由承担认证、菜单、权限和用户信息加载。
+- 让页面路由只关注页面自身的行为；普通业务页面用 `Page`，分栏面板和树表布局用 `FlexCard`。
+- 未认证和无权限跳转优先使用框架的事件链，而不是在各个页面里散落手写的 `navigate()` 调用。

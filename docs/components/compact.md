@@ -1,5 +1,6 @@
 ---
-sidebar_position: 108
+title: "Compact"
+description: "A wrapper that compacts child components (inputs, buttons, etc.) into a seamless group."
 ---
 
 # Compact
@@ -27,6 +28,8 @@ export default function Demo() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | Size of child components |
-| `direction` | `'horizontal' \| 'vertical'` | `'horizontal'` | Layout direction |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Size of child components (`'middle'` is a deprecated alias for `'medium'`) |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | Layout direction |
+| `vertical` | `boolean` | `false` | Shorthand for `orientation="vertical"` |
+| `direction` | `'horizontal' \| 'vertical'` | `'horizontal'` | **Deprecated.** Use `orientation` instead |
 | `block` | `boolean` | `false` | Fit width to parent |

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 50
+title: "Alert"
+description: "Displays a prominent message for user attention."
 ---
 
 # Alert
@@ -14,7 +15,7 @@ Displays a prominent message for user attention.
 import { Alert } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <Alert message="Success message" type="success" />;
+  return <Alert title="Success message" type="success" />;
 }
 ```
 
@@ -26,10 +27,10 @@ import { Alert, Space } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      <Alert message="Info" type="info" />
-      <Alert message="Success" type="success" />
-      <Alert message="Warning" type="warning" />
-      <Alert message="Error" type="error" />
+      <Alert title="Info" type="info" />
+      <Alert title="Success" type="success" />
+      <Alert title="Warning" type="warning" />
+      <Alert title="Error" type="error" />
     </Space>
   );
 }
@@ -39,7 +40,7 @@ export default function Demo() {
 
 ```tsx
 <Alert
-  message="Warning"
+  title="Warning"
   description="This action may affect other users."
   type="warning"
   showIcon
@@ -47,15 +48,24 @@ export default function Demo() {
 />
 ```
 
+## Variant
+
+```tsx
+<Alert title="Filled variant" type="warning" variant="filled" />
+```
+
 ## API
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `message` | `ReactNode` | — | Alert title |
+| `title` | `ReactNode` | — | Alert content (the primary title prop; `message` is a deprecated alias) |
+| `message` | `ReactNode` | — | **Deprecated.** Use `title` instead |
 | `description` | `ReactNode` | — | Additional content |
 | `type` | `'success' \| 'info' \| 'warning' \| 'error'` | `'info'` | Alert type |
+| `variant` | `'outlined' \| 'filled'` | — | Visual variant (antd 6.4+) |
+| `icon` | `ReactNode` | — | Custom icon (shown when `showIcon` is set) |
 | `showIcon` | `boolean` | `false` | Show type icon |
-| `closable` | `boolean` | `false` | Show close button |
-| `onClose` | `(e) => void` | — | Close callback |
+| `closable` | `boolean \| ({ closeIcon?, onClose? } & ...)` | `false` | Show close button; pass an object to customize the close icon or handle close via `closable.onClose` |
+| `onClose` | `(e) => void` | — | **Deprecated.** Use `closable.onClose` instead |
 | `banner` | `boolean` | `false` | Full-width banner style |
 | `action` | `ReactNode` | — | Action element |

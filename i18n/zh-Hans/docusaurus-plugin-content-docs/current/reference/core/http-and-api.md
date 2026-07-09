@@ -1,6 +1,6 @@
 ---
-sidebar_position: 2
 title: HTTP 与 API 客户端
+description: HttpClient 与 ApiClient 的签名、选项，以及查询/变更函数工厂。
 ---
 
 # HTTP 与 API 客户端
@@ -9,18 +9,18 @@ title: HTTP 与 API 客户端
 
 基于 Axios 构建的底层 HTTP 客户端，负责处理：
 
-- 自动注入 Token
-- 401 响应时自动刷新 Token
+- 自动令牌注入
+- 401 响应时的令牌刷新
 - 业务错误码检测
 - 文件上传与下载
 - 路径参数替换
 
-### 创建 `HttpClient`
+### `HttpClientOptions`
+
+`HttpClient` 不能直接构造——`createHttpClient` 是一个内部工厂函数，并未从包根导出。应用代码应将这些选项配置为 `ApiClientOptions.http`，并传递给 `createApiClient`（见下文）：
 
 ```ts
-import { createHttpClient } from "@vef-framework-react/core";
-
-const http = createHttpClient({
+const httpOptions = {
   baseUrl: "/api",
   timeout: 30_000,
   okCode: 0,
@@ -28,30 +28,32 @@ const http = createHttpClient({
   getAuthTokens: () => tokenStore.getTokens(),
   setAuthTokens: tokens => tokenStore.setTokens(tokens),
   refreshToken: async tokens => {
-    const result = await http.post("/auth/refresh", { data: tokens });
-    return result.data;
+    const response = await fetch("/api/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tokens)
+    });
+    return response.json();
   },
   onUnauthenticated: () => router.navigate({ to: "/login" }),
   showErrorMessage: message => notification.error(message)
-});
+};
 ```
-
-### `HttpClientOptions`
 
 | 选项 | 类型 | 说明 |
 | --- | --- | --- |
 | `baseUrl` | `string` | 所有请求的基础 URL |
 | `timeout` | `number` | 请求超时时间（毫秒） |
 | `okCode` | `MaybeArray<number>` | 业务成功码 |
-| `tokenExpiredCode` | `MaybeArray<number>` | Token 过期码 |
-| `getAuthTokens` | `() => Awaitable<AuthTokens \| undefined>` | 获取当前 Token |
-| `setAuthTokens` | `(tokens) => Awaitable<void>` | 持久化刷新后的 Token |
-| `refreshToken` | `(tokens) => Awaitable<AuthTokens>` | Token 刷新回调 |
-| `onUnauthenticated` | `() => Awaitable<void>` | 认证失败时调用 |
+| `tokenExpiredCode` | `MaybeArray<number>` | 令牌过期码 |
+| `getAuthTokens` | `() => Awaitable<AuthTokens \| undefined>` | 获取当前令牌 |
+| `setAuthTokens` | `(tokens) => Awaitable<void>` | 持久化刷新后的令牌 |
+| `refreshToken` | `(tokens) => Awaitable<AuthTokens>` | 令牌刷新回调 |
+| `onUnauthenticated` | `() => Awaitable<void>` | 鉴权失败时调用 |
 | `onAccessDenied` | `() => Awaitable<void>` | 403 时调用 |
-| `showInfoMessage` | `(msg) => void` | 信息消息处理器 |
-| `showWarningMessage` | `(msg) => void` | 警告消息处理器 |
-| `showErrorMessage` | `(msg) => void` | 错误消息处理器 |
+| `showInfoMessage` | `(msg) => void` | 信息提示处理函数 |
+| `showWarningMessage` | `(msg) => void` | 警告提示处理函数 |
+| `showErrorMessage` | `(msg) => void` | 错误提示处理函数 |
 
 ### HTTP 方法
 
@@ -68,13 +70,13 @@ const result = await http.put<void>("/user/update", { data: payload });
 // DELETE
 const result = await http.delete<void>("/user/delete", { params: { id: 1 } });
 
-// 上传文件
+// Upload
 const result = await http.upload<UploadResult>("/file/upload", {
   data: formData,
   onProgress: event => console.log(event.loaded / event.total)
 });
 
-// 下载文件
+// Download
 await http.download("/file/export", {
   params: { id: 1 },
   filename: "export.xlsx"
@@ -83,7 +85,7 @@ await http.download("/file/export", {
 
 ### `ApiResult<T>`
 
-所有 HTTP 方法均返回 `ApiResult<T>`：
+所有 HTTP 方法都返回 `ApiResult<T>`：
 
 ```ts
 interface ApiResult<T> {
@@ -93,9 +95,9 @@ interface ApiResult<T> {
 }
 ```
 
-### 跳过认证
+### 跳过鉴权
 
-对于不需要携带 Authorization 头的请求：
+对于不应携带 Authorization 请求头的请求：
 
 ```ts
 import { skipAuthenticationHeader, skipAuthenticationValue } from "@vef-framework-react/core";
@@ -117,7 +119,7 @@ try {
   await http.post("/user/create", { data: payload });
 } catch (error) {
   if (isBusinessError(error)) {
-    // 可访问 error.code、error.message
+    // error.code, error.message are available
   }
 }
 ```
@@ -126,11 +128,11 @@ try {
 
 ## `ApiClient`
 
-`ApiClient` 将 `HttpClient` 和 `QueryClient` 组合为一个对象。在大多数项目中，通过 `starter.createApiClient()` 创建一次后在整个应用中共享。
+`ApiClient` 将 `HttpClient` 和 `QueryClient` 组合为单一对象。在大多数项目中，它通过 `starter.createApiClient()` 创建一次，并在整个应用中共享。
 
-### `createApiClient`（core 层）
+### `createApiClient`（core）
 
-核心层工厂函数。在应用代码中，优先使用 `starter.createApiClient()`，它在此基础上增加了 Token 存储、消息反馈和未认证处理。
+core 层级的工厂函数。在应用代码中，优先使用 `starter.createApiClient()`，它在此基础上增加了令牌存储、消息反馈和未鉴权处理。
 
 ```ts
 import { createApiClient } from "@vef-framework-react/core";
@@ -156,7 +158,7 @@ const apiClient = createApiClient({
 
 ### `createQueryFn`
 
-创建带有自动 abort signal 注入的类型化查询函数。
+创建一个带有自动 abort signal 注入的类型化查询函数。
 
 ```ts
 export const findUserPage = apiClient.createQueryFn(
@@ -168,7 +170,7 @@ export const findUserPage = apiClient.createQueryFn(
 );
 ```
 
-返回的函数带有 `.key` 属性，用于 `queryKey` 数组：
+返回的函数带有 `.key` 属性，可用于 `queryKey` 数组：
 
 ```ts
 useQuery({
@@ -179,7 +181,7 @@ useQuery({
 
 ### `createMutationFn`
 
-创建类型化的变更函数。
+创建一个类型化的变更函数。
 
 ```ts
 export const createUser = apiClient.createMutationFn(
@@ -190,7 +192,7 @@ export const createUser = apiClient.createMutationFn(
 
 ### `fetchQuery` 和 `prefetchQuery`
 
-在 React 组件外部进行命令式数据获取：
+用于在 React 组件之外进行命令式数据获取：
 
 ```ts
 const userInfo = await apiClient.fetchQuery({
@@ -206,7 +208,7 @@ await apiClient.prefetchQuery({
 
 ### `executeMutation`
 
-在 React 组件外部进行命令式变更：
+用于在 React 组件之外进行命令式变更：
 
 ```ts
 await apiClient.executeMutation({
@@ -217,7 +219,7 @@ await apiClient.executeMutation({
 
 ### `QueryKey<TParams>`
 
-框架中使用的类型化查询键格式：
+框架中通用的类型化查询键格式：
 
 ```ts
 type QueryKey<TParams = never> = readonly [Key, ...If<IsNever<TParams>, [], [TParams]>];
@@ -225,8 +227,8 @@ type QueryKey<TParams = never> = readonly [Key, ...If<IsNever<TParams>, [], [TPa
 
 ### `MutationFunction<TData, TParams>`
 
-扩展了 TanStack 变更函数，增加了 `.key` 属性，用于 `useHasMutating` 匹配。
+在 TanStack 的变更函数基础上扩展了 `.key` 属性，用于 `useHasMutating` 中的匹配。
 
 ### `QueryFunction<TData, TParams, TPageParam>`
 
-扩展了 TanStack 查询函数，增加了 `.key` 属性，用于 `useHasFetching` 匹配。
+在 TanStack 的查询函数基础上扩展了 `.key` 属性，用于 `useHasFetching` 中的匹配。

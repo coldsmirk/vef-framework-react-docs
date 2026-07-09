@@ -1,5 +1,6 @@
 ---
-sidebar_position: 15
+title: "Loader"
+description: "A full-screen or inline loading indicator with an optional description."
 ---
 
 # Loader
@@ -60,7 +61,7 @@ export default function Page({ isLoading }: { isLoading: boolean }) {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `size` | `'small' \| 'default' \| 'large' \| number` | — | Spinner size |
+| `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | — | Spinner size |
 | `description` | `ReactNode` | — | Text shown below the spinner |
 | `descriptionSize` | `number` | — | Font size of the description in pixels |
 

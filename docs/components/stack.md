@@ -1,5 +1,6 @@
 ---
-sidebar_position: 12
+title: "Stack"
+description: "A vertical flex layout container. A convenience wrapper around Ant Design's `Flex` with `vertical` preset."
 ---
 
 # Stack
@@ -46,14 +47,14 @@ export default function Demo() {
 
 ## API
 
-`Stack` extends all `Flex` props except `vertical` and `orientation` (which are fixed to vertical), plus:
+`Stack` extends all `Flex` props except `vertical`, `orientation` (which are fixed to vertical), and `gap` (redefined below), plus:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | Gap between children |
+| `gap` | `'small' \| 'medium' \| 'middle' \| 'large' \| CSSProperties['gap']` | `'small'` | Gap between children |
 | `align` | `CSSProperties['alignItems']` | — | Cross-axis alignment |
 | `justify` | `CSSProperties['justifyContent']` | — | Main-axis alignment |
-| `wrap` | `CSSProperties['flexWrap']` | — | Flex wrap |
+| `wrap` | `boolean \| CSSProperties['flexWrap']` | — | Flex wrap |
 | `flex` | `CSSProperties['flex']` | — | Flex grow/shrink |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
@@ -62,4 +63,4 @@ export default function Demo() {
 ## Best Practices
 
 - Use `Stack` for vertical layouts and [`Center`](./center) for centered content.
-- Prefer named gap sizes (`'small'`, `'middle'`, `'large'`) over pixel values for consistency with the design system.
+- Prefer named gap sizes (`'small'`, `'medium'`, `'large'`) over pixel values for consistency with the design system.

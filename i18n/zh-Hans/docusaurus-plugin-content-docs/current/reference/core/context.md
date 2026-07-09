@@ -1,15 +1,15 @@
 ---
-sidebar_position: 5
-title: Context Provider
+title: 上下文提供者
+description: AppContextProvider、ApiClientProvider、DisabledProvider、createContextWithSelector 及其携带的通用类型。
 ---
 
-# Context Provider
+# 上下文提供者
 
-`@vef-framework-react/core` 提供了多个 React context provider 和 hook，构成应用的运行时上下文层。
+`@vef-framework-react/core` 提供了多个 React 上下文提供者和 Hook，构成应用运行时的上下文层。
 
 ## `AppContextProvider` 和 `useAppContext`
 
-VEF 应用上下文承载了组件和 hook 所依赖的全局配置。
+VEF 应用上下文携带组件和 Hook 所依赖的应用级配置。
 
 ```tsx
 import { AppContextProvider } from "@vef-framework-react/core";
@@ -17,7 +17,7 @@ import { AppContextProvider } from "@vef-framework-react/core";
 <AppContextProvider
   value={{
     hasPermission: token => permissionStore.has(token),
-    dataDictQueryFn: findDataDict,
+    dictionaryQueryFn: findDataDict,
     fileBaseUrl: "https://cdn.example.com"
   }}
 >
@@ -25,15 +25,15 @@ import { AppContextProvider } from "@vef-framework-react/core";
 </AppContextProvider>
 ```
 
-在应用代码中，通常通过 `starter.createApp().render()` 来设置，而不是直接使用。
+在应用代码中，通常通过 `starter.createApp().render()` 来完成配置，而不是直接使用。
 
 ### `AppContext`
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `hasPermission` | `(token: string) => boolean` | 权限检查函数 |
-| `dataDictQueryFn` | `QueryFunction<DataOption[], string>` | 数据字典查询函数 |
-| `fileBaseUrl` | `string` | 文件访问基础 URL |
+| `dictionaryQueryFn` | `QueryFunction<Record<string, DataOption[]>, string[]>` | 用于获取数据字典条目的查询函数；接收一个字典键数组，返回一个将每个键映射到其选项的记录 |
+| `fileBaseUrl` | `string` | 文件访问的基础 URL |
 
 ### `useAppContext`
 
@@ -64,20 +64,20 @@ import { useApiClient } from "@vef-framework-react/core";
 
 const apiClient = useApiClient();
 
-// 在事件处理器中命令式获取数据
+// Imperative fetch inside an event handler
 const data = await apiClient.fetchQuery({
   queryKey: [getUserInfo.key],
   queryFn: getUserInfo
 });
 ```
 
-在 `ApiClientProvider` 外部使用时会抛出错误。
+在 `ApiClientProvider` 之外使用会抛出异常。
 
 ---
 
 ## `DisabledProvider` 和 `useDisabled`
 
-通过组件树传播禁用状态。表单和操作组件内部使用此机制一次性禁用所有交互元素。
+在组件树中传播禁用状态，供表单和操作组件内部使用，以一次性禁用所有交互元素。
 
 ```tsx
 import { DisabledProvider } from "@vef-framework-react/core";
@@ -97,7 +97,7 @@ const disabled = useDisabled();
 
 ## `createContextWithSelector`
 
-创建支持选择器订阅的 React context，避免不必要的重渲染。
+创建一个基于选择器订阅的 React 上下文，以避免不必要的重新渲染。
 
 ```ts
 import { createContextWithSelector } from "@vef-framework-react/core";
@@ -107,7 +107,7 @@ const { Provider, useContext: useMyContext } = createContextWithSelector<MyState
   name: ""
 });
 
-// 在组件中
+// In component
 const count = useMyContext(state => state.count);
 ```
 
@@ -116,15 +116,15 @@ const count = useMyContext(state => state.count);
 | 类型 | 说明 |
 | --- | --- |
 | `AppContext` | VEF 应用上下文接口 |
-| `SelectorContextProviderProps<T>` | 选择器 context provider 的 props 类型 |
+| `SelectorContextProviderProps<T>` | 选择器上下文提供者的 Props |
 | `SelectorContextResult<T>` | `createContextWithSelector` 的返回类型 |
-| `UseSelectorContext<T>` | `createContextWithSelector` 返回的 hook 类型 |
+| `UseSelectorContext<T>` | `createContextWithSelector` 返回的 Hook 类型 |
 
 ---
 
 ## `checkPermission`
 
-在 React 组件外部进行命令式权限检查的工具函数。
+用于在 React 组件之外进行命令式权限检查的工具函数。
 
 ```ts
 import { checkPermission } from "@vef-framework-react/core";
@@ -142,8 +142,8 @@ const canCreate = checkPermission(
 type PermissionCheckMode = "any" | "all";
 ```
 
-- `"any"`：至少一个 token 匹配即通过
-- `"all"`：所有 token 都匹配才通过
+- `"any"`：只要有一个 token 匹配即通过
+- `"all"`：仅当所有 token 都匹配才通过
 
 ---
 
@@ -153,8 +153,8 @@ type PermissionCheckMode = "any" | "all";
 
 ```ts
 interface PaginationParams {
-  page?: number;  // 默认：1
-  size?: number;  // 默认：15
+  page?: number;  // default: 1
+  size?: number;  // default: 15
 }
 ```
 
@@ -169,7 +169,7 @@ interface PaginationResult<T> {
 
 ### `DataOption<T, M>`
 
-select、tree-select、cascader 等数据驱动组件的基础类型：
+Select、树选择、级联选择等数据驱动组件所使用的基础类型：
 
 ```ts
 type DataOption<T = {}, M = {}> = T & {
@@ -184,12 +184,10 @@ type DataOption<T = {}, M = {}> = T & {
 
 ### `DataOptionWithPinyin<T, M>`
 
-扩展了 `DataOption`，增加拼音字段以支持中文字符搜索：
+在 `DataOption` 基础上扩展（去掉 `children`，并以携带拼音的元素类型重新声明）拼音字段，用于中文字符检索：
 
 ```ts
-type DataOptionWithPinyin<T = {}, M = {}> = {
-  label: string;
-  value: Key;
+type DataOptionWithPinyin<T = {}, M = {}> = Except<DataOption<T, M>, "children"> & {
   labelPinyin: string;
   labelPinyinInitials: string;
   descriptionPinyin?: string;

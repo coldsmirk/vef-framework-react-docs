@@ -1,5 +1,6 @@
 ---
-sidebar_position: 51
+title: "Avatar"
+description: "Represents a user or entity with an image, icon, or text."
 ---
 
 # Avatar
@@ -46,9 +47,14 @@ export default function Demo() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `src` | `string` | — | Image source URL |
+| `src` | `ReactNode` | — | Image source (a URL string, or any node for a custom image element) |
+| `srcSet` | `string` | — | Image `srcset` for responsive images |
 | `icon` | `ReactNode` | — | Icon element |
-| `size` | `'large' \| 'small' \| 'default' \| number` | `'default'` | Avatar size |
+| `size` | `'large' \| 'medium' \| 'small' \| number \| ScreenSizeMap` | `'medium'` | Avatar size; `'middle'`/`'default'` are deprecated aliases for `'medium'`. Pass a `{ xs, sm, md, lg, xl, xxl }` breakpoint map for a responsive size |
 | `shape` | `'circle' \| 'square'` | `'circle'` | Avatar shape |
+| `gap` | `number` | — | Horizontal padding between text content and the avatar edge |
 | `alt` | `string` | — | Image alt text |
+| `draggable` | `boolean \| 'true' \| 'false'` | — | Whether the image is draggable |
+| `crossOrigin` | `'' \| 'anonymous' \| 'use-credentials'` | — | `crossOrigin` attribute for the image element |
+| `onClick` | `(e?) => void` | — | Click handler |
 | `onError` | `() => boolean` | — | Image load error handler |

@@ -1,6 +1,6 @@
 ---
-sidebar_position: 9
 title: Error Handling
+description: How business errors, network errors, and route-level fallbacks fit together across the request layer, router, and page code.
 ---
 
 # Error Handling
@@ -26,7 +26,7 @@ createApiClient({
 });
 ```
 
-These fields determine how the framework interprets request success, token refresh behavior, and whether the user should be sent back to login.
+These fields determine how the framework interprets request success, token refresh behavior, and whether the user should be sent back to login. See [HTTP and API Client](../reference/core/http-and-api.md) for the full `HttpClientOptions` field reference.
 
 ## Business Errors and Network Errors
 

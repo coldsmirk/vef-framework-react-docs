@@ -1,6 +1,6 @@
 ---
-sidebar_position: 4
 title: Testing Suggestions
+description: Which providers a VEF page test needs, and practical suggestions for keeping page tests focused.
 ---
 
 # Testing Suggestions

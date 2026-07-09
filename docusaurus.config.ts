@@ -126,7 +126,7 @@ const config: Config = {
             },
             {
               label: "API Reference",
-              to: "/docs/reference/api-reference",
+              to: "/docs/reference/overview",
             },
           ],
         },

@@ -1,6 +1,6 @@
 ---
-sidebar_position: 3
 title: Project Structure
+description: The standard src/ directory map for a VEF application, and how a typical page and API directory are split.
 ---
 
 # Project Structure
@@ -8,40 +8,32 @@ title: Project Structure
 VEF works best when projects are organized around page scenarios rather than around large shared buckets such as `components`, `hooks`, or `services`.  
 The sample application `playground` follows this structure and can be used as a reference.
 
-This page explains the standard directory map. The mandatory naming rules, placement rules, and forbidden patterns are defined in [Application Project Conventions](./application-project-conventions.md).
+This page explains the standard directory map. The mandatory naming rules, placement rules, and forbidden patterns are defined in [Project Conventions](../advanced/project-conventions.md).
 
 ## Recommended Layout
+
+This is a representative excerpt. The full mandatory `src/` layout — every top-level directory's contract — lives in [Project Conventions](../advanced/project-conventions.md).
 
 ```text
 src/
   api/
     index.ts
-    request.ts
   apis/
     auth/
     sys/
-    md/
-    pmr/
   helpers/
-    config.ts
   hooks/
-    use-upload/
   pages/
-    __root.tsx
+    __root.ts
     _common/
-      login.tsx
-      access-denied.tsx
+      login.ts
+      access-denied.ts
     _layout/
       route.ts
-      index/
-        route.tsx
       auth/
       sys/
-      md/
-      pmr/
   router/
     context.ts
-    router.gen.ts
   main.ts
 ```
 
@@ -109,7 +101,9 @@ When starting a project from scratch, these files are usually created first:
 2. `src/api/index.ts`
 3. `src/router/context.ts`
 4. `src/router/index.ts`
-5. `src/pages/__root.tsx`
+5. `src/pages/__root.ts`
 6. `src/pages/_layout/route.ts`
-7. `src/pages/_common/login.tsx`
-8. `src/pages/_common/access-denied.tsx`
+7. `src/pages/_common/login.ts`
+8. `src/pages/_common/access-denied.ts`
+
+With the directory map in place, [Routing & Layout](../guide/routing.md) is the natural next read.

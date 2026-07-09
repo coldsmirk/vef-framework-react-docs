@@ -342,7 +342,7 @@ function getHomeContent(): HomeContent {
           id: "homepage.paths.reference.description",
           message: "Useful when starting from a need and mapping it back to the right package and entry point."
         }),
-        to: "/docs/reference/api-reference"
+        to: "/docs/reference/overview"
       }
     ]
   };

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 20
+title: "Group"
+description: "A horizontal flex layout container. A convenience wrapper around Ant Design's `Flex` with horizontal preset."
 ---
 
 # Group
@@ -45,14 +46,14 @@ export default function Demo() {
 
 ## API
 
-`Group` extends all `Flex` props except `vertical` and `orientation` (fixed to horizontal), plus:
+`Group` extends all `Flex` props except `vertical`, `orientation` (fixed to horizontal), and `gap` (redefined below), plus:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | Gap between children |
+| `gap` | `'small' \| 'medium' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | Gap between children |
 | `align` | `CSSProperties['alignItems']` | — | Cross-axis alignment |
 | `justify` | `CSSProperties['justifyContent']` | — | Main-axis alignment |
-| `wrap` | `CSSProperties['flexWrap']` | — | Flex wrap |
+| `wrap` | `boolean \| CSSProperties['flexWrap']` | — | Flex wrap |
 | `ref` | `Ref<HTMLDivElement>` | — | DOM ref |
 
 ## Best Practices

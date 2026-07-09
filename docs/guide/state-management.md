@@ -1,6 +1,6 @@
 ---
-sidebar_position: 7
 title: State Management
+description: Choosing between Zustand-style stores, Jotai atoms, and state machines for a given piece of state.
 ---
 
 # State Management
@@ -11,7 +11,7 @@ VEF does not force a single state-management style. Instead, it exposes differen
 - Jotai atoms
 - XState state machines
 
-In most projects, the first two are used most often.
+In most projects, the first two are used most often. This page is a decision guide; the full API — every option, type export, and `PersistenceOptions` field — lives in [Store and Atom](../reference/core/store-and-atom.md).
 
 ## Quick Mapping
 
@@ -24,15 +24,19 @@ In most projects, the first two are used most often.
 
 ## Global Store: `createStore()`
 
+`createStore()` requires the state type to include a `name: string` field:
+
 ```ts
 import { createStore } from "@vef-framework-react/core";
 
 interface CounterState {
+  name: string;
   count: number;
   increment: () => void;
 }
 
 export const useCounterStore = createStore<CounterState>(set => ({
+  name: "counter",
   count: 0,
   increment: () => {
     set(state => {
@@ -43,6 +47,8 @@ export const useCounterStore = createStore<CounterState>(set => ({
 ```
 
 ## Persisted Store: `createPersistedStore()`
+
+`createPersistedStore()` does not require a `name` field on the state itself — the store's storage key comes from `persistenceOptions.name` instead:
 
 ```ts
 import { createPersistedStore } from "@vef-framework-react/core";
@@ -101,6 +107,8 @@ export const {
   })
 );
 ```
+
+Here the first argument (`"ConfigPage"`) is the store's name — used for the React context display name and dev-mode error messages — and is separate from any field on the state itself.
 
 ## Atom State
 

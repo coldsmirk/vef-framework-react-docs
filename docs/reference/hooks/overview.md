@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1
 title: Hooks Package Overview
+description: What @vef-framework-react/hooks covers — VEF-maintained hooks and re-exported third-party hooks.
 ---
 
 # Hooks Package Overview
@@ -13,4 +13,4 @@ title: Hooks Package Overview
 ## How to Read This Section
 
 - For permissions, data dictionaries, option transformation, and loading-state checks, start with [VEF Hooks](./vef-hooks.md).
-- For Mantine, AI SDK, or hotkey hooks that are re-exported by the framework, use [Upstream Hook Exports](./upstream-hooks.md).
+- For Mantine or hotkey hooks that are re-exported by the framework, use [Upstream Hook Exports](./upstream-hooks.md).

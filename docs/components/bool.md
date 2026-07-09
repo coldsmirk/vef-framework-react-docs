@@ -1,5 +1,6 @@
 ---
-sidebar_position: 10
+title: "Bool"
+description: "A boolean value display and input component with multiple visual variants."
 ---
 
 # Bool
@@ -81,7 +82,7 @@ export default function Demo() {
 | `trueLabel` | `ReactNode` | `'是'` | Label for `true` state |
 | `falseLabel` | `ReactNode` | `'否'` | Label for `false` state |
 | `disabled` | `boolean` | `false` | Disable interaction |
-| `size` | `'large' \| 'middle' \| 'small'` | — | Component size |
+| `size` | `'large' \| 'medium' \| 'small'` | — | Component size |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
 | `onChange` | `(value: boolean) => void` | — | Change handler |
@@ -101,4 +102,10 @@ export default function Demo() {
 - Use `variant="switch"` for settings toggles.
 - Use `variant="radio"` or `variant="radio-button"` in forms where both options should be visible.
 - Use `variant="checkbox"` with `children` for inline consent or feature flags.
-- In forms, use `form.Field.Bool` which handles value binding automatically.
+- In forms, use the [`Form`](./form) field component, which handles value binding automatically:
+
+```tsx
+<form.AppField name="isActive">
+  {(field) => <field.Bool label="Active" />}
+</form.AppField>
+```

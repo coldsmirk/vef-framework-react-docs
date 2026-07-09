@@ -1,5 +1,6 @@
 ---
-sidebar_position: 101
+title: "Page"
+description: "The primary container for business pages. Supports left/right aside panels, header, footer, action bar, and scrollable content."
 ---
 
 # Page
@@ -73,17 +74,24 @@ export default function UserPage() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `className` | `string` | — | Class name for the page container |
 | `margin` | `boolean` | `false` | Apply `var(--vef-spacing-md)` margin to the container |
 | `gap` | `Length` | `var(--vef-spacing-md)` | Gap between grid cells |
+| `mainClassName` | `string` | — | Class name for the main content area |
 | `leftAside` | `ReactNode` | — | Left aside content |
+| `leftAsideClassName` | `string` | — | Class name for the left aside |
 | `leftAsideWidth` | `AsideWidth` | `280` | Fixed width or resizable config |
 | `rightAside` | `ReactNode` | — | Right aside content |
+| `rightAsideClassName` | `string` | — | Class name for the right aside |
 | `rightAsideWidth` | `AsideWidth` | `280` | Fixed width or resizable config |
 | `header` | `ReactNode` | — | Header content |
+| `headerClassName` | `string` | — | Class name for the header |
 | `headerPosition` | `'inside' \| 'outside'` | `'inside'` | `'outside'` spans full width including asides |
 | `footer` | `ReactNode` | — | Footer content |
+| `footerClassName` | `string` | — | Class name for the footer |
 | `footerPosition` | `'inside' \| 'outside'` | `'inside'` | `'outside'` spans full width including asides |
 | `actionBar` | `ReactNode` | — | Action bar content |
+| `actionBarClassName` | `string` | — | Class name for the action bar |
 | `scrollable` | `boolean` | — | Whether main content is scrollable |
 | `scrollMargin` | `boolean` | `false` | Auto margin for scrollbar spacing (requires `scrollable`) |
 
@@ -106,3 +114,5 @@ import { useViewportHeight } from '@vef-framework-react/components';
 
 const height = useViewportHeight();
 ```
+
+> `useViewportHeight` throws if called outside a `<Page scrollable>` — it reads a context value that only `Page` provides, and only when `scrollable` is `true`.

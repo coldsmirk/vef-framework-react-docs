@@ -1,80 +1,65 @@
 ---
-sidebar_position: 5
-title: Store、常量与类型
+title: Store 与类型
+description: app/tab/theme 三个 Zustand store，以及 @vef-framework-react/starter 导出的领域、用户和路由类型。
 ---
 
-# Store、常量与类型
+# Store 与类型
 
 ## Store 导出
 
-| 导出 | 用途 |
-| --- | --- |
-| `useAppStore` | 登录状态、菜单、权限点、用户信息等应用状态 |
-| `useTabStore` | 标签页状态 |
-| `useThemeStore` | 主题状态 |
+- `useAppStore` —— 认证状态、当前用户信息、菜单映射与权限令牌；持久化（`isAuthenticated` / `custom` / `authTokens` 在刷新后保留）。
+- `useTabStore` —— 支撑多标签页布局的已打开标签列表；持久化。
+- `useThemeStore` —— 配色方案、语义主题颜色、菜单布局模式与布局开关；持久化。
 
-对应类型:
+三者均通过 `createPersistedStore` 创建（参见 [Store 与 Atom](../core/store-and-atom.md)）——它们的状态类型不需要 `name` 字段，存储键改由持久化选项提供。
 
-| 类型 | 用途 |
-| --- | --- |
-| `AppState` | 应用 store 状态 |
-| `Tab` / `TabState` | 标签页类型 |
-| `ColorScheme` / `ThemeColors` / `ThemeState` | 主题状态类型 |
+相关类型:
 
-## 常量导出
+- `AppState`
+- `Tab`
+- `TabState`
+- `ColorScheme` —— `"system" | "light" | "dark"`
+- `ThemeColors` —— `Record<SemanticColor, string>`
+- `MenuLayoutMode` —— `"vertical" | "horizontal" | "mixed"`
+- `ThemeState`
 
-| 常量 | 用途 |
-| --- | --- |
-| `RELOAD_PAGE_EVENT` | 刷新页面事件名 |
-| `ACCESS_DENIED_EVENT` | 无权限事件名 |
-| `UNAUTHENTICATED_EVENT` | 未认证事件名 |
-| `STORAGE_KEY_PREFIX_STORE` / `STORAGE_KEY_SUFFIX_STORE` | store 存储 key 片段 |
-| `SYMBOL_PAGINATION` | 分页参数内部 key |
-| `SYMBOL_SORT` | 排序参数内部 key |
+## API 与领域类型
 
-## API / 领域类型
+实体标识:
 
-实体身份:
+- `Entity<TId = string>` —— 仅携带 `id` 的基础接口
 
-| 类型 | 推荐场景 |
-| --- | --- |
-| `Entity<TId = string>` | 只携带 `id` 的基础实体接口 |
+独立的审计字段接口（用于组合主键或非 `id` 键控记录）:
 
-独立的审计字段接口（适合复合主键或非 `id` 主键的记录）:
+- `CreationTracked<TId, TDate>` —— `createdAt` / `createdBy` / `createdByName`
+- `FullTracked<TId, TDate>` —— 在 `CreationTracked` 基础上扩展 `updatedAt` / `updatedBy` / `updatedByName`
 
-| 类型 | 推荐场景 |
-| --- | --- |
-| `CreationTracked<TId, TDate>` | `createdAt` / `createdBy` / `createdByName` |
-| `FullTracked<TId, TDate>` | 继承 `CreationTracked`，再加 `updatedAt` / `updatedBy` / `updatedByName` |
+组合实体接口:
 
-组合后的实体接口:
-
-| 类型 | 推荐场景 |
-| --- | --- |
-| `CreationAuditedEntity<TId, TDate>` | `Entity` + `CreationTracked` |
-| `FullAuditedEntity<TId, TDate>` | `Entity` + `FullTracked` |
+- `CreationAuditedEntity<TId, TDate>` —— `Entity` + `CreationTracked`
+- `FullAuditedEntity<TId, TDate>` —— `Entity` + `FullTracked`
 
 批量参数辅助类型:
 
-| 类型 | 推荐场景 |
-| --- | --- |
-| `Many<T>` | 包一层 `list: T[]`，用于批量新增/更新参数 |
+- `Many<T>` —— 为批量创建/更新负载包装一个 `list: T[]`
 
-## 用户和菜单类型
+## 用户与菜单类型
 
-| 类型 | 推荐场景 |
-| --- | --- |
-| `Gender` | 用户性别枚举 |
-| `UserMenuType` | 菜单节点类型 |
-| `UserMenu` | 菜单树节点 |
-| `UserInfo` | 当前登录用户，`details` 通过 `Register` 扩展点定型（见下） |
-| `Register` | 空接口扩展点，项目通过 `declare module` 收紧 `UserInfo['details']` |
-| `UserDetails` | 当 `Register` 未扩展时 `details` 的兜底类型（`Record<string, unknown>`） |
-| `OrderSpec` | 排序字段描述 |
+- `Gender` —— `"male" | "female" | "unknown"`
+- `UserMenuType` —— `"directory" | "menu" | "view" | "report"`，通过 `LiteralUnion` 支持项目自定义扩展
+- `UserMenu` —— `type` / `path` / `name` / `icon?` / `meta?` / `children?`
+- `UserMenuMeta` —— 绑定到菜单路由的 `params?: Record<string, string>` 与 `search?: Record<string, string>`，以及在 `Register['menuMeta']` 上增补的任意键
+- `UserInfo` —— `details` 类型通过 `Register` 增补点确定（见下文）
+- `AppCustomState` —— `AppState.custom` 的形状；默认为 `AnyObject`，可经 `Register['appCustomState']` 收窄
+- `ChallengeSpec` —— `{ data?: unknown; response: unknown }`，一种登录挑战类型的契约
+- `ResolvedChallenges` —— 从 `Register['challenges']` 解析出的挑战类型注册表，未增补时为开放的 `Record<string, ChallengeSpec>`
+- `Register` —— 空接口，各项目通过 `declare module` 增补，用于细化 `UserInfo['details']`、`AppState.custom`、`UserMenuMeta` 以及登录挑战注册表
+- `UserDetails` —— 当 `Register['userDetails']` 未被增补时的兜底形状（`Record<string, unknown>`）
+- `OrderSpec` —— `{ column: string; direction: "asc" | "desc" }`
 
 ### 扩展 `UserInfo.details`
 
-`UserInfo.details` 的具体形状通过 `Register` 接口解析，参考的是 `@tanstack/react-query` 给 `mutationMeta` 用的同款模式。在项目里声明一次，整个应用里 `UserInfo` 流经的地方就都能拿到强类型:
+`UserInfo.details` 通过 `Register` 接口解析，模式与 `@tanstack/react-query` 中 `mutationMeta` 的用法一致。在项目中增补一次，即可在 `UserInfo` 流经应用的所有位置获得强类型的用户属性:
 
 ```ts
 // src/types/vef-augment.d.ts
@@ -88,17 +73,13 @@ declare module "@vef-framework-react/starter" {
 }
 ```
 
-声明之后，`userInfo.details.department` 在整个应用里都会被推断成 `string`，无需 fork 框架。
+完成此声明后，`userInfo.details.department` 在整个应用中都会被类型化为 `string`，且无需 fork 该框架。同一个 `Register` 接口也接受上述其他扩展点对应的 `appCustomState`、`menuMeta` 和 `challenges` 成员。
 
 ## 路由类型
 
-| 类型 | 推荐场景 |
-| --- | --- |
-| `RouterContext` | 根路由与 router 上下文类型 |
+- `RouterContext`
 
-## 查询辅助
+## Query 辅助函数
 
-| 导出 | 用途 |
-| --- | --- |
-| `extractQueryParams` | 从查询对象里拆出业务参数、分页和排序 |
-| `noopMutationFn` | 需要占位 mutation 时的空实现 |
+- `extractQueryParams`
+- `noopMutationFn`

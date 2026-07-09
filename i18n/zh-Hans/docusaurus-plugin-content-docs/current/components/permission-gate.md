@@ -1,17 +1,18 @@
 ---
-sidebar_position: 16
+title: "PermissionGate"
+description: "根据当前用户的权限有条件地渲染内容。"
 ---
 
-# PermissionGate 权限门控
+# PermissionGate
 
-根据当前用户权限条件渲染内容。
+根据当前用户的权限有条件地渲染内容。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design 的一部分。
 
 ## 何时使用
 
 - 根据权限令牌显示或隐藏 UI 元素。
-- 为有权限和无权限的用户渲染不同内容。
+- 为拥有和不拥有特定权限的用户渲染不同内容。
 
 ## 基础用法
 
@@ -20,63 +21,63 @@ import { PermissionGate } from '@vef-framework-react/components';
 
 export default function Demo() {
   return (
-    <PermissionGate permTokens="user:create">
-      <Button type="primary">新建用户</Button>
+    <PermissionGate requiredPermissions="user:create">
+      <Button type="primary">Create User</Button>
     </PermissionGate>
   );
 }
 ```
 
-如果用户没有 `user:create` 权限，则不渲染任何内容。
+如果用户没有 `user:create` 权限，则不会渲染任何内容。
 
-## 多权限（任意一个）
+## 多个权限（任一满足）
 
 ```tsx
-<PermissionGate permTokens={['user:edit', 'user:admin']} checkMode="any">
-  <Button>编辑</Button>
+<PermissionGate requiredPermissions={['user:edit', 'user:admin']} checkMode="any">
+  <Button>Edit</Button>
 </PermissionGate>
 ```
 
-用户拥有列表中**任意一个**权限时渲染。
+只要用户拥有列出权限中的**任意一个**，即会渲染。
 
-## 多权限（全部满足）
+## 多个权限（全部满足）
 
 ```tsx
-<PermissionGate permTokens={['report:view', 'report:export']} checkMode="all">
-  <Button>导出报表</Button>
+<PermissionGate requiredPermissions={['report:view', 'report:export']} checkMode="all">
+  <Button>Export Report</Button>
 </PermissionGate>
 ```
 
-用户拥有列表中**所有**权限时才渲染。
+只有当用户拥有**全部**列出的权限时才会渲染。
 
-## 渲染 Prop 模式
+## 渲染属性模式
 
 ```tsx
-<PermissionGate permTokens="admin:access">
+<PermissionGate requiredPermissions="admin:access">
   {(hasPermission) => (
     <Button disabled={!hasPermission}>
-      管理后台
+      Admin Panel
     </Button>
   )}
 </PermissionGate>
 ```
 
-使用渲染 Prop 可以在无权限时禁用（而非隐藏）元素。
+使用渲染属性可以有条件地禁用（而非隐藏）元素。
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `permTokens` | `string \| string[]` | — | 要检查的权限令牌 |
-| `checkMode` | `'any' \| 'all'` | `'any'` | 多个令牌的检查方式 |
-| `children` | `ReactNode \| (hasPermission: boolean) => ReactNode` | — | 要渲染的内容 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `requiredPermissions` | `string \| string[]` | — | 待校验的权限令牌 |
+| `checkMode` | `'any' \| 'all'` | `'any'` | 多个令牌的校验方式 |
+| `children` | `ReactNode \| (hasPermission: boolean) => ReactNode` | — | 待渲染的内容 |
 
-## 权限解析原理
+## 权限解析方式
 
-`PermissionGate` 从 VEF 核心权限 Store（通过 `@vef-framework-react/core` 配置）读取当前用户的权限列表。权限令牌是由应用自定义的任意字符串。
+`PermissionGate` 从 VEF core 的权限存储（通过 `@vef-framework-react/core` 配置）中读取当前用户的权限列表。权限令牌是由你的应用自行定义的任意字符串。
 
 ## 最佳实践
 
 - 使用 `PermissionGate` 隐藏整个 UI 区块，而不仅仅是单个按钮。
-- 需要异步 loading 和确认对话框的按钮，使用 `OperationButton`（`ActionButton` + `PermissionGate` 的组合）。
-- 保持权限令牌命名在前后端一致（推荐 `资源:操作` 格式，如 `user:create`）。
+- 对于同时需要异步加载和确认对话框的按钮，使用 `OperationButton`（它结合了 `ActionButton` 和 `PermissionGate`）。
+- 保持前后端的权限令牌命名一致（例如采用 `resource:action` 格式）。

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 9
+title: "ActionGroup"
+description: "Renders a group of action buttons from a declarative configuration array. Supports context-aware button visibility and permission checks."
 ---
 
 # ActionGroup
@@ -105,7 +106,7 @@ const buttons: ActionButtonConfig<User>[] = [
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `buttons` | `ActionButtonConfig<TContext>[]` | required | Button configuration array |
-| `size` | `'large' \| 'middle' \| 'small'` | — | Size applied to all buttons |
+| `size` | `'large' \| 'medium' \| 'small'` | — | Size applied to all buttons (`'middle'` is a deprecated alias for `'medium'`) |
 | `context` | `TContext` | — | Context value passed to button callbacks |
 | `renderWrapper` | `(buttonsNode: ReactNode) => ReactNode` | — | Custom wrapper renderer |
 
@@ -123,7 +124,7 @@ const buttons: ActionButtonConfig<User>[] = [
 | `confirmMode` | `'popover' \| 'dialog'` | `'popover'` | Confirm UI style |
 | `confirmTitle` | `ReactNode` | — | Confirm title |
 | `confirmDescription` | `ReactNode` | — | Confirm description |
-| `permTokens` | `string \| string[]` | — | Required permission tokens |
+| `requiredPermissions` | `string \| string[]` | — | Required permission tokens |
 | `checkMode` | `'any' \| 'all'` | `'any'` | Permission check mode |
 | `onClick` | `(ctx?: TContext) => Awaitable<void>` | — | Click handler |
 | `icon` | `ReactNode` | — | Button icon |
@@ -132,4 +133,4 @@ const buttons: ActionButtonConfig<User>[] = [
 
 - Define button configs outside the component to avoid re-creation on each render.
 - Use `hidden` (not `disabled`) to remove buttons that don't apply to a record.
-- Use `permTokens` to automatically hide buttons the user lacks permission for.
+- Use `requiredPermissions` to automatically hide buttons the user lacks permission for.

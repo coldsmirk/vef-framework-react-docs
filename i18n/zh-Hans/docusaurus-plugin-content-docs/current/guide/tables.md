@@ -1,21 +1,20 @@
 ---
-sidebar_position: 5
 title: 表格
+description: 何时使用纯展示型的 Table，何时使用与查询集成的 ProTable。
 ---
 
 # 表格
 
-VEF 里有两层表格能力，都从 `@vef-framework-react/components` 导出:
+VEF 有两层表格能力，都从 `@vef-framework-react/components` 导出：
 
-1. `Table` — 仅做数据展示
-2. `ProTable` — 页面级表格，已经把查询、分页、选中、列设置串起来
+1. `Table` —— 仅做展示
+2. `ProTable` —— 页面级表格，已经把查询、分页、选择和列设置集成在一起
 
-如果你只是展示数据，用 `Table` 即可。  
-如果你要接查询、分页、列设置、操作列、选择状态，优先用 `ProTable`。
+在两者之间做选择，归结为一个问题：这张表格是自己负责数据请求，还是页面已经拿到了行数据？
 
-## `Table` 适合什么场景
+## 什么时候 `Table` 就够了
 
-配套工具:
+当数据只需要展示——行数据已经存在于组件中（来自父级查询、计算值，或一份简单的静态列表），且表格本身不承担请求或分页职责时，使用 `Table`。相关辅助工具：
 
 - `usePaginationProps()`
 - `pageSizeOptions`
@@ -34,16 +33,9 @@ const pagination = usePaginationProps({
 <Table columns={columns} dataSource={rows} pagination={pagination} />;
 ```
 
-## `ProTable` 是页面级表格
+## 什么时候 `ProTable` 更合适
 
-`ProTable` 把这些事情接在一起了:
-
-- 查询函数
-- 分页或非分页模式
-- 选中行状态
-- 列显示设置
-- 操作列
-- header / footer 插槽
+当需要查询集成、分页、列设置、操作列或选择状态时，使用 `ProTable`。`ProTable` 把查询函数、分页或非分页模式、行选择状态、列设置、操作列以及页头/页脚插槽整合进了一个组件：
 
 ```tsx
 import { ProTable } from "@vef-framework-react/components";
@@ -57,22 +49,11 @@ import { ProTable } from "@vef-framework-react/components";
 />;
 ```
 
-## 最常用的 `ProTable` 参数
+由于 `queryFn` 与 [数据请求](./data-fetching.md) 中使用的形态相同，一个为 `useQuery()` 编写的查询函数通常无需改动即可直接支撑 `ProTable`。
 
-| 参数 | 作用 |
-| --- | --- |
-| `columns` | 列定义 |
-| `queryFn` | 数据查询函数 |
-| `isPaginated` | 是否分页，默认分页 |
-| `rowKey` | 行主键 |
-| `queryParams` | 附加查询参数 |
-| `rowSelection` | 开启行选择 |
-| `columnSettings` | 列设置与持久化 |
-| `operationColumn` | 行级操作列 |
-| `header` | 表格头部插槽 |
-| `footer` | 表格底部插槽 |
+完整的属性表——包括 `columnSettings`、`operationColumn`、`rowSelection` 等——见 [ProTable](../components/pro-table.md)。
 
-## 列设置持久化
+## 持久化列设置
 
 ```tsx
 <ProTable
@@ -81,7 +62,7 @@ import { ProTable } from "@vef-framework-react/components";
 />
 ```
 
-不需要时:
+如果不需要：
 
 ```tsx
 <ProTable columnSettings={false} ... />
@@ -89,15 +70,8 @@ import { ProTable } from "@vef-framework-react/components";
 
 ## `ProTableSubscriber`
 
-如果 footer 或某个局部按钮只需要读取表格内部状态，不要自己再绕一层外部状态管理。直接用 `ProTableSubscriber` 订阅就行。
+当页脚内容或某个局部操作只需要读取表格内部状态时，`ProTableSubscriber` 通常比引入额外的外部状态更合适。它的 API 见 [ProTable](../components/pro-table.md)。
 
-## `ProTable` 和 `CrudPage` 的关系
+## `ProTable` 与 `CrudPage`
 
-`CrudPage` 本质上是:
-
-- `Page`
-- `Crud`
-- `ProTable`
-- 表单弹窗或抽屉
-
-的一层组合封装。
+从概念上讲，`CrudPage` 就是把 `Page` 加上 `Crud`（`ProSearch` + `ProTable` + 场景表单）组合成的一个页面级抽象。如果页面在表格之上还需要搜索、表单和删除流程，直接使用 `CrudPage`，而不是手动组合 `ProTable`——见 [CRUD 页面](./crud.md)。

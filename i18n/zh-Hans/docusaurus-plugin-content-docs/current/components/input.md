@@ -1,19 +1,20 @@
 ---
-sidebar_position: 3
+title: "Input"
+description: "用于获取用户单行文本输入的基础控件。"
 ---
 
-# Input 输入框
+# Input
 
-通过鼠标或键盘输入内容的基础表单域。
+用于获取用户单行文本输入的基础控件。
 
-> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Input](https://ant.design/components/input-cn/)
+> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Input](https://ant.design/components/input/)
 
 ## 何时使用
 
 - 需要用户输入单行文本时。
-- 多行文本使用 `TextArea`。
-- 密码输入使用 `Password`。
-- 搜索场景使用 `Search`。
+- 多行输入请使用 `TextArea`。
+- 密码输入请使用 `Password`。
+- 搜索场景请使用 `Search`。
 
 ## 基础用法
 
@@ -21,11 +22,11 @@ sidebar_position: 3
 import { Input } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <Input placeholder="基础用法" />;
+  return <Input placeholder="Basic usage" />;
 }
 ```
 
-## 三种形态
+## 变体
 
 ```tsx
 import { Input, Space } from '@vef-framework-react/components';
@@ -33,15 +34,15 @@ import { Input, Space } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      <Input placeholder="线框型（默认）" />
-      <Input variant="filled" placeholder="填充型" />
-      <Input variant="borderless" placeholder="无边框" />
+      <Input placeholder="Outlined (default)" />
+      <Input variant="filled" placeholder="Filled" />
+      <Input variant="borderless" placeholder="Borderless" />
     </Space>
   );
 }
 ```
 
-## 前缀/后缀
+## 前缀 / 后缀
 
 ```tsx
 import { Input } from '@vef-framework-react/components';
@@ -51,8 +52,8 @@ export default function Demo() {
   return (
     <Input
       prefix={<Search size={14} />}
-      suffix={<span style={{ color: '#aaa' }}>元</span>}
-      placeholder="输入金额"
+      suffix={<span style={{ color: '#aaa' }}>USD</span>}
+      placeholder="Enter amount"
     />
   );
 }
@@ -64,7 +65,7 @@ export default function Demo() {
 import { Input } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <Input.Password placeholder="请输入密码" />;
+  return <Input.Password placeholder="Enter password" />;
 }
 ```
 
@@ -77,7 +78,7 @@ export default function Demo() {
   return (
     <Input.TextArea
       rows={4}
-      placeholder="请输入描述"
+      placeholder="Enter description"
       maxLength={200}
       showCount
     />
@@ -93,7 +94,7 @@ import { Input } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Input.Search
-      placeholder="搜索..."
+      placeholder="Search..."
       onSearch={(value) => console.log(value)}
       style={{ width: 300 }}
     />
@@ -115,44 +116,50 @@ export default function Demo() {
 
 ### Input
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `value` | `string` | — | 输入框内容（受控） |
-| `defaultValue` | `string` | — | 初始内容（非受控） |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `value` | `string` | — | 输入框的值（受控） |
+| `defaultValue` | `string` | — | 初始值（非受控） |
 | `placeholder` | `string` | — | 占位文本 |
-| `disabled` | `boolean` | `false` | 禁用状态 |
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | 控件大小 |
-| `variant` | `'outlined' \| 'filled' \| 'borderless'` | `'outlined'` | 形态变体 |
-| `prefix` | `ReactNode` | — | 带有前缀图标的输入框 |
-| `suffix` | `ReactNode` | — | 带有后缀图标的输入框 |
-| `addonBefore` | `ReactNode` | — | 带标签的输入框，设置前置标签 |
-| `addonAfter` | `ReactNode` | — | 带标签的输入框，设置后置标签 |
-| `allowClear` | `boolean \| { clearIcon: ReactNode }` | `false` | 可以点击清除图标删除内容 |
-| `maxLength` | `number` | — | 最大长度 |
-| `showCount` | `boolean` | `false` | 是否展示字数 |
-| `status` | `'error' \| 'warning'` | — | 设置校验状态 |
-| `onChange` | `(e: ChangeEvent) => void` | — | 输入框内容变化时的回调 |
-| `onPressEnter` | `(e: KeyboardEvent) => void` | — | 按下回车的回调 |
+| `disabled` | `boolean` | `false` | 禁用输入框 |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | 输入框尺寸（`'middle'` 是 `'medium'` 的废弃别名） |
+| `variant` | `'outlined' \| 'filled' \| 'borderless'` | `'outlined'` | 视觉样式变体 |
+| `prefix` | `ReactNode` | — | 输入框前置内容 |
+| `suffix` | `ReactNode` | — | 输入框后置内容 |
+| `addonBefore` | `ReactNode` | — | 输入框前置标签 |
+| `addonAfter` | `ReactNode` | — | 输入框后置标签 |
+| `allowClear` | `boolean \| { clearIcon: ReactNode }` | `false` | 显示清除按钮 |
+| `maxLength` | `number` | — | 最大字符数 |
+| `showCount` | `boolean` | `false` | 显示字数统计 |
+| `status` | `'error' \| 'warning'` | — | 校验状态 |
+| `onChange` | `(e: ChangeEvent) => void` | — | 内容变化回调 |
+| `onPressEnter` | `(e: KeyboardEvent) => void` | — | 回车键回调 |
 
 ### Input.TextArea
 
-继承 `Input` 所有属性，另有：
+继承所有 `Input` 属性，另有：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
 | `rows` | `number` | — | 行数 |
-| `autoSize` | `boolean \| { minRows, maxRows }` | `false` | 自适应内容高度 |
+| `autoSize` | `boolean \| { minRows, maxRows }` | `false` | 高度自适应 |
 
 ### Input.Password
 
-继承 `Input` 所有属性，另有：
+继承所有 `Input` 属性，另有：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `visibilityToggle` | `boolean \| { visible, onVisibleChange }` | `true` | 是否显示切换按钮 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `visibilityToggle` | `boolean \| { visible, onVisibleChange }` | `true` | 显示/隐藏切换开关 |
 
 ## 最佳实践
 
-- 始终为 `Input` 配置 `label` 或在 `Form.Item` 中使用，以满足无障碍要求。
-- 搜索类输入框使用 `allowClear` 提升用户体验。
-- 在表单中优先使用 `useForm` 的字段组件（`form.Field.Input`、`form.Field.TextArea` 等），可自动处理校验。
+- 始终为 `Input` 搭配 `label`，或在 `Form.Item` 中使用，以满足无障碍访问要求。
+- 搜索类输入框使用 `allowClear` 以提升用户体验。
+- 表单场景下优先使用 [`Form`](./form) 的字段组件，它会自动处理取值绑定和校验：
+
+```tsx
+<form.AppField name="username">
+  {(field) => <field.Input label="Username" />}
+</form.AppField>
+```

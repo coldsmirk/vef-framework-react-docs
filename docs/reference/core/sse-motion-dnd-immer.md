@@ -1,6 +1,6 @@
 ---
-sidebar_position: 6
 title: SSE, Motion, DnD, and Immer
+description: SseClient options and events, plus the motion, drag-and-drop, and Immer re-exports.
 ---
 
 # SSE, Motion, DnD, and Immer

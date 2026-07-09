@@ -1,135 +1,101 @@
 ---
-sidebar_position: 1
+title: "Components Overview"
+description: "The single catalog of every component exported by @vef-framework-react/components, grouped by purpose."
 ---
 
 # Components Overview
 
-`@vef-framework-react/components` is the UI component library for VEF Framework. It is built on top of [Ant Design 6.x](https://ant.design/components/overview/) and extends it with additional layout primitives, permission-aware components, and form integration utilities.
+`@vef-framework-react/components` is the UI component library for VEF Framework. It is built on top of [Ant Design 6.x](https://ant.design/components/overview/) and extends it with layout primitives, permission-aware components, a CRUD stack, and a type-safe form system — while re-exporting the rest of Ant Design unchanged.
 
-## Component Categories
+Every component lives in exactly one of the groups below. Components marked **VEF** are original or meaningfully enhanced; everything under [Ant Design Pass-Through](./antd-pass-through.md) is a thin, behavior-identical re-export.
 
-### Ant Design Pass-through
-
-Most Ant Design components are re-exported directly from `antd`. You can use them exactly as documented on the [Ant Design website](https://ant.design/components/overview/), with the same props and APIs.
+## Layout
 
 | Component | Description |
 |-----------|-------------|
-| `Button` | Trigger operations |
-| `Input` | Text input field |
-| `Select` | Dropdown selector |
-| `Table` | Data table (with VEF enhancements) |
-| `Form` | Data entry form (replaced by `useForm`) |
-| `Modal` | Dialog overlay |
-| `DatePicker` | Date / date-range picker |
-| `TimePicker` | Time / time-range picker |
-| `Checkbox` | Checkbox input |
-| `Radio` | Radio input |
-| `Switch` | Toggle switch |
-| `Slider` | Slider input |
-| `Upload` | File upload |
-| `Tree` | Tree view |
-| `TreeSelect` | Tree-based selector |
-| `Cascader` | Cascading selector |
-| `AutoComplete` | Auto-complete input |
-| `Mentions` | Mentions input |
-| `ColorPicker` | Color picker |
-| `Rate` | Star rating |
-| `Transfer` | Transfer list |
-| `Avatar` | User avatar |
-| `Badge` | Status badge |
-| `Tag` | Label tag |
-| `Tooltip` | Hover tooltip |
-| `Popover` | Click popover |
-| `Popconfirm` | Confirmation popover |
-| `Dropdown` | Dropdown menu |
-| `Menu` | Navigation menu |
-| `Tabs` | Tab navigation |
-| `Collapse` | Collapsible panel |
-| `Card` | Content card |
-| `List` | Data list |
-| `Descriptions` | Key-value descriptions |
-| `Statistic` | Numeric statistic |
-| `Progress` | Progress indicator |
-| `Spin` | Loading spinner |
-| `Skeleton` | Loading skeleton |
-| `Alert` | Alert message |
-| `Result` | Result page |
-| `Empty` | Empty state |
-| `Pagination` | Pagination control |
-| `Steps` | Step indicator |
-| `Timeline` | Timeline |
-| `Breadcrumb` | Breadcrumb navigation |
-| `Anchor` | Anchor links |
-| `Affix` | Sticky element |
-| `Divider` | Visual divider |
-| `Space` | Spacing wrapper |
-| `Flex` | Flex layout |
-| `Row` / `Col` | Grid layout |
-| `Splitter` | Resizable panels |
-| `Drawer` | Slide-in panel |
-| `FloatButton` | Floating action button |
-| `Image` | Image with preview |
-| `Calendar` | Calendar view |
-| `Carousel` | Carousel / slideshow |
-| `QRCode` | QR code generator |
-| `Watermark` | Watermark overlay |
-| `Tour` | Guided tour |
-| `Segmented` | Segmented control |
-| `InputNumber` | Numeric input |
-| `Typography` | Text / Title / Paragraph / Link |
-| `ConfigProvider` | Global config provider |
+| [`Grid`](./grid.md) | Responsive auto-fill grid with collapse support |
+| [`Stack`](./stack.md) | Vertical flex stack layout |
+| [`Center`](./center.md) | Centered flex layout |
+| [`Group`](./group.md) | Horizontal flex layout |
+| [`ScrollArea`](./scroll-area.md) | Custom scrollbar area with scroll event callbacks |
 
-### VEF-specific Components
-
-These components are unique to VEF Framework and are not part of Ant Design.
+## Page & CRUD
 
 | Component | Description |
 |-----------|-------------|
-| [`ActionButton`](./action-button) | Button with built-in async loading and confirm dialog |
-| [`ActionGroup`](./action-group) | Renders a group of action buttons from a config array |
-| [`OperationButton`](./operation-button) | `ActionButton` + `PermissionGate` combined |
-| [`Bool`](./bool) | Boolean value display/input with multiple variants |
-| [`Grid`](./grid) | Responsive auto-fill grid with collapse support |
-| [`Stack`](./stack) | Vertical flex stack layout |
-| [`Center`](./center) | Centered flex layout |
-| [`Group`](./group) | Horizontal flex layout |
-| [`ScrollArea`](./scroll-area) | Custom scrollbar area with scroll event callbacks |
-| [`Loader`](./loader) | Full-screen or inline loading indicator |
-| [`PermissionGate`](./permission-gate) | Conditionally renders children based on permissions |
-| [`IconButton`](./icon-button) | Icon-only button with tooltip |
-| [`DynamicIcon`](./dynamic-icon) | Renders a Lucide icon by name string |
-| [`Icon`](./icon) | Renders a Lucide icon component passed as a prop |
-| [`ConfigProvider`](./config-provider) | VEF global config provider with dark mode & theme |
-| [`Chart`](./chart) | ECharts wrapper with theme and chart linking |
-| [`CodeHighlighter`](./code-highlighter) | Syntax-highlighted code block |
-| [`Keyboard`](./keyboard) | Keyboard shortcut display |
+| [`Page`](./page.md) | Primary business-page container with aside panels, header, and footer |
+| [`FlexCard`](./flex-card.md) | Semantic `Card` wrapper for split-card and tree-table layouts |
+| [`FormModal`](./form-modal.md) | Modal that combines form state, mutation, and submit/reset actions |
+| [`FormDrawer`](./form-drawer.md) | Same as `FormModal`, rendered as a side drawer |
+| [`ProSearch`](./pro-search.md) | Search-form container with basic/advanced areas and search/reset actions |
+| [`ProTable`](./pro-table.md) | Page-level table with built-in query, pagination, row selection, and column settings |
+| [`Table`](./table.md) | The underlying data table, with `flexHeight` and pagination helpers |
+| [`Crud` and `CrudPage`](./crud.md) | Combines `ProSearch` + `ProTable` + scene forms + delete mutations into one CRUD state model |
+| [`EditableTable`](./editable-table.md) | Controlled, inline-editable table — editing, adding, and deleting rows are operations on a value array |
 
-### Animation Components
+## Forms
 
 | Component | Description |
 |-----------|-------------|
-| [`FlipText`](./flip-text) | Character flip animation |
-| [`SparklesText`](./sparkles-text) | Text with sparkle particle effects |
-| [`SplitText`](./split-text) | GSAP-powered text split animation |
-| [`TypingAnimation`](./typing-animation) | Typewriter effect animation |
+| [`Form`](./form.md) | Type-safe form system built on [`@tanstack/react-form`](https://tanstack.com/form) (`useForm`, `form.AppField`, field components) |
+| [`Bool`](./bool.md) | Boolean value display/input with switch, radio, radio-button, and checkbox variants |
+| [`Select`](./select.md) | Dropdown selector, enhanced with `useDataOptionsSelect` for remote/dictionary options |
+| [`Tree`](./tree.md) | Tree view, enhanced with `useDataOptionsTree` |
+| [`TreeSelect`](./tree-select.md) | Tree-structured dropdown, enhanced with `useDataOptionsTreeSelect` |
+| [`Upload`](./upload.md) | File upload with inline image cropping |
+| [`FileUpload`](./file-upload.md) | Chunked, resumable upload variant of `Upload`, wired to the framework's storage protocol |
+| [`IconPicker`](./icon-picker.md) | Searchable popup grid for choosing a lucide icon |
+| [`GenericSelect`](./generic-select.md) | Abstract base for popup-driven selection controls — the foundation `IconPicker` is built on |
 
-### AI Components (X Series)
-
-Built on [`@ant-design/x`](https://x.ant.design/), re-exported with the `X` prefix. See the [AI Components Overview](./x-overview) for details.
+## Actions & Permissions
 
 | Component | Description |
 |-----------|-------------|
-| `XBubble` | Chat message bubble |
-| `XSender` | Message input with send button |
-| `XConversations` | Conversation list |
-| `XPrompts` | Suggested prompt list |
-| `XThoughtChain` | AI reasoning chain display |
-| `XWelcome` | Welcome screen |
-| `XMarkdown` | Markdown renderer with streaming |
-| `XMermaid` | Mermaid diagram renderer |
-| `XCodeHighlighter` | Code block for AI responses |
+| [`ActionButton`](./action-button.md) | Button with built-in async loading and confirm dialog |
+| [`ActionGroup`](./action-group.md) | Renders a group of action buttons from a config array |
+| [`OperationButton`](./operation-button.md) | `ActionButton` + `PermissionGate` combined |
+| [`PermissionGate`](./permission-gate.md) | Conditionally renders children based on permissions |
+| [`IconButton`](./icon-button.md) | Icon-only button with tooltip |
 
-VEF replaces Ant Design's `Form` with a type-safe form system built on [`@tanstack/react-form`](https://tanstack.com/form). See the [Form](./form) documentation for details.
+## Display & Utility
+
+| Component | Description |
+|-----------|-------------|
+| [`ConfigProvider`](./config-provider.md) | VEF's global theme provider — dark mode, semantic colors, CSS variables |
+| [`Loader`](./loader.md) | Full-screen or inline loading indicator |
+| [`Icon`](./icon.md) | Renders a Lucide icon component passed as a prop |
+| [`DynamicIcon`](./dynamic-icon.md) | Renders a Lucide icon by name string |
+| [`LogoIcon`](./logo-icon.md) | The VEF framework logo as an SVG component |
+| [`Chart`](./chart.md) | ECharts wrapper with theme support and chart linking |
+| [`CodeHighlighter`](./code-highlighter.md) | Syntax-highlighted code block |
+| [`CodeEditor`](./code-editor.md) | CodeMirror 6 code editor with syntax highlighting and an imperative ref API |
+| [`Keyboard`](./keyboard.md) | Keyboard shortcut key display |
+
+## Animation
+
+| Component | Description |
+|-----------|-------------|
+| [`FlipText`](./flip-text.md) | Character flip animation |
+| [`SparklesText`](./sparkles-text.md) | Text with sparkle particle effects |
+| [`SplitText`](./split-text.md) | GSAP-powered text split animation |
+| [`TypingAnimation`](./typing-animation.md) | Typewriter effect animation |
+| [`BorderBeam`](./border-beam.md) | Decorative animated beam that travels along a container's border |
+
+## Ant Design
+
+Components documented on their own page because they carry VEF-specific notes (props, form integration, or usage guidance) beyond straight pass-through:
+
+| Component | Description |
+|-----------|-------------|
+| [`Button`](./button.md) | Trigger operations |
+| [`Input`](./input.md) | Text input field (`Input.Password`, `Input.TextArea`, `Input.Search`, `Input.OTP`) |
+| [`Modal`](./modal.md) | Dialog overlay |
+| [`Alert`](./alert.md) | Alert message |
+| [`Avatar`](./avatar.md) | User avatar |
+| [`Typography`](./typography.md) | `Title` / `Text` / `Paragraph` / `Link` |
+| [`Compact`](./compact.md) | `Space.Compact` — groups inputs/buttons into a seamless unit |
+
+Everything else from Ant Design is a straight, unmodified re-export — see the [Ant Design Pass-Through](./antd-pass-through.md) index.
 
 ## Installation
 

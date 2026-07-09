@@ -1,5 +1,6 @@
 ---
-sidebar_position: 107
+title: "FlexCard"
+description: "A semantic wrapper around `Card` for split-card and tree-table page layouts."
 ---
 
 # FlexCard

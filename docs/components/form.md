@@ -1,5 +1,6 @@
 ---
-sidebar_position: 6
+title: "Form"
+description: "A type-safe, headless form system built on [`@tanstack/react-form`](https://tanstack.com/form), integrated with Ant Design field components."
 ---
 
 # Form
@@ -79,14 +80,17 @@ All field components are accessed via `field.*` inside a `form.AppField` render 
 | `field.Checkbox` | Single checkbox |
 | `field.CheckboxGroup` | Checkbox group |
 | `field.Radio` | Radio group |
-| `field.Bool` | Boolean input (switch/radio/checkbox) |
-| `field.Switch` | — (use `field.Bool` with `variant="switch"`) |
+| `field.Bool` | Boolean input (switch/radio/checkbox, `variant` prop selects which; defaults to `"switch"`) |
 | `field.Slider` | Slider input |
 | `field.Rate` | Star rating |
 | `field.ColorPicker` | Color picker |
+| `field.CodeEditor` | Code editor |
+| `field.IconPicker` | Icon picker |
 | `field.Mentions` | Mentions input |
 | `field.Transfer` | Transfer list |
 | `field.Upload` | File upload |
+
+> There is no separate `field.Switch` key. For a switch-style boolean input, use `field.Bool` (its `variant` prop defaults to `"switch"`).
 
 ## Validation
 

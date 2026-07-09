@@ -1,5 +1,6 @@
 ---
-sidebar_position: 13
+title: "Center"
+description: "A flex layout container that centers its children both horizontally and vertically."
 ---
 
 # Center
@@ -49,7 +50,7 @@ export default function LoadingState() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | Gap between children |
+| `gap` | `'small' \| 'medium' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | Gap between children |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
 | `ref` | `Ref<HTMLDivElement>` | — | DOM ref |

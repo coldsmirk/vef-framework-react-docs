@@ -1,5 +1,6 @@
 ---
-sidebar_position: 24
+title: "CodeHighlighter"
+description: "A syntax-highlighted code block component."
 ---
 
 # CodeHighlighter

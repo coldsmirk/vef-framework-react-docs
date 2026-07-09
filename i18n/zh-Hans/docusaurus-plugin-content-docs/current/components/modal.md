@@ -1,18 +1,19 @@
 ---
-sidebar_position: 7
+title: "Modal"
+description: "一种会中断用户操作、用于展示重要信息或请求用户决策的对话框浮层。"
 ---
 
-# Modal 对话框
+# Modal
 
-模态对话框，在不离开当前页面的情况下展示重要信息或请求用户决策。
+一种会中断用户操作、用于展示重要信息或请求用户决策的对话框浮层。
 
-> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Modal](https://ant.design/components/modal-cn/)
+> **来源：** 对 `antd` Modal 进行封装，新增了 `draggable` 属性。完整文档：[Ant Design Modal](https://ant.design/components/modal/)
 
 ## 何时使用
 
-- 需要用户处理事务，又不希望跳转页面以致打断工作流程时。
-- 需要用户确认某个破坏性操作时。
-- 收集少量用户输入时。
+- 在执行破坏性操作前需要用户确认时。
+- 需要在不离开当前页面的情况下展示补充内容时。
+- 需要收集少量用户输入时。
 
 ## 基础用法
 
@@ -26,22 +27,22 @@ export default function Demo() {
   return (
     <>
       <Button type="primary" onClick={() => setOpen(true)}>
-        打开对话框
+        Open Modal
       </Button>
       <Modal
-        title="基础对话框"
+        title="Basic Modal"
         open={open}
         onOk={() => setOpen(false)}
         onCancel={() => setOpen(false)}
       >
-        <p>对话框内容。</p>
+        <p>Modal content goes here.</p>
       </Modal>
     </>
   );
 }
 ```
 
-## 异步确认
+## 异步确定操作
 
 ```tsx
 import { Modal, Button } from '@vef-framework-react/components';
@@ -60,15 +61,15 @@ export default function Demo() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>打开</Button>
+      <Button onClick={() => setOpen(true)}>Open</Button>
       <Modal
-        title="保存更改"
+        title="Save Changes"
         open={open}
         onOk={handleOk}
         confirmLoading={loading}
         onCancel={() => setOpen(false)}
       >
-        <p>确定要保存吗？</p>
+        <p>Are you sure you want to save?</p>
       </Modal>
     </>
   );
@@ -84,67 +85,78 @@ import { Modal } from '@vef-framework-react/components';
 
 function handleDelete(id: number) {
   Modal.confirm({
-    title: '删除记录',
-    content: '此操作不可撤销，是否继续？',
-    okText: '删除',
+    title: 'Delete Record',
+    content: 'This action cannot be undone. Continue?',
+    okText: 'Delete',
     okType: 'danger',
     onOk: () => deleteRecord(id),
   });
 }
 ```
 
-> 对于表格行内的确认按钮，建议使用 [`ActionButton`](./action-button) 的 `confirmable` 属性。
+> 对于行内的确认按钮，建议改用 [`ActionButton`](./action-button) 配合 `confirmable` 属性。
 
 ## 自定义页脚
 
 ```tsx
 <Modal
-  title="自定义页脚"
+  title="Custom Footer"
   open={open}
   footer={[
-    <Button key="back" onClick={() => setOpen(false)}>返回</Button>,
-    <Button key="submit" type="primary" onClick={handleOk}>提交</Button>,
+    <Button key="back" onClick={() => setOpen(false)}>Return</Button>,
+    <Button key="submit" type="primary" onClick={handleOk}>Submit</Button>,
   ]}
 >
-  <p>内容</p>
+  <p>Content</p>
 </Modal>
 ```
 
 ## 无页脚
 
 ```tsx
-<Modal title="信息" open={open} footer={null} onCancel={() => setOpen(false)}>
-  <p>只读内容。</p>
+<Modal title="Info" open={open} footer={null} onCancel={() => setOpen(false)}>
+  <p>Read-only content.</p>
+</Modal>
+```
+
+## 可拖拽
+
+VEF 新增了 `draggable` 属性（`@default false`），开启后用户可以通过拖拽对话框头部来移动它。
+
+```tsx
+<Modal title="Draggable Modal" open={open} draggable onCancel={() => setOpen(false)}>
+  <p>Drag the header to move this modal.</p>
 </Modal>
 ```
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
 | `open` | `boolean` | `false` | 对话框是否可见 |
-| `title` | `ReactNode` | — | 标题 |
-| `children` | `ReactNode` | — | 内容 |
-| `footer` | `ReactNode \| null` | — | 底部内容；`null` 不显示 |
-| `onOk` | `(e) => void` | — | 点击确定回调 |
-| `onCancel` | `(e) => void` | — | 点击遮罩层或右上角叉或取消按钮的回调 |
-| `okText` | `ReactNode` | `'确定'` | 确认按钮文字 |
-| `cancelText` | `ReactNode` | `'取消'` | 取消按钮文字 |
-| `okType` | `ButtonType` | `'primary'` | 确认按钮类型 |
-| `confirmLoading` | `boolean` | `false` | 确定按钮 loading |
-| `width` | `number \| string` | `520` | 宽度 |
-| `centered` | `boolean` | `false` | 垂直居中展示 |
-| `closable` | `boolean` | `true` | 是否显示右上角的关闭按钮 |
-| `maskClosable` | `boolean` | `true` | 点击蒙层是否允许关闭 |
-| `destroyOnClose` | `boolean` | `false` | 关闭时销毁子元素 |
-| `forceRender` | `boolean` | `false` | 强制渲染 |
-| `keyboard` | `boolean` | `true` | 是否支持键盘 esc 关闭 |
-| `zIndex` | `number` | `1000` | 设置 z-index |
-| `afterClose` | `() => void` | — | 完全关闭后的回调 |
-| `afterOpenChange` | `(open) => void` | — | 打开和关闭的回调 |
+| `draggable` | `boolean` | `false` | 是否可以通过头部拖拽对话框（VEF 新增） |
+| `title` | `ReactNode` | — | 对话框标题 |
+| `children` | `ReactNode` | — | 对话框主体内容 |
+| `footer` | `ReactNode \| null` | — | 自定义页脚；`null` 表示隐藏页脚 |
+| `onOk` | `(e) => void` | — | 确定按钮点击回调 |
+| `onCancel` | `(e) => void` | — | 取消 / 关闭回调 |
+| `okText` | `ReactNode` | `'OK'` | 确定按钮文案 |
+| `cancelText` | `ReactNode` | `'Cancel'` | 取消按钮文案 |
+| `okType` | `ButtonType` | `'primary'` | 确定按钮类型 |
+| `confirmLoading` | `boolean` | `false` | 在确定按钮上显示加载状态 |
+| `width` | `number \| string` | `520` | 对话框宽度 |
+| `centered` | `boolean` | `false` | 垂直居中显示 |
+| `closable` | `boolean` | `true` | 显示关闭图标 |
+| `maskClosable` | `boolean` | `true` | 点击蒙层是否可以关闭 |
+| `destroyOnClose` | `boolean` | `false` | 关闭时卸载子元素 |
+| `forceRender` | `boolean` | `false` | 预渲染内容 |
+| `keyboard` | `boolean` | `true` | 支持按下 Esc 键关闭 |
+| `zIndex` | `number` | `1000` | 层级 |
+| `afterClose` | `() => void` | — | 关闭动画结束后的回调 |
+| `afterOpenChange` | `(open) => void` | — | 打开状态变化后的回调 |
 
 ## 最佳实践
 
-- 对话框内含表单时设置 `destroyOnClose`，关闭时重置表单状态。
-- 避免嵌套多层对话框；次级面板使用 `Drawer`。
-- 简单的是/否确认使用 `Modal.confirm`；表格行内操作使用 `ActionButton` 的 `confirmable`。
+- 当对话框内包含表单时设置 `destroyOnClose`，使关闭后表单状态被重置。
+- 避免多层嵌套的对话框；次级面板请使用 `Drawer`。
+- 简单的是/否确认使用 `Modal.confirm`；表格中的行内操作使用 `ActionButton` 配合 `confirmable`。

@@ -1,12 +1,13 @@
 ---
-sidebar_position: 105
+title: "Tree"
+description: "用于展示层级数据的树形视图组件。"
 ---
 
-# Tree 树形控件
+# Tree
 
-用于展示具有层级关系的数据。
+用于展示层级数据的树形视图组件。
 
-> **来源：** 从 `antd` 重新导出，并提供 VEF Hook 增强。完整文档：[Ant Design Tree](https://ant.design/components/tree-cn/)
+> **来源：** 从 `antd` 重新导出，并增加了 VEF Hook 增强。完整文档：[Ant Design Tree](https://ant.design/components/tree/)
 
 ## 基础用法
 
@@ -16,11 +17,11 @@ import type { TreeNode } from '@vef-framework-react/components';
 
 const treeData: TreeNode[] = [
   {
-    title: '父节点 1',
+    title: 'Parent 1',
     key: '0-0',
     children: [
-      { title: '子节点 1-1', key: '0-0-0' },
-      { title: '子节点 1-2', key: '0-0-1' },
+      { title: 'Child 1-1', key: '0-0-0' },
+      { title: 'Child 1-2', key: '0-0-1' },
     ],
   },
 ];
@@ -32,7 +33,7 @@ export default function Demo() {
 
 ## VEF 增强：`useDataOptionsTree`
 
-从异步数据源加载树形数据，内置 loading 状态和搜索支持：
+从异步数据源加载树形数据，内置加载状态和搜索支持。数据获取相关的选项统一嵌套在 `queryOptions` 中（与 TanStack Query 的 `useQuery` 接受的形状相同），`useDataOptionsTree` 自身的选项与其平级。
 
 ```tsx
 import { Tree, useDataOptionsTree } from '@vef-framework-react/components';
@@ -44,8 +45,10 @@ async function fetchDepartments() {
 
 export default function Demo() {
   const { treeProps, searchValue, setSearchValue } = useDataOptionsTree({
-    queryKey: ['departments'],
-    queryFn: fetchDepartments,
+    queryOptions: {
+      queryKey: ['departments'],
+      queryFn: fetchDepartments,
+    },
   });
 
   return (
@@ -53,7 +56,7 @@ export default function Demo() {
       <input
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
-        placeholder="搜索..."
+        placeholder="Search..."
       />
       <Tree {...treeProps} />
     </>
@@ -61,14 +64,20 @@ export default function Demo() {
 }
 ```
 
-### `useDataOptionsTree` 参数
+### `useDataOptionsTree` 选项
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `queryKey` | `QueryKey` | 必填 | TanStack Query 缓存 key |
-| `queryFn` | `() => Promise<TData[]>` | 必填 | 异步数据获取函数 |
-| `onFetch` | `(data: TData[]) => void` | — | 数据获取成功后的回调 |
+| 选项 | 类型 | 默认值 | 说明 |
+|--------|------|---------|-------------|
+| `queryOptions` | `UseQueryOptions<TQueryFnData[], TData[], TParams>` | 必填 | TanStack Query 选项（`queryKey`、`queryFn` 及 `useQuery` 的其余选项） |
+| `onFetch` | `(data: TData[]) => void` | — | 数据获取完成后的回调 |
+| `labelKey` | `string \| (item: TData) => string` | `"label"` | 节点 label 的字段映射 |
+| `valueKey` | `string \| (item: TData) => Key` | `"value"` | 节点 value 的字段映射 |
+| `disabledKey` | `string \| (item: TData) => boolean \| undefined` | `"disabled"` | 禁用状态的字段映射 |
+| `descriptionKey` | `string \| (item: TData) => string \| undefined` | `"description"` | 节点说明文字的字段映射 |
+| `childrenKey` | `string \| (item: TData) => TData[] \| undefined` | `"children"` | 嵌套子节点的字段映射（会递归转换） |
+
+每个 `*Key` 选项都可以是字符串路径（例如 `"user.name"`）或提取函数。
 
 返回 `{ treeProps, isFetching, searchValue, setSearchValue }`。
 
-其他属性请参阅 [Ant Design Tree 文档](https://ant.design/components/tree-cn/)。
+其余属性请参阅 [Ant Design Tree 文档](https://ant.design/components/tree/)。

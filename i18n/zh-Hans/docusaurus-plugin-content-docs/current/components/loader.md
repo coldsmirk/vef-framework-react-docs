@@ -1,17 +1,18 @@
 ---
-sidebar_position: 15
+title: "Loader"
+description: "支持全屏或行内显示的加载指示器，可附带可选的描述文本。"
 ---
 
-# Loader 加载器
+# Loader
 
-带可选描述文字的全屏或内联加载指示器。
+支持全屏或行内显示的加载指示器，可附带可选的描述文本。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design 的一部分。
 
 ## 何时使用
 
-- 页面或区块正在获取数据时展示加载状态。
-- 路由切换时作为全屏遮罩层。
+- 在页面或区块获取数据期间显示加载状态。
+- 在路由切换期间用作全屏遮罩层。
 
 ## 基础用法
 
@@ -23,13 +24,13 @@ export default function Demo() {
 }
 ```
 
-## 带描述文字
+## 带描述文本
 
 ```tsx
 import { Loader } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <Loader description="数据加载中，请稍候..." />;
+  return <Loader description="Loading data, please wait..." />;
 }
 ```
 
@@ -39,7 +40,7 @@ export default function Demo() {
 import { Loader } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <Loader size="large" description="初始化中..." descriptionSize={16} />;
+  return <Loader size="large" description="Initializing..." descriptionSize={16} />;
 }
 ```
 
@@ -50,21 +51,21 @@ import { Loader } from '@vef-framework-react/components';
 
 export default function Page({ isLoading }: { isLoading: boolean }) {
   if (isLoading) {
-    return <Loader description="页面加载中..." />;
+    return <Loader description="Loading page..." />;
   }
-  return <div>页面内容</div>;
+  return <div>Page content</div>;
 }
 ```
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `size` | `'small' \| 'default' \| 'large' \| number` | — | 加载图标尺寸 |
-| `description` | `ReactNode` | — | 加载图标下方的文字 |
-| `descriptionSize` | `number` | — | 描述文字字号（像素） |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | — | 加载图标尺寸 |
+| `description` | `ReactNode` | — | 显示在加载图标下方的文本 |
+| `descriptionSize` | `number` | — | 描述文本的字号（像素） |
 
 ## 最佳实践
 
-- 页面级加载状态使用 `Loader`；组件级内联加载使用 Ant Design 的 `Spin`。
-- 提供 `description` 让用户了解正在加载的内容。
+- 页面级加载状态使用 `Loader`；行内/组件级加载使用 Ant Design 的 `Spin`。
+- 提供 `description` 以便让用户了解当前正在加载的内容。

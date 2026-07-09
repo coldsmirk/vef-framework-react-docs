@@ -1,5 +1,6 @@
 ---
-sidebar_position: 2
+title: "Button"
+description: "Triggers an operation when clicked."
 ---
 
 # Button
@@ -107,7 +108,7 @@ export default function Demo() {
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `type` | `'primary' \| 'default' \| 'dashed' \| 'text' \| 'link'` | `'default'` | Button style type |
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | Button size |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Button size (`'middle'` is a deprecated alias for `'medium'`) |
 | `loading` | `boolean \| { delay?: number }` | `false` | Show loading state |
 | `disabled` | `boolean` | `false` | Disable the button |
 | `danger` | `boolean` | `false` | Set danger status |
@@ -128,4 +129,4 @@ export default function Demo() {
 - Use `type="primary"` for the main call-to-action on a page. Avoid multiple primary buttons.
 - Use `danger` for destructive actions like delete.
 - For icon-only buttons with tooltips, use [`IconButton`](./icon-button).
-- For buttons that need permission checks, use [`OperationButton`](./overview#vef-specific-components).
+- For buttons that need permission checks, use [`OperationButton`](./operation-button.md).

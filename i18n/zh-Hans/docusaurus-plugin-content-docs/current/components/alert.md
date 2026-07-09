@@ -1,12 +1,13 @@
 ---
-sidebar_position: 50
+title: "Alert"
+description: "展示需要用户关注的醒目提示信息。"
 ---
 
-# Alert 警告提示
+# Alert
 
-用于页面中展示重要的提示信息。
+展示需要用户关注的醒目提示信息。
 
-> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Alert](https://ant.design/components/alert-cn/)
+> **来源：** 直接从 `antd` 重新导出。完整文档：[Ant Design Alert](https://ant.design/components/alert/)
 
 ## 基础用法
 
@@ -14,11 +15,11 @@ sidebar_position: 50
 import { Alert } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <Alert message="成功提示" type="success" />;
+  return <Alert title="Success message" type="success" />;
 }
 ```
 
-## 四种类型
+## 类型
 
 ```tsx
 import { Alert, Space } from '@vef-framework-react/components';
@@ -26,36 +27,45 @@ import { Alert, Space } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      <Alert message="消息提示" type="info" />
-      <Alert message="成功提示" type="success" />
-      <Alert message="警告提示" type="warning" />
-      <Alert message="错误提示" type="error" />
+      <Alert title="Info" type="info" />
+      <Alert title="Success" type="success" />
+      <Alert title="Warning" type="warning" />
+      <Alert title="Error" type="error" />
     </Space>
   );
 }
 ```
 
-## 带描述
+## 带描述信息
 
 ```tsx
 <Alert
-  message="警告"
-  description="此操作可能影响其他用户。"
+  title="Warning"
+  description="This action may affect other users."
   type="warning"
   showIcon
   closable
 />
 ```
 
+## 变体
+
+```tsx
+<Alert title="Filled variant" type="warning" variant="filled" />
+```
+
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `message` | `ReactNode` | — | 警告提示内容 |
-| `description` | `ReactNode` | — | 警告提示的辅助性文字介绍 |
-| `type` | `'success' \| 'info' \| 'warning' \| 'error'` | `'info'` | 指定警告提示的样式 |
-| `showIcon` | `boolean` | `false` | 是否显示辅助图标 |
-| `closable` | `boolean` | `false` | 是否可关闭 |
-| `onClose` | `(e) => void` | — | 关闭时触发的回调函数 |
-| `banner` | `boolean` | `false` | 是否用作顶部公告 |
-| `action` | `ReactNode` | — | 自定义操作项 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `title` | `ReactNode` | — | 提示内容（主要的标题属性；`message` 是废弃别名） |
+| `message` | `ReactNode` | — | **已废弃。** 请使用 `title` |
+| `description` | `ReactNode` | — | 附加内容 |
+| `type` | `'success' \| 'info' \| 'warning' \| 'error'` | `'info'` | 提示类型 |
+| `variant` | `'outlined' \| 'filled'` | — | 视觉变体（antd 6.4+） |
+| `icon` | `ReactNode` | — | 自定义图标（`showIcon` 开启时展示） |
+| `showIcon` | `boolean` | `false` | 显示类型图标 |
+| `closable` | `boolean \| ({ closeIcon?, onClose? } & ...)` | `false` | 显示关闭按钮；传对象可自定义关闭图标，或通过 `closable.onClose` 处理关闭 |
+| `onClose` | `(e) => void` | — | **已废弃。** 请使用 `closable.onClose` |
+| `banner` | `boolean` | `false` | 通栏横幅样式 |
+| `action` | `ReactNode` | — | 操作元素 |

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 18
+title: "DynamicIcon"
+description: "Renders a [Lucide](https://lucide.dev/) icon by name string, useful for icon names stored in configuration or database."
 ---
 
 # DynamicIcon
@@ -19,7 +20,7 @@ Renders a [Lucide](https://lucide.dev/) icon by name string, useful for icon nam
 import { DynamicIcon } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <DynamicIcon name="user" size={20} />;
+  return <DynamicIcon name="user" />;
 }
 ```
 
@@ -46,7 +47,7 @@ export default function SideMenu() {
     <ul>
       {menuItems.map((item) => (
         <li key={item.path}>
-          <DynamicIcon name={item.icon} size={16} />
+          <DynamicIcon name={item.icon} />
           <span>{item.label}</span>
         </li>
       ))}
@@ -60,13 +61,11 @@ export default function SideMenu() {
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `name` | `DynamicIconName` | required | Lucide icon name (kebab-case) |
-| `size` | `number \| string` | `24` | Icon size |
-| `color` | `string` | — | Icon color |
 | `strokeWidth` | `number` | `2` | Stroke width |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
 
-All standard Lucide icon props are supported.
+Icon size and color are not configurable via props — the icon always renders at `1.2em` and inherits `color` from its parent. All other standard Lucide props are supported.
 
 ## Available Icon Names
 

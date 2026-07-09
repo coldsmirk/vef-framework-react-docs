@@ -1,64 +1,56 @@
 ---
-sidebar_position: 3
-title: 推荐目录结构
+title: 项目结构
+description: VEF 应用标准的 src/ 目录地图，以及典型页面目录和 API 目录的拆分方式。
 ---
 
-# 推荐目录结构
+# 项目结构
 
-VEF 最适合按“页面场景”组织项目，而不是把所有 `components`、`hooks`、`services` 都堆成巨型公共目录。  
-仓库中的示例应用 `playground` 采用了这一组织方式，可作为目录拆分参考。
+当项目按页面场景组织，而不是按 `components`、`hooks`、`services` 这类大而全的共享目录组织时，VEF 的效果最好。  
+示例应用 `playground` 遵循这一结构，可以作为参考。
 
-本页说明的是标准目录骨架；关于命名规则、放置规则和禁止模式，请继续阅读 [应用项目规范](./application-project-conventions.md)。
+本页说明标准的目录地图。强制性的命名规则、放置规则和禁止使用的模式定义在[项目规范](../advanced/project-conventions.md)中。
 
-## 推荐目录
+## 推荐布局
+
+这是一个代表性的精简示例。完整的强制性 `src/` 布局——每个顶层目录的契约——见[项目规范](../advanced/project-conventions.md)。
 
 ```text
 src/
   api/
     index.ts
-    request.ts
   apis/
     auth/
     sys/
-    md/
-    pmr/
   helpers/
-    config.ts
   hooks/
-    use-upload/
   pages/
-    __root.tsx
+    __root.ts
     _common/
-      login.tsx
-      access-denied.tsx
+      login.ts
+      access-denied.ts
     _layout/
       route.ts
-      index/
-        route.tsx
       auth/
       sys/
-      md/
-      pmr/
   router/
     context.ts
-    router.gen.ts
   main.ts
 ```
 
-## 每个目录负责什么
+## 各目录的职责
 
-| 目录 | 作用 | 推荐放什么 |
+| 目录 | 用途 | 典型内容 |
 | --- | --- | --- |
-| `api/` | 应用级 API 客户端能力 | `createApiClient()`、统一请求包装、公共 header |
+| `api/` | 应用级 API 客户端设置 | `createApiClient()`、请求包装器、共享 header |
 | `apis/` | 领域 API 函数 | `findUserPage`、`createUser`、`refreshAuth` |
-| `helpers/` | 与业务无关但与应用有关的工具 | 配置读取、环境变量包装 |
-| `hooks/` | 页面复用 hooks | 上传、弹窗状态、组合逻辑 |
-| `pages/` | 路由和页面主体 | `route.tsx`、页面组件、局部 helper |
-| `router/` | router 实例与上下文 | `createRouter()`、`RouterContext` |
+| `helpers/` | 与具体领域无关的应用级工具 | 配置读取器、环境变量包装器 |
+| `hooks/` | 可复用的页面级 hooks | 上传、弹窗状态、组合行为 |
+| `pages/` | 路由入口和页面实现 | `route.tsx`、页面组件、局部 helper |
+| `router/` | 路由器实例和路由上下文 | `createRouter()`、`RouterContext` |
 
-## 页面目录怎么拆
+## 典型页面目录拆分
 
-VEF 下一个典型 CRUD 页面通常这样拆:
+一个典型的 CRUD 页面通常这样拆分:
 
 ```text
 pages/_layout/auth/user/
@@ -70,16 +62,16 @@ pages/_layout/auth/user/
     form.tsx
 ```
 
-这种拆法的好处是:
+这样能让职责保持清晰:
 
-- `route.tsx` 只负责拼装 `CrudPage`
-- `components/form.tsx` 只负责表单字段
-- `components/basic-search.tsx` 只负责搜索区域
-- `helpers/index.ts` 只负责 `createCrudKit()` 这类页面类型适配
+- `route.tsx` 只负责组装 `CrudPage`
+- `components/form.tsx` 只负责渲染表单字段
+- `components/basic-search.tsx` 只负责渲染搜索区域
+- `helpers/index.ts` 只提供页面级的类型 helper，例如 `createCrudKit()`
 
-## API 目录怎么拆
+## API 目录拆分
 
-推荐按业务领域拆 `apis/`:
+按领域拆分 `apis/` 通常效果不错:
 
 ```text
 apis/
@@ -96,20 +88,22 @@ apis/
     staff.ts
 ```
 
-每个文件里只做两件事:
+每个文件通常只做两件事:
 
 1. 定义接口类型
-2. 导出 `createQueryFn()` / `createMutationFn()` 结果
+2. 导出 `createQueryFn()` / `createMutationFn()` 的结果
 
-## 基础启动骨架
+## 基础启动文件
 
-从零搭建项目时，通常会先创建这些文件:
+从零开始一个项目时，通常会先创建以下这些文件:
 
 1. `src/main.ts`
 2. `src/api/index.ts`
 3. `src/router/context.ts`
 4. `src/router/index.ts`
-5. `src/pages/__root.tsx`
+5. `src/pages/__root.ts`
 6. `src/pages/_layout/route.ts`
-7. `src/pages/_common/login.tsx`
-8. `src/pages/_common/access-denied.tsx`
+7. `src/pages/_common/login.ts`
+8. `src/pages/_common/access-denied.ts`
+
+有了目录地图之后，自然的下一步是阅读[路由与布局](../guide/routing.md)。

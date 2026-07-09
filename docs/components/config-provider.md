@@ -1,5 +1,6 @@
 ---
-sidebar_position: 22
+title: "ConfigProvider"
+description: "VEF's global configuration provider. Wraps Ant Design's `ConfigProvider` with VEF-specific theme support including dark mode, semantic color overrides, and global CSS variables."
 ---
 
 # ConfigProvider

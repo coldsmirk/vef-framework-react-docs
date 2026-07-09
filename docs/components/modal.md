@@ -1,12 +1,13 @@
 ---
-sidebar_position: 7
+title: "Modal"
+description: "A dialog overlay that interrupts the user to present critical information or request a decision."
 ---
 
 # Modal
 
 A dialog overlay that interrupts the user to present critical information or request a decision.
 
-> **Source:** Re-exported from `antd`. Full documentation: [Ant Design Modal](https://ant.design/components/modal/)
+> **Source:** Wraps `antd` Modal, adding a `draggable` prop. Full documentation: [Ant Design Modal](https://ant.design/components/modal/)
 
 ## When to Use
 
@@ -118,11 +119,22 @@ function handleDelete(id: number) {
 </Modal>
 ```
 
+## Draggable
+
+VEF adds a `draggable` prop (`@default false`) that lets the user reposition the modal by dragging its header.
+
+```tsx
+<Modal title="Draggable Modal" open={open} draggable onCancel={() => setOpen(false)}>
+  <p>Drag the header to move this modal.</p>
+</Modal>
+```
+
 ## API
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `open` | `boolean` | `false` | Whether the modal is visible |
+| `draggable` | `boolean` | `false` | Whether the modal can be dragged by its header (VEF addition) |
 | `title` | `ReactNode` | — | Modal title |
 | `children` | `ReactNode` | — | Modal body content |
 | `footer` | `ReactNode \| null` | — | Custom footer; `null` hides footer |

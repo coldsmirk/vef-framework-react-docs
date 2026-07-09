@@ -1,5 +1,6 @@
 ---
-sidebar_position: 102
+title: "FormModal"
+description: "A modal dialog that combines form state, mutation execution, and submit/reset actions."
 ---
 
 # FormModal
@@ -16,7 +17,7 @@ A modal dialog that combines form state, mutation execution, and submit/reset ac
 ## Basic Usage
 
 ```tsx
-import { FormModal, useForm } from '@vef-framework-react/components';
+import { FormModal } from '@vef-framework-react/components';
 
 interface UserForm {
   name: string;
@@ -59,6 +60,7 @@ export default function CreateUserModal({ open, onClose }) {
 | `draggable` | `boolean` | `true` | Whether the modal can be dragged |
 | `defaultValues` | `TValues` | — | Initial form values |
 | `disabled` | `boolean` | `false` | Disable the form |
+| `formComponent` | `ElementType` | `"form"` | Element type for the inner form wrapper |
 | `mutationFn` | `MutationFunction<ApiResult<TData>, TValues>` | — | Mutation to execute on submit |
 | `mutationMeta` | `MutationMeta` | — | Mutation metadata (e.g. `invalidates`) |
 | `beforeSubmit` | `(values) => Awaitable<TValues>` | — | Transform values before submission |
@@ -66,7 +68,18 @@ export default function CreateUserModal({ open, onClose }) {
 | `onSubmit` | `(values) => Awaitable<void>` | — | Custom submit handler (alternative to `mutationFn`) |
 | `onReset` | `(defaultValues?) => void` | — | Called on form reset |
 | `onClose` | `() => void` | — | Called when modal closes |
-| `renderActions` | `(formApi) => ReactNode` | — | Custom footer actions; return `null` to hide footer |
-| `submitButtonProps` | `SubmitButtonProps` | — | Submit button customization |
-| `resetButtonProps` | `ResetButtonProps \| false` | — | Reset button customization; `false` to hide |
+| `renderActions` | `(formApi, defaults: { submitButton, resetButton }) => ReactNode` | — | Custom footer actions; `defaults` carries the default submit/reset buttons to reuse alongside custom ones; return `null` to hide footer |
+| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Submit button customization (only used when `renderActions` is not provided) |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` to hide (only used when `renderActions` is not provided) |
 | `children` | `ReactNode \| (formApi) => ReactNode` | — | Form content |
+
+```tsx
+// Add a custom button alongside the defaults
+renderActions={(formApi, { submitButton, resetButton }) => (
+  <>
+    <Button onClick={handleDraft}>Save Draft</Button>
+    {resetButton}
+    {submitButton}
+  </>
+)}
+```

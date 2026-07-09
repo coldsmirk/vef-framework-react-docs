@@ -1,5 +1,6 @@
 ---
-sidebar_position: 108
+title: "LogoIcon"
+description: "The VEF framework logo as an SVG component."
 ---
 
 # LogoIcon

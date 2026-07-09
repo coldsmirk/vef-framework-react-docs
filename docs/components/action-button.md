@@ -1,5 +1,6 @@
 ---
-sidebar_position: 8
+title: "ActionButton"
+description: "A button with built-in async loading state management and optional confirmation dialog."
 ---
 
 # ActionButton

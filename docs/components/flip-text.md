@@ -1,5 +1,6 @@
 ---
-sidebar_position: 26
+title: "FlipText"
+description: "Animates text with a character-by-character flip effect using GSAP."
 ---
 
 # FlipText

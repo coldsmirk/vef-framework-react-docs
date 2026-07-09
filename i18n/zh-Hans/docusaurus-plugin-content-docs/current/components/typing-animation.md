@@ -1,12 +1,13 @@
 ---
-sidebar_position: 29
+title: "TypingAnimation"
+description: "使用打字机效果逐字符显示文本动画。"
 ---
 
-# TypingAnimation 打字动画
+# TypingAnimation
 
-逐字符显示文字的打字机效果动画组件。
+使用打字机效果逐字符显示文本动画。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design。
 
 ## 基础用法
 
@@ -14,15 +15,15 @@ sidebar_position: 29
 import { TypingAnimation } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <TypingAnimation>你好，我是 VEF Framework！</TypingAnimation>;
+  return <TypingAnimation>Hello, I am VEF Framework!</TypingAnimation>;
 }
 ```
 
-## 带延迟
+## 延迟启动
 
 ```tsx
 <TypingAnimation delay={500} duration={80}>
-  500ms 后开始打字...
+  This text starts typing after 500ms...
 </TypingAnimation>
 ```
 
@@ -30,19 +31,19 @@ export default function Demo() {
 
 ```tsx
 <TypingAnimation startOnView>
-  进入视口时开始打字动画。
+  This text types when it enters the viewport.
 </TypingAnimation>
 ```
 
 ## API
 
-`TypingAnimation` 继承所有 `motion.div` 属性，另有：
+`TypingAnimation` 继承所有 `motion.div` 属性，并新增：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `children` | `ReactNode` | — | 文字内容 |
-| `duration` | `number` | `100` | 每个字符的间隔（毫秒） |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | — | 文本内容 |
+| `duration` | `number` | `100` | 每个字符之间的延迟（毫秒） |
 | `delay` | `number` | `0` | 动画开始前的延迟（毫秒） |
-| `startOnView` | `boolean` | `false` | 元素进入视口时才开始动画 |
+| `startOnView` | `boolean` | `false` | 元素进入视口时开始动画 |
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |

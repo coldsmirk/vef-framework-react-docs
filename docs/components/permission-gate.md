@@ -1,5 +1,6 @@
 ---
-sidebar_position: 16
+title: "PermissionGate"
+description: "Conditionally renders content based on the current user's permissions."
 ---
 
 # PermissionGate
@@ -20,7 +21,7 @@ import { PermissionGate } from '@vef-framework-react/components';
 
 export default function Demo() {
   return (
-    <PermissionGate permTokens="user:create">
+    <PermissionGate requiredPermissions="user:create">
       <Button type="primary">Create User</Button>
     </PermissionGate>
   );
@@ -32,7 +33,7 @@ If the user does not have the `user:create` permission, nothing is rendered.
 ## Multiple Permissions (Any)
 
 ```tsx
-<PermissionGate permTokens={['user:edit', 'user:admin']} checkMode="any">
+<PermissionGate requiredPermissions={['user:edit', 'user:admin']} checkMode="any">
   <Button>Edit</Button>
 </PermissionGate>
 ```
@@ -42,7 +43,7 @@ Renders if the user has **any** of the listed permissions.
 ## Multiple Permissions (All)
 
 ```tsx
-<PermissionGate permTokens={['report:view', 'report:export']} checkMode="all">
+<PermissionGate requiredPermissions={['report:view', 'report:export']} checkMode="all">
   <Button>Export Report</Button>
 </PermissionGate>
 ```
@@ -52,7 +53,7 @@ Renders only if the user has **all** listed permissions.
 ## Render Prop Pattern
 
 ```tsx
-<PermissionGate permTokens="admin:access">
+<PermissionGate requiredPermissions="admin:access">
   {(hasPermission) => (
     <Button disabled={!hasPermission}>
       Admin Panel
@@ -67,7 +68,7 @@ Use the render prop to conditionally disable (rather than hide) elements.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `permTokens` | `string \| string[]` | — | Permission token(s) to check |
+| `requiredPermissions` | `string \| string[]` | — | Permission token(s) to check |
 | `checkMode` | `'any' \| 'all'` | `'any'` | How multiple tokens are evaluated |
 | `children` | `ReactNode \| (hasPermission: boolean) => ReactNode` | — | Content to render |
 

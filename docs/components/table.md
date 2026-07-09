@@ -1,5 +1,6 @@
 ---
-sidebar_position: 5
+title: "Table"
+description: "A feature-rich data table for displaying rows of structured data."
 ---
 
 # Table
@@ -158,11 +159,14 @@ Extends Ant Design `TableProps` (with `scroll` prop removed — handled internal
 | `scroll` | — | — | Removed; use `flexHeight` instead |
 | `onChange` | `(pagination, filters, sorter) => void` | — | Table state change handler |
 | `onRow` | `(record) => EventHandlers` | — | Row event handlers |
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | Table density |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Table density (`'middle'` is a deprecated alias for `'medium'`) |
 | `bordered` | `boolean` | `false` | Show cell borders |
 | `sticky` | `boolean \| { offsetHeader }` | `false` | Sticky header |
+| `striped` | `boolean` | `false` | Render zebra-striped rows (every second body row gets a subtle fill); composes with `rowClassName` |
 | `virtual` | `boolean` | `false` | Enable virtual scrolling |
 | `summary` | `(data) => ReactNode` | — | Summary row |
+
+> `sticky` is force-disabled whenever `flexHeight` is on (the default): `flexHeight`'s internal scroll container makes a sticky header redundant, so it is always passed `sticky={false}` to antd's `Table` in that mode. Set `flexHeight={false}` if you need antd's native sticky behavior.
 
 ### TableColumn
 

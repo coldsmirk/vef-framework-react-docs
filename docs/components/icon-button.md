@@ -1,5 +1,6 @@
 ---
-sidebar_position: 17
+title: "IconButton"
+description: "An icon-only button with an optional tooltip."
 ---
 
 # IconButton
@@ -91,7 +92,7 @@ export default function Demo() {
 | `tip` | `ReactNode` | — | Tooltip content |
 | `tipDelay` | `number` | — | Tooltip show delay in milliseconds |
 | `placement` | `TooltipPlacement` | — | Tooltip placement |
-| `size` | `'large' \| 'middle' \| 'small'` | — | Button size |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Button size (`'middle'` is a deprecated alias for `'medium'`) |
 | `disabled` | `boolean` | `false` | Disable the button |
 | `loading` | `boolean` | `false` | Show loading state |
 | `onClick` | `(e) => void` | — | Click handler |

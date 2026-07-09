@@ -1,5 +1,12 @@
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
+/**
+ * Hand-authored sidebar. Ordering and grouping live here (not in per-doc
+ * `sidebar_position` or `_category_.json`), so this file is the single source
+ * of navigation truth. Sections follow a shallow→deep learning path:
+ * Getting Started (learn) → Guides (build) → Components / Visual Editors /
+ * API Reference (look up) → Advanced (extend).
+ */
 const sidebars: SidebarsConfig = {
   docsSidebar: [
     "intro",
@@ -10,73 +17,108 @@ const sidebars: SidebarsConfig = {
       items: [
         "getting-started/installation",
         "getting-started/quick-start",
+        "getting-started/first-crud-page",
         "getting-started/configuration",
-        "getting-started/project-structure",
-        "getting-started/application-project-conventions"
+        "getting-started/project-structure"
       ]
     },
     {
       type: "category",
-      label: "Core Guides",
+      label: "Guides",
       collapsed: false,
       items: [
         "guide/routing",
-        "features/layouts",
-        "guide/api-integration",
-        "guide/components",
+        "guide/data-fetching",
         "guide/forms",
         "guide/tables",
         "guide/crud",
-        "guide/hooks",
         "guide/state-management",
-        "features/i18n",
-        "features/theming",
-        "guide/error-handling"
+        "guide/authentication",
+        "guide/permissions",
+        "guide/data-dictionaries",
+        "guide/theming",
+        "guide/error-handling",
+        "guide/hooks"
       ]
     },
     {
       type: "category",
       label: "Components",
-      collapsed: false,
+      collapsed: true,
       items: [
         "components/overview",
         {
-          type: "link",
-          label: "Ant Design Components",
-          href: "https://ant.design/components/overview/"
+          type: "category",
+          label: "Layout",
+          collapsed: true,
+          items: [
+            "components/grid",
+            "components/stack",
+            "components/center",
+            "components/group",
+            "components/scroll-area"
+          ]
         },
-        "components/button",
-        "components/input",
-        "components/select",
-        "components/table",
-        "components/form",
-        "components/modal",
-        "components/page",
-        "components/flex-card",
-        "components/form-modal",
-        "components/form-drawer",
-        "components/pro-search",
-        "components/pro-table",
-        "components/crud",
-        "components/action-button",
-        "components/action-group",
-        "components/bool",
-        "components/grid",
-        "components/stack",
-        "components/center",
-        "components/scroll-area",
-        "components/loader",
-        "components/logo-icon",
-        "components/permission-gate",
-        "components/icon-button",
-        "components/dynamic-icon",
-        "components/operation-button",
-        "components/group",
-        "components/icon",
-        "components/config-provider",
-        "components/chart",
-        "components/code-highlighter",
-        "components/keyboard",
+        {
+          type: "category",
+          label: "Page & CRUD",
+          collapsed: true,
+          items: [
+            "components/page",
+            "components/flex-card",
+            "components/form-modal",
+            "components/form-drawer",
+            "components/pro-search",
+            "components/pro-table",
+            "components/table",
+            "components/editable-table",
+            "components/crud"
+          ]
+        },
+        {
+          type: "category",
+          label: "Forms",
+          collapsed: true,
+          items: [
+            "components/form",
+            "components/bool",
+            "components/select",
+            "components/tree",
+            "components/tree-select",
+            "components/upload",
+            "components/icon-picker",
+            "components/file-upload",
+            "components/generic-select"
+          ]
+        },
+        {
+          type: "category",
+          label: "Actions & Permissions",
+          collapsed: true,
+          items: [
+            "components/action-button",
+            "components/action-group",
+            "components/operation-button",
+            "components/permission-gate",
+            "components/icon-button"
+          ]
+        },
+        {
+          type: "category",
+          label: "Display & Utility",
+          collapsed: true,
+          items: [
+            "components/config-provider",
+            "components/loader",
+            "components/icon",
+            "components/dynamic-icon",
+            "components/logo-icon",
+            "components/chart",
+            "components/code-highlighter",
+            "components/code-editor",
+            "components/keyboard"
+          ]
+        },
         {
           type: "category",
           label: "Animation",
@@ -85,122 +127,61 @@ const sidebars: SidebarsConfig = {
             "components/flip-text",
             "components/sparkles-text",
             "components/split-text",
-            "components/typing-animation"
+            "components/typing-animation",
+            "components/border-beam"
           ]
         },
         {
           type: "category",
-          label: "AI Components (X)",
+          label: "Ant Design",
           collapsed: true,
           items: [
-            "components/x-overview",
-            "components/x-bubble",
-            "components/x-sender",
-            "components/x-conversations",
-            "components/x-prompts",
-            "components/x-thought-chain",
-            "components/x-welcome",
-            "components/x-attachments",
-            "components/x-actions",
-            "components/x-suggestion",
-            "components/x-sources",
-            "components/x-file-card",
-            "components/x-think",
-            "components/x-notification",
-            "components/x-markdown",
-            "components/x-mermaid",
-            "components/x-code-highlighter"
-          ]
-        },
-        {
-          type: "category",
-          label: "Ant Design Components",
-          collapsed: true,
-          items: [
+            "components/button",
+            "components/input",
+            "components/modal",
             "components/alert",
-            "components/affix",
-            "components/anchor",
-            "components/auto-complete",
             "components/avatar",
-            "components/badge",
-            "components/breadcrumb",
-            "components/calendar",
-            "components/card",
-            "components/carousel",
-            "components/cascader",
-            "components/checkbox",
-            "components/col",
-            "components/collapse",
-            "components/color-picker",
-            "components/date-picker",
-            "components/descriptions",
-            "components/divider",
-            "components/drawer",
-            "components/dropdown",
-            "components/empty",
-            "components/flex",
-            "components/float-button",
-            "components/image",
-            "components/input-number",
-            "components/list",
-            "components/mentions",
-            "components/menu",
-            "components/pagination",
-            "components/popconfirm",
-            "components/popover",
-            "components/progress",
-            "components/qrcode",
-            "components/radio",
-            "components/rate",
-            "components/result",
-            "components/row",
-            "components/segmented",
-            "components/skeleton",
-            "components/slider",
-            "components/space",
-            "components/spin",
-            "components/splitter",
-            "components/statistic",
-            "components/steps",
-            "components/switch",
-            "components/tabs",
-            "components/tag",
-            "components/time-picker",
-            "components/timeline",
-            "components/tooltip",
-            "components/tour",
-            "components/transfer",
-            "components/tree",
-            "components/tree-select",
             "components/typography",
-            "components/upload",
-            "components/watermark",
-            "components/compact"
+            "components/compact",
+            "components/antd-pass-through",
+            {
+              type: "link",
+              label: "All Ant Design Components ↗",
+              href: "https://ant.design/components/overview/"
+            }
           ]
         }
       ]
     },
     {
       type: "category",
-      label: "Security",
+      label: "Visual Editors",
       collapsed: true,
       items: [
-        "security/authentication",
-        "security/authorization",
-        "security/route-guards"
-      ]
-    },
-    {
-      type: "category",
-      label: "Advanced Topics",
-      collapsed: true,
-      items: [
-        "features/icons",
-        "features/charts",
-        "advanced/custom-components",
-        "advanced/plugin-system",
-        "advanced/performance",
-        "advanced/testing"
+        "editors/overview",
+        {
+          type: "category",
+          label: "Form Editor",
+          collapsed: true,
+          items: [
+            "editors/form-editor/overview",
+            "editors/form-editor/embedding",
+            "editors/form-editor/schema",
+            "editors/form-editor/linkage",
+            "editors/form-editor/reference"
+          ]
+        },
+        {
+          type: "category",
+          label: "Approval Flow Editor",
+          collapsed: true,
+          items: [
+            "editors/approval-flow-editor/overview",
+            "editors/approval-flow-editor/host-integration",
+            "editors/approval-flow-editor/reference"
+          ]
+        },
+        "editors/approval-form-bridge"
       ]
     },
     {
@@ -208,13 +189,24 @@ const sidebars: SidebarsConfig = {
       label: "API Reference",
       collapsed: true,
       items: [
-        "reference/api-reference",
-        "reference/configuration-reference",
-        "reference/css-variables-reference",
-        "reference/component-reference",
+        "reference/overview",
         {
           type: "category",
-          label: "Starter Package",
+          label: "Core",
+          collapsed: true,
+          items: [
+            "reference/core/overview",
+            "reference/core/http-and-api",
+            "reference/core/query",
+            "reference/core/store-and-atom",
+            "reference/core/context",
+            "reference/core/storage",
+            "reference/core/sse-motion-dnd-immer"
+          ]
+        },
+        {
+          type: "category",
+          label: "Starter",
           collapsed: true,
           items: [
             "reference/starter/overview",
@@ -225,19 +217,7 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
-          label: "Components Package",
-          collapsed: true,
-          items: [
-            "reference/components/overview",
-            "reference/components/vef-components",
-            "reference/components/form-and-data",
-            "reference/components/antd-pass-through",
-            "reference/components/page-and-crud"
-          ]
-        },
-        {
-          type: "category",
-          label: "Hooks Package",
+          label: "Hooks",
           collapsed: true,
           items: [
             "reference/hooks/overview",
@@ -247,7 +227,7 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
-          label: "Shared Package",
+          label: "Shared",
           collapsed: true,
           items: [
             "reference/shared/overview",
@@ -259,25 +239,23 @@ const sidebars: SidebarsConfig = {
         },
         {
           type: "category",
-          label: "Core Package",
+          label: "Dev",
           collapsed: true,
-          items: [
-            "reference/core/overview",
-            "reference/core/http-and-api",
-            "reference/core/query",
-            "reference/core/store-and-atom",
-            "reference/core/context",
-            "reference/core/sse-motion-dnd-immer"
-          ]
+          items: ["reference/dev/overview"]
         },
-        {
-          type: "category",
-          label: "Dev Package",
-          collapsed: true,
-          items: [
-            "reference/dev/overview"
-          ]
-        }
+        "reference/configuration-reference",
+        "reference/css-variables-reference"
+      ]
+    },
+    {
+      type: "category",
+      label: "Advanced",
+      collapsed: true,
+      items: [
+        "advanced/project-conventions",
+        "advanced/custom-form-components",
+        "advanced/performance",
+        "advanced/testing"
       ]
     }
   ]

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 104
+title: "ProSearch"
+description: "A search-form container with basic search area, collapsible advanced search panel, and search/reset actions."
 ---
 
 # ProSearch
@@ -58,6 +59,7 @@ export default function UserSearchBar({ onSearch }) {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
+| `className` | `string` | — | CSS class name |
 | `defaultValues` | `TValues` | — | Initial search values |
 | `basicSearch` | `ReactNode` | — | Inline search fields |
 | `advancedSearch` | `ReactNode` | — | Collapsible advanced search fields |
@@ -69,5 +71,5 @@ export default function UserSearchBar({ onSearch }) {
 | `onAdvancedSearchVisibleChange` | `(visible: boolean) => void` | — | Called when advanced search visibility changes |
 | `onSearch` | `(values: TValues) => void` | — | Called when search is submitted |
 | `onReset` | `(defaultValues?) => void` | — | Called when search is reset |
-| `searchButtonProps` | `SubmitButtonProps` | — | Search button customization |
-| `resetButtonProps` | `ResetButtonProps \| false` | — | Reset button customization; `false` to hide |
+| `searchButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Search button customization |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` to hide |

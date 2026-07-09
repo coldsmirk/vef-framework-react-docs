@@ -1,12 +1,13 @@
 ---
-sidebar_position: 25
+title: "Keyboard"
+description: "以统一样式渲染键盘快捷键。"
 ---
 
-# Keyboard 键盘按键
+# Keyboard
 
 以统一样式渲染键盘快捷键。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 特有组件。** 不属于 Ant Design。
 
 ## 基础用法
 
@@ -16,7 +17,7 @@ import { Keyboard } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <span>
-      按 <Keyboard>Ctrl</Keyboard> + <Keyboard>K</Keyboard> 搜索
+      Press <Keyboard>Ctrl</Keyboard> + <Keyboard>K</Keyboard> to search
     </span>
   );
 }
@@ -40,11 +41,11 @@ export default function Demo() {
 
 ## API
 
-`Keyboard` 继承所有原生 `<kbd>` 元素属性，另有：
+`Keyboard` 继承所有原生 `<kbd>` 元素的属性，另有：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `size` | `'small' \| 'middle' \| 'large'` | `'middle'` | 按键尺寸 |
-| `children` | `ReactNode` | — | 按键标签 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | 按键尺寸 |
+| `children` | `ReactNode` | — | 按键文案 |
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 23
+title: "Chart"
+description: "An ECharts wrapper component with React integration, theme support, and chart linking."
 ---
 
 # Chart
@@ -98,21 +99,41 @@ export default function Demo() {
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `option` | `EChartsOption` | required | ECharts option configuration |
-| `theme` | `'walden' \| 'wonderland' \| object` | — | Chart theme |
+| `theme` | `'walden' \| 'wonderland' \| object` | `'walden'` | Chart theme |
 | `loading` | `boolean` | `false` | Show loading overlay |
-| `width` | `number \| 'auto'` | `'auto'` | Chart width |
-| `height` | `number \| 'auto'` | `'auto'` | Chart height |
+| `width` | `number \| 'auto'` | — | Chart width. Omit or pass `'auto'` to size automatically via `ResizeObserver`. |
+| `height` | `number \| 'auto'` | — | Chart height. Omit or pass `'auto'` to size automatically via `ResizeObserver`. |
 | `group` | `string` | — | Group name for linked charts |
 | `deepMemo` | `boolean` | `false` | Deep comparison for option memoization |
-| `renderer` | `'canvas' \| 'svg'` | `'canvas'` | Rendering mode |
+| `renderer` | `'canvas' \| 'svg'` | `'svg'` | Rendering mode |
 | `onReady` | `(chart: ECharts) => void` | — | Called when chart is initialized |
 | `onBeforeDispose` | `(chart: ECharts) => void` | — | Called before chart is disposed |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
 
+`ChartProps` also accepts the advanced `UseChartOptions` passthrough fields listed below.
+
+#### Advanced options (ECharts passthrough)
+
+Available on both `<Chart>` and `useChart`:
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `notMerge` | `boolean` | `false` | Replace the previous option instead of merging with it |
+| `replaceMerge` | `string \| string[]` | — | Component ids/names to fully replace on merge |
+| `lazyUpdate` | `boolean` | `true` | Defer the chart repaint to the next frame |
+| `silent` | `boolean` | `false` | Suppress events triggered by `setOption` |
+| `transition` | `SetOptionTransitionOpt` | — | ECharts universal transition animation options |
+| `locale` | `string \| LocaleOption` | — | ECharts locale |
+| `devicePixelRatio` | `number` | — | Canvas device pixel ratio (`renderer: 'canvas'` only) |
+| `useDirtyRect` | `boolean` | — | Enable dirty-rectangle rendering optimization |
+| `useCoarsePointer` | `boolean` | — | Enlarge hit targets for coarse pointers (touch) |
+| `pointerSize` | `number` | — | Hit target size when `useCoarsePointer` is enabled |
+| `ssr` | `boolean` | — | Enable server-side rendering mode |
+
 ### `useChart(options)`
 
-Returns a `RefObject<HTMLDivElement>` to attach to a container div. Accepts all `ChartProps` fields.
+Returns a `RefObject<HTMLDivElement>` to attach to a container div. Accepts `UseChartOptions` — the same fields as `ChartProps` except `className`, `style`, and `deepMemo`, which are `Chart`-only.
 
 ### `connectCharts(group)` / `disconnectCharts(group)`
 

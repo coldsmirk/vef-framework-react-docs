@@ -1,16 +1,17 @@
 ---
-sidebar_position: 104
+title: "Upload"
+description: "支持可选图片裁剪功能的文件上传组件。"
 ---
 
-# Upload 上传
+# Upload
 
-文件上传组件，支持可选的图片裁剪功能。
+支持可选图片裁剪功能的文件上传组件。
 
-> **来源：** 封装 `antd` Upload 并提供 VEF 图片裁剪增强。完整文档：[Ant Design Upload](https://ant.design/components/upload-cn/)
+> **来源：** 基于 `antd` 的 Upload 封装，并增加了 VEF 图片裁剪增强功能。完整文档：[Ant Design Upload](https://ant.design/components/upload/)
 
-## VEF 增强说明
+## VEF 增强
 
-VEF 新增了 `enableCrop` 和 `cropperProps`，通过 `antd-img-crop` 在上传前进行图片裁剪。
+VEF 新增了 `enableCrop` 和 `cropperProps`，可在上传前通过 `antd-img-crop` 实现内联图片裁剪。
 
 ## 基础用法
 
@@ -24,13 +25,13 @@ export default function Demo() {
       listType="text"
       onChange={(info) => console.log(info)}
     >
-      <button>点击上传</button>
+      <button>Click to Upload</button>
     </Upload>
   );
 }
 ```
 
-## 图片上传带裁剪
+## 带裁剪功能的图片上传
 
 ```tsx
 import { Upload } from '@vef-framework-react/components';
@@ -44,7 +45,7 @@ export default function Demo() {
       cropperProps={{ aspectRatio: 1 }}
       maxCount={1}
     >
-      <div>+ 上传</div>
+      <div>+ Upload</div>
     </Upload>
   );
 }
@@ -54,18 +55,18 @@ export default function Demo() {
 
 ```tsx
 <Upload action="/api/upload" pastable>
-  <button>上传或粘贴</button>
+  <button>Upload or Paste</button>
 </Upload>
 ```
 
 ## API
 
-继承 Ant Design `UploadProps`，另有：
+在 Ant Design `UploadProps` 基础上扩展了以下属性：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
 | `enableCrop` | `boolean` | `false` | 上传前启用图片裁剪 |
-| `cropperProps` | `ImgCropProps`（不含 `children`） | — | 图片裁剪器配置 |
-| `pastable` | `boolean` | `false` | 允许从剪贴板粘贴图片 |
+| `cropperProps` | `ImgCropProps` (without `children`) | — | 图片裁剪器配置 |
+| `pastable` | `boolean` | `true` | 允许从剪贴板粘贴图片（VEF 将 antd 默认的 `false` 改为了 `true`） |
 
-其他属性请参阅 [Ant Design Upload 文档](https://ant.design/components/upload-cn/)。
+其余属性请参阅 [Ant Design Upload 文档](https://ant.design/components/upload/)。

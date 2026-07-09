@@ -1,5 +1,6 @@
 ---
-sidebar_position: 11
+title: "Grid"
+description: "A responsive auto-fill grid layout with optional collapse/expand support."
 ---
 
 # Grid
@@ -21,7 +22,7 @@ import { Grid } from '@vef-framework-react/components';
 
 export default function Demo() {
   return (
-    <Grid baseWidth={200} gap="middle">
+    <Grid baseWidth={200} gap="medium">
       <div>Item 1</div>
       <div>Item 2</div>
       <div>Item 3</div>
@@ -40,7 +41,7 @@ import { Grid } from '@vef-framework-react/components';
 
 export default function Demo() {
   return (
-    <Grid baseWidth={200} gap="middle">
+    <Grid baseWidth={200} gap="medium">
       <Grid.Item span={2}>Wide item (spans 2 columns)</Grid.Item>
       <div>Normal item</div>
       <div>Normal item</div>
@@ -51,34 +52,39 @@ export default function Demo() {
 
 ## Collapsible Grid (Search Filters)
 
+`useGridCollapsed` reads the collapsed state from the nearest `<Grid>`'s context, so it must be called from a component rendered as a descendant of `<Grid>` — it throws if there's no `<Grid>` ancestor.
+
 ```tsx
 import { Grid, Button } from '@vef-framework-react/components';
 import { useGridCollapsed } from '@vef-framework-react/components';
 
-export default function SearchForm() {
-  const [collapsed, setCollapsed] = useGridCollapsed(false);
+function CollapseToggle() {
+  const { isCollapsed, setCollapsed } = useGridCollapsed();
 
   return (
-    <>
-      <Grid
-        baseWidth={240}
-        gap="middle"
-        isCollapsed={collapsed}
-        collapsedRows={1}
-        onCollapseChange={setCollapsed}
-      >
-        <div>Filter 1</div>
-        <div>Filter 2</div>
-        <div>Filter 3</div>
-        <div>Filter 4</div>
-        <div>Filter 5</div>
-        <Grid.Item suffix>
-          <Button onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? 'Expand' : 'Collapse'}
-          </Button>
-        </Grid.Item>
-      </Grid>
-    </>
+    <Button onClick={() => setCollapsed(!isCollapsed)}>
+      {isCollapsed ? 'Expand' : 'Collapse'}
+    </Button>
+  );
+}
+
+export default function SearchForm() {
+  return (
+    <Grid
+      baseWidth={240}
+      gap="medium"
+      defaultIsCollapsed
+      collapsedRows={1}
+    >
+      <div>Filter 1</div>
+      <div>Filter 2</div>
+      <div>Filter 3</div>
+      <div>Filter 4</div>
+      <div>Filter 5</div>
+      <Grid.Item suffix>
+        <CollapseToggle />
+      </Grid.Item>
+    </Grid>
   );
 }
 ```
@@ -108,7 +114,7 @@ export default function SearchForm() {
 | `collapsedRows` | `number` | `1` | Number of rows shown when collapsed |
 | `onCollapseChange` | `(isCollapsed: boolean) => void` | — | Collapse state change callback |
 
-`FullSize` values: `'mini' | 'small' | 'middle' | 'large' | 'xlarge'`
+`FullSize` values: `'extra-small' | 'small' | 'medium' | 'large' | 'extra-large'`
 
 ### GridItemProps
 
@@ -121,10 +127,10 @@ export default function SearchForm() {
 ### `useGridCollapsed`
 
 ```tsx
-const [isCollapsed, setIsCollapsed] = useGridCollapsed(false);
+const { isCollapsed, setCollapsed } = useGridCollapsed();
 ```
 
-A simple state hook for managing grid collapse state.
+Takes no arguments. Reads `{ isCollapsed, setCollapsed }` from the nearest `<Grid>`'s context — must be called from a component rendered as a descendant of `<Grid>`; throws if there's no `<Grid>` ancestor.
 
 ## Best Practices
 

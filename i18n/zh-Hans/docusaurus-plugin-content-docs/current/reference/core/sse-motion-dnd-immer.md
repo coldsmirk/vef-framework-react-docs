@@ -1,13 +1,13 @@
 ---
-sidebar_position: 6
 title: SSE、Motion、DnD 与 Immer
+description: "SseClient 的选项与事件，以及 motion、拖放和 Immer 的重导出。"
 ---
 
 # SSE、Motion、DnD 与 Immer
 
 ## SSE（Server-Sent Events）
 
-`@vef-framework-react/core` 提供了基于 `@microsoft/fetch-event-source` 构建的 SSE 客户端，支持自动 Token 注入和重试。
+`@vef-framework-react/core` 提供了一个基于 `@microsoft/fetch-event-source` 构建的 SSE 客户端，支持自动 Token 注入与重试。
 
 ### `SseClient`
 
@@ -29,25 +29,25 @@ await sseClient.stream(
   {
     url: "/api/chat/stream",
     method: "POST",
-    body: { message: "你好" }
+    body: { message: "Hello" }
   },
   {
-    onOpen: response => console.log("已连接", response.status),
+    onOpen: response => console.log("Connected", response.status),
     onMessage: event => {
       console.log(event.data);
     },
     onError: error => console.error(error),
-    onClose: () => console.log("已关闭")
+    onClose: () => console.log("Closed")
   }
 );
 
-// 中止所有活跃流
+// Abort all active streams
 sseClient.abort();
 ```
 
 ### `createSseClient`
 
-创建 `SseClient` 的工厂函数：
+用于创建 `SseClient` 的工厂函数：
 
 ```ts
 import { createSseClient } from "@vef-framework-react/core";
@@ -65,7 +65,7 @@ const sseClient = createSseClient({
 | `enableRetry` | `boolean` | `true` | 启用自动重试 |
 | `maxRetries` | `number` | `3` | 最大重试次数 |
 | `showErrorMessage` | `(msg) => void` | — | 错误消息处理器 |
-| `onTokenExpired` | `() => Awaitable<boolean>` | — | Token 刷新回调；返回 `true` 则重试 |
+| `onTokenExpired` | `() => Awaitable<boolean>` | — | Token 刷新回调；返回 `true` 表示重试 |
 
 ### `SseRequestConfig`
 
@@ -94,21 +94,21 @@ const sseClient = createSseClient({
 ```tsx
 import { motion, AnimatePresence, LayoutGroup, Reorder, MotionProvider } from "@vef-framework-react/core";
 
-// 动画元素
+// Animated element
 <motion.div
   initial={{ opacity: 0 }}
   animate={{ opacity: 1 }}
   exit={{ opacity: 0 }}
 >
-  内容
+  Content
 </motion.div>
 
-// 出现/消失动画
+// Presence animation
 <AnimatePresence>
   {isVisible && <motion.div key="item">...</motion.div>}
 </AnimatePresence>
 
-// 可排序列表
+// Reorderable list
 <Reorder.Group values={items} onReorder={setItems}>
   {items.map(item => (
     <Reorder.Item key={item.id} value={item}>
@@ -134,9 +134,9 @@ import { motion, AnimatePresence, LayoutGroup, Reorder, MotionProvider } from "@
 
 ---
 
-## 拖拽（Drag and Drop）
+## 拖放
 
-从 `@dnd-kit` 和 `@hello-pangea/dnd` 重导出，提供拖拽支持。
+从 `@dnd-kit` 和 `@hello-pangea/dnd` 重导出，提供拖放支持。
 
 ### dnd-kit（现代 API）
 
@@ -162,14 +162,14 @@ import {
 ```ts
 import { moveArrayItem, swapArrayItem, moveDragItem, swapDragItem } from "@vef-framework-react/core";
 
-// 将索引 0 的元素移动到索引 2
+// Move item from index 0 to index 2
 const newItems = moveArrayItem(items, 0, 2);
 
-// 交换索引 0 和 2 的元素
+// Swap items at index 0 and 2
 const newItems = swapArrayItem(items, 0, 2);
 ```
 
-### 修饰器
+### 修饰符
 
 ```ts
 import {
@@ -182,7 +182,7 @@ import {
 } from "@vef-framework-react/core";
 ```
 
-### @hello-pangea/dnd（兼容旧版 API）
+### @hello-pangea/dnd（旧版 API）
 
 ```tsx
 import { DragDropContext, Droppable, Draggable } from "@vef-framework-react/core";
@@ -200,7 +200,7 @@ import { DragDropContext, Droppable, Draggable } from "@vef-framework-react/core
 import { produce } from "@vef-framework-react/core";
 
 const nextState = produce(state, draft => {
-  draft.user.name = "张三";
+  draft.user.name = "Alice";
   draft.items.push({ id: 1 });
 });
 ```
@@ -223,14 +223,14 @@ import { applyPatches } from "@vef-framework-react/core";
 const undoneState = applyPatches(nextState, inversePatches);
 ```
 
-### `currentState` 和 `originalState`
+### `currentState` 与 `originalState`
 
 ```ts
 import { currentState, originalState } from "@vef-framework-react/core";
 
 produce(state, draft => {
-  const snapshot = currentState(draft);   // 当前 draft 值
-  const base = originalState(draft);      // 原始基础值
+  const snapshot = currentState(draft);   // current draft value
+  const base = originalState(draft);      // original base value
 });
 ```
 

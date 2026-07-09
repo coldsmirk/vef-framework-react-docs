@@ -1,5 +1,6 @@
 ---
-sidebar_position: 3
+title: "Input"
+description: "A basic widget for getting user input as a text field."
 ---
 
 # Input
@@ -121,7 +122,7 @@ export default function Demo() {
 | `defaultValue` | `string` | — | Initial value (uncontrolled) |
 | `placeholder` | `string` | — | Placeholder text |
 | `disabled` | `boolean` | `false` | Disable the input |
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | Input size |
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Input size (`'middle'` is a deprecated alias for `'medium'`) |
 | `variant` | `'outlined' \| 'filled' \| 'borderless'` | `'outlined'` | Visual variant |
 | `prefix` | `ReactNode` | — | Content before input |
 | `suffix` | `ReactNode` | — | Content after input |
@@ -155,4 +156,10 @@ Inherits all `Input` props, plus:
 
 - Always pair `Input` with a `label` or use it inside a `Form.Item` for accessibility.
 - Use `allowClear` for search-like inputs to improve UX.
-- For form usage, prefer the `useForm` field components (`form.Field.Input`, `form.Field.TextArea`, etc.) which handle validation automatically.
+- For form usage, prefer the [`Form`](./form) field components, which handle value binding and validation automatically:
+
+```tsx
+<form.AppField name="username">
+  {(field) => <field.Input label="Username" />}
+</form.AppField>
+```

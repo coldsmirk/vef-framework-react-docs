@@ -1,5 +1,6 @@
 ---
-sidebar_position: 107
+title: "Typography"
+description: "Text display components: `Title`, `Text`, `Paragraph`, and `Link`."
 ---
 
 # Typography
@@ -67,6 +68,8 @@ export default function Demo() {
 ```
 
 ## API
+
+`Title`, `Text`, `Paragraph`, and `Link` are pure `antd` re-exports (`Typography.Title` / `Typography.Text` / `Typography.Paragraph` / `Typography.Link`) with no VEF-specific props. The tables below list the most commonly used props; see the [Ant Design Typography documentation](https://ant.design/components/typography/) for the full prop set on each component (including `Link`, which is omitted here).
 
 ### Title
 

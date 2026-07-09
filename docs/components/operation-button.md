@@ -1,5 +1,6 @@
 ---
-sidebar_position: 19
+title: "OperationButton"
+description: "A combination of [`ActionButton`](./action-button) and [`PermissionGate`](./permission-gate) — an action button with built-in async loading, optional confirmation dialog, and permission-based visibility."
 ---
 
 # OperationButton
@@ -22,7 +23,7 @@ import { Pencil } from 'lucide-react';
 export default function Demo() {
   return (
     <OperationButton
-      permTokens="user:edit"
+      requiredPermissions="user:edit"
       icon={<Pencil size={14} />}
       onClick={async () => {
         await editUser(id);
@@ -40,7 +41,7 @@ If the user lacks `user:edit` permission, the button is not rendered at all.
 
 ```tsx
 <OperationButton
-  permTokens="user:delete"
+  requiredPermissions="user:delete"
   danger
   confirmable
   confirmTitle="Delete User"
@@ -61,13 +62,13 @@ If the user lacks `user:edit` permission, the button is not rendered at all.
   render: (_, record) => (
     <Space>
       <OperationButton
-        permTokens="user:edit"
+        requiredPermissions="user:edit"
         onClick={async () => openEdit(record)}
       >
         Edit
       </OperationButton>
       <OperationButton
-        permTokens="user:delete"
+        requiredPermissions="user:delete"
         danger
         confirmable
         onClick={async () => deleteUser(record.id)}
@@ -85,7 +86,7 @@ If the user lacks `user:edit` permission, the button is not rendered at all.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `permTokens` | `string \| string[]` | — | Required permission token(s) |
+| `requiredPermissions` | `string \| string[]` | — | Required permission token(s) |
 | `checkMode` | `'any' \| 'all'` | `'any'` | Permission check mode |
 | `confirmable` | `boolean` | `false` | Show confirmation before executing |
 | `confirmMode` | `'popover' \| 'dialog'` | `'popover'` | Confirmation UI style |

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 105
+title: "Tree"
+description: "A tree view component for displaying hierarchical data."
 ---
 
 # Tree
@@ -32,7 +33,7 @@ export default function Demo() {
 
 ## VEF Enhancement: `useDataOptionsTree`
 
-Load tree data from an async source with built-in loading state and search support:
+Load tree data from an async source with built-in loading state and search support. Fetch options are nested under `queryOptions` (the same shape TanStack Query's `useQuery` accepts); `useDataOptionsTree`-specific options sit alongside it.
 
 ```tsx
 import { Tree, useDataOptionsTree } from '@vef-framework-react/components';
@@ -44,8 +45,10 @@ async function fetchDepartments() {
 
 export default function Demo() {
   const { treeProps, searchValue, setSearchValue } = useDataOptionsTree({
-    queryKey: ['departments'],
-    queryFn: fetchDepartments,
+    queryOptions: {
+      queryKey: ['departments'],
+      queryFn: fetchDepartments,
+    },
   });
 
   return (
@@ -65,9 +68,15 @@ export default function Demo() {
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `queryKey` | `QueryKey` | required | TanStack Query cache key |
-| `queryFn` | `() => Promise<TData[]>` | required | Async data fetcher |
+| `queryOptions` | `UseQueryOptions<TQueryFnData[], TData[], TParams>` | required | TanStack Query options (`queryKey`, `queryFn`, and the rest of `useQuery`'s options) |
 | `onFetch` | `(data: TData[]) => void` | — | Callback after data is fetched |
+| `labelKey` | `string \| (item: TData) => string` | `"label"` | Field mapping for the node label |
+| `valueKey` | `string \| (item: TData) => Key` | `"value"` | Field mapping for the node value |
+| `disabledKey` | `string \| (item: TData) => boolean \| undefined` | `"disabled"` | Field mapping for the disabled state |
+| `descriptionKey` | `string \| (item: TData) => string \| undefined` | `"description"` | Field mapping for the node description |
+| `childrenKey` | `string \| (item: TData) => TData[] \| undefined` | `"children"` | Field mapping for nested children (recursively transformed) |
+
+Each `*Key` option accepts either a string path (e.g. `"user.name"`) or an extractor function.
 
 Returns `{ treeProps, isFetching, searchValue, setSearchValue }`.
 

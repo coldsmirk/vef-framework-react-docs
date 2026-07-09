@@ -1,38 +1,36 @@
 ---
-sidebar_position: 1
 title: Starter 包概览
+description: "@vef-framework-react/starter 涵盖的内容，以及在启动、路由与应用壳层之间的建议阅读顺序。"
 ---
 
 # Starter 包概览
 
-`@vef-framework-react/starter` 是把 VEF 真正“拼成一个应用”的那层包。
+`@vef-framework-react/starter` 是将 VEF 打造成完整应用壳层的包。
 
-它主要负责三件事:
+它主要涵盖三个方面:
 
-1. 应用启动
-2. 路由与布局
-3. 应用壳层组件（根组件、布局、登录、路由状态页）
+1. 应用启动（`createApp`、`createApiClient`）
+2. 路由（`createRouter`、路由选项辅助函数）
+3. 应用级状态（`useAppStore`、`useTabStore`、`useThemeStore`）
 
-页面级容器、表单弹窗、表格与 CRUD 体系请参见 [组件 / 页面、表单容器与 CRUD](../components/page-and-crud.md)。
+应用壳层本身——根应用、布局、登录及状态页（`App`、`Layout`、`Login`、`AccessDenied`、`Error`、`NotFound`、`NProgress` 及相关组件）——是**内部**实现：均未从该包导出。它完全通过上述函数进行配置；各函数所接受的选项形状参见 [Application Shell](./application-shell.md)。
 
-> **注意（v2.1.6）：** `Page`、`FlexCard`、`FormModal`、`FormDrawer`、`ProSearch`、`ProTable`、`Crud`、`CrudPage` 和 `createCrudKit` 已从 `starter` 迁移到 `@vef-framework-react/components`。
+页面级容器、表单弹窗、表格以及 CRUD 体系位于 `@vef-framework-react/components` 中——参见 [Components / CRUD](../../components/crud.md)。
 
-1. [应用启动与路由](./bootstrap-and-routing.md)
+## 建议阅读顺序
+
+1. [启动与路由](./bootstrap-and-routing.md)
 2. [应用壳层](./application-shell.md)
 3. [Store、常量与类型](./stores-and-types.md)
 
 ## 常用导出
 
-| 导出 | 用途 |
-| --- | --- |
-| `createApp` | 启动应用 |
-| `createApiClient` | 创建应用级 API 客户端 |
-| `createRouter` | 创建路由实例 |
-| `createRootRouteOptions` | 根路由 |
-| `createLayoutRouteOptions` | 布局和守卫 |
-| `App` | 应用根组件 |
-| `Layout` / `BaseLayout` | 应用壳层布局 |
-| `Login` | 内置登录页 |
-| `RouterProvider` | 路由 Provider |
-| `ThemeConfigProvider` | 主题 Provider |
-| `setupAppVersionNotification` | 应用版本检查与通知 |
+- `createApp`
+- `createApiClient`
+- `createRouter`
+- `createRootRouteOptions`
+- `createLayoutRouteOptions`
+- `createLoginRouteOptions`
+- `createAccessDeniedRouteOptions`
+- `setupAppVersionNotification`
+- `useAppStore` / `useTabStore` / `useThemeStore`

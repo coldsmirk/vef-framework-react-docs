@@ -1,17 +1,18 @@
 ---
-sidebar_position: 12
+title: "Stack"
+description: "纵向 flex 布局容器，是对 Ant Design `Flex` 组件 `vertical` 预设的便捷封装。"
 ---
 
-# Stack 垂直堆叠
+# Stack
 
-垂直 flex 布局容器，是 Ant Design `Flex` 组件 `vertical` 模式的便捷封装。
+纵向 flex 布局容器，是对 Ant Design `Flex` 组件 `vertical` 预设的便捷封装。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design 的一部分。
 
 ## 何时使用
 
-- 将子元素垂直排列并保持一致间距。
-- 替代 `<div style={{ display: 'flex', flexDirection: 'column' }}>` 样板代码。
+- 将子元素纵向排列，并保持一致的间距。
+- 用语义化组件替代 `<div style={{ display: 'flex', flexDirection: 'column' }}>`。
 
 ## 基础用法
 
@@ -21,9 +22,9 @@ import { Stack } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Stack gap="middle">
-      <div>项目 1</div>
-      <div>项目 2</div>
-      <div>项目 3</div>
+      <div>Item 1</div>
+      <div>Item 2</div>
+      <div>Item 3</div>
     </Stack>
   );
 }
@@ -37,8 +38,8 @@ import { Stack } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Stack gap="small" align="center">
-      <div>居中项目 1</div>
-      <div>居中项目 2</div>
+      <div>Centered Item 1</div>
+      <div>Centered Item 2</div>
     </Stack>
   );
 }
@@ -46,14 +47,14 @@ export default function Demo() {
 
 ## API
 
-`Stack` 继承所有 `Flex` 属性（除 `vertical` 和 `orientation`，已固定为垂直方向），另有：
+`Stack` 继承了除 `vertical`、`orientation`（已固定为纵向）和 `gap`（在下方重新定义）之外的所有 `Flex` 属性，并新增：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | 子元素间距 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `gap` | `'small' \| 'medium' \| 'middle' \| 'large' \| CSSProperties['gap']` | `'small'` | 子元素间距 |
 | `align` | `CSSProperties['alignItems']` | — | 交叉轴对齐方式 |
 | `justify` | `CSSProperties['justifyContent']` | — | 主轴对齐方式 |
-| `wrap` | `CSSProperties['flexWrap']` | — | 换行方式 |
+| `wrap` | `boolean \| CSSProperties['flexWrap']` | — | 换行方式 |
 | `flex` | `CSSProperties['flex']` | — | flex 伸缩 |
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |
@@ -61,5 +62,5 @@ export default function Demo() {
 
 ## 最佳实践
 
-- 垂直布局使用 `Stack`，居中内容使用 [`Center`](./center)。
-- 优先使用具名间距（`'small'`、`'middle'`、`'large'`）而非像素值，与设计系统保持一致。
+- 纵向布局使用 `Stack`，居中内容使用 [`Center`](./center)。
+- 优先使用具名间距（`'small'`、`'medium'`、`'large'`）而非像素值，以与设计系统保持一致。

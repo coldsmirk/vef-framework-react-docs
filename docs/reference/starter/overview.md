@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1
 title: Starter Package Overview
+description: What @vef-framework-react/starter covers and the suggested reading order across bootstrap, routing, and the application shell.
 ---
 
 # Starter Package Overview
@@ -9,11 +9,13 @@ title: Starter Package Overview
 
 It mainly covers three areas:
 
-1. application bootstrap
-2. routing and layouts
-3. application shell components (root app, layouts, login, status pages)
+1. application bootstrap (`createApp`, `createApiClient`)
+2. routing (`createRouter`, the route-option helpers)
+3. app-level state (`useAppStore`, `useTabStore`, `useThemeStore`)
 
-Page-level containers, form dialogs, tables, and the CRUD stack are documented under [Components / Pages, Form Containers, and CRUD](../components/page-and-crud.md).
+The application shell itself — the root app, layouts, login, and status pages (`App`, `Layout`, `Login`, `AccessDenied`, `Error`, `NotFound`, `NProgress`, and friends) — is **internal**: none of it is exported from the package. It is configured entirely through the functions above; see [Application Shell](./application-shell.md) for the option shapes each one accepts.
+
+Page-level containers, form dialogs, tables, and the CRUD stack live in `@vef-framework-react/components` — see [Components / CRUD](../../components/crud.md).
 
 ## Suggested Reading Order
 
@@ -28,9 +30,7 @@ Page-level containers, form dialogs, tables, and the CRUD stack are documented u
 - `createRouter`
 - `createRootRouteOptions`
 - `createLayoutRouteOptions`
-- `App`
-- `Layout` / `BaseLayout`
-- `Login`
-- `RouterProvider`
-- `ThemeConfigProvider`
+- `createLoginRouteOptions`
+- `createAccessDeniedRouteOptions`
 - `setupAppVersionNotification`
+- `useAppStore` / `useTabStore` / `useThemeStore`

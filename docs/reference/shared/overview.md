@@ -1,11 +1,11 @@
 ---
-sidebar_position: 1
 title: Shared Package Overview
+description: What @vef-framework-react/shared covers and the suggested reading order across its four topic pages.
 ---
 
 # Shared Package Overview
 
-`@vef-framework-react/shared` is the general-purpose foundation package of the framework. It mainly contains:
+`@vef-framework-react/shared` is the general-purpose, pure-function foundation package of the framework. It has no React or DOM dependency beyond a few browser APIs (`crypto`, `atob`/`btoa`) used internally. It mainly contains:
 
 1. type utilities
 2. date, formatting, and validation helpers

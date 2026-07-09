@@ -1,5 +1,6 @@
 ---
-sidebar_position: 28
+title: "SplitText"
+description: "Animates text by splitting it into characters, words, or lines using GSAP."
 ---
 
 # SplitText
@@ -54,4 +55,7 @@ export default function Demo() {
 | `from` | `gsap.TweenVars` | `{ opacity: 0, y: 40 }` | Initial GSAP properties |
 | `to` | `gsap.TweenVars` | `{ opacity: 1, y: 0 }` | Target GSAP properties |
 | `threshold` | `number` | `0.1` | Intersection threshold to trigger animation (0–1) |
+| `rootMargin` | `string` | `'-100px'` | Root margin for the scroll trigger |
+| `textAlign` | `CSSProperties['textAlign']` | `'center'` | Text alignment |
 | `className` | `string` | — | CSS class |
+| `onLetterAnimationComplete` | `() => void` | — | Callback fired when all animations complete |

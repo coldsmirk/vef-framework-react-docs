@@ -1,6 +1,6 @@
 ---
-sidebar_position: 2
 title: Quick Start
+description: Wire up Vite, the API client, the router, and a first route to get a minimal VEF application running.
 ---
 
 # Quick Start
@@ -101,7 +101,7 @@ export const login = apiClient.createMutationFn(
 
 ## Step 4: Create the Root and Layout Routes
 
-```tsx title="src/pages/__root.tsx"
+```ts title="src/pages/__root.ts"
 import type { RouterContext } from "@vef-framework-react/starter";
 
 import { createRootRouteWithContext } from "@tanstack/react-router";
@@ -224,9 +224,8 @@ createApp().render({
 
 ```tsx title="src/pages/_layout/index/route.tsx"
 import { createFileRoute } from "@tanstack/react-router";
-import { Button, Card, Text } from "@vef-framework-react/components";
+import { Button, Card, Page, Text, Title } from "@vef-framework-react/components";
 import { useQuery } from "@vef-framework-react/core";
-import { Page } from "@vef-framework-react/components";
 
 import { getDashboard } from "../../../apis/dashboard";
 
@@ -241,7 +240,8 @@ function RouteComponent() {
   });
 
   return (
-    <Page title="Home">
+    <Page margin>
+      <Title level={3}>Home</Title>
       <Card>
         <Text>{dashboard.data?.message ?? "Welcome to VEF"}</Text>
         <Button type="primary">Start Building</Button>
@@ -253,9 +253,10 @@ function RouteComponent() {
 
 ## Next Reading
 
-Continue with:
+The skeleton above renders a page, but it doesn't yet talk to a real list, form, or table. Continue with:
 
-1. [Project Structure](./project-structure.md)
+1. [Your First CRUD Page](./first-crud-page.md) — turn this skeleton into a working list-and-form page
 2. [Configuration](./configuration.md)
-3. [Routing](../guide/routing.md)
-4. [API Integration](../guide/api-integration.md)
+3. [Project Structure](./project-structure.md)
+4. [Routing & Layout](../guide/routing.md)
+5. [Data Fetching](../guide/data-fetching.md)

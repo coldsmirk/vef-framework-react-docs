@@ -1,17 +1,17 @@
 ---
-sidebar_position: 4
 title: Store 与 Atom
+description: createStore、createPersistedStore、createComponentStore 及 Jotai atom 的签名。
 ---
 
 # Store 与 Atom
 
-`@vef-framework-react/core` 提供两种状态管理方式：基于 Zustand 的 store 和 Jotai atom。
+`@vef-framework-react/core` 提供两种状态管理方式：基于 Zustand 的 Store 和 Jotai atom。
 
 ## Zustand Store
 
 ### `createStore`
 
-创建带有 `subscribeWithSelector` 和 `immer` 中间件的全局绑定 store。
+创建一个带有 `subscribeWithSelector` 和 `immer` 中间件的全局绑定 Store。
 
 状态类型必须包含 `name: string` 字段。
 
@@ -50,7 +50,7 @@ const increment = useCounterStore(state => state.increment);
 
 ### `createPersistedStore`
 
-创建持久化到 `localStorage` 或 `sessionStorage` 的全局 store。
+创建一个持久化到 `localStorage` 或 `sessionStorage` 的全局 Store。
 
 ```ts
 import { createPersistedStore } from "@vef-framework-react/core";
@@ -81,13 +81,13 @@ export const useThemeStore = createPersistedStore<ThemeState>(
 
 | 选项 | 类型 | 说明 |
 | --- | --- | --- |
-| `name` | `string` | 唯一存储键名 |
+| `name` | `string` | 唯一的存储键 |
 | `storage` | `"local" \| "session"` | 存储类型（默认：`"local"`） |
 | `selector` | `(state) => partial` | 选择需要持久化的字段 |
 
 ### `createComponentStore`
 
-创建基于 React Context 的组件级 store，适合在页面或功能模块内共享状态，而不污染全局状态。
+创建一个由 React Context 支撑的组件作用域 Store，适用于在某个页面或功能内共享状态而不污染全局状态。
 
 ```ts
 import { createComponentStore } from "@vef-framework-react/core";
@@ -110,7 +110,7 @@ export const {
 }));
 ```
 
-用 Provider 包裹页面：
+用提供者包裹页面：
 
 ```tsx
 <PageStoreProvider>
@@ -118,7 +118,7 @@ export const {
 </PageStoreProvider>
 ```
 
-携带初始状态：
+带初始状态：
 
 ```tsx
 <PageStoreProvider initialState={{ selectedId: "default" }}>
@@ -128,18 +128,18 @@ export const {
 
 ### `useDeep` 和 `useShallow`
 
-Zustand store 的选择器比较辅助函数：
+用于 Zustand Store 的选择器比较辅助函数：
 
 ```ts
 import { useDeep, useShallow } from "@vef-framework-react/core";
 
-// 浅比较（对象引用变化但值相同时避免重渲染）
+// Shallow comparison (avoids re-render when object reference changes but values are equal)
 const { count, name } = useCounterStore(useShallow(state => ({
   count: state.count,
   name: state.name
 })));
 
-// 深比较
+// Deep comparison
 const config = useConfigStore(useDeep(state => state.config));
 ```
 
@@ -147,19 +147,20 @@ const config = useConfigStore(useDeep(state => state.config));
 
 | 类型 | 说明 |
 | --- | --- |
-| `SliceStateCreator<TState, TSlice, TPersist>` | store 切片的状态创建器类型 |
-| `UnboundStore<TState>` | 未绑定 React 的原始 Zustand store 类型 |
-| `UseBoundStore<TState>` | 绑定 store 的 hook 类型 |
-| `UseBoundStoreWithPersist<TState>` | 带持久化的绑定 store hook 类型 |
-| `PersistenceOptions<TState, TSelectedState>` | `createPersistedStore` 的选项类型 |
-| `StoreProviderProps<TInitialState>` | 组件 store Provider 的 props 类型 |
-| `UseStore<TState>` | `useStore` 的 hook 签名类型 |
+| `SliceStateCreator<TState, TSlice, TPersist>` | Store 切片的状态创建器类型 |
+| `UnboundStore<TState>` | 未绑定 React 的原始 Zustand Store |
+| `UseBoundStore<TState>` | 已绑定的 Store Hook 类型 |
+| `UseBoundStoreWithPersist<TState>` | 带持久化的已绑定 Store Hook 类型 |
+| `PersistenceOptions<TState, TSelectedState>` | `createPersistedStore` 的选项 |
+| `StoreProviderProps<TInitialState>` | 组件 Store 提供者的 Props |
+| `UseStore<TState>` | `useStore` 的 Hook 签名 |
+| `ReturnedComponentStoreResult<TState, TInitialState>` | `createComponentStore` 的返回类型 —— `{ StoreProvider, useStoreApi, useStore }` |
 
 ---
 
 ## Jotai Atom
 
-适用于不需要完整 store 的轻量级一次性状态。
+用于不需要完整 Store 的轻量、一次性状态。
 
 ### `atom`
 
@@ -175,13 +176,13 @@ const countAtom = atom(0);
 ```tsx
 import { useAtom, useAtomValue, useSetAtom } from "@vef-framework-react/core";
 
-// 读写
+// Read and write
 const [modal, setModal] = useAtom(modalAtom);
 
-// 只读
+// Read only
 const modal = useAtomValue(modalAtom);
 
-// 只写
+// Write only
 const setModal = useSetAtom(modalAtom);
 ```
 
@@ -204,10 +205,10 @@ const store = createAtomStore();
 ```ts
 import { useAtomStore, getDefaultAtomStore } from "@vef-framework-react/core";
 
-// 组件内部
+// Inside component
 const store = useAtomStore();
 
-// React 外部
+// Outside React
 const store = getDefaultAtomStore();
 const value = store.get(countAtom);
 store.set(countAtom, 1);
@@ -220,9 +221,9 @@ store.set(countAtom, 1);
 | `Atom<T>` | 只读 atom 类型 |
 | `PrimitiveAtom<T>` | 可读写的原始 atom 类型 |
 | `WritableAtom<T, Args, Result>` | 可写 atom 类型 |
-| `AtomGetter` | getter 函数类型 |
-| `AtomSetter` | setter 函数类型 |
+| `AtomGetter` | Getter 函数类型 |
+| `AtomSetter` | Setter 函数类型 |
 | `ExtractAtomValue<T>` | 从 atom 中提取值类型 |
 | `ExtractAtomArgs<T>` | 从可写 atom 中提取参数类型 |
 | `ExtractAtomResult<T>` | 从可写 atom 中提取结果类型 |
-| `SetStateAction<T>` | 设置状态的 action 类型 |
+| `SetStateAction<T>` | 设置状态操作类型 |

@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1
 title: Dev Package
+description: defineViteConfig, defineEslintConfig, defineStylelintConfig, and defineCommitlintConfig signatures.
 ---
 
 # Dev Package
@@ -23,22 +23,23 @@ Creates a Vite configuration with VEF defaults.
 import { defineViteConfig } from "@vef-framework-react/dev";
 
 export default defineViteConfig({
-  base: "/my-app/",
-  server: {
-    port: 3000,
-    proxy: {
-      "/api": "http://localhost:8080"
-    }
-  }
+  proxies: {
+    "/api": "http://localhost:8080"
+  },
+  routerHistory: "browser"
 });
 ```
 
-Defaults applied by `defineViteConfig`:
+`DefineConfigOptions` fields:
 
-- React plugin with Babel and Emotion support
-- TypeScript path alias resolution
-- CSS modules configuration
-- Production chunk splitting
+| Option | Type | Description |
+| --- | --- | --- |
+| `resolve` | `Pick<UserConfig["resolve"], "alias" \| "conditions">` | Extra Vite resolve config, merged with the framework's own |
+| `plugins` | `PluginOption[]` | Additional Vite plugins, prepended to the framework's plugin list |
+| `autoEnhancePlugins` | `AutoEnhancePlugin[]` | Extra auto-enhance plugins (JSX transforms applied to specific component patterns) |
+| `routerHistory` | `"hash" \| "browser"` | TanStack Router history mode (default: `"browser"`) |
+| `react` | `ReactPluginOptions` | Options forwarded to the React plugin |
+| `proxies` | `Record<string, string \| ProxyOptions>` | Dev-server proxy table |
 
 ## `defineEslintConfig`
 
@@ -54,13 +55,9 @@ export default defineEslintConfig();
 With overrides:
 
 ```ts
-export default defineEslintConfig([
-  {
-    rules: {
-      "no-console": "warn"
-    }
-  }
-]);
+export default defineEslintConfig({
+  ignores: ["scripts/**"]
+});
 ```
 
 Included rule sets:
@@ -85,11 +82,11 @@ With overrides:
 
 ```ts
 export default defineStylelintConfig({
-  rules: {
-    "color-no-invalid-hex": true
-  }
+  scss: true
 });
 ```
+
+The only supported field is `scss?: boolean` — the framework already defaults SCSS on; pass `{ scss: false }` for a plain-CSS project.
 
 ## `defineCommitlintConfig`
 

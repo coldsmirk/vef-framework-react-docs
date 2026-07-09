@@ -1,33 +1,29 @@
 ---
-sidebar_position: 3
 title: 查询与变更
+description: "VEF 风格的 TanStack Query 重导出、QueryClientOptions 与 mutation meta 扩展。"
 ---
 
 # 查询与变更
 
-`@vef-framework-react/core` 重导出了 TanStack React Query，并提供了 VEF 专属的类型包装和预配置的 `QueryClient`。
+`@vef-framework-react/core` 重导出了 TanStack React Query，并提供了 VEF 专属的类型包装与预配置的 `QueryClient`。
 
-## `createQueryClient`
+## `QueryClientOptions`
 
-创建带有 mutation cache 和默认选项的 `QueryClient`。
+`QueryClient` 不能直接构造——`createQueryClient` 是一个内部工厂函数，并未从包根导出。应用代码应将这些选项配置为 `ApiClientOptions.query`，并传递给 `createApiClient`（参见 [HTTP 与 API 客户端](./http-and-api.md)）：
 
 ```ts
-import { createQueryClient } from "@vef-framework-react/core";
-
-const queryClient = createQueryClient({
+const queryOptions = {
   staleTime: 5_000,
   gcTime: 300_000,
   showSuccessMessage: message => notification.success(message)
-});
+};
 ```
-
-### `QueryClientOptions`
 
 | 选项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `staleTime` | `number` | `5000` | 数据过期时间（毫秒） |
-| `gcTime` | `number` | `300000` | 非活跃查询垃圾回收时间（毫秒） |
-| `showSuccessMessage` | `(msg) => void` | — | 变更成功消息回调 |
+| `staleTime` | `number` | `5000` | 数据被视为过期前的时间（毫秒） |
+| `gcTime` | `number` | `300000` | 非活跃查询被垃圾回收前的时间（毫秒） |
+| `showSuccessMessage` | `(msg) => void` | — | 用于显示变更成功消息的回调 |
 
 ## `useQuery`
 
@@ -100,9 +96,9 @@ const states = useMutationState({
 });
 ```
 
-## `useIsFetching` 和 `useIsMutating`
+## `useIsFetching` 与 `useIsMutating`
 
-检查全局 fetch/mutation 状态的底层 hook。大多数情况下，优先使用 `@vef-framework-react/hooks` 中的 `useHasFetching` 和 `useHasMutating`，它们接受类型化的查询/变更键。
+用于检查全局 fetch/mutation 状态的底层 hook。多数情况下，优先使用来自 `@vef-framework-react/hooks` 的 `useHasFetching` 和 `useHasMutating`，它们接受类型化的查询/变更键。
 
 ## `keepPreviousData`
 
@@ -127,9 +123,9 @@ useQuery({
 });
 ```
 
-## `matchQuery` 和 `matchMutation`
+## `matchQuery` 与 `matchMutation`
 
-用于缓存操作中过滤查询和变更的辅助函数：
+用于在缓存操作中过滤查询和变更的辅助函数：
 
 ```ts
 import { matchQuery, matchMutation } from "@vef-framework-react/core";
@@ -142,14 +138,14 @@ import { matchQuery, matchMutation } from "@vef-framework-react/core";
 | `UseQueryResult<TData>` | `useQuery` 的结果类型 |
 | `DefinedUseQueryResult<TData>` | 初始数据已定义时的结果类型 |
 | `UseQueryOptions<TQueryFnData, TData, TParams>` | `useQuery` 的选项类型 |
-| `DefinedInitialDataOptions` | 初始数据始终存在时的选项类型 |
-| `UndefinedInitialDataOptions` | 初始数据可能不存在时的选项类型 |
+| `DefinedInitialDataOptions` | 初始数据始终已定义时的选项类型 |
+| `UndefinedInitialDataOptions` | 初始数据可能未定义时的选项类型 |
 | `UseInfiniteQueryOptions` | `useInfiniteQuery` 的选项类型 |
 | `UseMutationResult<TData, TParams>` | `useMutation` 的结果类型 |
 | `QueryKeyHashFunction` | 自定义查询键哈希函数类型 |
-| `PlaceholderDataFunction` | `placeholderData` 回调类型 |
+| `PlaceholderDataFunction` | `placeholderData` 回调的类型 |
 | `RefetchOptions` | `refetch()` 的选项类型 |
-| `StaleTime` | `staleTime` 选项类型 |
+| `StaleTime` | `staleTime` 选项的类型 |
 | `MutationMeta` | 扩展后的变更元数据类型 |
 | `QueryMeta` | 查询元数据类型 |
 | `SkipQueryToken` | `skipQueryToken` 的类型 |

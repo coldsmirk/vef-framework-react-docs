@@ -1,34 +1,27 @@
 ---
-sidebar_position: 5
-title: Stores, Constants, and Types
+title: Stores and Types
+description: The app/tab/theme Zustand stores and the domain, user, and router types exported by @vef-framework-react/starter.
 ---
 
-# Stores, Constants, and Types
+# Stores and Types
 
 ## Store Exports
 
-- `useAppStore`
-- `useTabStore`
-- `useThemeStore`
+- `useAppStore` — authentication state, current user info, menu maps, and permission tokens; persisted (`isAuthenticated` / `custom` / `authTokens` survive reload).
+- `useTabStore` — the open-tabs list backing the multi-tab layout; persisted.
+- `useThemeStore` — color scheme, semantic theme colors, menu layout mode, and layout toggles; persisted.
+
+All three are created with `createPersistedStore` (see [Store and Atom](../core/store-and-atom.md)) — their state types do not need a `name` field; the storage key comes from the persistence options instead.
 
 Related types:
 
 - `AppState`
 - `Tab`
 - `TabState`
-- `ColorScheme`
-- `ThemeColors`
+- `ColorScheme` — `"system" | "light" | "dark"`
+- `ThemeColors` — `Record<SemanticColor, string>`
+- `MenuLayoutMode` — `"vertical" | "horizontal" | "mixed"`
 - `ThemeState`
-
-## Constants
-
-- `RELOAD_PAGE_EVENT`
-- `ACCESS_DENIED_EVENT`
-- `UNAUTHENTICATED_EVENT`
-- `STORAGE_KEY_PREFIX_STORE`
-- `STORAGE_KEY_SUFFIX_STORE`
-- `SYMBOL_PAGINATION`
-- `SYMBOL_SORT`
 
 ## API and Domain Types
 
@@ -52,13 +45,17 @@ Batch parameter helper:
 
 ## User and Menu Types
 
-- `Gender`
-- `UserMenuType`
-- `UserMenu`
+- `Gender` — `"male" | "female" | "unknown"`
+- `UserMenuType` — `"directory" | "menu" | "view" | "report"`, open to project-specific extension via `LiteralUnion`
+- `UserMenu` — `type` / `path` / `name` / `icon?` / `meta?` / `children?`
+- `UserMenuMeta` — `params?: Record<string, string>` and `search?: Record<string, string>` bound to a menu's route, plus any keys augmented onto `Register['menuMeta']`
 - `UserInfo` — `details` is typed via the `Register` augmentation point (see below)
-- `Register` — empty interface that projects augment via `declare module` to refine `UserInfo['details']`
-- `UserDetails` — fallback shape (`Record<string, unknown>`) when `Register` is not augmented
-- `OrderSpec`
+- `AppCustomState` — the shape of `AppState.custom`; defaults to `AnyObject`, narrowed via `Register['appCustomState']`
+- `ChallengeSpec` — `{ data?: unknown; response: unknown }`, the contract for one login challenge type
+- `ResolvedChallenges` — the challenge-type registry resolved from `Register['challenges']`, or an open `Record<string, ChallengeSpec>` when not augmented
+- `Register` — empty interface that projects augment via `declare module` to refine `UserInfo['details']`, `AppState.custom`, `UserMenuMeta`, and the login challenge registry
+- `UserDetails` — fallback shape (`Record<string, unknown>`) when `Register['userDetails']` is not augmented
+- `OrderSpec` — `{ column: string; direction: "asc" | "desc" }`
 
 ### Extending `UserInfo.details`
 
@@ -76,7 +73,7 @@ declare module "@vef-framework-react/starter" {
 }
 ```
 
-After this declaration, `userInfo.details.department` is typed as `string` across the application without forking the framework.
+After this declaration, `userInfo.details.department` is typed as `string` across the application without forking the framework. The same `Register` interface also accepts `appCustomState`, `menuMeta`, and `challenges` members for the other extension points above.
 
 ## Router Types
 

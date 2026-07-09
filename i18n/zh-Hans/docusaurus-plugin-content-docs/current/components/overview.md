@@ -1,109 +1,101 @@
 ---
-sidebar_position: 1
+title: "组件概览"
+description: "@vef-framework-react/components 导出的全部组件的统一目录，按用途分组。"
 ---
 
-# 组件总览
+# 组件概览
 
-`@vef-framework-react/components` 是 VEF Framework 的 UI 组件库，基于 [Ant Design 6.x](https://ant.design/components/overview-cn/) 构建，并在此基础上扩展了布局原语、权限感知组件和表单集成工具。
+`@vef-framework-react/components` 是 VEF Framework 的 UI 组件库。它基于 [Ant Design 6.x](https://ant.design/components/overview/) 构建，并在此基础上扩展了布局原语、权限感知组件、CRUD 技术栈以及类型安全的表单系统——同时保持对其余 Ant Design 组件的原样重新导出。
 
-## 组件分类
+以下每个组件都仅属于下方分组中的一个。标记为 **VEF** 的组件是原创或经过显著增强的组件；[Ant Design 直通组件](./antd-pass-through.md) 下的所有组件都是行为一致的轻量重新导出。
 
-### Ant Design 直通组件
-
-大多数 Ant Design 组件直接从 `antd` 重新导出，可以完全按照 [Ant Design 官方文档](https://ant.design/components/overview-cn/) 使用，Props 和 API 完全一致。
+## 布局
 
 | 组件 | 说明 |
-|------|------|
-| `Button` | 触发操作 |
-| `Input` | 文本输入框 |
-| `Select` | 下拉选择器 |
-| `Table` | 数据表格（含 VEF 增强） |
-| `Form` | 数据录入表单（由 `useForm` 替代） |
-| `Modal` | 对话框 |
-| `DatePicker` | 日期/日期范围选择器 |
-| `TimePicker` | 时间/时间范围选择器 |
-| `Checkbox` | 复选框 |
-| `Radio` | 单选框 |
-| `Switch` | 开关 |
-| `Slider` | 滑动输入条 |
-| `Upload` | 文件上传 |
-| `Tree` | 树形控件 |
-| `TreeSelect` | 树形选择器 |
-| `Cascader` | 级联选择 |
-| `AutoComplete` | 自动完成 |
-| `Mentions` | 提及 |
-| `ColorPicker` | 颜色选择器 |
-| `Rate` | 评分 |
-| `Transfer` | 穿梭框 |
-| `Avatar` | 头像 |
-| `Badge` | 徽标数 |
-| `Tag` | 标签 |
-| `Tooltip` | 文字提示 |
-| `Popover` | 气泡卡片 |
-| `Popconfirm` | 气泡确认框 |
-| `Dropdown` | 下拉菜单 |
-| `Menu` | 导航菜单 |
-| `Tabs` | 标签页 |
-| `Collapse` | 折叠面板 |
-| `Card` | 卡片 |
-| `List` | 列表 |
-| `Descriptions` | 描述列表 |
-| `Statistic` | 统计数值 |
-| `Progress` | 进度条 |
-| `Spin` | 加载中 |
-| `Skeleton` | 骨架屏 |
-| `Alert` | 警告提示 |
-| `Result` | 结果页 |
-| `Empty` | 空状态 |
-| `Pagination` | 分页 |
-| `Steps` | 步骤条 |
-| `Timeline` | 时间轴 |
-| `Breadcrumb` | 面包屑 |
-| `Anchor` | 锚点 |
-| `Affix` | 固钉 |
-| `Divider` | 分割线 |
-| `Space` | 间距 |
-| `Flex` | 弹性布局 |
-| `Row` / `Col` | 栅格布局 |
-| `Splitter` | 分割面板 |
-| `Drawer` | 抽屉 |
-| `FloatButton` | 悬浮按钮 |
-| `Image` | 图片（含预览） |
-| `Calendar` | 日历 |
-| `Carousel` | 走马灯 |
-| `QRCode` | 二维码 |
-| `Watermark` | 水印 |
-| `Tour` | 漫游式引导 |
-| `Segmented` | 分段控制器 |
-| `InputNumber` | 数字输入框 |
-| `Typography` | 排版（Text / Title / Paragraph / Link） |
-| `ConfigProvider` | 全局化配置 |
+|-----------|-------------|
+| [`Grid`](./grid.md) | 支持折叠的响应式自动填充网格 |
+| [`Stack`](./stack.md) | 纵向 flex 堆叠布局 |
+| [`Center`](./center.md) | 居中的 flex 布局 |
+| [`Group`](./group.md) | 横向 flex 布局 |
+| [`ScrollArea`](./scroll-area.md) | 带滚动事件回调的自定义滚动条区域 |
 
-### VEF 特有组件
-
-以下组件是 VEF Framework 独有的，不属于 Ant Design。
+## 页面与 CRUD
 
 | 组件 | 说明 |
-|------|------|
-| [`ActionButton`](./action-button) | 内置异步 loading 和确认对话框的按钮 |
-| [`ActionGroup`](./action-group) | 从配置数组渲染一组操作按钮 |
-| [`Bool`](./bool) | 多种展示形式的布尔值输入/展示组件 |
-| [`Grid`](./grid) | 支持折叠的响应式自动填充网格 |
-| [`Stack`](./stack) | 垂直 flex 堆叠布局 |
-| [`Center`](./center) | 居中 flex 布局 |
-| [`ScrollArea`](./scroll-area) | 自定义滚动条区域，支持滚动事件回调 |
-| [`Loader`](./loader) | 全屏或内联加载指示器 |
-| [`PermissionGate`](./permission-gate) | 基于权限条件渲染子内容 |
-| [`IconButton`](./icon-button) | 带 Tooltip 的图标按钮 |
-| [`DynamicIcon`](./dynamic-icon) | 通过名称字符串渲染 Lucide 图标 |
-| `OperationButton` | `ActionButton` + `PermissionGate` 的组合 |
-| `Chart` | ECharts 封装 |
-| `CodeHighlighter` | 语法高亮代码块 |
-| `Keyboard` | 键盘快捷键展示 |
+|-----------|-------------|
+| [`Page`](./page.md) | 主要的业务页面容器，支持侧边面板、页头和页脚 |
+| [`FlexCard`](./flex-card.md) | 用于分栏卡片和树形表格布局的语义化 `Card` 封装 |
+| [`FormModal`](./form-modal.md) | 集表单状态、mutation 与提交/重置操作于一体的弹窗 |
+| [`FormDrawer`](./form-drawer.md) | 与 `FormModal` 相同，但以侧边抽屉形式渲染 |
+| [`ProSearch`](./pro-search.md) | 带基础/高级区域及搜索/重置操作的搜索表单容器 |
+| [`ProTable`](./pro-table.md) | 内置查询、分页、行选择与列设置的页面级表格 |
+| [`Table`](./table.md) | 底层数据表格，提供 `flexHeight` 与分页辅助功能 |
+| [`Crud` and `CrudPage`](./crud.md) | 将 `ProSearch` + `ProTable` + 场景表单 + 删除 mutation 整合为一个 CRUD 状态模型 |
+| [`EditableTable`](./editable-table.md) | 受控的行内可编辑表格——编辑、新增、删除行都是对值数组的操作 |
 
-### 表单系统
+## 表单
 
-VEF 使用基于 [`@tanstack/react-form`](https://tanstack.com/form) 的类型安全表单系统替代 Ant Design 的 `Form`。详见 [Form](./form) 文档。
+| 组件 | 说明 |
+|-----------|-------------|
+| [`Form`](./form.md) | 基于 [`@tanstack/react-form`](https://tanstack.com/form) 构建的类型安全表单系统（`useForm`、`form.AppField`、字段组件） |
+| [`Bool`](./bool.md) | 布尔值展示/输入组件，支持开关、单选、单选按钮和复选框等变体 |
+| [`Select`](./select.md) | 下拉选择器，通过 `useDataOptionsSelect` 增强，支持远程/字典选项 |
+| [`Tree`](./tree.md) | 树形视图，通过 `useDataOptionsTree` 增强 |
+| [`TreeSelect`](./tree-select.md) | 树形结构下拉框，通过 `useDataOptionsTreeSelect` 增强 |
+| [`Upload`](./upload.md) | 支持行内图片裁剪的文件上传组件 |
+| [`FileUpload`](./file-upload.md) | 分片、可续传的上传组件，接入框架自身的存储协议 |
+| [`IconPicker`](./icon-picker.md) | 用于选择 lucide 图标的可搜索弹出网格 |
+| [`GenericSelect`](./generic-select.md) | 弹出式选择控件的抽象基座——`IconPicker` 正是基于它构建的 |
+
+## 操作与权限
+
+| 组件 | 说明 |
+|-----------|-------------|
+| [`ActionButton`](./action-button.md) | 内置异步加载状态与确认对话框的按钮 |
+| [`ActionGroup`](./action-group.md) | 根据配置数组渲染一组操作按钮 |
+| [`OperationButton`](./operation-button.md) | `ActionButton` 与 `PermissionGate` 的组合 |
+| [`PermissionGate`](./permission-gate.md) | 根据权限条件渲染子元素 |
+| [`IconButton`](./icon-button.md) | 带提示的纯图标按钮 |
+
+## 展示与工具
+
+| 组件 | 说明 |
+|-----------|-------------|
+| [`ConfigProvider`](./config-provider.md) | VEF 的全局主题提供者——暗色模式、语义化颜色、CSS 变量 |
+| [`Loader`](./loader.md) | 全屏或行内加载指示器 |
+| [`Icon`](./icon.md) | 渲染以属性形式传入的 Lucide 图标组件 |
+| [`DynamicIcon`](./dynamic-icon.md) | 根据名称字符串渲染 Lucide 图标 |
+| [`LogoIcon`](./logo-icon.md) | 以 SVG 组件形式提供的 VEF 框架 logo |
+| [`Chart`](./chart.md) | 支持主题与图表联动的 ECharts 封装 |
+| [`CodeHighlighter`](./code-highlighter.md) | 带语法高亮的代码块 |
+| [`CodeEditor`](./code-editor.md) | 基于 CodeMirror 6 的代码编辑器，支持语法高亮与命令式 ref API |
+| [`Keyboard`](./keyboard.md) | 键盘快捷键展示 |
+
+## 动画
+
+| 组件 | 说明 |
+|-----------|-------------|
+| [`FlipText`](./flip-text.md) | 字符翻转动画 |
+| [`SparklesText`](./sparkles-text.md) | 带闪光粒子效果的文本 |
+| [`SplitText`](./split-text.md) | 基于 GSAP 的文本拆分动画 |
+| [`TypingAnimation`](./typing-animation.md) | 打字机效果动画 |
+| [`BorderBeam`](./border-beam.md) | 沿容器边框流动的装饰性动画光束 |
+
+## Ant Design
+
+以下组件因携带 VEF 专属说明（属性、表单集成或使用指引）而非单纯直通，因此各自拥有独立文档页面：
+
+| 组件 | 说明 |
+|-----------|-------------|
+| [`Button`](./button.md) | 触发操作 |
+| [`Input`](./input.md) | 文本输入框（`Input.Password`、`Input.TextArea`、`Input.Search`、`Input.OTP`） |
+| [`Modal`](./modal.md) | 对话框浮层 |
+| [`Alert`](./alert.md) | 提示消息 |
+| [`Avatar`](./avatar.md) | 用户头像 |
+| [`Typography`](./typography.md) | `Title` / `Text` / `Paragraph` / `Link` |
+| [`Compact`](./compact.md) | `Space.Compact`——将输入框/按钮组合成一个无缝整体 |
+
+Ant Design 中的其余组件均为原样、未经修改的重新导出——完整索引参见 [Ant Design 直通组件](./antd-pass-through.md)。
 
 ## 安装
 
@@ -117,4 +109,4 @@ pnpm add @vef-framework-react/components
 import { Button, Table, ActionButton } from '@vef-framework-react/components';
 ```
 
-所有组件均通过具名导出支持 Tree-shaking。
+所有组件均通过具名导出支持 tree-shaking。

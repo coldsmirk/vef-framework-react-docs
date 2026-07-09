@@ -1,5 +1,6 @@
 ---
-sidebar_position: 25
+title: "Keyboard"
+description: "Renders keyboard shortcut keys with consistent styling."
 ---
 
 # Keyboard
@@ -44,7 +45,7 @@ export default function Demo() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `size` | `'small' \| 'middle' \| 'large'` | `'middle'` | Key size |
+| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | Key size |
 | `children` | `ReactNode` | — | Key label |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |

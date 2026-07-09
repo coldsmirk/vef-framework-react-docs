@@ -1,29 +1,29 @@
 ---
-sidebar_position: 3
-title: 性能优化
+title: 性能
+description: 在 VEF 应用中，针对表格、查询、状态选择和选项搜索的实用性能习惯。
 ---
 
-# 性能优化
+# 性能
 
-VEF 本身已经帮你做了不少默认优化，但页面层仍然有几个最值得关注的点。
+VEF 已经内置了不少性能默认值，但页面代码仍然可以从一些实用习惯中受益。
 
 ## 表格
 
-- 大列表优先考虑 `virtual`
-- 搜索项变化频繁时，配合 `useDeferredValue`
-- 列设置持久化开启后，避免重复重建列数组
+- 大数据集优先使用 `virtual`。
+- 搜索输入频繁变化时使用 `useDeferredValue`。
+- 启用列持久化时，避免不必要地重建列数组。
 
 ## Query
 
-- 给稳定数据设置合适的 `staleTime`
-- 登录后频繁复用的数据优先走 `fetchQuery()` 预热
-- 页面按钮 loading 可以用 `useHasFetching()` / `useHasMutating()`，不要手写重复状态
+- 为稳定数据选择合适的 `staleTime`。
+- 登录或路由进入后，通过 `fetchQuery()` 预热频繁复用的数据。
+- 按钮的 loading 状态使用 `useHasFetching()` 和 `useHasMutating()`，而不是重复编写自定义状态标志。
 
-## 状态读取
+## 状态选择
 
-- Zustand 多字段选择优先配合 `useShallow`
-- 页面局部状态优先局部化，不要一上来就全局 store
+- 从 Zustand store 中选取多个字段时使用 `useShallow`。
+- 尽量把状态保持在局部，而不是把所有状态都提升到全局 store。
 
 ## 选项搜索
 
-对于中文选项，优先用框架的拼音增强选项链路，而不是在页面里自己写模糊搜索转换。
+对于中文选项数据，优先使用内置的拼音增强选项处理链路，而不是在页面代码中重新搭建自定义的模糊搜索转换逻辑。

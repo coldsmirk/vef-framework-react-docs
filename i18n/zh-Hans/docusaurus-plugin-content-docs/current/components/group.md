@@ -1,12 +1,18 @@
 ---
-sidebar_position: 20
+title: "Group"
+description: "横向 flex 布局容器，是对 Ant Design `Flex` 组件横向预设的便捷封装。"
 ---
 
-# Group 水平布局
+# Group
 
-水平 flex 布局容器，是 Ant Design `Flex` 组件水平模式的便捷封装。
+横向 flex 布局容器，是对 Ant Design `Flex` 组件横向预设的便捷封装。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design 的一部分。
+
+## 何时使用
+
+- 将子元素横向排列，并保持一致的间距。
+- `<div style={{ display: 'flex', flexDirection: 'row' }}>` 的语义化替代方案。
 
 ## 基础用法
 
@@ -16,8 +22,8 @@ import { Group } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Group gap="small">
-      <span>标签</span>
-      <span>值</span>
+      <span>Label</span>
+      <span>Value</span>
     </Group>
   );
 }
@@ -32,7 +38,7 @@ export default function Demo() {
   return (
     <Group gap="middle" align="center">
       <Avatar />
-      <span>用户名</span>
+      <span>Username</span>
     </Group>
   );
 }
@@ -40,16 +46,16 @@ export default function Demo() {
 
 ## API
 
-`Group` 继承所有 `Flex` 属性（除 `vertical` 和 `orientation`，已固定为水平方向），另有：
+`Group` 继承了除 `vertical`、`orientation`（已固定为横向）和 `gap`（在下方重新定义）之外的所有 `Flex` 属性，并新增：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | 子元素间距 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `gap` | `'small' \| 'medium' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | 子元素间距 |
 | `align` | `CSSProperties['alignItems']` | — | 交叉轴对齐方式 |
 | `justify` | `CSSProperties['justifyContent']` | — | 主轴对齐方式 |
-| `wrap` | `CSSProperties['flexWrap']` | — | 换行方式 |
+| `wrap` | `boolean \| CSSProperties['flexWrap']` | — | 换行方式 |
 | `ref` | `Ref<HTMLDivElement>` | — | DOM ref |
 
 ## 最佳实践
 
-- 水平布局使用 `Group`，垂直布局使用 [`Stack`](./stack)，居中内容使用 [`Center`](./center)。
+- 横向布局使用 `Group`，纵向布局使用 [`Stack`](./stack)，居中内容使用 [`Center`](./center)。

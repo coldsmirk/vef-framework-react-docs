@@ -1,6 +1,6 @@
 ---
-sidebar_position: 3
 title: Upstream Hook Exports
+description: The Mantine and hotkey hooks re-exported (some wrapped) through @vef-framework-react/hooks.
 ---
 
 # Upstream Hook Exports
@@ -9,43 +9,43 @@ These exports exist so business projects can import common hooks through `@vef-f
 
 ## Wrapped Media and Environment Hooks
 
-VEF wraps these Mantine hooks to normalize the `getInitialValueInEffect` behavior:
+VEF wraps these Mantine hooks to normalize the `getInitialValueInEffect` behavior (default `false`, so the initial value is read on mount rather than deferred to an effect):
 
-- `useMediaQuery`
-- `useColorScheme`
-- `useReducedMotion`
+| Hook | Signature | Description |
+| --- | --- | --- |
+| `useMediaQuery` | `(query: string, initialValue?: boolean, options?: { getInitialValueInEffect?: boolean }) => boolean` | Matches a CSS media query. |
+| `useColorScheme` | `(initialValue?: "light" \| "dark", options?: { getInitialValueInEffect?: boolean }) => "light" \| "dark"` | Reads the OS-level `prefers-color-scheme`. |
+| `useReducedMotion` | `(initialValue?: boolean, options?: { getInitialValueInEffect?: boolean }) => boolean` | Reads the OS-level `prefers-reduced-motion`. |
+| `useElementSize` | `<T extends HTMLElement>(options?: ResizeObserverOptions) => { ref: RefCallback<T \| null>; width: number; height: number }` | Tracks an element's size via `ResizeObserver`; VEF defaults `box: "border-box"`. |
 
 ## Mantine Re-Exports
 
-Representative exports include:
+Passed through as-is from `@mantine/hooks`:
 
 - `useDebouncedCallback`
 - `useDebouncedState`
 - `useDebouncedValue`
 - `useDidUpdate`
 - `useDocumentTitle`
-- `useElementSize`
 - `useEventListener`
 - `useFocusTrap`
-- `useFullscreen`
+- `useFullscreenDocument`
 - `useIntersection`
 - `useInterval`
+- `useIsFirstRender`
 - `useIsomorphicEffect`
-- `useMutationObserver`
+- `useMergedRef`
+- `useMounted`
+- `useMutationObserverTarget`
 - `usePrevious`
 - `useResizeObserver`
 - `useTimeout`
 - `useWindowEvent`
+- `assignRef` — not a hook; a ref-assignment helper used alongside `mergeRefs`
+- `getHotkeyHandler` — not a hook; builds a `keydown` handler from a hotkey list
+- `mergeRefs` — not a hook; combines multiple refs into one callback ref
 
 Official docs: [Mantine Hooks](https://mantine.dev/hooks/)
-
-## AI SDK React Re-Exports
-
-- `useChat`
-- `useCompletion`
-- `useObject`
-
-Official docs: [AI SDK Docs](https://ai-sdk.dev/docs)
 
 ## Hotkey Exports
 

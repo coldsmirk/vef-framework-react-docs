@@ -1,14 +1,15 @@
 ---
-sidebar_position: 107
+title: "FlexCard"
+description: "用于分栏卡片和树形表格页面布局的 `Card` 语义化封装。"
 ---
 
 # FlexCard
 
-`Card` 的语义化包装，用于分栏卡片和树形表格页面布局。
+用于分栏卡片和树形表格页面布局的 `Card` 语义化封装。
 
-> **VEF 专属组件。** 在 v2.1.6 中从 `@vef-framework-react/starter` 迁移到 `@vef-framework-react/components`。
+> **VEF 专属组件。** 已在 v2.1.6 中从 `@vef-framework-react/starter` 迁移至 `@vef-framework-react/components`。
 
-## 适用场景
+## 何时使用
 
 - 树形表格布局中的左侧树形面板。
 - 任何需要在 flex 容器中填充可用高度的卡片。
@@ -21,7 +22,7 @@ import { FlexCard, Page } from '@vef-framework-react/components';
 export default function UserPage() {
   return (
     <Page leftAside={
-      <FlexCard title="部门">
+      <FlexCard title="Departments">
         <DeptTree />
       </FlexCard>
     }>

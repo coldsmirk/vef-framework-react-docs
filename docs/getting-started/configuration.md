@@ -1,6 +1,6 @@
 ---
-sidebar_position: 4
 title: Configuration
+description: Set up Vite, ESLint, Stylelint, and Commitlint with the shared @vef-framework-react/dev configuration.
 ---
 
 # Configuration
@@ -22,16 +22,7 @@ export default defineViteConfig({
 });
 ```
 
-### What `defineViteConfig()` Covers
-
-| Option | Purpose |
-| --- | --- |
-| `resolve` | Adds aliases and export `conditions` |
-| `plugins` | Injects custom Vite plugins |
-| `autoEnhancePlugins` | Participates in the framework's auto-enhancement pipeline |
-| `routerHistory` | Chooses `hash` or `browser` router history |
-| `react` | Configures React plugin behavior such as Emotion or Compiler |
-| `proxies` | Declares local development proxies |
+The full option list for `defineViteConfig()`, `createApp()`, `createApiClient()`, and `createRouter()` lives in the [Configuration Quick Reference](../reference/configuration-reference.md) — this page only covers the narrative of setting the build up.
 
 ## ESLint Configuration
 
@@ -95,3 +86,5 @@ Common variables are typically used like this:
 2. `@vef-framework-react/*` packages resolve correctly.
 3. Emotion styles and component styles load correctly.
 4. ESLint and Stylelint can run locally.
+
+Next: [Project Structure](./project-structure.md).

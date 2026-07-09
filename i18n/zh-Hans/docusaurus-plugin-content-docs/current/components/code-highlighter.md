@@ -1,12 +1,13 @@
 ---
-sidebar_position: 24
+title: "CodeHighlighter"
+description: "一个带语法高亮的代码块组件。"
 ---
 
-# CodeHighlighter 代码高亮
+# CodeHighlighter
 
-语法高亮代码块组件。
+一个带语法高亮的代码块组件。
 
-> **VEF 特有组件**，基于 [`react-syntax-highlighter`](https://github.com/react-syntax-highlighter/react-syntax-highlighter) 构建。
+> **VEF 特有组件。** 基于 [`react-syntax-highlighter`](https://github.com/react-syntax-highlighter/react-syntax-highlighter) 构建。
 
 ## 基础用法
 
@@ -29,7 +30,7 @@ export default function Demo() {
   {`import { Button } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <Button type="primary">点击</Button>;
+  return <Button type="primary">Click me</Button>;
 }`}
 </CodeHighlighter>
 ```
@@ -37,22 +38,26 @@ export default function Demo() {
 ## 高亮指定行
 
 ```tsx
-<CodeHighlighter language="typescript" showLineNumbers lineProps={[1, 3]}>
+<CodeHighlighter
+  language="typescript"
+  showLineNumbers
+  lineProps={[1, 3]}
+>
   {code}
 </CodeHighlighter>
 ```
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `children` | `string` | 必填 | 要高亮的代码字符串 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `children` | `string` | required | 要高亮的代码字符串 |
 | `language` | `string` | `'typescript'` | 编程语言 |
 | `showLineNumbers` | `boolean` | `false` | 显示行号 |
 | `startingLineNumber` | `number` | `1` | 起始行号 |
-| `wrapLines` | `boolean` | `false` | 换行 |
-| `wrapLongLines` | `boolean` | `true` | 长行换行而非滚动 |
+| `wrapLines` | `boolean` | `false` | 换行显示 |
+| `wrapLongLines` | `boolean` | `true` | 长行自动换行而非滚动 |
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |
-| `customStyle` | `CSSProperties` | — | 高亮容器的自定义样式 |
-| `lineProps` | `SyntaxHighlighterProps['lineProps']` | — | 要高亮的行 |
+| `customStyle` | `CSSProperties` | — | 语法高亮容器的样式 |
+| `lineProps` | `SyntaxHighlighterProps['lineProps']` | — | 需要高亮的行 |

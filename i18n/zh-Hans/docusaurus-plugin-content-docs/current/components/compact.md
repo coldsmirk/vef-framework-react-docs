@@ -1,12 +1,13 @@
 ---
-sidebar_position: 108
+title: "Compact"
+description: "将子组件（输入框、按钮等）无缝拼接为一体的包装容器。"
 ---
 
-# Compact 紧凑布局
+# Compact
 
-将子组件（输入框、按钮等）紧凑地组合在一起的包装器。
+将子组件（输入框、按钮等）无缝拼接为一体的包装容器。
 
-> **来源：** 从 `antd` 重新导出（`Space.Compact`）。完整文档：[Ant Design Space Compact](https://ant.design/components/space-cn/#Space.Compact)
+> **来源：** 从 `antd` 重新导出（`Space.Compact`）。完整文档：[Ant Design Space Compact](https://ant.design/components/space/#Space.Compact)
 
 ## 基础用法
 
@@ -16,8 +17,8 @@ import { Compact, Input, Button } from '@vef-framework-react/components';
 export default function Demo() {
   return (
     <Compact>
-      <Input placeholder="搜索..." />
-      <Button type="primary">搜索</Button>
+      <Input placeholder="Search..." />
+      <Button type="primary">Search</Button>
     </Compact>
   );
 }
@@ -25,8 +26,10 @@ export default function Demo() {
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `size` | `'large' \| 'middle' \| 'small'` | `'middle'` | 子组件大小 |
-| `direction` | `'horizontal' \| 'vertical'` | `'horizontal'` | 布局方向 |
-| `block` | `boolean` | `false` | 宽度撑满父元素 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | 子组件的尺寸（`'middle'` 是 `'medium'` 的废弃别名） |
+| `orientation` | `'horizontal' \| 'vertical'` | `'horizontal'` | 布局方向 |
+| `vertical` | `boolean` | `false` | `orientation="vertical"` 的简写形式 |
+| `direction` | `'horizontal' \| 'vertical'` | `'horizontal'` | **已废弃。** 请使用 `orientation` |
+| `block` | `boolean` | `false` | 宽度自适应父容器 |

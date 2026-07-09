@@ -1,12 +1,13 @@
 ---
-sidebar_position: 27
+title: "SparklesText"
+description: "在文本周围渲染动态闪烁粒子效果。"
 ---
 
-# SparklesText 闪光文字
+# SparklesText
 
-在文字周围渲染动态闪光粒子效果。
+在文本周围渲染动态闪烁粒子效果。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design。
 
 ## 基础用法
 
@@ -14,23 +15,23 @@ sidebar_position: 27
 import { SparklesText } from '@vef-framework-react/components';
 
 export default function Demo() {
-  return <SparklesText>✨ 魔法文字</SparklesText>;
+  return <SparklesText>✨ Magic Text</SparklesText>;
 }
 ```
 
-## 自定义闪光数量
+## 自定义粒子数量
 
 ```tsx
-<SparklesText sparklesCount={20}>闪闪发光！</SparklesText>
+<SparklesText sparklesCount={20}>Sparkly!</SparklesText>
 ```
 
 ## API
 
-`SparklesText` 继承所有 `div` 元素属性，另有：
+`SparklesText` 继承所有 `div` 元素属性，并新增：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `sparklesCount` | `number` | `10` | 闪光粒子数量 |
-| `children` | `ReactNode` | — | 文字内容 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `sparklesCount` | `number` | `10` | 闪烁粒子的数量 |
+| `children` | `ReactNode` | — | 文本内容 |
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |

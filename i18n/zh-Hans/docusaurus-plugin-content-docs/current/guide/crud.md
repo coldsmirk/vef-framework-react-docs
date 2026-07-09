@@ -1,14 +1,13 @@
 ---
-sidebar_position: 3
 title: CRUD 页面
+description: CrudPage 与 createCrudKit 如何把搜索、表格、场景表单和删除流程组合成一个页面级抽象。
 ---
 
 # CRUD 页面
 
-`@vef-framework-react/components` 里最有生产力的 API 之一，就是 `CrudPage` 与 `createCrudKit()`。  
-它们的目标不是让你“少写一个表格”，而是让列表页、搜索、弹窗表单、删除、批量操作和页面局部状态都走一条统一路径。
+`@vef-framework-react/components` 中生产力最高的部分之一，是 `CrudPage` 与 `createCrudKit()` 的组合。它的目标不只是减少表格样板代码，而是把搜索、列表加载、表单场景、删除流程、批量操作以及页面局部状态统一标准化。本篇聚焦于这些部分为什么是这样设计的；完整的属性参考见 [Crud 与 CrudPage](../components/crud.md)。
 
-## 一页 CRUD 到底由哪些部分组成
+## 一个 CRUD 页面由哪些部分组成
 
 ```mermaid
 flowchart TD
@@ -26,8 +25,6 @@ flowchart TD
 ```
 
 ## 最小 `CrudPage` 示例
-
-用户管理类页面通常可以按下面的方式组织:
 
 ```tsx
 <CrudPage
@@ -50,55 +47,27 @@ flowchart TD
 />
 ```
 
-## `CrudPage` 适合什么页面
+## `CrudPage` 最适合什么场景
 
-当页面同时具备下面几项时，优先考虑 `CrudPage`:
+当一个页面同时具备列表查询、搜索区域、新建或编辑表单、单条删除以及批量操作时，`CrudPage` 通常是不错的选择。如果页面只是一张只读表格，单独使用 `ProTable` 往往就够了——见 [表格](./tables.md)。
 
-- 列表查询
-- 搜索区域
-- 新增或编辑表单
-- 单条删除
-- 批量操作
+## 为什么 `renderForm(scene)` 很重要
 
-如果页面只是“一个只读表格”，用 `ProTable` 就够了。
+CRUD 表单很少只有一种形态。新建流程和编辑流程通常存在一些细微但重要的差异：
 
-## 最常用的参数
+- 密码在新建时必填，在编辑时可选
+- 部分默认值只在新建时生效
+- 某些字段在编辑时被禁用
 
-| 参数 | 作用 |
-| --- | --- |
-| `queryFn` | 列表查询函数 |
-| `tableColumns` | 表格列 |
-| `rowKey` | 行主键 |
-| `basicSearch` | 基础搜索区域 |
-| `advancedSearch` | 高级搜索区域 |
-| `renderForm` | 根据场景渲染表单 |
-| `formMutationFns` | 不同场景的提交函数 |
-| `deleteMutationFn` | 单条删除 |
-| `deleteManyMutationFn` | 批量删除 |
-| `toolbarActions` | 工具栏按钮 |
-| `operationColumn` | 行级按钮列 |
-| `sceneDefaultFormValues` | 各场景默认表单值 |
-
-## `renderForm(scene)` 的意义
-
-CRUD 表单不是固定只有一种形态。  
-同一个页面里，新增和编辑通常会有细微差异，比如:
-
-- 创建时密码必填，编辑时可选
-- 创建时某些字段给默认值
-- 编辑时部分字段禁用
-
-所以 VEF 把表单渲染函数设计成:
+这就是为什么表单要按场景渲染，而不是做成一个固定不变的静态表单：
 
 ```tsx
 renderForm={scene => <Form scene={scene} />}
 ```
 
-这样表单组件内部就能通过 `scene` 区分逻辑。
+## 为什么 `createCrudKit()` 很重要
 
-## `createCrudKit()` 为什么重要
-
-`createCrudKit()` 负责把页面自己的泛型信息固定下来，避免你在很多局部组件里重复写类型参数。
+`createCrudKit()` 把一个页面自身的泛型类型固定进一个可复用的局部工具集：
 
 ```ts
 import { createCrudKit } from "@vef-framework-react/components";
@@ -112,93 +81,12 @@ export const {
 } = createCrudKit<User, UserSearch, UserFormSceneValues>();
 ```
 
-有了它之后:
-
-- 搜索组件可以直接拿到强类型搜索值
-- 工具栏按钮可以直接拿到当前选中行
-- 操作列可以直接拿到 `openForm`、`delete`、`refetchQuery`
-
-## 工具栏按钮怎么写
-
-```tsx
-toolbarActions={(
-  <UserActionButtonGroup selector={state => [state.openForm, state.selectedRows, state.deleteMany, state.refetchQuery] as const}>
-    {([openForm, selectedRows, deleteMany, refetchQuery]) => (
-      <>
-        <ActionButton onClick={() => openForm({ scene: "create" })}>
-          新增
-        </ActionButton>
-
-        <ActionButton
-          disabled={selectedRows.length === 0}
-          onClick={async () => {
-            await deleteMany(selectedRows);
-            refetchQuery();
-          }}
-        >
-          批量删除
-        </ActionButton>
-      </>
-    )}
-  </UserActionButtonGroup>
-)}
-```
-
-## 行操作按钮怎么写
-
-```tsx
-operationColumn={{
-  render(row) {
-    return (
-      <UserOperationButtonGroup selector={state => [state.openForm, state.delete, state.refetchQuery] as const}>
-        {([openForm, deleteUser, refetchQuery]) => (
-          <>
-            <OperationButton onClick={() => openForm({ scene: "update", values: row })}>
-              编辑
-            </OperationButton>
-
-            <OperationButton
-              confirmable
-              onClick={async () => {
-                await deleteUser(row);
-                refetchQuery();
-              }}
-            >
-              删除
-            </OperationButton>
-          </>
-        )}
-      </UserOperationButtonGroup>
-    );
-  }
-}}
-```
+有了它之后，搜索组件可以读取到强类型的搜索值，工具栏按钮可以直接访问选中行，行操作列也可以直接访问 `openForm`、`delete` 和 `refetchQuery`，而不需要在每个涉及该页面的组件中重复传递泛型参数。
 
 ## 行为说明
 
-使用 `CrudPage` 时，下面几个行为值得知道:
+`delete`/`deleteMany` 成功后的选中状态清空行为，以及各场景 `formActionsRenderers` 的签名，完整说明见 [Crud 与 CrudPage](../components/crud.md)。
 
-- `delete` / `deleteMany` 成功后，`CrudPage` 会自动清空内部的选中行状态——依赖 `selectedRows` 的工具栏按钮会自行重新禁用，无需手工 reset。
-- 各场景的 action 渲染器（`renderFormActions[scene]`）签名是 `(formApi, defaults)`，`defaults` 里带着框架默认的 `submitButton` 和 `resetButton`。需要自定义布局又想保留默认按钮时，直接组合即可:
+## 复用策略
 
-```tsx
-renderFormActions={{
-  create: (_formApi, { submitButton, resetButton }) => (
-    <Group gap="small">
-      {resetButton}
-      {submitButton}
-    </Group>
-  )
-}}
-```
-
-## 实践建议
-
-更适合复用的通常不是“通用 CRUD 页面组件”，而是:
-
-- 页面的查询函数
-- 页面的 `createCrudKit()` 结果
-- 搜索组件
-- 表单组件
-
-这样页面既保持统一，也保留了足够的业务可定制性。
+最值得复用的部分通常是页面的查询函数、页面局部的 `createCrudKit()` 结果、搜索组件和表单组件。这样既能保持页面的一致性，又不会让它们过于僵化。

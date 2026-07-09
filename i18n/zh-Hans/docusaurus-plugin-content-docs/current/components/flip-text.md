@@ -1,12 +1,13 @@
 ---
-sidebar_position: 26
+title: "FlipText"
+description: "使用 GSAP 实现逐字符翻转动画效果。"
 ---
 
-# FlipText 翻转文字
+# FlipText
 
-使用 GSAP 实现逐字符翻转动画效果的文字组件。
+使用 GSAP 实现逐字符翻转动画效果。
 
-> **VEF 特有组件**，不属于 Ant Design。
+> **VEF 专属组件。** 不属于 Ant Design。
 
 ## 基础用法
 
@@ -22,17 +23,17 @@ export default function Demo() {
 
 ```tsx
 <FlipText duration={0.4} delayMultiple={0.05} repeat={2}>
-  动画文字
+  Animated Text
 </FlipText>
 ```
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `children` | `ReactNode` | 必填 | 文字内容 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | required | 文本内容 |
 | `duration` | `number` | `0.6` | 每个字符的动画时长（秒） |
 | `delayMultiple` | `number` | `0.08` | 字符间的交错延迟（秒） |
-| `repeat` | `number` | `0` | 重复次数（`0` = 一次，`-1` = 无限） |
+| `repeat` | `number` | `0` | 重复次数（`0` 表示一次，`-1` 表示无限循环） |
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |
