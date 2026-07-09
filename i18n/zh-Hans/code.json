@@ -296,5 +296,12 @@
   "theme.lastUpdated.lastUpdatedAtBy": {
     "message": "最后{byUser}{atDate}更新",
     "description": "The sentence used to display when a page has been last updated, and by who"
+  },
+  "homepage.hero.headline": {
+    "message": "{accent} React，逐层构建。",
+    "description": "Hero h1. {accent} is rendered in the primary accent color."
+  },
+  "homepage.hero.headline.accent": {
+    "message": "可组合的"
   }
 }

@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 
-import { translate } from "@docusaurus/Translate";
+import Translate, { translate } from "@docusaurus/Translate";
 import Link from "@docusaurus/Link";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 
@@ -349,20 +348,12 @@ function getHomeContent(): HomeContent {
   };
 }
 
-function HeroCodeBlock({
-  panelPoints,
-  panelTitle
-}: {
-  panelPoints: string[];
-  panelTitle: string;
-}) {
+function HeroCodeBlock({ panelPoints }: { panelPoints: string[] }) {
   return (
     <div className="home-panel hero-code-panel">
       <div className="home-panel-header">
-        <span className="home-panel-dot" />
-        <span className="home-panel-dot" />
-        <span className="home-panel-dot" />
-        <span className="home-panel-title">{panelTitle}</span>
+        <span className="home-panel-file">main.tsx</span>
+        <span className="home-panel-tag">TS</span>
       </div>
 
       <pre className="home-code-block" aria-hidden="true">
@@ -381,7 +372,6 @@ function HeroCodeBlock({
 }
 
 function Home() {
-  const { siteConfig } = useDocusaurusContext();
   const content = getHomeContent();
 
   return (
@@ -393,9 +383,23 @@ function Home() {
         <div className="home-shell">
           <section className="home-hero">
             <div className="home-hero-copy">
-              <p className="home-kicker">{content.heroKicker}</p>
+              <p className="home-kicker">vef framework · react</p>
               <Heading as="h1" className="home-title">
-                {siteConfig.title}
+                <Translate
+                  id="homepage.hero.headline"
+                  description="Hero h1. {accent} is rendered in the primary accent color."
+                  values={{
+                    accent: (
+                      <span className="home-title-accent">
+                        <Translate id="homepage.hero.headline.accent">
+                          Composable
+                        </Translate>
+                      </span>
+                    )
+                  }}
+                >
+                  {"{accent} React, layer by layer."}
+                </Translate>
               </Heading>
               <p className="home-description">{content.heroDescription}</p>
 
@@ -426,7 +430,7 @@ function Home() {
                 className="home-hero-logo"
                 src={useBaseUrl("/img/logo.svg")}
               />
-              <HeroCodeBlock panelPoints={content.heroPanelPoints} panelTitle={content.heroPanelTitle} />
+              <HeroCodeBlock panelPoints={content.heroPanelPoints} />
             </div>
           </section>
 
