@@ -53,7 +53,7 @@ interface HomeContent {
 }
 
 const heroCode = [
-  "import { createApp } from \"@vef-framework/starter\";",
+  "import { createApp } from \"@vef-framework-react/starter\";",
   "import { apiClient } from \"./api\";",
   "import router from \"./router\";",
   "",
@@ -84,7 +84,7 @@ function getHomeContent(): HomeContent {
     heroDescription: translate({
       id: "homepage.hero.description",
       message:
-        "The documentation focuses on how to build applications with the exported APIs from `@vef-framework/*`, including routing, requests, forms, CRUD pages, and approval-flow integration."
+        "The documentation focuses on how to build applications with the exported APIs from `@vef-framework-react/*`, including routing, requests, forms, CRUD pages, and approval-flow integration."
     }),
     overviewLabel: translate({
       id: "homepage.hero.primary",
@@ -119,7 +119,7 @@ function getHomeContent(): HomeContent {
           message: "App Layer"
         }),
         title: "Starter",
-        packageName: "@vef-framework/starter",
+        packageName: "@vef-framework-react/starter",
         summary: translate({
           id: "homepage.stats.appLayer.summary",
           message: "bootstrap · routing · layouts · CRUD"
@@ -131,7 +131,7 @@ function getHomeContent(): HomeContent {
           message: "UI Layer"
         }),
         title: "Components",
-        packageName: "@vef-framework/components",
+        packageName: "@vef-framework-react/components",
         summary: translate({
           id: "homepage.stats.uiLayer.summary",
           message: "forms · options · charts · icons"
@@ -143,7 +143,7 @@ function getHomeContent(): HomeContent {
           message: "Data Layer"
         }),
         title: "Core",
-        packageName: "@vef-framework/core",
+        packageName: "@vef-framework-react/core",
         summary: translate({
           id: "homepage.stats.dataLayer.summary",
           message: "requests · query · stores · atoms"
@@ -155,7 +155,7 @@ function getHomeContent(): HomeContent {
           message: "Tooling"
         }),
         title: "Dev",
-        packageName: "@vef-framework/dev",
+        packageName: "@vef-framework-react/dev",
         summary: translate({
           id: "homepage.stats.tooling.summary",
           message: "Vite · ESLint · Stylelint · Commitlint"
@@ -441,15 +441,19 @@ function Home() {
               <p>{content.workflowSubtitle}</p>
             </div>
 
-            <div className="workflow-grid">
+            <ol className="workflow-stepper">
               {content.workflowList.map(item => (
-                <article className="home-panel workflow-card" key={item.index}>
-                  <span className="workflow-index">{item.index}</span>
-                  <Heading as="h3">{item.title}</Heading>
-                  <p>{item.description}</p>
-                </article>
+                <li className="workflow-step" key={item.index}>
+                  <div className="workflow-step-marker">
+                    <span className="workflow-step-index">{item.index}</span>
+                  </div>
+                  <Heading as="h3" className="workflow-step-title">
+                    {item.title}
+                  </Heading>
+                  <p className="workflow-step-description">{item.description}</p>
+                </li>
               ))}
-            </div>
+            </ol>
           </section>
 
           <section className="home-section">
@@ -475,15 +479,19 @@ function Home() {
               </p>
             </div>
 
-            <div className="feature-grid">
+            <ul className="feature-list">
               {content.featureList.map(item => (
-                <article className="home-panel feature-card" key={item.title}>
-                  <span className="feature-badge">{item.badge}</span>
-                  <Heading as="h3">{item.title}</Heading>
-                  <p>{item.description}</p>
-                </article>
+                <li className="feature-item" key={item.title}>
+                  <div className="feature-item-meta">
+                    <span className="feature-badge">{item.badge}</span>
+                  </div>
+                  <Heading as="h3" className="feature-item-title">
+                    {item.title}
+                  </Heading>
+                  <p className="feature-item-description">{item.description}</p>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
 
           <section className="home-section">
@@ -495,7 +503,7 @@ function Home() {
 
             <div className="link-grid">
               {content.pathList.map(item => (
-                <Link className="home-panel link-card" key={item.title} to={item.to}>
+                <Link className="link-card" key={item.title} to={item.to}>
                   <span className="link-card-arrow" aria-hidden="true">
                     →
                   </span>

@@ -320,15 +320,17 @@ a {
     color: var(--vef-text-muted);
 }
 
-/* Tables — datasheet */
+/* Tables — datasheet. display:block + max-width keeps wide tables
+ * scrolling inside the content column instead of bleeding under the TOC. */
 .markdown table {
-    display: table;
-    width: 100%;
+    display: block;
+    width: max-content;
+    max-width: 100%;
     border-collapse: collapse;
     border-spacing: 0;
     border: 1px solid var(--vef-line);
     border-radius: var(--vef-radius);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .markdown table thead tr {
@@ -740,7 +742,7 @@ pre {
 /* ---------- Hero stat cards (package map) ---------- */
 .home-stat-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.85rem;
     margin-top: 2.25rem;
 }
@@ -782,7 +784,6 @@ pre {
     border: 1px solid var(--vef-line);
     border-radius: 5px;
     padding: 0.1rem 0.4rem;
-    word-break: break-all;
 }
 
 .home-stat-description {
@@ -819,73 +820,36 @@ pre {
     line-height: 1.68;
 }
 
-/* ---------- Card grids (workflow / feature / links) ---------- */
-.workflow-grid,
-.feature-grid,
-.link-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.workflow-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.feature-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.link-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.workflow-card,
-.feature-card,
-.link-card {
-    position: relative;
-    display: block;
-    padding: 1.5rem;
-    color: inherit;
-    text-decoration: none !important;
-    transition:
-        transform 0.18s ease,
-        border-color 0.18s ease,
-        box-shadow 0.18s ease;
-}
-
-.workflow-card:hover,
-.feature-card:hover,
-.link-card:hover {
-    border-color: var(--ifm-color-primary);
-    box-shadow: var(--vef-shadow-raised);
-    transform: translateY(-2px);
-}
-
-.workflow-card h3,
-.feature-card h3,
-.link-card h3 {
+/* ---------- Workflow stepper — mono index + hairline connector ---------- */
+.workflow-stepper {
+    list-style: none;
+    padding: 0;
     margin: 0;
-    font-size: 1.16rem;
-    letter-spacing: -0.02em;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.75rem;
 }
 
-.workflow-card p,
-.feature-card p,
-.link-card p {
-    margin: 0.6rem 0 0;
-    color: var(--vef-text-muted);
-    font-size: 0.94rem;
-    line-height: 1.6;
+.workflow-step {
+    position: relative;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--vef-line-strong);
 }
 
-/* Workflow index — mono square marker */
-.workflow-index {
+.workflow-step-marker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.workflow-step-index {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    margin-bottom: 1rem;
     border: 1px solid var(--ifm-color-primary);
     border-radius: var(--vef-radius-sm);
     color: var(--ifm-color-primary);
@@ -895,11 +859,53 @@ pre {
     font-weight: 600;
 }
 
-/* Feature badge — mono tag */
+.workflow-step-marker::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--vef-line);
+}
+
+.workflow-step-title {
+    margin: 0;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+}
+
+.workflow-step-description {
+    margin: 0.6rem 0 0;
+    color: var(--vef-text-muted);
+    line-height: 1.66;
+    font-size: 0.96rem;
+}
+
+/* ---------- Feature datasheet list ---------- */
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2.75rem;
+    row-gap: 0;
+}
+
+.feature-item {
+    position: relative;
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--vef-line);
+}
+
+.feature-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.6rem;
+}
+
 .feature-badge {
     display: inline-flex;
     align-items: center;
-    margin-bottom: 0.9rem;
     padding: 0.16rem 0.5rem;
     border-radius: 5px;
     border: 1px solid var(--vef-line-strong);
@@ -912,15 +918,65 @@ pre {
     text-transform: uppercase;
 }
 
-/* Path link cards */
+.feature-item-title {
+    margin: 0;
+    font-size: 1.16rem;
+    letter-spacing: -0.02em;
+}
+
+.feature-item-description {
+    margin: 0.5rem 0 0;
+    color: var(--vef-text-muted);
+    line-height: 1.64;
+    font-size: 0.95rem;
+}
+
+/* ---------- Path link rows ---------- */
+.link-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.link-card {
+    position: relative;
+    display: block;
+    padding: 1.35rem 1.5rem;
+    color: inherit;
+    text-decoration: none !important;
+    background: var(--vef-surface);
+    border: 1px solid var(--vef-line);
+    border-radius: var(--vef-radius);
+    box-shadow: var(--vef-shadow);
+    transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.link-card:hover {
+    border-color: var(--ifm-color-primary);
+    box-shadow: var(--vef-shadow-raised);
+    transform: translateY(-2px);
+}
+
 .link-card h3 {
-    margin-right: 2rem;
+    margin: 0 2rem 0 0;
+    font-size: 1.14rem;
+    letter-spacing: -0.02em;
+}
+
+.link-card p {
+    margin: 0.55rem 0 0;
+    color: var(--vef-text-muted);
+    font-size: 0.94rem;
+    line-height: 1.58;
 }
 
 .link-card-arrow {
     position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
+    top: 1.35rem;
+    right: 1.4rem;
     color: var(--vef-text-faint);
     font-family: var(--ifm-font-family-monospace);
     font-size: 1.1rem;
@@ -964,8 +1020,9 @@ pre {
  * Responsive
  * =======================================================*/
 @media screen and (max-width: 996px) {
+    /* minmax(0) lets the code panel scroll instead of widening the column */
     .home-hero {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 2rem;
         padding: 2.75rem 0 2.5rem;
     }
@@ -975,13 +1032,18 @@ pre {
         font-size: clamp(2.5rem, 8vw, 3.4rem);
     }
 
-    .home-stat-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .workflow-stepper {
+        grid-template-columns: 1fr;
+        gap: 1.4rem;
     }
 
-    .workflow-grid,
-    .feature-grid {
-        grid-template-columns: 1fr 1fr;
+    .workflow-step-marker::after {
+        display: none;
+    }
+
+    .feature-list {
+        grid-template-columns: 1fr;
+        column-gap: 0;
     }
 }
 
@@ -995,8 +1057,6 @@ pre {
     }
 
     .home-stat-grid,
-    .workflow-grid,
-    .feature-grid,
     .link-grid {
         grid-template-columns: 1fr;
     }
