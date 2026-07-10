@@ -16,40 +16,66 @@ A search-form container with basic search area, collapsible advanced search pane
 
 ## Basic Usage
 
+`ProSearch` owns a form instance internally. Search fields connect to it through `useFormContext` + `AppField` — a bare input without an `AppField` binding never reaches `onSearch`. The conventional shape is a small `BasicSearch` component next to the page:
+
 ```tsx
-import { ProSearch } from '@vef-framework-react/components';
+import { ProSearch, useFormContext } from '@vef-framework-react/components';
 
 interface UserSearch {
-  name?: string;
+  keyword?: string;
   status?: string;
 }
 
-export default function UserSearchBar({ onSearch }) {
+function BasicSearch() {
+  const { AppField } = useFormContext<UserSearch>();
+
+  return (
+    <>
+      <AppField name="keyword">
+        {(field) => <field.Input noWrapper placeholder="Keyword" />}
+      </AppField>
+      <AppField name="status">
+        {(field) => <field.Select noWrapper placeholder="Status" options={STATUS_OPTIONS} />}
+      </AppField>
+    </>
+  );
+}
+
+export default function UserSearchBar({ onSearch }: { onSearch: (values: UserSearch) => void }) {
   return (
     <ProSearch<UserSearch>
-      basicSearch={
-        <>
-          <Input placeholder="Name" />
-          <Select placeholder="Status" />
-        </>
-      }
+      basicSearch={<BasicSearch />}
       onSearch={onSearch}
     />
   );
 }
 ```
 
+`onSearch` receives the current form values when the search button is pressed. Use `noWrapper` on field components inside search areas so they render without the label/error scaffolding used in full forms.
+
 ## With Advanced Search
 
+The collapsible advanced panel uses the same context — both areas share one form, so `onSearch` receives the merged values:
+
 ```tsx
-<ProSearch<UserSearch>
-  basicSearch={<Input placeholder="Name" />}
-  advancedSearch={
+function AdvancedSearch() {
+  const { AppField } = useFormContext<UserSearch>();
+
+  return (
     <>
-      <DatePicker placeholder="Created after" />
-      <Select placeholder="Department" />
+      <AppField name="createdAfter">
+        {(field) => <field.DatePicker noWrapper placeholder="Created after" />}
+      </AppField>
+      <AppField name="department">
+        {(field) => <field.Select noWrapper placeholder="Department" options={DEPARTMENT_OPTIONS} />}
+      </AppField>
     </>
-  }
+  );
+}
+
+<ProSearch<UserSearch>
+  basicSearch={<BasicSearch />}
+  advancedSearch={<AdvancedSearch />}
   onSearch={onSearch}
   onReset={onReset}
 />

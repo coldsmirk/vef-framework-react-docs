@@ -7,7 +7,7 @@ description: "Index of components re-exported from Ant Design unchanged — use 
 
 `@vef-framework-react/components` re-exports most of [Ant Design](https://ant.design/components/overview/) directly. These components carry no VEF-specific behavior or prop changes — import them from `@vef-framework-react/components` and use them exactly as documented on the Ant Design site.
 
-> Of the components with their own pages, [`Modal`](./modal.md) (adds `draggable`), [`Table`](./table.md) (adds `flexHeight`/`striped`), and [`Upload`](./upload.md) (adds `enableCrop`/`pastable`) genuinely extend antd. [`Button`](./button.md), [`Input`](./input.md), [`Alert`](./alert.md), [`Avatar`](./avatar.md), [`Typography`](./typography.md), and [`Compact`](./compact.md) are bare `antd` re-exports too — they get dedicated pages for discoverability, not because VEF changes their behavior. `Empty` in the table below is also not an unmodified pass-through: VEF overrides its default `image` to antd's `PRESENTED_IMAGE_SIMPLE`. For components that genuinely gain VEF-specific props, hooks, or behavior, or that are VEF-original, see the [Components Overview](./overview.md).
+> Of the components with their own pages, [`Modal`](./modal.md) (adds `draggable`), [`Table`](./table.md) (adds `flexHeight`/`striped`), and [`Upload`](./upload.md) (adds `enableCrop`/`pastable`) genuinely extend antd. [`Button`](./button.md), [`Input`](./input.md), [`Alert`](./alert.md), [`Avatar`](./avatar.md), [`Typography`](./typography.md), [`Compact`](./compact.md), and [`BorderBeam`](./border-beam.md) are bare `antd` re-exports too — they get dedicated pages for discoverability, not because VEF changes their behavior. `Empty` in the table below is also not an unmodified pass-through: VEF overrides its default `image` to antd's `PRESENTED_IMAGE_SIMPLE`. For components that genuinely gain VEF-specific props, hooks, or behavior, or that are VEF-original, see the [Components Overview](./overview.md).
 
 ```tsx
 import { Affix, Card, Tabs, Tag } from '@vef-framework-react/components';
@@ -33,6 +33,7 @@ import { Affix, Card, Tabs, Tag } from '@vef-framework-react/components';
 | `Divider` | A visual divider between content. | [Divider](https://ant.design/components/divider/) |
 | `Drawer` | A panel that slides in from the edge. | [Drawer](https://ant.design/components/drawer/) |
 | `Dropdown` | A dropdown menu triggered by a button. | [Dropdown](https://ant.design/components/dropdown/) |
+| `Empty` | An empty-state placeholder; VEF presets `image` to `PRESENTED_IMAGE_SIMPLE`. | [Empty](https://ant.design/components/empty/) |
 | `Flex` | A flex layout container. | [Flex](https://ant.design/components/flex/) |
 | `FloatButton` | A floating action button. | [FloatButton](https://ant.design/components/float-button/) |
 | `Image` | An image with preview support. | [Image](https://ant.design/components/image/) |

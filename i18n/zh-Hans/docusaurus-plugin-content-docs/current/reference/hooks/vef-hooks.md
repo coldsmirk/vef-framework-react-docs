@@ -5,7 +5,7 @@ description: "@vef-framework-react/hooks 中每个由 VEF 维护的 hook 的签�
 
 # VEF Hooks
 
-这里是 `@vef-framework-react/hooks` 维护的每个 hook 的详尽签名级索引。若需要叙述性的“何时用什么”版本，请参阅 [Hooks](../../guide/hooks.md)。
+这里是 `@vef-framework-react/hooks` 维护的每个 hook 的详尽签名级索引。若需要叙述性的“何时用什么”版本，请参阅 [Hooks](../../guide/hooks.md)。该包的另一半——经同一入口重新导出的 Mantine 与快捷键 hooks——收录在[上游 Hook 导出](./upstream-hooks.md)中。
 
 ## 权限 Hooks
 

@@ -154,7 +154,7 @@ export default function Demo() {
 
 ## 最佳实践
 
-- 始终为 `Input` 搭配 `label`，或在 `Form.Item` 中使用，以满足无障碍访问要求。
+- 始终为 `Input` 搭配可见的 label（或提供 `aria-label`），以满足无障碍访问要求。
 - 搜索类输入框使用 `allowClear` 以提升用户体验。
 - 表单场景下优先使用 [`Form`](./form) 的字段组件，它会自动处理取值绑定和校验：
 

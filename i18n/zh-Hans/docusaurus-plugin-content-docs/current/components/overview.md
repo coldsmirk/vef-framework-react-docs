@@ -55,13 +55,14 @@ description: "@vef-framework-react/components 导出的全部组件的统一目�
 | [`ActionGroup`](./action-group.md) | 根据配置数组渲染一组操作按钮 |
 | [`OperationButton`](./operation-button.md) | `ActionButton` 与 `PermissionGate` 的组合 |
 | [`PermissionGate`](./permission-gate.md) | 根据权限条件渲染子元素 |
-| [`IconButton`](./icon-button.md) | 带提示的纯图标按钮 |
 
 ## 展示与工具
 
 | 组件 | 说明 |
 |-----------|-------------|
 | [`ConfigProvider`](./config-provider.md) | VEF 的全局主题提供者——暗色模式、语义化颜色、CSS 变量 |
+| [消息与通知](./notifications.md) | 命令式反馈 helpers——`showSuccessMessage`、`showErrorNotification`、`showConfirm` 等 |
+| [`IconButton`](./icon-button.md) | 带提示的纯图标按钮 |
 | [`Loader`](./loader.md) | 全屏或行内加载指示器 |
 | [`Icon`](./icon.md) | 渲染以属性形式传入的 Lucide 图标组件 |
 | [`DynamicIcon`](./dynamic-icon.md) | 根据名称字符串渲染 Lucide 图标 |
@@ -79,7 +80,7 @@ description: "@vef-framework-react/components 导出的全部组件的统一目�
 | [`SparklesText`](./sparkles-text.md) | 带闪光粒子效果的文本 |
 | [`SplitText`](./split-text.md) | 基于 GSAP 的文本拆分动画 |
 | [`TypingAnimation`](./typing-animation.md) | 打字机效果动画 |
-| [`BorderBeam`](./border-beam.md) | 沿容器边框流动的装饰性动画光束 |
+| [`BorderBeam`](./border-beam.md) | 沿容器边框流动的装饰性动画光束（antd 原样导出） |
 
 ## Ant Design
 
@@ -96,6 +97,24 @@ description: "@vef-framework-react/components 导出的全部组件的统一目�
 | [`Compact`](./compact.md) | `Space.Compact`——将输入框/按钮组合成一个无缝整体 |
 
 Ant Design 中的其余组件均为原样、未经修改的重新导出——完整索引参见 [Ant Design 直通组件](./antd-pass-through.md)。
+
+## 本包导出的 Hooks
+
+`@vef-framework-react/components` 同时导出一批 hooks，各自的文档在其宿主组件页面上：
+
+| Hooks | 文档位置 |
+|-------|---------------|
+| `useForm`、`useFormContext`、`useFormStore`、`createFormOptions`、`withForm`、`withFieldGroup` | [`Form`](./form.md) |
+| `useDataOptionsSelect`、`useDictionaryOptionsSelect` | [`Select`](./select.md) |
+| `useDataOptionsTreeSelect` | [`TreeSelect`](./tree-select.md) |
+| `useDataOptionsTree` | [`Tree`](./tree.md) |
+| `usePaginationProps` | [`Table`](./table.md) |
+| `useGridCollapsed` | [`Grid`](./grid.md) |
+| `usePageEntranceEffect`、`usePageEntranceSettled`、`useViewportHeight` | [`Page`](./page.md) |
+| `useThemeTokens`、`useIsDarkMode` | [`ConfigProvider`](./config-provider.md) |
+| `useChart`、`connectCharts`、`disconnectCharts` | [`Chart`](./chart.md) |
+
+`@vef-framework-react/hooks` 包中的 hooks（权限、字典、上传、防抖等）另有索引，见 [VEF Hooks](../reference/hooks/vef-hooks.md)。
 
 ## 安装
 

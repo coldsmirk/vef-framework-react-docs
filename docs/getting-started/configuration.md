@@ -22,7 +22,7 @@ export default defineViteConfig({
 });
 ```
 
-The full option list for `defineViteConfig()`, `createApp()`, `createApiClient()`, and `createRouter()` lives in the [Configuration Quick Reference](../reference/configuration-reference.md) — this page only covers the narrative of setting the build up.
+The full option lists live in the reference section — [Bootstrap & Routing](../reference/starter/bootstrap-and-routing.md) for `createApp()`, `createApiClient()`, `createRouter()`, and the route helpers, and [Dev Package](../reference/dev/overview.md) for `defineViteConfig()`. This page only covers the narrative of setting the build up.
 
 ## ESLint Configuration
 

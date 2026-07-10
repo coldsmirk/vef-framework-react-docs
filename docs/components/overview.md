@@ -55,13 +55,14 @@ Every component lives in exactly one of the groups below. Components marked **VE
 | [`ActionGroup`](./action-group.md) | Renders a group of action buttons from a config array |
 | [`OperationButton`](./operation-button.md) | `ActionButton` + `PermissionGate` combined |
 | [`PermissionGate`](./permission-gate.md) | Conditionally renders children based on permissions |
-| [`IconButton`](./icon-button.md) | Icon-only button with tooltip |
 
 ## Display & Utility
 
 | Component | Description |
 |-----------|-------------|
 | [`ConfigProvider`](./config-provider.md) | VEF's global theme provider — dark mode, semantic colors, CSS variables |
+| [Notifications & Messages](./notifications.md) | Imperative feedback helpers — `showSuccessMessage`, `showErrorNotification`, `showConfirm`, and friends |
+| [`IconButton`](./icon-button.md) | Icon-only button with tooltip |
 | [`Loader`](./loader.md) | Full-screen or inline loading indicator |
 | [`Icon`](./icon.md) | Renders a Lucide icon component passed as a prop |
 | [`DynamicIcon`](./dynamic-icon.md) | Renders a Lucide icon by name string |
@@ -79,7 +80,7 @@ Every component lives in exactly one of the groups below. Components marked **VE
 | [`SparklesText`](./sparkles-text.md) | Text with sparkle particle effects |
 | [`SplitText`](./split-text.md) | GSAP-powered text split animation |
 | [`TypingAnimation`](./typing-animation.md) | Typewriter effect animation |
-| [`BorderBeam`](./border-beam.md) | Decorative animated beam that travels along a container's border |
+| [`BorderBeam`](./border-beam.md) | Decorative animated beam that travels along a container's border (antd re-export) |
 
 ## Ant Design
 
@@ -96,6 +97,24 @@ Components documented on their own page because they carry VEF-specific notes (p
 | [`Compact`](./compact.md) | `Space.Compact` — groups inputs/buttons into a seamless unit |
 
 Everything else from Ant Design is a straight, unmodified re-export — see the [Ant Design Pass-Through](./antd-pass-through.md) index.
+
+## Hooks Exported by This Package
+
+`@vef-framework-react/components` also exports hooks. Each is documented on its host component's page:
+
+| Hooks | Documented on |
+|-------|---------------|
+| `useForm`, `useFormContext`, `useFormStore`, `createFormOptions`, `withForm`, `withFieldGroup` | [`Form`](./form.md) |
+| `useDataOptionsSelect`, `useDictionaryOptionsSelect` | [`Select`](./select.md) |
+| `useDataOptionsTreeSelect` | [`TreeSelect`](./tree-select.md) |
+| `useDataOptionsTree` | [`Tree`](./tree.md) |
+| `usePaginationProps` | [`Table`](./table.md) |
+| `useGridCollapsed` | [`Grid`](./grid.md) |
+| `usePageEntranceEffect`, `usePageEntranceSettled`, `useViewportHeight` | [`Page`](./page.md) |
+| `useThemeTokens`, `useIsDarkMode` | [`ConfigProvider`](./config-provider.md) |
+| `useChart`, `connectCharts`, `disconnectCharts` | [`Chart`](./chart.md) |
+
+Hooks from `@vef-framework-react/hooks` (permissions, dictionaries, upload, debounce, …) are indexed separately in [VEF Hooks](../reference/hooks/vef-hooks.md).
 
 ## Installation
 

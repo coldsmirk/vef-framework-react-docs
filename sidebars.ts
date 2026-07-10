@@ -28,6 +28,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         "guide/routing",
+        "guide/menus-and-navigation",
         "guide/data-fetching",
         "guide/forms",
         "guide/tables",
@@ -37,6 +38,7 @@ const sidebars: SidebarsConfig = {
         "guide/permissions",
         "guide/data-dictionaries",
         "guide/theming",
+        "guide/localization",
         "guide/error-handling",
         "guide/hooks"
       ]
@@ -99,8 +101,7 @@ const sidebars: SidebarsConfig = {
             "components/action-button",
             "components/action-group",
             "components/operation-button",
-            "components/permission-gate",
-            "components/icon-button"
+            "components/permission-gate"
           ]
         },
         {
@@ -109,6 +110,8 @@ const sidebars: SidebarsConfig = {
           collapsed: true,
           items: [
             "components/config-provider",
+            "components/notifications",
+            "components/icon-button",
             "components/loader",
             "components/icon",
             "components/dynamic-icon",
@@ -171,6 +174,7 @@ const sidebars: SidebarsConfig = {
             "editors/form-editor/reference"
           ]
         },
+        "editors/approval-form-bridge",
         {
           type: "category",
           label: "Approval Flow Editor",
@@ -180,8 +184,7 @@ const sidebars: SidebarsConfig = {
             "editors/approval-flow-editor/host-integration",
             "editors/approval-flow-editor/reference"
           ]
-        },
-        "editors/approval-form-bridge"
+        }
       ]
     },
     {
@@ -220,7 +223,6 @@ const sidebars: SidebarsConfig = {
           label: "Hooks",
           collapsed: true,
           items: [
-            "reference/hooks/overview",
             "reference/hooks/vef-hooks",
             "reference/hooks/upstream-hooks"
           ]
@@ -243,8 +245,8 @@ const sidebars: SidebarsConfig = {
           collapsed: true,
           items: ["reference/dev/overview"]
         },
-        "reference/configuration-reference",
-        "reference/css-variables-reference"
+        "reference/css-variables-reference",
+        "reference/release-notes"
       ]
     },
     {

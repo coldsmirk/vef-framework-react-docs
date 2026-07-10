@@ -8,7 +8,7 @@ description: How to choose between raw CSS variables, globalCssVars, and useThem
 VEF theme capabilities are primarily provided by `@vef-framework-react/components`, and they are already wired when the application is bootstrapped through `createApp()`.
 
 :::tip
-If your app is bootstrapped through `starter.createApp().render()`, the CSS custom properties are already injected onto `:root`. If you mount the component layer manually, keep `@vef-framework-react/components` `ConfigProvider` in place so the global variables are emitted.
+If your app is bootstrapped through `starter.createApp().render()`, the CSS custom properties are already injected onto `:root`. If you mount the component layer manually, keep `@vef-framework-react/components` [`ConfigProvider`](../components/config-provider.md) in place so the global variables are emitted.
 :::
 
 ## Common APIs

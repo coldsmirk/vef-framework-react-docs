@@ -8,7 +8,7 @@ description: 在为 VEF 页面编写样式时，如何在原生 CSS 变量、glo
 VEF 的主题能力主要由 `@vef-framework-react/components` 提供，当应用通过 `createApp()` 完成启动后，它们就已经接好了。
 
 :::tip
-如果你的应用是通过 `starter.createApp().render()` 启动的，CSS 自定义属性已经被注入到 `:root` 上。如果你手动挂载组件层，请保留 `@vef-framework-react/components` 的 `ConfigProvider`，这样全局变量才会被正确输出。
+如果你的应用是通过 `starter.createApp().render()` 启动的，CSS 自定义属性已经被注入到 `:root` 上。如果你手动挂载组件层，请保留 `@vef-framework-react/components` 的 [`ConfigProvider`](../components/config-provider.md)，这样全局变量才会被正确输出。
 :::
 
 ## 常用 API

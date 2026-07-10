@@ -154,7 +154,7 @@ Inherits all `Input` props, plus:
 
 ## Best Practices
 
-- Always pair `Input` with a `label` or use it inside a `Form.Item` for accessibility.
+- Always pair `Input` with a visible label (or an `aria-label`) for accessibility.
 - Use `allowClear` for search-like inputs to improve UX.
 - For form usage, prefer the [`Form`](./form) field components, which handle value binding and validation automatically:
 

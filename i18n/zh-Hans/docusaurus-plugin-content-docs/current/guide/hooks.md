@@ -60,34 +60,7 @@ const roleOptions = useDataOptionsQuery({
 
 ## 权限相关 Hooks
 
-### `useCheckPermission`
-
-```tsx
-const checkPermission = useCheckPermission();
-
-if (checkPermission("sys:user:create")) {
-  // ...
-}
-```
-
-### `useIsAuthorized`
-
-```tsx
-const canEdit = useIsAuthorized(["sys:user:update", "sys:user:write"], "any");
-```
-
-### `useAuthorizedItems`
-
-对于先声明、再按权限过滤的菜单、按钮配置和操作列表来说，这个 hook 特别有用。
-
-```tsx
-const visibleActions = useAuthorizedItems([
-  { key: "create", requiredPermissions: "sys:user:create" },
-  { key: "delete", requiredPermissions: "sys:user:delete" }
-]);
-```
-
-完整的权限模型——这些 hook 与 `PermissionGate` 和路由守卫共享的模型——见 [权限](./permissions.md)。
+`useCheckPermission`、`useIsAuthorized` 和 `useAuthorizedItems` 与 `PermissionGate`、路由守卫共享同一套权限模型。它们的用法——命令式检查、渲染期检查、配置数组过滤——连同示例见[权限](./permissions.md)；精确签名见 [VEF Hooks](../reference/hooks/vef-hooks.md#权限-hooks)。
 
 ## `useUpload`
 

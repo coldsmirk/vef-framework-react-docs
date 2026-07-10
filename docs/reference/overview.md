@@ -97,7 +97,7 @@ Start with:
 - `useAuthorizedItems`
 - `useIsAuthorized`
 
-Reference: [Hooks Package](./hooks/overview.md)
+Reference: [Hooks Package](./hooks/vef-hooks.md)
 
 ## `@vef-framework-react/shared`
 

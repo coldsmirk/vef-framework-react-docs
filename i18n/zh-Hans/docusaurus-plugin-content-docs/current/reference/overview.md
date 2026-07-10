@@ -97,7 +97,7 @@ description: 针对特定需求应优先查阅九个已发布包中的哪一个�
 - `useAuthorizedItems`
 - `useIsAuthorized`
 
-参考文档：[Hooks 包](./hooks/overview.md)
+参考文档：[Hooks 包](./hooks/vef-hooks.md)
 
 ## `@vef-framework-react/shared`
 

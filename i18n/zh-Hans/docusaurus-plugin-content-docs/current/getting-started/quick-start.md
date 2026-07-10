@@ -183,7 +183,7 @@ export const routerContext: RouterContext = {
 ```ts title="src/router/index.ts"
 import { createRouter } from "@vef-framework-react/starter";
 
-import { routeTree } from "./routeTree.gen";
+import { routeTree } from "./router.gen";
 import { routerContext } from "./context";
 
 const router = createRouter({
@@ -194,6 +194,8 @@ const router = createRouter({
 
 export default router;
 ```
+
+`src/router/router.gen.ts` 是 `defineViteConfig` 启用的路由插件生成的路由树。开发服务器运行期间它会被自动创建并保持更新——切勿手工编辑。
 
 ## 第七步: 渲染应用
 

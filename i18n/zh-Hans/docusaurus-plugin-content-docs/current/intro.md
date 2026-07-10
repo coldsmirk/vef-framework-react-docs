@@ -40,7 +40,7 @@ VEF 在 `@vef-framework-react/*` 作用域下发布了 9 个包。其中 6 个�
 侧边栏共有 6 个部分:
 
 1. **快速上手** —— 一条线性教程。安装框架、运行一个最小应用，然后构建一个真实的 CRUD 页面。
-2. **指南** —— 面向任务的"如何做 X"类型的叙述型文档（路由、数据请求、表单、表格、CRUD、状态、鉴权、权限、数据字典、主题、错误处理、hooks），按照从基础到进阶的顺序排列。
+2. **指南** —— 面向任务的"如何做 X"类型的叙述型文档（路由、菜单、数据请求、表单、表格、CRUD、状态、鉴权、权限、数据字典、主题、本地化、错误处理、hooks），按照从基础到进阶的顺序排列。
 3. **组件** —— 每个导出组件的系统化参考，附带属性表和示例。按需查阅即可，不需要从头读到尾。
 4. **可视化编辑器** —— form-editor、approval-flow-editor 和 approval-form-bridge 三个包:它们是什么、如何嵌入宿主应用，以及它们的 Schema/类型参考。
 5. **API 参考** —— 简洁的逐包导出签名说明。当你已经明确知道要找什么时再来这里。
@@ -60,17 +60,19 @@ VEF 在 `@vef-framework-react/*` 作用域下发布了 9 个包。其中 6 个�
    5. [项目结构](./getting-started/project-structure.md)
 2. **指南**，按顺序——每一篇都建立在前一篇的概念之上:
    1. [路由与布局](./guide/routing.md)
-   2. [数据请求](./guide/data-fetching.md)
-   3. [表单](./guide/forms.md)
-   4. [表格](./guide/tables.md)
-   5. [CRUD 页面](./guide/crud.md)
-   6. [状态管理](./guide/state-management.md)
-   7. [身份认证](./guide/authentication.md)
-   8. [权限](./guide/permissions.md)
-   9. [数据字典](./guide/data-dictionaries.md)
-   10. [主题](./guide/theming.md)
-   11. [错误处理](./guide/error-handling.md)
-   12. [Hooks](./guide/hooks.md)
+   2. [菜单与导航](./guide/menus-and-navigation.md)
+   3. [数据请求](./guide/data-fetching.md)
+   4. [表单](./guide/forms.md)
+   5. [表格](./guide/tables.md)
+   6. [CRUD 页面](./guide/crud.md)
+   7. [状态管理](./guide/state-management.md)
+   8. [身份认证](./guide/authentication.md)
+   9. [权限](./guide/permissions.md)
+   10. [数据字典](./guide/data-dictionaries.md)
+   11. [主题](./guide/theming.md)
+   12. [本地化](./guide/localization.md)
+   13. [错误处理](./guide/error-handling.md)
+   14. [Hooks](./guide/hooks.md)
 3. **组件** —— 从这里开始，把文档当作参考资料而不是线性阅读的教程。当页面需要某个具体的构建块时，打开[组件目录](./components/overview.md)查阅。
 4. **可视化编辑器** —— 仅当应用需要嵌入表单设计器或审批流设计器时，才需要阅读[总览](./editors/overview.md)。
 5. **API 参考** —— 需要精确的导出签名时，从[包总览](./reference/overview.md)开始查找。

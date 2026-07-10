@@ -130,6 +130,125 @@ const { gender } = useDictionaryOptionsSelect({
 
 `useDictionaryOptionsSelect(keys, options?)` 返回一个 `{ alias: SelectProps }` 映射。传入 `{ filterable: true }`（或针对某个 key 单独传入 `{ key: { key: "...", filterable: true } }`）可以启用拼音搜索——底层数据的来源见 [数据字典](./data-dictionaries.md)。
 
+## 字段依赖与联动
+
+由于表单层底层就是 TanStack Form，一个字段响应另一个字段不需要额外的机制。三种手段覆盖了常见场景：
+
+- `Subscribe` —— 当表单状态中被选中的部分发生变化时，重新渲染一小块 UI；用它来根据另一个字段的值显示、隐藏、禁用某个字段或改变其必填性。
+- `AppField` 上的 `listeners` —— 在字段值变化时执行副作用；用它来重置或派生依赖字段的值。
+- `useFormStore()` —— `Subscribe` 的 hook 形式，适用于整个组件都需要该值的情况。
+
+### 响应另一个字段的变化
+
+`Subscribe` 和 `AppField` 来自同一个地方——`useForm()` 或 `useFormContext()`。它的 `selector` 决定什么会触发重新渲染，因此在无关字段中输入不会重新渲染被订阅的区块：
+
+```tsx
+const { AppField, Subscribe } = useFormContext<MenuFormValues>();
+
+<AppField name="path">
+  {field => (
+    <Subscribe selector={state => state.values.type}>
+      {type => (
+        <field.Input
+          disabled={type === "button"}
+          label="Path"
+          required={type !== "button"}
+        />
+      )}
+    </Subscribe>
+  )}
+</AppField>
+```
+
+同一个组件也可以用在 `AppField` 之外，用于显示或隐藏一整个区块：
+
+```tsx
+<Subscribe selector={state => state.values.orgId}>
+  {orgId => orgId && <DepartmentSection orgId={orgId} />}
+</Subscribe>
+```
+
+保持 selector 尽量窄——用 `state.values.type` 而不是 `state.values`——这样该区块只会在它真正依赖的值变化时重新渲染。
+
+### 派生与重置字段值
+
+`AppField` 接受一个 `listeners` prop。`onChange` 监听器会收到新的 `value` 和 `fieldApi`，后者的 `form` 属性可以触达表单的其余部分——`form.resetField()` 把依赖字段恢复为默认值，`form.setFieldValue()` 写入派生值（它也接受更新函数 `prev => next`）：
+
+```tsx
+<AppField
+  name="quantity"
+  listeners={{
+    onChange: ({ value, fieldApi: { form } }) => {
+      form.setFieldValue("total", (value ?? 0) * form.state.values.unitPrice);
+    }
+  }}
+>
+  {field => <field.InputNumber required label="Quantity" />}
+</AppField>
+```
+
+与 `validators` 不同，listeners 只用于副作用——它们不会产生错误信息。
+
+### 选项级联
+
+级联把上面两种机制结合起来：控制字段在变化时重置它的依赖字段，依赖字段的选项查询以控制字段的值作为 key。
+
+```tsx
+function DepartmentField({ orgId }: { orgId?: string }) {
+  const { AppField } = useFormContext<StaffFormValues>();
+
+  const deptTreeSelectProps = useDataOptionsTreeSelect({
+    filterable: true,
+    queryOptions: {
+      queryKey: [findDepartmentTree.key, { orgId }],
+      queryFn: findDepartmentTree,
+      enabled: Boolean(orgId)
+    }
+  });
+
+  return (
+    <AppField name="deptId">
+      {field => <field.TreeSelect {...deptTreeSelectProps} label="Department" />}
+    </AppField>
+  );
+}
+```
+
+由父组件把两个字段串起来：
+
+```tsx
+<AppField
+  name="orgId"
+  listeners={{
+    onChange: ({ fieldApi: { form } }) => form.resetField("deptId")
+  }}
+>
+  {field => <field.TreeSelect {...orgTreeSelectProps} required label="Organization" />}
+</AppField>
+
+<Subscribe selector={state => state.values.orgId}>
+  {orgId => <DepartmentField orgId={orgId} />}
+</Subscribe>
+```
+
+因为 `orgId` 是 `queryKey` 的一部分，切换机构会自动重新拉取部门选项（`enabled` 让查询在选定机构之前保持空闲），而 `listeners` 中的重置则保证过期的 `deptId` 不会在切换后残留。
+
+### 在 Hook 代码中订阅
+
+当需要在普通的 hook 代码而不是 JSX 中使用该值时，`useFormStore(form.store, selector)` 拥有与 `Subscribe` 相同的 selector 语义：
+
+```tsx
+import { useForm, useFormStore } from "@vef-framework-react/components";
+
+const form = useForm({
+  defaultValues: { type: "menu", path: "" }
+});
+
+const type = useFormStore(form.store, state => state.values.type);
+```
+
+如果想把一个完全自定义的控件接入依赖字段，见[自定义表单组件](../advanced/custom-form-components.md)。
+
 ## 为什么要做这种拆分
 
 把数据来源（`useDataOptionsSelect()`、`useDictionaryOptionsSelect()` 等）与字段渲染（`AppField`）和布局（`Grid`）分开，意味着：

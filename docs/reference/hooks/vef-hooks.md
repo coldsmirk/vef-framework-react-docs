@@ -5,7 +5,7 @@ description: Signatures for every VEF-maintained hook in @vef-framework-react/ho
 
 # VEF Hooks
 
-This is the exhaustive, signature-level index of every hook `@vef-framework-react/hooks` maintains. For the narrative / when-to-use-what version, see [Hooks](../../guide/hooks.md).
+This is the exhaustive, signature-level index of every hook `@vef-framework-react/hooks` maintains. For the narrative / when-to-use-what version, see [Hooks](../../guide/hooks.md). The package's other half — Mantine and hotkey hooks re-exported through the same entry — is indexed in [Upstream Hook Exports](./upstream-hooks.md).
 
 ## Permission Hooks
 

@@ -40,7 +40,7 @@ The three editor packages are independent of each other — a host application c
 The sidebar has 6 sections:
 
 1. **Getting Started** — a linear tutorial. Install the framework, run a minimal app, then build a real CRUD page.
-2. **Guides** — task-oriented "how do I do X" narratives (routing, data fetching, forms, tables, CRUD, state, auth, permissions, dictionaries, theming, error handling, hooks), ordered from foundational to advanced.
+2. **Guides** — task-oriented "how do I do X" narratives (routing, menus, data fetching, forms, tables, CRUD, state, auth, permissions, dictionaries, theming, localization, error handling, hooks), ordered from foundational to advanced.
 3. **Components** — an organized reference of every exported component, with prop tables and examples. Browse it as needed; it is not meant to be read start to finish.
 4. **Visual Editors** — the form-editor, approval-flow-editor, and approval-form-bridge packages: what they are, how to embed them in a host app, and their schema/type reference.
 5. **API Reference** — dry, per-package export signatures. Come here once you already know what you're looking for.
@@ -60,17 +60,19 @@ For a first-time reader, this order builds understanding incrementally:
    5. [Project Structure](./getting-started/project-structure.md)
 2. **Guides**, in order — each one leans on the concepts before it:
    1. [Routing & Layout](./guide/routing.md)
-   2. [Data Fetching](./guide/data-fetching.md)
-   3. [Forms](./guide/forms.md)
-   4. [Tables](./guide/tables.md)
-   5. [CRUD Pages](./guide/crud.md)
-   6. [State Management](./guide/state-management.md)
-   7. [Authentication](./guide/authentication.md)
-   8. [Permissions](./guide/permissions.md)
-   9. [Data Dictionaries](./guide/data-dictionaries.md)
-   10. [Theming](./guide/theming.md)
-   11. [Error Handling](./guide/error-handling.md)
-   12. [Hooks](./guide/hooks.md)
+   2. [Menus & Navigation](./guide/menus-and-navigation.md)
+   3. [Data Fetching](./guide/data-fetching.md)
+   4. [Forms](./guide/forms.md)
+   5. [Tables](./guide/tables.md)
+   6. [CRUD Pages](./guide/crud.md)
+   7. [State Management](./guide/state-management.md)
+   8. [Authentication](./guide/authentication.md)
+   9. [Permissions](./guide/permissions.md)
+   10. [Data Dictionaries](./guide/data-dictionaries.md)
+   11. [Theming](./guide/theming.md)
+   12. [Localization](./guide/localization.md)
+   13. [Error Handling](./guide/error-handling.md)
+   14. [Hooks](./guide/hooks.md)
 3. **Components** — from here on, treat the docs as a reference rather than a sequence. Open the [component catalog](./components/overview.md) whenever a page needs a specific building block.
 4. **Visual Editors** — read the [overview](./editors/overview.md) only if the application embeds the form designer or the approval flow designer.
 5. **API Reference** — start from the [package map](./reference/overview.md) whenever exact export signatures are needed.

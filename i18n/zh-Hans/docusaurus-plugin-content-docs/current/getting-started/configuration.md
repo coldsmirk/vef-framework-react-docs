@@ -22,7 +22,7 @@ export default defineViteConfig({
 });
 ```
 
-`defineViteConfig()`、`createApp()`、`createApiClient()` 和 `createRouter()` 的完整选项列表位于[配置速查](../reference/configuration-reference.md)——本页只介绍搭建构建流程的整体思路。
+完整选项列表位于参考章节——`createApp()`、`createApiClient()`、`createRouter()` 及路由 helper 见[引导与路由](../reference/starter/bootstrap-and-routing.md)，`defineViteConfig()` 见 [Dev 包](../reference/dev/overview.md)。本页只介绍搭建构建流程的整体思路。
 
 ## ESLint 配置
 

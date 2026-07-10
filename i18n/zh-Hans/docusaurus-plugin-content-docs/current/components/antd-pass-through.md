@@ -7,7 +7,7 @@ description: "从 Ant Design 原样重新导出的组件索引——请完全按
 
 `@vef-framework-react/components` 直接重新导出了大部分 [Ant Design](https://ant.design/components/overview/) 组件。这些组件不携带任何 VEF 专属行为或属性变更——从 `@vef-framework-react/components` 导入它们，并完全按照 Ant Design 官网文档使用即可。
 
-> 在拥有独立文档页面的组件中，[`Modal`](./modal.md)（新增 `draggable`）、[`Table`](./table.md)（新增 `flexHeight`/`striped`）和 [`Upload`](./upload.md)（新增 `enableCrop`/`pastable`）真正扩展了 antd。[`Button`](./button.md)、[`Input`](./input.md)、[`Alert`](./alert.md)、[`Avatar`](./avatar.md)、[`Typography`](./typography.md) 和 [`Compact`](./compact.md) 同样是 `antd` 的原样重新导出——它们拥有独立页面只是为了便于查找，而不是因为 VEF 改变了它们的行为。下表中的 `Empty` 也并非未经修改的直通组件：VEF 将其默认 `image` 覆盖为了 antd 的 `PRESENTED_IMAGE_SIMPLE`。对于真正获得了 VEF 专属属性、hook 或行为的组件，或 VEF 原创组件，请参见[组件概览](./overview.md)。
+> 在拥有独立文档页面的组件中，[`Modal`](./modal.md)（新增 `draggable`）、[`Table`](./table.md)（新增 `flexHeight`/`striped`）和 [`Upload`](./upload.md)（新增 `enableCrop`/`pastable`）真正扩展了 antd。[`Button`](./button.md)、[`Input`](./input.md)、[`Alert`](./alert.md)、[`Avatar`](./avatar.md)、[`Typography`](./typography.md)、[`Compact`](./compact.md) 和 [`BorderBeam`](./border-beam.md) 同样是 `antd` 的原样重新导出——它们拥有独立页面只是为了便于查找，而不是因为 VEF 改变了它们的行为。下表中的 `Empty` 也并非未经修改的直通组件：VEF 将其默认 `image` 覆盖为了 antd 的 `PRESENTED_IMAGE_SIMPLE`。对于真正获得了 VEF 专属属性、hook 或行为的组件，或 VEF 原创组件，请参见[组件概览](./overview.md)。
 
 ```tsx
 import { Affix, Card, Tabs, Tag } from '@vef-framework-react/components';
@@ -33,6 +33,7 @@ import { Affix, Card, Tabs, Tag } from '@vef-framework-react/components';
 | `Divider` | 内容之间的视觉分割线。 | [Divider](https://ant.design/components/divider/) |
 | `Drawer` | 从屏幕边缘滑出的面板。 | [Drawer](https://ant.design/components/drawer/) |
 | `Dropdown` | 由按钮触发的下拉菜单。 | [Dropdown](https://ant.design/components/dropdown/) |
+| `Empty` | 空状态占位；VEF 将 `image` 预设为 `PRESENTED_IMAGE_SIMPLE`。 | [Empty](https://ant.design/components/empty/) |
 | `Flex` | flex 布局容器。 | [Flex](https://ant.design/components/flex/) |
 | `FloatButton` | 悬浮操作按钮。 | [FloatButton](https://ant.design/components/float-button/) |
 | `Image` | 支持预览的图片。 | [Image](https://ant.design/components/image/) |

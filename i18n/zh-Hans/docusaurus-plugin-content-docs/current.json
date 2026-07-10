@@ -7,56 +7,84 @@
     "message": "快速入门",
     "description": "The label for category 'Getting Started' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Core Guides": {
-    "message": "核心指南",
-    "description": "The label for category 'Core Guides' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Guides": {
+    "message": "指南",
+    "description": "The label for category 'Guides' in sidebar 'docsSidebar'"
   },
   "sidebar.docsSidebar.category.Components": {
     "message": "组件",
     "description": "The label for category 'Components' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.link.Ant Design Components": {
-    "message": "Ant Design 组件",
-    "description": "The label for link 'Ant Design Components' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Layout": {
+    "message": "布局",
+    "description": "The label for category 'Layout' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Ant Design Components": {
-    "message": "Ant Design 组件",
-    "description": "The label for category 'Ant Design Components' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Page & CRUD": {
+    "message": "页面与 CRUD",
+    "description": "The label for category 'Page & CRUD' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Forms": {
+    "message": "表单",
+    "description": "The label for category 'Forms' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Actions & Permissions": {
+    "message": "操作与权限",
+    "description": "The label for category 'Actions & Permissions' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Display & Utility": {
+    "message": "展示与工具",
+    "description": "The label for category 'Display & Utility' in sidebar 'docsSidebar'"
   },
   "sidebar.docsSidebar.category.Animation": {
-    "message": "动画组件",
+    "message": "动画",
     "description": "The label for category 'Animation' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.AI Components (X)": {
-    "message": "AI 组件（X 系列）",
-    "description": "The label for category 'AI Components (X)' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Ant Design": {
+    "message": "Ant Design",
+    "description": "The label for category 'Ant Design' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Security": {
-    "message": "安全",
-    "description": "The label for category 'Security' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.link.All Ant Design Components ↗": {
+    "message": "全部 Ant Design 组件 ↗",
+    "description": "The label for link 'All Ant Design Components ↗' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Advanced Topics": {
-    "message": "进阶主题",
-    "description": "The label for category 'Advanced Topics' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Visual Editors": {
+    "message": "可视化编辑器",
+    "description": "The label for category 'Visual Editors' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Form Editor": {
+    "message": "表单编辑器",
+    "description": "The label for category 'Form Editor' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Approval Flow Editor": {
+    "message": "审批流编辑器",
+    "description": "The label for category 'Approval Flow Editor' in sidebar 'docsSidebar'"
   },
   "sidebar.docsSidebar.category.API Reference": {
     "message": "API 参考",
     "description": "The label for category 'API Reference' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Starter Package": {
-    "message": "Starter 包",
-    "description": "The label for category 'Starter Package' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Core": {
+    "message": "Core",
+    "description": "The label for category 'Core' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Components Package": {
-    "message": "Components 包",
-    "description": "The label for category 'Components Package' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Starter": {
+    "message": "Starter",
+    "description": "The label for category 'Starter' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Hooks Package": {
-    "message": "Hooks 包",
-    "description": "The label for category 'Hooks Package' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Hooks": {
+    "message": "Hooks",
+    "description": "The label for category 'Hooks' in sidebar 'docsSidebar'"
   },
-  "sidebar.docsSidebar.category.Shared Package": {
-    "message": "Shared 包",
-    "description": "The label for category 'Shared Package' in sidebar 'docsSidebar'"
+  "sidebar.docsSidebar.category.Shared": {
+    "message": "Shared",
+    "description": "The label for category 'Shared' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Dev": {
+    "message": "Dev",
+    "description": "The label for category 'Dev' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Advanced": {
+    "message": "进阶",
+    "description": "The label for category 'Advanced' in sidebar 'docsSidebar'"
   }
 }

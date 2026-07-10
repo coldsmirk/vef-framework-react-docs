@@ -41,6 +41,49 @@ export default defineViteConfig({
 | `react` | `ReactPluginOptions` | Options forwarded to the React plugin |
 | `proxies` | `Record<string, string \| ProxyOptions>` | Dev-server proxy table |
 
+## Environment Variables
+
+`defineViteConfig` reads `.env` files from the `env/` directory (not the project root) and recognizes two prefixes, both exposed on `import.meta.env` in client code:
+
+- `VEF_BUILD_*` — build and dev-server settings, resolved once at build time.
+- `VEF_APP_*` — application configuration, injected into the running app.
+
+Mode-specific file resolution (`env/.env`, `env/.env.development`, `env/.env.production`, shell variables) follows standard Vite behavior — see [Vite's env documentation](https://vite.dev/guide/env-and-mode).
+
+### Build-time: `VEF_BUILD_*`
+
+| Variable | Type | Default | Controls |
+| --- | --- | --- | --- |
+| `VEF_BUILD_BASE_PUBLIC_PATH` | `string` | `/` (Vite default) | Public base path (Vite `base`) that assets and `app.config.js` are served from |
+| `VEF_BUILD_OUTPUT_DIR` | `string` | `dist` | Build output directory (`build.outDir`); also where `app.config.js` is emitted |
+| `VEF_BUILD_SERVER_PORT` | `number` | `3833` | Dev-server port (`strictPort` is enabled, so the port must be free) |
+
+### Runtime-injected: `VEF_APP_*`
+
+Every variable with the `VEF_APP_` prefix is collected into the frozen `__VEF_APP_CONFIG__` global:
+
+- In development, the object is built inline from `import.meta.env`.
+- In production builds, the values from `env/.env` and `env/.env.production` are written to `<outputDir>/app.config.js`, loaded by a script tag injected into `index.html`. Editing that file after the build changes the runtime configuration without rebuilding.
+
+`__VEF_APP_CONFIG__` keys keep their full `VEF_APP_*` names; the scaffolded `getAppConfig` helper strips the prefix and camel-cases the rest (`VEF_APP_API_BASE_URL` → `apiBaseUrl`).
+
+The prefix is open-ended — any `VEF_APP_*` variable you add is picked up. These are the ones the framework itself consumes:
+
+| Variable | Type | Default (scaffold) | Controls |
+| --- | --- | --- | --- |
+| `VEF_APP_NAME` | `string` | `vef-app` | Application name shown in the built-in HTML shell (loading screen and `<noscript>` notice) |
+| `VEF_APP_TITLE` | `string` | `VEF App` | Document `<title>` |
+| `VEF_APP_FAVICON` | `string` | `/favicon.svg` | Favicon URL in the built-in HTML template |
+| `VEF_APP_VERSION` | `string` | `0.0.0` | `<meta name="app-version">` and the loading-screen version; polled by the starter's `setupAppVersionNotification` (see [Application Shell](../starter/application-shell.md)) to detect new deployments |
+| `VEF_APP_CHANGELOG` | `string` | `/changelog.json` | `<meta name="app-changelog">` — URL of the changelog JSON the version notification fetches |
+| `VEF_APP_API_BASE_URL` | `string` | `http://127.0.0.1:8080` (dev) / `/` (prod) | API base URL; the scaffolded API client reads it via `getAppConfig("apiBaseUrl")` |
+
+`%VEF_APP_*%` placeholders in the built-in `index.html` template are substituted by Vite's HTML env replacement, so every variable above is also resolved into the generated HTML at build time.
+
+Note that `VEF_APP_VERSION` — the version advertised to running clients — is independent of the `__VEF_APP_VERSION__` compile-time constant, which always comes from the `version` field in `package.json`.
+
+`vef init` seeds `env/.env` with `VEF_APP_NAME` and `VEF_APP_TITLE`, and `env/.env.development` with `VEF_APP_API_BASE_URL`, from your scaffolding answers.
+
 ## `defineEslintConfig`
 
 Creates an ESLint flat config with VEF defaults.

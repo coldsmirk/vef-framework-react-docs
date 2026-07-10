@@ -60,34 +60,7 @@ It returns `options`, query state fields, and the rest of the underlying query r
 
 ## Permission Hooks
 
-### `useCheckPermission`
-
-```tsx
-const checkPermission = useCheckPermission();
-
-if (checkPermission("sys:user:create")) {
-  // ...
-}
-```
-
-### `useIsAuthorized`
-
-```tsx
-const canEdit = useIsAuthorized(["sys:user:update", "sys:user:write"], "any");
-```
-
-### `useAuthorizedItems`
-
-Especially useful for menus, button configs, and action lists that are declared first and filtered later.
-
-```tsx
-const visibleActions = useAuthorizedItems([
-  { key: "create", requiredPermissions: "sys:user:create" },
-  { key: "delete", requiredPermissions: "sys:user:delete" }
-]);
-```
-
-See [Permissions](./permissions.md) for the full permission model these hooks share with `PermissionGate` and route guards.
+`useCheckPermission`, `useIsAuthorized`, and `useAuthorizedItems` share one permission model with `PermissionGate` and route guards. Their usage — imperative checks, render-time checks, and config-array filtering — is documented with examples in [Permissions](./permissions.md); exact signatures live in [VEF Hooks](../reference/hooks/vef-hooks.md#permission-hooks).
 
 ## `useUpload`
 

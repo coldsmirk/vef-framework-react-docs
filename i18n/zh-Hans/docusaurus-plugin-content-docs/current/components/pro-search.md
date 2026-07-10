@@ -16,40 +16,66 @@ description: "一个包含基础搜索区域、可折叠高级搜索面板以及
 
 ## 基础用法
 
+`ProSearch` 内部持有一个表单实例。搜索字段必须通过 `useFormContext` + `AppField` 连接到该表单——直接放裸的输入组件不会绑定任何值，`onSearch` 拿不到它。约定的写法是在页面旁定义一个小的 `BasicSearch` 组件：
+
 ```tsx
-import { ProSearch } from '@vef-framework-react/components';
+import { ProSearch, useFormContext } from '@vef-framework-react/components';
 
 interface UserSearch {
-  name?: string;
+  keyword?: string;
   status?: string;
 }
 
-export default function UserSearchBar({ onSearch }) {
+function BasicSearch() {
+  const { AppField } = useFormContext<UserSearch>();
+
+  return (
+    <>
+      <AppField name="keyword">
+        {(field) => <field.Input noWrapper placeholder="关键词" />}
+      </AppField>
+      <AppField name="status">
+        {(field) => <field.Select noWrapper placeholder="状态" options={STATUS_OPTIONS} />}
+      </AppField>
+    </>
+  );
+}
+
+export default function UserSearchBar({ onSearch }: { onSearch: (values: UserSearch) => void }) {
   return (
     <ProSearch<UserSearch>
-      basicSearch={
-        <>
-          <Input placeholder="Name" />
-          <Select placeholder="Status" />
-        </>
-      }
+      basicSearch={<BasicSearch />}
       onSearch={onSearch}
     />
   );
 }
 ```
 
+点击搜索按钮时，`onSearch` 会收到当前表单值。搜索区域内的字段组件建议加 `noWrapper`，去掉完整表单里的 label/错误提示骨架。
+
 ## 带高级搜索
 
+可折叠的高级面板使用同一个表单上下文——两块区域共享一个表单，`onSearch` 收到的是合并后的值：
+
 ```tsx
-<ProSearch<UserSearch>
-  basicSearch={<Input placeholder="Name" />}
-  advancedSearch={
+function AdvancedSearch() {
+  const { AppField } = useFormContext<UserSearch>();
+
+  return (
     <>
-      <DatePicker placeholder="Created after" />
-      <Select placeholder="Department" />
+      <AppField name="createdAfter">
+        {(field) => <field.DatePicker noWrapper placeholder="创建时间晚于" />}
+      </AppField>
+      <AppField name="department">
+        {(field) => <field.Select noWrapper placeholder="部门" options={DEPARTMENT_OPTIONS} />}
+      </AppField>
     </>
-  }
+  );
+}
+
+<ProSearch<UserSearch>
+  basicSearch={<BasicSearch />}
+  advancedSearch={<AdvancedSearch />}
   onSearch={onSearch}
   onReset={onReset}
 />
