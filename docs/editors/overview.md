@@ -20,8 +20,8 @@ An approval workflow has two halves that are designed separately and then joined
 ```mermaid
 flowchart LR
     A["FormEditor\n(design the form)"] -->|FormSchema| B["projectFormSchema\n(approval-form-bridge)"]
-    B -->|ApprovalFormField[]| C["Backend deploy contract"]
-    B -->|FormFieldDefinition[]| D["ApprovalFlowEditor\nplugins.formFields\n(design the routing)"]
+    B -->|"ApprovalFormField[]"| C["Backend deploy contract"]
+    B -->|"FormFieldDefinition[]"| D["ApprovalFlowEditor\nplugins.formFields\n(design the routing)"]
     D -->|FlowDefinition| E["Backend deploy contract"]
 ```
 

@@ -20,8 +20,8 @@ VEF 提供三个相互独立的包，用于以可视化方式设计表单和审�
 ```mermaid
 flowchart LR
     A["FormEditor\n(design the form)"] -->|FormSchema| B["projectFormSchema\n(approval-form-bridge)"]
-    B -->|ApprovalFormField[]| C["Backend deploy contract"]
-    B -->|FormFieldDefinition[]| D["ApprovalFlowEditor\nplugins.formFields\n(design the routing)"]
+    B -->|"ApprovalFormField[]"| C["Backend deploy contract"]
+    B -->|"FormFieldDefinition[]"| D["ApprovalFlowEditor\nplugins.formFields\n(design the routing)"]
     D -->|FlowDefinition| E["Backend deploy contract"]
 ```
 
