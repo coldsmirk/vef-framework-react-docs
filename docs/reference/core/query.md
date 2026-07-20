@@ -23,7 +23,15 @@ const queryOptions = {
 | --- | --- | --- | --- |
 | `staleTime` | `number` | `5000` | Time before data is considered stale (ms) |
 | `gcTime` | `number` | `300000` | Time before inactive queries are garbage collected (ms) |
-| `showSuccessMessage` | `(msg) => void` | — | Callback to display mutation success messages |
+| `showSuccessMessage` | `(message: string) => void` | — | Callback to display mutation success messages (see the mutation cache behavior below) |
+
+### Pre-Configured Defaults
+
+The internal factory configures the `QueryClient` with these defaults (per-query/mutation options can still override them):
+
+- **Queries**: `networkMode: "online"`, `retry: false`, `structuralSharing: true`, `throwOnError: false`, `refetchOnMount` / `refetchOnReconnect` / `refetchOnWindowFocus`: `true`, `retryOnMount: true`, `queryKeyHashFn: hashKey` (the `shared` stable hasher, so structurally-equal keys hash identically regardless of key order), and `experimental_prefetchInRender: true`.
+- **Mutations**: `networkMode: "online"`, `retry: false`, `throwOnError: false`, and the same `gcTime`.
+- **Mutation cache `onSuccess`**: when the finished mutation's `meta.invalidates` is set, every active-or-inactive query matching one of those keys (TanStack `matchQuery` semantics; already-stale queries are not re-invalidated) is invalidated. When `meta.shouldShowSuccessFeedback` is not `false` and the mutation result is a plain object with a `message` property, that message is passed to `showSuccessMessage`.
 
 ## `useQuery`
 
@@ -57,8 +65,8 @@ VEF extends TanStack's `MutationMeta` with two fields:
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `invalidates` | `QueryKey[]` | Query keys to invalidate on successful mutation |
-| `shouldShowSuccessFeedback` | `boolean` | Whether to show success message (default: `true`) |
+| `invalidates` | `Array<QueryKey<never> \| QueryKey<unknown>>` | Query keys to invalidate on successful mutation |
+| `shouldShowSuccessFeedback` | `boolean` | Whether to show the success message from the mutation response (default: `true`) |
 
 ## `useInfiniteQuery`
 
@@ -98,7 +106,20 @@ const states = useMutationState({
 
 ## `useIsFetching` and `useIsMutating`
 
-Low-level hooks for checking global fetch/mutation state. In most cases, prefer `useHasFetching` and `useHasMutating` from `@vef-framework-react/hooks` which accept typed query/mutation keys.
+```ts
+useIsFetching(filters?: QueryFilters): number
+useIsMutating(filters?: MutationFilters): number
+```
+
+Low-level hooks returning the count of currently fetching queries / running mutations that match the filters. In most cases, prefer `useHasFetching` and `useHasMutating` from `@vef-framework-react/hooks` which accept typed query/mutation keys and return a `boolean`.
+
+## `useQueryClient`
+
+Returns the `QueryClient` provided by `ApiClientProvider` (which wraps children with TanStack's `QueryClientProvider`). Useful for cache operations (`invalidateQueries`, `setQueryData`, …) inside components; outside React, use `apiClient[QUERY_CLIENT]` instead.
+
+## `useQueryErrorResetBoundary`
+
+TanStack's error-boundary reset hook, re-exported unchanged: returns `{ reset, clearReset, isReset }` for coordinating query retries with an error boundary.
 
 ## `keepPreviousData`
 
@@ -148,4 +169,13 @@ import { matchQuery, matchMutation } from "@vef-framework-react/core";
 | `StaleTime` | Type for `staleTime` option |
 | `MutationMeta` | Extended mutation meta type |
 | `QueryMeta` | Query meta type |
-| `SkipQueryToken` | Type of `skipQueryToken` |
+| `SkipQueryToken` | Type of `skipQueryToken` (TanStack's `SkipToken`, renamed) |
+| `InitialDataFunction<T>` | Function form of `initialData` |
+| `MutationFunctionContext` | Context object passed to mutation functions |
+| `MutationScope` | Type of the `scope` mutation option (serial-execution scoping) |
+| `RetryValue` | `boolean \| number \| ShouldRetryFunction` — type of the `retry` option |
+| `ShouldRetryFunction` | `(failureCount: number, error: Error) => boolean` |
+| `RetryDelayValue` | `number \| RetryDelayFunction` — type of the `retryDelay` option |
+| `RetryDelayFunction` | `(failureCount: number, error: Error) => number` |
+
+The VEF wrappers fix the error type to `Error` and the key type to [`QueryKey<TParams>`](./http-and-api.md#querykeytparams), so `useQuery` / `useMutation` calls do not need to spell out TanStack's five-generic forms.

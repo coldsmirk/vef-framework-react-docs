@@ -49,9 +49,13 @@ VEF 对以下 Mantine hooks 做了包装，以统一 `getInitialValueInEffect` �
 
 ## 热键 Hook 导出
 
+从 `react-hotkeys-hook` 原样透传：
+
 - `HotkeysProvider`
 - `useHotkeys`
 - `useHotkeysContext`
 - `useRecordHotkeys`
+- `HotkeyCallback` — 传给 `useHotkeys` 的回调类型
+- `HotkeysOptions` — 该 hook 的选项类型（react-hotkeys-hook 的 `Options`，重命名）
 
 官方文档：[react-hotkeys-hook](https://react-hotkeys-hook.vercel.app/)

@@ -17,7 +17,7 @@ import { AppContextProvider } from "@vef-framework-react/core";
 <AppContextProvider
   value={{
     hasPermission: token => permissionStore.has(token),
-    dictionaryQueryFn: findDataDict,
+    codeSetQueryFn: findCodeSets,
     fileBaseUrl: "https://cdn.example.com"
   }}
 >
@@ -29,11 +29,13 @@ import { AppContextProvider } from "@vef-framework-react/core";
 
 ### `AppContext`
 
-| 字段 | 类型 | 说明 |
-| --- | --- | --- |
-| `hasPermission` | `(token: string) => boolean` | 权限检查函数 |
-| `dictionaryQueryFn` | `QueryFunction<Record<string, DataOption[]>, string[]>` | 用于获取数据字典条目的查询函数；接收一个字典键数组，返回一个将每个键映射到其选项的记录 |
-| `fileBaseUrl` | `string` | 文件访问的基础 URL |
+所有字段均为可选；默认的上下文值为 `{}`。
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `hasPermission` | `(token: string) => boolean` | — | 判断用户是否有权访问由权限 token 标识的资源，例如 `hasPermission("user:query")`。消费方（权限 Hooks、`checkPermission` 的调用者）将缺失该函数视为“始终允许”。 |
+| `codeSetQueryFn` | `QueryFunction<Record<string, DataOption[]>, string[]>` | — | 用于获取宿主码集条目的查询函数（由 `dictionaryQueryFn` 重命名而来）。接收一个码集 key 数组，返回一个将每个 key 映射到其选项的记录。由 [`useCodeSetQuery`](../hooks/vef-hooks.md#码集与选项-hooks) 消费，未配置该字段时后者会抛出异常。参见[码集指南](../../guide/code-sets.md)。 |
+| `fileBaseUrl` | `string` | — | 文件访问的基础 URL（由文件渲染组件拼接到相对文件 key 之前）。 |
 
 ### `useAppContext`
 
@@ -77,7 +79,7 @@ const data = await apiClient.fetchQuery({
 
 ## `DisabledProvider` 和 `useDisabled`
 
-在组件树中传播禁用状态，供表单和操作组件内部使用，以一次性禁用所有交互元素。
+在组件树中传播禁用状态（`boolean`，默认 `false`），供表单和操作组件内部使用，以一次性禁用所有交互元素。
 
 ```tsx
 import { DisabledProvider } from "@vef-framework-react/core";
@@ -98,6 +100,12 @@ const disabled = useDisabled();
 ## `createContextWithSelector`
 
 创建一个基于选择器订阅的 React 上下文，以避免不必要的重新渲染。
+
+```ts
+createContextWithSelector<TValue>(defaultValue: TValue): SelectorContextResult<TValue>
+```
+
+返回 `{ Provider, useContext }`。`Provider` 接受一个普通的 `value` prop；消费方仅在其选中的切片变化时重新渲染（通过 `useSyncExternalStore` 以 `Object.is` 比较）。不带选择器调用 `useContext()` 返回完整的上下文值。
 
 ```ts
 import { createContextWithSelector } from "@vef-framework-react/core";
@@ -125,6 +133,16 @@ const count = useMyContext(state => state.count);
 ## `checkPermission`
 
 用于在 React 组件之外进行命令式权限检查的工具函数。
+
+```ts
+checkPermission(
+  hasPermission: (token: string) => boolean,
+  requiredPermissions?: MaybeArray<string>,
+  checkMode: PermissionCheckMode = "any"
+): boolean
+```
+
+当 `requiredPermissions` 为空值（nullish）时返回 `true`（不要求任何权限即视为允许访问）。单个字符串会被当作只有一个元素的数组处理。
 
 ```ts
 import { checkPermission } from "@vef-framework-react/core";
@@ -169,16 +187,16 @@ interface PaginationResult<T> {
 
 ### `DataOption<T, M>`
 
-Select、树选择、级联选择等数据驱动组件所使用的基础类型：
+Select、树选择、级联选择等数据驱动组件所使用的基础类型。`T` 用于向选项合并额外的自定义字段；`M` 用于约束 `meta` 字段的类型：
 
 ```ts
-type DataOption<T = {}, M = {}> = T & {
-  label: string;
-  value: Key;
-  disabled?: boolean;
-  description?: string;
-  meta?: M;
-  children?: DataOption<T, M>[];
+type DataOption<T = EmptyObject, M extends AnyObject = AnyObject> = T & {
+  label: string;          // display text
+  value: Key;             // unique identifier
+  disabled?: boolean;     // default: false
+  description?: string;   // additional help text
+  meta?: M;               // additional metadata
+  children?: Array<DataOption<T, M>>; // tree-like structures (TreeSelect, Cascader)
 };
 ```
 
@@ -187,11 +205,11 @@ type DataOption<T = {}, M = {}> = T & {
 在 `DataOption` 基础上扩展（去掉 `children`，并以携带拼音的元素类型重新声明）拼音字段，用于中文字符检索：
 
 ```ts
-type DataOptionWithPinyin<T = {}, M = {}> = Except<DataOption<T, M>, "children"> & {
+type DataOptionWithPinyin<T = EmptyObject, M extends AnyObject = AnyObject> = Except<DataOption<T, M>, "children"> & {
   labelPinyin: string;
   labelPinyinInitials: string;
   descriptionPinyin?: string;
   descriptionPinyinInitials?: string;
-  children?: DataOptionWithPinyin<T, M>[];
+  children?: Array<DataOptionWithPinyin<T, M>>;
 };
 ```

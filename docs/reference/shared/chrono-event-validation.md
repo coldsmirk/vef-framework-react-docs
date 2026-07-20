@@ -19,9 +19,9 @@ Built on a pre-configured `dayjs` (zh-CN locale, `localizedFormat` / `customPars
 | `LOCALIZED_DATE_FORMAT` | `"LLdddd"` | dayjs localized-format token for a full date + weekday. |
 | `LOCALIZED_DATETIME_FORMAT` | `"LLLL"` | dayjs localized-format token for a full datetime. |
 | `formatDuration` | `(value: number, unit?: DurationUnitType) => string` | Formats a duration (default unit `"seconds"`) as a human-readable Chinese string, e.g. `formatDuration(3600)` → `"1小时0分钟"`. |
-| `parseDate` | `(date: string \| Date, format?: string) => Dayjs` | Parses a date string or `Date` into a `Dayjs` instance; `format` is ignored for `Date` inputs. May return an invalid `Dayjs` on bad input — use `tryParseDate` when the shape is unknown. |
-| `tryParseDate` | `(date: string) => Dayjs \| null` | Parses a date string by trying every known date/datetime format; returns `null` instead of an invalid `Dayjs` on failure. |
-| `tryParseTime` | `(time: string) => Dayjs \| null` | Parses a bare time-of-day string (e.g. `"08:08:00"`) that dayjs's default parser would reject; returns `null` on failure. |
+| `parseDate` | `(date: string \| Date, format?: string) => Dayjs` | Parses a date string or `Date` into a `Dayjs` instance; `format` is ignored for `Date` inputs, and without it dayjs's built-in parser is used (ISO 8601 and common shapes). May return an invalid `Dayjs` on bad input — use `tryParseDate` when the shape is unknown. |
+| `tryParseDate` | `(date: string) => Dayjs \| null` | Parses a date string by strict-matching every known datetime format, then every date format (`"YYYY-MM-DD"`, `"YYYY/MM/DD"`, `"YYYYMMDD"`, two-digit-year variants, …), finally falling back to dayjs's default parser; returns `null` instead of an invalid `Dayjs` when everything fails. |
+| `tryParseTime` | `(time: string) => Dayjs \| null` | Parses a bare time-of-day string that dayjs's default parser would reject, strict-matching the time (`"HH:mm:ss"`, `"HH.mm.ss"`, `"HHmmss"`), minute (`"HH:mm"`, `"HH.mm"`, `"HHmm"`), and hour (`"HH"`) formats; returns `null` on failure. |
 | `formatDate` | `(date: Dayjs, format?: string) => string` | Formats a `Dayjs` instance (default format `DEFAULT_DATETIME_FORMAT`). |
 | `getNow` | `() => Dayjs` | Returns the current time as a `Dayjs` instance. |
 | `getNowDateString` | `() => string` | Current date as `"YYYY-MM-DD"`. |
@@ -34,8 +34,8 @@ Built on a pre-configured `dayjs` (zh-CN locale, `localizedFormat` / `customPars
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `formatBytes` | `(bytes: number, decimals?: number) => string` | Formats a byte count as `"1.5 KB"`-style output (default `decimals: 2`). |
-| `formatNumber` | `(num: number, decimals?: number) => string` | Formats a large number with a `K`/`M`/`B`/`T` unit suffix (default `decimals: 2`). |
+| `formatBytes` | `(bytes: number, decimals?: number) => string` | Formats a byte count with a binary (1024-based) `B`/`KB`/`MB`/`GB`/`TB`/`PB` unit suffix, e.g. `formatBytes(1536, 1)` → `"1.5 KB"` (default `decimals: 2`; trailing zeros trimmed; `0` → `"0 B"`). |
+| `formatNumber` | `(num: number, decimals?: number) => string` | Formats a large number with a decimal (1000-based) `K`/`M`/`B`/`T` unit suffix, e.g. `formatNumber(1234567)` → `"1.23 M"` (default `decimals: 2`). Numbers below `1000` are returned as-is without a suffix. |
 
 ## Equality
 
@@ -63,10 +63,20 @@ Built on `mitt`.
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `EventEmitter<TEvents>` | `class EventEmitter<TEvents> { on, emit, off, clear, getAllListeners }` | Type-safe event emitter. `on(type, listener)` returns an unsubscribe function; `emit(type)` requires no payload when `TEvents[type]` allows `undefined`, otherwise `emit(type, payload)`. |
+| `EventEmitter<TEvents>` | `class EventEmitter<TEvents extends Record<EventType, any>>` | Type-safe event emitter (see the member table below). |
 | `createEventEmitter` | `<TEvents>() => EventEmitter<TEvents>` | Factory for a new `EventEmitter` instance. |
 | `EventHandler` | `type EventHandler<T> = Handler<T>` (from `mitt`) | The listener function type accepted by `EventEmitter.on`. |
 | `EventType` | `type EventType` (from `mitt`) | The event-key constraint (`string \| symbol`) used by `EventEmitter`. |
+
+`EventEmitter` members:
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `on` | `(eventType, eventListener) => () => void` | Subscribes; returns the unsubscribe function. |
+| `emit` | `(eventType)` / `(eventType, eventPayload)` | Emits an event. The payload-less overload is only accepted when `TEvents[eventType]` allows `undefined`. |
+| `off` | `(eventType, eventListener?) => void` | Removes one listener — or **all** listeners of that type when `eventListener` is omitted. |
+| `clear` | `() => void` | Removes every listener from every event. |
+| `getAllListeners` | `() => EventHandlerMap<TEvents>` | Returns the underlying mitt handler map (for debugging). |
 
 ## Security Helpers
 

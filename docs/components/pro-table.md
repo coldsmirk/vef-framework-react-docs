@@ -125,16 +125,34 @@ interface ColumnSettingsConfig {
 
 ### `OperationColumnConfig<TRow>`
 
-```ts
-interface OperationColumnConfig<TRow> {
-  width?: Length;
-  title?: ReactNode;
-  requiredPermissions?: string[];
-  render: (row: TRow, index: number) => ReactNode;
-}
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| `width` | `Length` | Column width. No built-in default — set a fixed width so the end-fixed column doesn't absorb leftover table space; the framework convention is `160` px for a two-button action pair (which is also [`EditableTable`](./editable-table.md)'s default) |
+| `title` | `ReactNode` | Column header title; defaults to `"操作"`. The column-settings icon is rendered next to it when column settings are enabled |
+| `requiredPermissions` | `string[]` | Permission tokens required to display the operation column |
+| `render` | `(row: TRow, index: number) => ReactNode` | Render the operation cell for a row (required) |
 
-`requiredPermissions` hides the entire operation column (header included) when the current user doesn't hold any of the listed permission tokens.
+`requiredPermissions` hides the entire operation column (header included) when the current user doesn't hold any of the listed permission tokens. The operation column is always fixed to the end of the table.
+
+### `RowSelectionConfig<TRow>`
+
+Passed as `rowSelection` (or pass `true` for all defaults):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `rowSelectDisabled` | `(model: TRow) => boolean` | Disable selection for rows where the function returns `true` |
+| `checkStrictly` | `boolean` | Check table rows precisely, with parent and children selection not associated |
+| `hideSelectAll` | `boolean` | Hide the select-all checkbox in the header |
+| `preserveSelectedRowKeys` | `boolean` | Keep selection keys even when the key no longer exists in `dataSource` |
+| `defaultSelectedRowKeys` | `Key[]` | The initially selected row keys |
+
+### `ProTableRef`
+
+| Member | Type | Description |
+|--------|------|-------------|
+| `refetch` | `() => void` | Manually trigger a data refetch (e.g. after external changes) |
+| `onLoading` | `(callback: () => void) => () => void` | Register a callback invoked when the table starts loading; returns an unsubscribe function |
+| `onLoaded` | `(callback: () => void) => () => void` | Register a callback invoked when the table finishes loading; returns an unsubscribe function |
 
 ### `ProTableSubscriber`
 

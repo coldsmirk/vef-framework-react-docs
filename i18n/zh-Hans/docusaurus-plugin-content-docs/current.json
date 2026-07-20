@@ -59,6 +59,22 @@
     "message": "审批流编辑器",
     "description": "The label for category 'Approval Flow Editor' in sidebar 'docsSidebar'"
   },
+  "sidebar.docsSidebar.category.Engine Pages": {
+    "message": "引擎页面",
+    "description": "The label for category 'Engine Pages' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Approval": {
+    "message": "审批",
+    "description": "The label for category 'Approval' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Integration": {
+    "message": "集成",
+    "description": "The label for category 'Integration' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Cron": {
+    "message": "定时调度",
+    "description": "The label for category 'Cron' in sidebar 'docsSidebar'"
+  },
   "sidebar.docsSidebar.category.API Reference": {
     "message": "API 参考",
     "description": "The label for category 'API Reference' in sidebar 'docsSidebar'"

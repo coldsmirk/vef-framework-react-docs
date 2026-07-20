@@ -49,7 +49,7 @@ export const apiClient = createApiClient({
 - `staleTime` — how long a cached result is served without refetching. Queries also refetch on window focus and reconnect by default, so a short `staleTime` on stable reference data turns into repeated identical requests.
 - `gcTime` — how long inactive cache entries survive before garbage collection.
 
-Both options also work per query, which is usually the better tool: keep the global default conservative, then stretch it for data you know is stable (dictionaries, department trees, enum-like lists):
+Both options also work per query, which is usually the better tool: keep the global default conservative, then stretch it for data you know is stable (code sets, department trees, enum-like lists):
 
 ```ts
 const { data } = useQuery({
@@ -173,4 +173,4 @@ Reduced motion is handled at the framework level: `ConfigProvider` reads the OS-
 
 ## Pinyin Option Search
 
-For Chinese option data, the built-in pipeline — `filterable` on [Select](../components/select.md) and the `useDataOptions*` hooks — already performs pinyin-enhanced matching, backed by the shared `withPinyin()` utility and a dedicated pinyin vendor chunk. Prefer it over rebuilding fuzzy pinyin conversion in page code: a hand-rolled version recomputes conversions per keystroke and duplicates dictionary data the app has already loaded.
+For Chinese option data, the built-in pipeline — `filterable` on [Select](../components/select.md) and the `useDataOptions*` hooks — already performs pinyin-enhanced matching, backed by the shared `withPinyin()` utility and a dedicated pinyin vendor chunk. Prefer it over rebuilding fuzzy pinyin conversion in page code: a hand-rolled version recomputes conversions per keystroke and duplicates option data the app has already loaded.

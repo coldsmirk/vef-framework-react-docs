@@ -18,6 +18,8 @@ Every component lives in exactly one of the groups below. Components marked **VE
 | [`Center`](./center.md) | Centered flex layout |
 | [`Group`](./group.md) | Horizontal flex layout |
 | [`ScrollArea`](./scroll-area.md) | Custom scrollbar area with scroll event callbacks |
+| [`FlexTabs`](./flex-tabs.md) | Height-filling `Tabs` variant — the tab bar stays fixed and the active pane stretches to the remaining space |
+| [`Labeled`](./labeled.md) | Label-on-top wrapper with label/group a11y semantics, aligning non-form controls with vertical form items |
 
 ## Page & CRUD
 
@@ -39,13 +41,14 @@ Every component lives in exactly one of the groups below. Components marked **VE
 |-----------|-------------|
 | [`Form`](./form.md) | Type-safe form system built on [`@tanstack/react-form`](https://tanstack.com/form) (`useForm`, `form.AppField`, field components) |
 | [`Bool`](./bool.md) | Boolean value display/input with switch, radio, radio-button, and checkbox variants |
-| [`Select`](./select.md) | Dropdown selector, enhanced with `useDataOptionsSelect` for remote/dictionary options |
+| [`Select`](./select.md) | Dropdown selector, enhanced with `useDataOptionsSelect` for remote/code-set options |
 | [`Tree`](./tree.md) | Tree view, enhanced with `useDataOptionsTree` |
 | [`TreeSelect`](./tree-select.md) | Tree-structured dropdown, enhanced with `useDataOptionsTreeSelect` |
 | [`Upload`](./upload.md) | File upload with inline image cropping |
 | [`FileUpload`](./file-upload.md) | Chunked, resumable upload variant of `Upload`, wired to the framework's storage protocol |
 | [`IconPicker`](./icon-picker.md) | Searchable popup grid for choosing a lucide icon |
 | [`GenericSelect`](./generic-select.md) | Abstract base for popup-driven selection controls — the foundation `IconPicker` is built on |
+| [`Labels`](./labels.md) | Key-value label display, editor, and filter input (`LabelsDisplay`, `LabelsEditor`, `LabelFilterSelect`) — moved from `@vef-framework-react/approval` in v2.12.0 |
 
 ## Actions & Permissions
 
@@ -71,6 +74,8 @@ Every component lives in exactly one of the groups below. Components marked **VE
 | [`CodeHighlighter`](./code-highlighter.md) | Syntax-highlighted code block |
 | [`CodeEditor`](./code-editor.md) | CodeMirror 6 code editor with syntax highlighting and an imperative ref API |
 | [`Keyboard`](./keyboard.md) | Keyboard shortcut key display |
+| [`FilePreview`](./file-preview.md) | Contract for application-provided file preview hosts (`FilePreviewProvider`, `useFilePreview`) — `Upload` dispatches non-image previews to it (v2.11.0) |
+| [Utility Exports](./utilities.md) | Non-component exports — `breakpoints`, color/size/scene design-token constants, `globalCssVars`, `useThemeTokens`, query metadata symbols, and misc helpers |
 
 ## Animation
 
@@ -105,16 +110,18 @@ Everything else from Ant Design is a straight, unmodified re-export — see the 
 | Hooks | Documented on |
 |-------|---------------|
 | `useForm`, `useFormContext`, `useFormStore`, `createFormOptions`, `withForm`, `withFieldGroup` | [`Form`](./form.md) |
-| `useDataOptionsSelect`, `useDictionaryOptionsSelect` | [`Select`](./select.md) |
+| `useDataOptionsSelect`, `useCodeSetOptionsSelect` | [`Select`](./select.md) |
 | `useDataOptionsTreeSelect` | [`TreeSelect`](./tree-select.md) |
 | `useDataOptionsTree` | [`Tree`](./tree.md) |
 | `usePaginationProps` | [`Table`](./table.md) |
 | `useGridCollapsed` | [`Grid`](./grid.md) |
 | `usePageEntranceEffect`, `usePageEntranceSettled`, `useViewportHeight` | [`Page`](./page.md) |
-| `useThemeTokens`, `useIsDarkMode` | [`ConfigProvider`](./config-provider.md) |
+| `useThemeTokens` | [Utility Exports](./utilities.md) |
+| `useIsDarkMode` | [`ConfigProvider`](./config-provider.md) |
+| `useFilePreview` | [`FilePreview`](./file-preview.md) |
 | `useChart`, `connectCharts`, `disconnectCharts` | [`Chart`](./chart.md) |
 
-Hooks from `@vef-framework-react/hooks` (permissions, dictionaries, upload, debounce, …) are indexed separately in [VEF Hooks](../reference/hooks/vef-hooks.md).
+Hooks from `@vef-framework-react/hooks` (permissions, code sets, upload, debounce, …) are indexed separately in [VEF Hooks](../reference/hooks/vef-hooks.md).
 
 ## Installation
 

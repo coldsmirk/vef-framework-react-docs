@@ -1,16 +1,17 @@
 ---
 title: Tables
-description: When to reach for the display-only Table versus the query-integrated ProTable.
+description: When to reach for the display-only Table, the query-integrated ProTable, or the form-controlled EditableTable.
 ---
 
 # Tables
 
-VEF has two table layers, both exported from `@vef-framework-react/components`:
+VEF has three table layers, all exported from `@vef-framework-react/components`:
 
 1. `Table` — display only
 2. `ProTable` — page-level table integrated with query, pagination, selection, and column settings
+3. `EditableTable` — a controlled form control for editing an array of rows inline
 
-The decision between them comes down to one question: does the table own its own data fetching, or does the page already have the rows in hand?
+Between the first two, the decision comes down to one question: does the table own its own data fetching, or does the page already have the rows in hand? `EditableTable` is different in kind — it edits data instead of displaying it.
 
 ## When `Table` Is Enough
 
@@ -71,6 +72,17 @@ If not needed:
 ## `ProTableSubscriber`
 
 When footer content or a local action only needs table-local state, `ProTableSubscriber` is usually more suitable than introducing extra external state. See [ProTable](../components/pro-table.md) for its API.
+
+## When Rows Are Edited Inline: `EditableTable`
+
+`EditableTable` is a controlled form control, not a query component: `value` is the full row array, every edit / add / delete emits the next array through `onChange`, and no request is involved. One row edits at a time; each column defines a read slot (`renderView`) and an editor slot (`renderEditor`), with row-level validators. It is the right tool for embedded sub-lists — order lines inside a form, parameter rows in a config page — where the enclosing form submits the whole array.
+
+Two defaults worth knowing when composing one into a page:
+
+- The appended operation column has a fixed default width of **160px**, sized for the built-in action pair (Edit/Delete or Save/Cancel). When `renderRowActions` adds extra actions, widen it via `operationColumn.width`.
+- The `locale` prop is forwarded to the underlying table (v2.12.0), so a compact empty state is a one-liner: `locale={{ emptyText: "暂无记录" }}`.
+
+The full prop and column API lives in [EditableTable](../components/editable-table.md).
 
 ## `ProTable` and `CrudPage`
 

@@ -18,6 +18,8 @@ description: "@vef-framework-react/components 导出的全部组件的统一目�
 | [`Center`](./center.md) | 居中的 flex 布局 |
 | [`Group`](./group.md) | 横向 flex 布局 |
 | [`ScrollArea`](./scroll-area.md) | 带滚动事件回调的自定义滚动条区域 |
+| [`FlexTabs`](./flex-tabs.md) | 高度填充的 `Tabs` 变体——标签栏保持固定，激活面板拉伸占满剩余空间 |
+| [`Labeled`](./labeled.md) | 标签在上的包装组件，带 label/group 无障碍语义，让非表单控件与垂直表单项对齐 |
 
 ## 页面与 CRUD
 
@@ -39,13 +41,14 @@ description: "@vef-framework-react/components 导出的全部组件的统一目�
 |-----------|-------------|
 | [`Form`](./form.md) | 基于 [`@tanstack/react-form`](https://tanstack.com/form) 构建的类型安全表单系统（`useForm`、`form.AppField`、字段组件） |
 | [`Bool`](./bool.md) | 布尔值展示/输入组件，支持开关、单选、单选按钮和复选框等变体 |
-| [`Select`](./select.md) | 下拉选择器，通过 `useDataOptionsSelect` 增强，支持远程/字典选项 |
+| [`Select`](./select.md) | 下拉选择器，通过 `useDataOptionsSelect` 增强，支持远程/码集选项 |
 | [`Tree`](./tree.md) | 树形视图，通过 `useDataOptionsTree` 增强 |
 | [`TreeSelect`](./tree-select.md) | 树形结构下拉框，通过 `useDataOptionsTreeSelect` 增强 |
 | [`Upload`](./upload.md) | 支持行内图片裁剪的文件上传组件 |
 | [`FileUpload`](./file-upload.md) | 分片、可续传的上传组件，接入框架自身的存储协议 |
 | [`IconPicker`](./icon-picker.md) | 用于选择 lucide 图标的可搜索弹出网格 |
 | [`GenericSelect`](./generic-select.md) | 弹出式选择控件的抽象基座——`IconPicker` 正是基于它构建的 |
+| [`Labels`](./labels.md) | 键值对标签的展示、编辑器与过滤输入框（`LabelsDisplay`、`LabelsEditor`、`LabelFilterSelect`）——v2.12.0 中从 `@vef-framework-react/approval` 迁入 |
 
 ## 操作与权限
 
@@ -71,6 +74,8 @@ description: "@vef-framework-react/components 导出的全部组件的统一目�
 | [`CodeHighlighter`](./code-highlighter.md) | 带语法高亮的代码块 |
 | [`CodeEditor`](./code-editor.md) | 基于 CodeMirror 6 的代码编辑器，支持语法高亮与命令式 ref API |
 | [`Keyboard`](./keyboard.md) | 键盘快捷键展示 |
+| [`FilePreview`](./file-preview.md) | 应用自备文件预览宿主的契约（`FilePreviewProvider`、`useFilePreview`）——`Upload` 会把非图片预览派发给它（v2.11.0） |
+| [工具导出](./utilities.md) | 非组件导出——`breakpoints`、颜色/尺寸/场景设计令牌常量、`globalCssVars`、`useThemeTokens`、查询元数据 symbol 及杂项辅助函数 |
 
 ## 动画
 
@@ -105,16 +110,18 @@ Ant Design 中的其余组件均为原样、未经修改的重新导出——完
 | Hooks | 文档位置 |
 |-------|---------------|
 | `useForm`、`useFormContext`、`useFormStore`、`createFormOptions`、`withForm`、`withFieldGroup` | [`Form`](./form.md) |
-| `useDataOptionsSelect`、`useDictionaryOptionsSelect` | [`Select`](./select.md) |
+| `useDataOptionsSelect`、`useCodeSetOptionsSelect` | [`Select`](./select.md) |
 | `useDataOptionsTreeSelect` | [`TreeSelect`](./tree-select.md) |
 | `useDataOptionsTree` | [`Tree`](./tree.md) |
 | `usePaginationProps` | [`Table`](./table.md) |
 | `useGridCollapsed` | [`Grid`](./grid.md) |
 | `usePageEntranceEffect`、`usePageEntranceSettled`、`useViewportHeight` | [`Page`](./page.md) |
-| `useThemeTokens`、`useIsDarkMode` | [`ConfigProvider`](./config-provider.md) |
+| `useThemeTokens` | [工具导出](./utilities.md) |
+| `useIsDarkMode` | [`ConfigProvider`](./config-provider.md) |
+| `useFilePreview` | [`FilePreview`](./file-preview.md) |
 | `useChart`、`connectCharts`、`disconnectCharts` | [`Chart`](./chart.md) |
 
-`@vef-framework-react/hooks` 包中的 hooks（权限、字典、上传、防抖等）另有索引，见 [VEF Hooks](../reference/hooks/vef-hooks.md)。
+`@vef-framework-react/hooks` 包中的 hooks（权限、码集、上传、防抖等）另有索引，见 [VEF Hooks](../reference/hooks/vef-hooks.md)。
 
 ## 安装
 

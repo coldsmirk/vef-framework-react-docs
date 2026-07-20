@@ -9,8 +9,8 @@ description: "@vef-framework-react/shared 中每个 key、路径、拼音、表�
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `hashKey` | `(key: unknown) => string` | 将任意值序列化为稳定的 JSON 字符串，对对象 key 排序（symbol key 排在之后），使结构相同的输入无论 key 顺序如何都能得到相同的哈希结果。 |
-| `mergeWith` | `<T extends object>(target: T, source: Partial<T>, overrideExisting?: boolean) => T` | 将 `source` 原地合并进 `target`，跳过值为 `undefined` 的 source 字段；仅当 `overrideExisting` 为 `true`（默认 `false`）时才覆盖 target 中已存在的值。 |
+| `hashKey` | `(key: unknown) => string` | 将任意值序列化为稳定的 JSON 字符串，对对象 key 排序（symbol key 排在其后，加 `@@` 前缀），使结构相同的输入无论 key 顺序如何都能得到相同的哈希结果。被用作框架的 `queryKeyHashFn`。 |
+| `mergeWith` | `<T extends object>(target: T, source: Partial<T>, overrideExisting?: boolean) => T` | 将 `source` **浅层**、仅顶层地原地合并进 `target`（被修改的 `target` 也会被返回）。值为 `undefined` 的 source 字段始终被跳过；仅当 `overrideExisting` 为 `true`（默认 `false`——即只填补缺失的值）时才覆盖 target 中已定义的值。 |
 
 ## 路径辅助函数
 
@@ -33,14 +33,14 @@ description: "@vef-framework-react/shared 中每个 key、路径、拼音、表�
 
 ## 拼音辅助函数
 
-构建在 `pinyin-pro` 之上，首次使用时会预加载现代汉语词典。
+构建在 `pinyin-pro` 之上，首次使用时懒加载现代汉语词库数据（`@pinyin-pro/data/modern`），以获得准确的多音字消歧。
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `WithPinyin<T, K>` | `type WithPinyin<T extends AnyObject, K extends keyof T & string>` | 为每个字符串 key `K` 添加 `${K}Pinyin` / `${K}PinyinInitials` 字段（若 `T[K]` 为可选，则新增字段也为可选）。 |
-| `getPinyin` | `(text: string) => string[]` | `text` 中每个字符的完整拼音音节，按输入字符串做了 memoize。 |
+| `WithPinyin<T, K>` | `type WithPinyin<T extends AnyObject, K extends keyof T & string>` | 为每个 key `K` 添加 `${K}Pinyin` / `${K}PinyinInitials` 字段——当 `T[K]` 是必填字符串时为必填，当 `T[K]` 可选时为可选，非字符串 key 则完全不添加。 |
+| `getPinyin` | `(text: string) => string[]` | `text` 中每个字符的完整无声调拼音音节（非中文的连续片段保持为整段文本，姓氏按姓氏读音处理），按输入字符串做了 memoize。 |
 | `getPinyinInitials` | `(text: string) => string[]` | `text` 中每个字符的拼音首字母，按输入字符串做了 memoize。 |
-| `withPinyin` | `<T extends AnyObject, K extends keyof T & string>(obj: T, ...keys: K[]) => WithPinyin<T, K>` | 返回 `obj` 的浅拷贝，并为给定的每个字符串 key 添加 `{key}Pinyin` / `{key}PinyinInitials` 字段，例如 `withPinyin({ name: "张三" }, "name")` → 添加 `namePinyin` / `namePinyinInitials`。 |
+| `withPinyin` | `<T extends AnyObject, K extends keyof T & string>(obj: T, ...keys: K[]) => WithPinyin<T, K>` | 返回 `obj` 的浅拷贝，并为给定的每个值为字符串的 key 添加 `{key}Pinyin` / `{key}PinyinInitials` 字段，例如 `withPinyin({ name: "张三" }, "name")` → 添加 `namePinyin` / `namePinyinInitials`。 |
 
 ## 表格更新辅助函数
 

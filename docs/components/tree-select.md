@@ -76,4 +76,21 @@ export default function Demo() {
 
 Each `*Key` option accepts either a string path (e.g. `"user.name"`) or an extractor function.
 
+### `useDataOptionsTreeSelect` Result
+
+The hook returns a ready-to-spread `TreeSelectProps<Key, DataOptionWithPinyin<TData>>` carrying:
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| `treeData` | `DataOptionWithPinyin<TData>[]` | The transformed tree, each node enhanced with precomputed pinyin for `label` and `description` |
+| `loading` | `boolean` | `true` while the query is fetching |
+| `fieldNames` | `{ label, value, children }` | Maps `DataOption`'s shape onto the tree select |
+| `maxTagCount` | `'responsive'` | Collapses excess tags in multiple mode |
+| `listHeight` | `280` | Dropdown list height |
+| `notFoundContent` | `Loader` while fetching | Shows a loader instead of "no data" during the initial fetch |
+| `showSearch` | `boolean` | The `filterable` flag |
+| `filterTreeNode` | `(input, node) => boolean` | Matches `label` / `description`, their full pinyin, and pinyin initials (only set when `filterable`) |
+| `treeNodeFilterProp` / `treeNodeLabelProp` | `'labelPinyinInitials'` / `'label'` | Search matches against pinyin initials; the trigger displays the label |
+| `treeLine` | `{ showLeafIcon: false }` | Connecting lines without leaf icons |
+
 For all other props, see [Ant Design TreeSelect documentation](https://ant.design/components/tree-select/).

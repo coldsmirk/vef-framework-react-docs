@@ -19,9 +19,9 @@ description: "@vef-framework-react/shared 中每个日期、格式化、相等�
 | `LOCALIZED_DATE_FORMAT` | `"LLdddd"` | dayjs 本地化格式 token，表示完整日期 + 星期。 |
 | `LOCALIZED_DATETIME_FORMAT` | `"LLLL"` | dayjs 本地化格式 token，表示完整日期时间。 |
 | `formatDuration` | `(value: number, unit?: DurationUnitType) => string` | 将时长（默认单位 `"seconds"`）格式化为易读的中文字符串，例如 `formatDuration(3600)` → `"1小时0分钟"`。 |
-| `parseDate` | `(date: string \| Date, format?: string) => Dayjs` | 将日期字符串或 `Date` 解析为 `Dayjs` 实例；对 `Date` 类型输入会忽略 `format`。输入格式不正确时可能返回无效的 `Dayjs`——如果不确定输入形态，请使用 `tryParseDate`。 |
-| `tryParseDate` | `(date: string) => Dayjs \| null` | 依次尝试所有已知的日期/日期时间格式来解析日期字符串；解析失败时返回 `null` 而不是无效的 `Dayjs`。 |
-| `tryParseTime` | `(time: string) => Dayjs \| null` | 解析 dayjs 默认解析器会拒绝的纯时间字符串（例如 `"08:08:00"`）；解析失败时返回 `null`。 |
+| `parseDate` | `(date: string \| Date, format?: string) => Dayjs` | 将日期字符串或 `Date` 解析为 `Dayjs` 实例；对 `Date` 类型输入会忽略 `format`，未提供 `format` 时使用 dayjs 的内置解析器（ISO 8601 及常见形态）。输入格式不正确时可能返回无效的 `Dayjs`——如果不确定输入形态，请使用 `tryParseDate`。 |
+| `tryParseDate` | `(date: string) => Dayjs \| null` | 解析日期字符串：先对每种已知的日期时间格式做严格匹配，再对每种日期格式做严格匹配（`"YYYY-MM-DD"`、`"YYYY/MM/DD"`、`"YYYYMMDD"`、两位年份变体等），最后回退到 dayjs 的默认解析器；全部失败时返回 `null` 而不是无效的 `Dayjs`。 |
+| `tryParseTime` | `(time: string) => Dayjs \| null` | 解析 dayjs 默认解析器会拒绝的纯时间字符串，按时间（`"HH:mm:ss"`、`"HH.mm.ss"`、`"HHmmss"`）、分钟（`"HH:mm"`、`"HH.mm"`、`"HHmm"`）与小时（`"HH"`）格式做严格匹配；解析失败时返回 `null`。 |
 | `formatDate` | `(date: Dayjs, format?: string) => string` | 格式化一个 `Dayjs` 实例（默认格式为 `DEFAULT_DATETIME_FORMAT`）。 |
 | `getNow` | `() => Dayjs` | 以 `Dayjs` 实例的形式返回当前时间。 |
 | `getNowDateString` | `() => string` | 以 `"YYYY-MM-DD"` 格式表示的当前日期。 |
@@ -34,8 +34,8 @@ description: "@vef-framework-react/shared 中每个日期、格式化、相等�
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `formatBytes` | `(bytes: number, decimals?: number) => string` | 将字节数格式化为类似 `"1.5 KB"` 的输出（默认 `decimals: 2`）。 |
-| `formatNumber` | `(num: number, decimals?: number) => string` | 将较大的数字格式化为带 `K`/`M`/`B`/`T` 单位后缀的形式（默认 `decimals: 2`）。 |
+| `formatBytes` | `(bytes: number, decimals?: number) => string` | 将字节数格式化为带二进制（基于 1024）`B`/`KB`/`MB`/`GB`/`TB`/`PB` 单位后缀的形式，例如 `formatBytes(1536, 1)` → `"1.5 KB"`（默认 `decimals: 2`；末尾的零会被去掉；`0` → `"0 B"`）。 |
+| `formatNumber` | `(num: number, decimals?: number) => string` | 将较大的数字格式化为带十进制（基于 1000）`K`/`M`/`B`/`T` 单位后缀的形式，例如 `formatNumber(1234567)` → `"1.23 M"`（默认 `decimals: 2`）。小于 `1000` 的数字原样返回，不带后缀。 |
 
 ## 相等性判断
 
@@ -63,10 +63,20 @@ description: "@vef-framework-react/shared 中每个日期、格式化、相等�
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `EventEmitter<TEvents>` | `class EventEmitter<TEvents> { on, emit, off, clear, getAllListeners }` | 类型安全的事件发射器。`on(type, listener)` 返回一个取消订阅函数；当 `TEvents[type]` 允许 `undefined` 时 `emit(type)` 不需要传 payload，否则需要 `emit(type, payload)`。 |
+| `EventEmitter<TEvents>` | `class EventEmitter<TEvents extends Record<EventType, any>>` | 类型安全的事件发射器（成员见下方表格）。 |
 | `createEventEmitter` | `<TEvents>() => EventEmitter<TEvents>` | 创建新 `EventEmitter` 实例的工厂函数。 |
 | `EventHandler` | `type EventHandler<T> = Handler<T>`（来自 `mitt`） | `EventEmitter.on` 所接受的监听函数类型。 |
 | `EventType` | `type EventType`（来自 `mitt`） | `EventEmitter` 使用的事件 key 约束（`string \| symbol`）。 |
+
+`EventEmitter` 成员：
+
+| Member | Signature | Description |
+| --- | --- | --- |
+| `on` | `(eventType, eventListener) => () => void` | 订阅；返回取消订阅函数。 |
+| `emit` | `(eventType)` / `(eventType, eventPayload)` | 发出事件。仅当 `TEvents[eventType]` 允许 `undefined` 时才接受不带 payload 的重载。 |
+| `off` | `(eventType, eventListener?) => void` | 移除一个监听器——省略 `eventListener` 时移除该类型的**所有**监听器。 |
+| `clear` | `() => void` | 移除所有事件的所有监听器。 |
+| `getAllListeners` | `() => EventHandlerMap<TEvents>` | 返回底层的 mitt 处理函数映射（用于调试）。 |
 
 ## 安全辅助函数
 

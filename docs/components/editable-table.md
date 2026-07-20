@@ -88,12 +88,14 @@ export default function Demo() {
 
 ## Operation Column Overrides
 
+The appended operation column defaults to a fixed `160`px width (fitting the built-in two-button action pair). Widen it when `renderRowActions` adds extra actions:
+
 ```tsx
 <EditableTable<Row>
   columns={columns}
   rowKey="id"
   value={rows}
-  operationColumn={{ title: 'Actions', width: 160 }}
+  operationColumn={{ title: 'Actions', width: 220 }}
   onChange={setRows}
 />
 ```
@@ -116,6 +118,7 @@ export default function Demo() {
 | `operationColumn` | `EditableOperationColumnConfig` | — | Operation column overrides (title / width / button labels) |
 | `size` | `TableProps<TRow>["size"]` | — | Table density, forwarded to the underlying table |
 | `pagination` | `TableProps<TRow>["pagination"]` | `false` | Client-side pagination config, forwarded to the underlying table |
+| `locale` | `TableProps<TRow>["locale"]` | — | Table locale overrides (e.g. a compact `emptyText`), forwarded to the underlying table |
 
 ### EditableColumn\<TRow\>
 
@@ -142,9 +145,9 @@ Built via `createEditableColumn<TRow>(dataIndex, options)` — a type-safe facto
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `title` | `ReactNode` | Operation column header |
-| `width` | `Length` | Operation column width |
-| `texts` | `EditableRowActionsTexts` | Button label overrides |
+| `title` | `ReactNode` | Operation column header; defaults to `"操作"` |
+| `width` | `Length` | Operation column width. Defaults to a fixed `160` px, which comfortably fits the built-in action pair — without a fixed width the flexing table would hand the operation column any leftover space. Widen it when `renderRowActions` adds extra actions |
+| `texts` | `EditableRowActionsTexts` | Custom labels for the built-in row action buttons |
 
 ### EditableRowActionsTexts
 

@@ -125,15 +125,15 @@ export default function Demo() {
 
 该 Hook 返回的 `SelectProps` 可以直接展开到 `<Select>` 上。
 
-## VEF 增强：`useDictionaryOptionsSelect`
+## VEF 增强：`useCodeSetOptionsSelect`
 
-对于基于数据字典的选项，`useDictionaryOptionsSelect` 封装了 `useDictionaryQuery`，为每个别名返回可直接展开的 `SelectProps`：
+对于以码集为数据源的选项，`useCodeSetOptionsSelect` 封装了 `useCodeSetQuery`，为每个别名返回可直接展开的 `SelectProps`：
 
 ```tsx
-import { Select, useDictionaryOptionsSelect } from '@vef-framework-react/components';
+import { Select, useCodeSetOptionsSelect } from '@vef-framework-react/components';
 
 export default function Demo() {
-  const { gender, status } = useDictionaryOptionsSelect({
+  const { gender, status } = useCodeSetOptionsSelect({
     gender: 'common.gender',
     status: { key: 'common.status', filterable: true },
   });
@@ -147,7 +147,42 @@ export default function Demo() {
 }
 ```
 
-第一个参数把每个别名映射为字典键字符串，或 `{ key, filterable? }` 以按别名覆盖过滤开关。可选的第二个参数 `{ filterable }` 为未单独指定的别名设置默认值。参见[数据字典](../guide/data-dictionaries.md)。
+所有别名会在一次批量码集查询中获取。背后的查询与应用上下文接线参见[码集](../guide/code-sets.md)。
+
+### `useCodeSetOptionsSelect` 签名
+
+```ts
+function useCodeSetOptionsSelect<const T extends CodeSetAliasMap>(
+  keys: T,
+  options?: UseCodeSetOptionsSelectOptions
+): UseCodeSetOptionsSelectResult<T>;
+```
+
+**`keys`**（`CodeSetAliasMap`，必填）把每个别名映射为一个 `CodeSetKeyValue`——码集键字符串，或一个 `CodeSetKeyConfig` 对象：
+
+| 字段 | 类型 | 默认值 | 说明 |
+|-------|------|---------|-------------|
+| `key` | `CodeSetKey` | 必填 | 码集键（通过 `Register` 增强获得类型约束，否则为 `string`） |
+| `filterable` | `boolean` | Hook 级别的 `filterable` | 按别名覆盖搜索过滤开关 |
+
+**`options`**（`UseCodeSetOptionsSelectOptions`，可选）：
+
+| 选项 | 类型 | 默认值 | 说明 |
+|--------|------|---------|-------------|
+| `filterable` | `boolean` | `false` | 每个 select 是否启用搜索；带有自身 `filterable` 配置的别名优先于该默认值 |
+
+**返回值**（`UseCodeSetOptionsSelectResult<T>` = `Record<keyof T, SelectProps<Key, DataOptionWithPinyin<DataOption>>>`）——每个别名对应一个 `SelectProps` 对象，各自携带：
+
+| 字段 | 值 | 说明 |
+|-------|-------|-------------|
+| `options` | `DataOptionWithPinyin<DataOption>[]` | 码集条目（含嵌套 `children`），每一项都为 `label` 和 `description` 预计算了拼音 |
+| `loading` | `boolean` | 批量码集查询进行中时为 `true` |
+| `fieldNames` | `{ label, value, options: 'children', groupLabel: 'label' }` | 把 `DataOption` 的形状映射到 select 上 |
+| `maxTagCount` | `'responsive'` | 多选模式下折叠超出的标签 |
+| `listHeight` | `280` | 下拉列表高度 |
+| `notFoundContent` | 获取期间为 `Loader` | 初次获取期间显示加载器而非"暂无数据" |
+| `showSearch` | `boolean` | 该别名最终解析出的 filterable 标志 |
+| `filterOption` | `(input, option) => boolean` | 匹配 `label` / `description`、其完整拼音及拼音首字母（仅在可过滤时设置） |
 
 ## API
 

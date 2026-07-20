@@ -138,7 +138,7 @@ const pagination = usePaginationProps({
 });
 ```
 
-`usePaginationProps` 接受 `{ paginationParams, total }` 作为参数，并返回 `TablePaginationConfig`。需要单独处理 `onChange` 以更新 `paginationParams`。
+`usePaginationProps` 接受 `{ paginationParams: PaginationParams, total: number }`，返回携带框架标准配置的 `TablePaginationConfig`：由 `paginationParams` 推导出的 `current` / `pageSize`（默认第 `1` 页、每页 `15` 条）、`showSizeChanger`、预设的 `pageSizeOptions`（`[10, 15, 20, 30, 40, 50, 100]`，也可单独导入）、"第 x - y 条 / 共 n 条"的总数渲染器，以及底部居右的位置。需要单独处理 `onChange` 以更新 `paginationParams`。
 
 ## API
 

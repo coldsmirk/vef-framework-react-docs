@@ -1,12 +1,12 @@
 ---
 slug: /intro
 title: VEF Framework React
-description: What VEF Framework React is, the 9 packages it ships, and how to read the rest of these docs.
+description: What VEF Framework React is, the 12 packages it ships, and how to read the rest of these docs.
 ---
 
 # VEF Framework React
 
-VEF Framework React is a React solution for internal platforms, admin systems, and other enterprise-facing applications. It is not only a component library or a scaffold. Instead, it brings application bootstrap, routing, API integration, permissions, CRUD pages, forms, state management, visual schema editors, and UI building blocks under one consistent API surface.
+VEF Framework React is a React solution for internal platforms, admin systems, and other enterprise-facing applications. It is not only a component library or a scaffold. Instead, it brings application bootstrap, routing, API integration, server push, permissions, CRUD pages, forms, state management, visual schema editors, ready-made engine management pages, and UI building blocks under one consistent API surface.
 
 This documentation focuses on one thing: **how to build applications with the framework's exported APIs**.  
 The repository also includes a sample application, `playground`, which can be used as a reference for application structure and page composition.
@@ -19,32 +19,36 @@ VEF also works best when application code is organized around **page scenarios**
 
 ## The Package Map
 
-VEF ships 9 packages under the `@vef-framework-react/*` scope. Six form the application runtime and UI; three are visual, schema-driven editors that can be embedded into a host application.
+VEF ships 12 packages under the `@vef-framework-react/*` scope. Six form the application runtime and UI; three are visual, schema-driven editors that can be embedded into a host application; three are drop-in management-page packages for the VEF backend engines.
 
 | Package | When You Reach for It | Common Exports |
 | --- | --- | --- |
 | `@vef-framework-react/starter` | Application bootstrap, routing, login pages, and layouts | `createApp`, `createRouter`, `createApiClient`, `createRootRouteOptions`, `createLayoutRouteOptions` |
 | `@vef-framework-react/components` | Page UI, page containers, CRUD pages, forms, tables, notifications, icons, and charts | `Button`, `Page`, `CrudPage`, `createCrudKit`, `ProTable`, `Table`, `FormModal`, `FormDrawer`, `useForm`, `PermissionGate`, `Chart` |
-| `@vef-framework-react/core` | Requests, query, stores, atoms, permission checks, and SSE | `ApiClient`, `useQuery`, `useMutation`, `createStore`, `createComponentStore`, `atom` |
-| `@vef-framework-react/hooks` | Page-level helper hooks | `useDictionaryQuery`, `useHasMutating`, `useAuthorizedItems`, `useDebouncedValue` |
+| `@vef-framework-react/core` | Requests, query, stores, atoms, permission checks, SSE, and the server push channel | `ApiClient`, `useQuery`, `useMutation`, `createStore`, `createComponentStore`, `atom`, `createPushClient` |
+| `@vef-framework-react/hooks` | Page-level helper hooks | `useCodeSetQuery`, `usePushMessage`, `useHasMutating`, `useAuthorizedItems`, `useDebouncedValue` |
 | `@vef-framework-react/shared` | Common types, validation, formatting, tree utilities, and event emitters | `z`, `EventEmitter`, `formatDate`, `flattenTree`, `withPinyin` |
-| `@vef-framework-react/dev` | Vite, ESLint, Stylelint, and Commitlint configuration | `defineViteConfig`, `defineEslintConfig`, `defineStylelintConfig`, `defineCommitlintConfig` |
+| `@vef-framework-react/dev` | Vite, ESLint, Stylelint, and Commitlint configuration, plus code generation | `defineViteConfig`, `defineEslintConfig`, `defineStylelintConfig`, `defineCommitlintConfig` |
 | `@vef-framework-react/form-editor` | Visual, schema-driven form designer for forms with hundreds of fields | `FormEditor`, `FormRenderer`, `FormEditorProvider` |
 | `@vef-framework-react/approval-flow-editor` | Visual approval flow designer built on `@xyflow/react` + elkjs auto-layout | `ApprovalFlowEditor`, `toFlowDefinition`, `fromFlowDefinition` |
 | `@vef-framework-react/approval-form-bridge` | Projects a form-editor schema into the backend approval form contract | `projectFormSchema`, `createApprovalRegistries`, `validateApprovalSchema` |
+| `@vef-framework-react/approval` | Ready-made approval engine pages: flow designer, task center, instance views, admin | `ApprovalFlowPage`, `ApprovalTaskCenterPage`, `ApprovalProvider`, `APPROVAL_PERMISSIONS` |
+| `@vef-framework-react/integration` | Ready-made integration engine pages: systems, adapters, contracts, routes, console | `IntegrationSystemPage`, `IntegrationConsolePage`, `INTEGRATION_PERMISSIONS` |
+| `@vef-framework-react/cron` | Ready-made cron scheduling pages: schedules and run history | `CronSchedulePage`, `CronRunPage`, `CRON_PERMISSIONS` |
 
-The three editor packages are independent of each other — a host application can embed `form-editor` alone, `approval-flow-editor` alone, or both together with `approval-form-bridge` acting as the projection layer between them.
+The three editor packages are independent of each other — a host application can embed `form-editor` alone, `approval-flow-editor` alone, or both together with `approval-form-bridge` acting as the projection layer between them. The three engine packages are likewise independent: each one is a set of finished pages that mount directly onto application routes — see [Engines](./engines/overview.md).
 
 ## How These Docs Are Organized
 
-The sidebar has 6 sections:
+The sidebar has 7 sections:
 
 1. **Getting Started** — a linear tutorial. Install the framework, run a minimal app, then build a real CRUD page.
-2. **Guides** — task-oriented "how do I do X" narratives (routing, menus, data fetching, forms, tables, CRUD, state, auth, permissions, dictionaries, theming, localization, error handling, hooks), ordered from foundational to advanced.
+2. **Guides** — task-oriented "how do I do X" narratives (routing, menus, data fetching, forms, tables, CRUD, state, auth, permissions, code sets, theming, localization, error handling, hooks), ordered from foundational to advanced.
 3. **Components** — an organized reference of every exported component, with prop tables and examples. Browse it as needed; it is not meant to be read start to finish.
 4. **Visual Editors** — the form-editor, approval-flow-editor, and approval-form-bridge packages: what they are, how to embed them in a host app, and their schema/type reference.
-5. **API Reference** — dry, per-package export signatures. Come here once you already know what you're looking for.
-6. **Advanced** — extension points, performance habits, testing suggestions, and project governance conventions, for once the basics feel comfortable.
+5. **Engines** — the approval, integration, and cron packages: drop-in management pages for the VEF backend engines and how to mount them.
+6. **API Reference** — dry, per-package export signatures. Come here once you already know what you're looking for.
+7. **Advanced** — extension points, performance habits, testing suggestions, and project governance conventions, for once the basics feel comfortable.
 
 Guides own the narrative and the "why." Components own prop tables. API Reference owns exact signatures. If the same concept shows up in more than one of these, that is a bug — the guide should link to the component or reference page instead of repeating it.
 
@@ -68,15 +72,16 @@ For a first-time reader, this order builds understanding incrementally:
    7. [State Management](./guide/state-management.md)
    8. [Authentication](./guide/authentication.md)
    9. [Permissions](./guide/permissions.md)
-   10. [Data Dictionaries](./guide/data-dictionaries.md)
+   10. [Code Sets](./guide/code-sets.md)
    11. [Theming](./guide/theming.md)
    12. [Localization](./guide/localization.md)
    13. [Error Handling](./guide/error-handling.md)
    14. [Hooks](./guide/hooks.md)
 3. **Components** — from here on, treat the docs as a reference rather than a sequence. Open the [component catalog](./components/overview.md) whenever a page needs a specific building block.
 4. **Visual Editors** — read the [overview](./editors/overview.md) only if the application embeds the form designer or the approval flow designer.
-5. **API Reference** — start from the [package map](./reference/overview.md) whenever exact export signatures are needed.
-6. **Advanced** — [project conventions](./advanced/project-conventions.md), [custom form components](./advanced/custom-form-components.md), [performance](./advanced/performance.md), and [testing](./advanced/testing.md) once the day-to-day workflow is familiar.
+5. **Engines** — read the [overview](./engines/overview.md) only if the application hosts the approval, integration, or cron management pages.
+6. **API Reference** — start from the [package map](./reference/overview.md) whenever exact export signatures are needed.
+7. **Advanced** — [project conventions](./advanced/project-conventions.md), [custom form components](./advanced/custom-form-components.md), [performance](./advanced/performance.md), and [testing](./advanced/testing.md) once the day-to-day workflow is familiar.
 
 ## Typical Application Composition
 
@@ -101,6 +106,7 @@ In most projects, the application flow looks like this:
 4. Use `@vef-framework-react/components` and `@vef-framework-react/hooks` to build pages.
 5. Use `@vef-framework-react/shared` for validation, formatting, and data transformation.
 6. Optionally embed `form-editor` and/or `approval-flow-editor` (bridged by `approval-form-bridge`) for schema-driven design surfaces inside the application.
+7. Optionally mount the `approval`, `integration`, and `cron` engine pages onto routes when the deployment includes those backend engines.
 
 ## Sample Application Reference Points
 
@@ -115,6 +121,8 @@ The sample application (`playground`) includes representative examples for:
 - `src/pages/_layout/sys/form-editor/route.tsx` — host integration for the form editor
 - `src/pages/_layout/sys/approval-flow-editor/route.tsx` — host integration for the approval flow editor
 - `src/pages/_layout/sys/flow-designer-wizard/` — `approval-form-bridge` projecting a form-editor schema into an approval flow
+- `src/pages/_layout/approval/` — the approval engine pages mounted as an approval center
+- `src/pages/_layout/sys/integration-*/route.tsx` — the integration engine pages, including the console workbench
 
 ## Documentation Notes
 

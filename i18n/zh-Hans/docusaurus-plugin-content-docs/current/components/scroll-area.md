@@ -87,7 +87,7 @@ export default function Demo() {
 | `viewportRef` | `Ref<HTMLDivElement>` | — | 视口元素的 ref |
 | `viewportClassName` | `string` | — | 视口元素的类名 |
 | `viewportStyle` | `CSSProperties` | — | 视口元素的样式 |
-| `overscrollBehavior` | `CSSProperties['overscrollBehavior']` | — | 过度滚动行为 |
+| `overscrollBehavior` | `CSSProperties['overscrollBehavior']` | `'none'` | 滚动越过边界时的行为（默认禁用向父容器的滚动链） |
 | `onScrollPositionChange` | `(position: { x: number; y: number }) => void` | — | 滚动位置变化回调 |
 | `onTopReached` | `() => void` | — | 滚动到顶部时触发 |
 | `onBottomReached` | `() => void` | — | 滚动到底部时触发 |

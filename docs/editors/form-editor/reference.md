@@ -25,7 +25,7 @@ Extends `FormEditorProviderProps` (below) plus:
 | Prop | Type | Notes |
 | --- | --- | --- |
 | `brand` | `ToolbarBrand` (`{ name?, tag?, icon? }`) | Toolbar brand mark; defaults to the framework's own name/glyph. |
-| `onPublish` | `(schema: FormSchema) => void` | Runs a validation pass first; publish button is not rendered when omitted. |
+| `onPublish` | `(schema: FormSchema) => void` | Runs a validation pass first (errors block, warnings ask for confirmation); publish button is not rendered when omitted. |
 | `publishText` | `string` | Defaults to `"发布"`. Ignored when `onPublish` is omitted. |
 | `publishLoading` | `boolean` | Loading state on the publish button. Ignored when `onPublish` is omitted. |
 
@@ -91,7 +91,8 @@ Extends `FormEditorProviderProps` (below) plus:
 | --- | --- |
 | `submit` | `() => Promise<void>` — same validation pipeline as a schema `submit` button |
 | `reset` | `() => void` |
-| `getValues` | `() => Record<string, unknown>` |
+| `getValues` | `() => Record<string, unknown>` — the RAW live form state, including hidden fields' seeded defaults and read-only (non-writable-clamped) values |
+| `getSubmitValues` | `() => Record<string, unknown>` — exactly what the submit pipeline would deliver to `onSubmit` right now: the live values run through the same payload filtering (effectively-hidden fields dropped, non-writable-clamped keys excluded, subforms recursed per row), without running validation or the submit lifecycle. Added in v2.10.0 alongside the [field-permission clamp](./linkage.md#field-permission-clamp) |
 
 ## Field registries
 
@@ -373,6 +374,8 @@ See [Linkage](./linkage.md) for the full model. Exported surface:
 | `defaultEvaluateScriptAction` | `(source, values, context?) => LinkageScriptResult \| void` |
 | `isStateAction` / `isEffectAction` | `(action: FieldLinkageAction) => action is StateAction / EffectAction` |
 | `isFieldEventTriggerKind` | `(kind: LinkageTriggerKind) => boolean` |
+| `getFieldPermission` | `(permissions: Record<string, FieldPermission> \| undefined, key: string) => FieldPermission \| undefined` — own-property-guarded lookup (a field keyed like an `Object` prototype member never reads a prototype slot). Added in v2.10.0 |
+| `isWritableFieldPermission` | `(permission: FieldPermission \| undefined) => boolean` — `true` for `undefined` (no clamp entry), `"editable"`, and `"required"`; `false` for `"visible"` / `"hidden"`. Added in v2.10.0 |
 | `STATE_ACTION_TYPES` | `readonly StateActionType[]` (`show, hide, enable, disable, require, optional, assign, script`) |
 | `EFFECT_ACTION_TYPES` | `readonly EffectActionType[]` (`set_field, set_variable, refresh_data_source, alert, api_call, navigate, submit, reset`) |
 | `LINKAGE_ACTION_TYPES` | `readonly LinkageActionType[]` — the union of the two above |

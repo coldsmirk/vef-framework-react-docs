@@ -47,8 +47,8 @@ export default function Demo() {
 ## 公开上传
 
 ```tsx
-// 将对象存放于 `pub/` 而非 `priv/` 下。需要后端启用
-// `vef.storage.allow_public_uploads`。
+// Lands the object under `pub/` instead of `priv/`. Requires the backend's
+// `vef.storage.allow_public_uploads` to be enabled.
 <FileUpload public />
 ```
 
@@ -98,5 +98,7 @@ export default function Demo() {
 | 字段 | 类型 | 说明 |
 |-------|------|-------------|
 | `key` | `string` | 对象 key（例如 `priv/2026/05/12/abc.png`） |
-| `url` | `string` | 解析后的访问 URL——由 `fileBaseUrl` 组合而成，除非提供了 `resolveFileUrl` |
+| `sourceUrl` | `string` | 解析后的源 URL——由 `fileBaseUrl` 组合而成，除非提供了 `resolveFileUrl`。有意与 antd 可导航的 `UploadFile.url` 分开存放，确保带鉴权的文件绝不会被渲染成原生列表链接（见 [Upload——鉴权文件](./upload.md#鉴权文件与-url-隔离)） |
 | `fileName` | `string` | 后端回传的客户端原始文件名 |
+
+非图片文件的预览会经由共享的 `Upload` 预览链路派发到应用的[文件预览宿主](./file-preview.md)。

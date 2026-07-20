@@ -148,7 +148,7 @@ VEF 新增了 `draggable` 属性（`@default false`），开启后用户可以�
 | `centered` | `boolean` | `false` | 垂直居中显示 |
 | `closable` | `boolean` | `true` | 显示关闭图标 |
 | `maskClosable` | `boolean` | `true` | 点击蒙层是否可以关闭 |
-| `destroyOnClose` | `boolean` | `false` | 关闭时卸载子元素 |
+| `destroyOnHidden` | `boolean` | `false` | 关闭时卸载子元素（`destroyOnClose` 是废弃别名） |
 | `forceRender` | `boolean` | `false` | 预渲染内容 |
 | `keyboard` | `boolean` | `true` | 支持按下 Esc 键关闭 |
 | `zIndex` | `number` | `1000` | 层级 |
@@ -157,6 +157,6 @@ VEF 新增了 `draggable` 属性（`@default false`），开启后用户可以�
 
 ## 最佳实践
 
-- 当对话框内包含表单时设置 `destroyOnClose`，使关闭后表单状态被重置。
+- 当对话框内包含表单时设置 `destroyOnHidden`，使关闭后表单状态被重置。
 - 避免多层嵌套的对话框；次级面板请使用 `Drawer`。
 - 简单的是/否确认使用 `Modal.confirm`；表格中的行内操作使用 `ActionButton` 配合 `confirmable`。

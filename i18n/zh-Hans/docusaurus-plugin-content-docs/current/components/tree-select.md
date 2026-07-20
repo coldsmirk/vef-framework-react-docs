@@ -76,4 +76,21 @@ export default function Demo() {
 
 每个 `*Key` 选项都可以是字符串路径（例如 `"user.name"`）或提取函数。
 
+### `useDataOptionsTreeSelect` 返回值
+
+该 Hook 返回可直接展开的 `TreeSelectProps<Key, DataOptionWithPinyin<TData>>`，携带：
+
+| 字段 | 值 | 说明 |
+|-------|-------|-------------|
+| `treeData` | `DataOptionWithPinyin<TData>[]` | 转换后的树，每个节点都为 `label` 和 `description` 预计算了拼音 |
+| `loading` | `boolean` | 查询进行中时为 `true` |
+| `fieldNames` | `{ label, value, children }` | 把 `DataOption` 的形状映射到树形选择器上 |
+| `maxTagCount` | `'responsive'` | 多选模式下折叠超出的标签 |
+| `listHeight` | `280` | 下拉列表高度 |
+| `notFoundContent` | 获取期间为 `Loader` | 初次获取期间显示加载器而非"暂无数据" |
+| `showSearch` | `boolean` | 即 `filterable` 标志 |
+| `filterTreeNode` | `(input, node) => boolean` | 匹配 `label` / `description`、其完整拼音及拼音首字母（仅在 `filterable` 时设置） |
+| `treeNodeFilterProp` / `treeNodeLabelProp` | `'labelPinyinInitials'` / `'label'` | 搜索按拼音首字母匹配；触发器显示 label |
+| `treeLine` | `{ showLeafIcon: false }` | 显示连接线且不带叶子图标 |
+
 其余属性请参阅 [Ant Design TreeSelect 文档](https://ant.design/components/tree-select/)。

@@ -97,7 +97,7 @@ export const Route = createFileRoute(INDEX_ROUTE_ID)(
 
 路由决定渲染哪个页面；布局组件决定页面如何被框住。VEF 把它拆成两层：
 
-- **应用级布局** —— `Layout` / `BaseLayout`（来自 `@vef-framework-react/starter`）。这是持久化的外壳：菜单、用户区域、标签页和内容区。它通常不需要从零编写——`createLayoutRouteOptions()` 会根据传入的属性（`title`、`onLogout` 以及 `LayoutProps` 的其余部分）自动装配。
+- **应用级布局** —— `@vef-framework-react/starter` 内部的 `Layout` / `BaseLayout` 外壳（不对外导出）：菜单、用户区域、标签页和内容区。它不需要从零编写——`createLayoutRouteOptions()` 会根据传入的属性（`title`、`onLogout` 以及其它布局选项；见 [应用外壳](../reference/starter/application-shell.md)）自动装配。
 - **页面级容器** —— `Page` / `FlexCard`（来自 `@vef-framework-react/components`）。它们位于外壳内部，负责框住单个页面的内容。
 
 ### `Page`

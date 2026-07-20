@@ -86,7 +86,7 @@ export default function Demo() {
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
 | `onChange` | `(value: boolean) => void` | — | Change handler |
-| `children` | `ReactNode` | — | Label text (for `checkbox` variant) |
+| `children` | `ReactNode` | — | Label text (for `switch` / `checkbox` variants) |
 
 ## Variant Behavior
 

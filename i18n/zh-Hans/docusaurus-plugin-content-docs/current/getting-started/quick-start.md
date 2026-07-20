@@ -53,11 +53,18 @@ import { createApiClient } from "@vef-framework-react/starter";
 
 export const apiClient = createApiClient({
   http: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL,
+    // Injected from VEF_APP_API_BASE_URL by the dev plugin (see Configuration)
+    baseUrl: __VEF_APP_CONFIG__.VEF_APP_API_BASE_URL,
     okCode: 0,
     tokenExpiredCode: 1002,
     timeout: 30_000,
     async refreshToken(tokens) {
+      // JWT-mode backends return a refresh token; since v2.10.0 the field is
+      // optional, so guard it before the exchange.
+      if (!tokens.refreshToken) {
+        throw new Error("No refresh token");
+      }
+
       const response = await fetch("/api/auth/refresh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,6 +80,8 @@ export const apiClient = createApiClient({
   }
 });
 ```
+
+`AuthTokens.refreshToken` 是可选的：签发有状态不透明令牌（opaque token）会话的后端（由服务端滑动续期）不会返回刷新令牌——面对这类后端，直接省略 `refreshToken` 回调即可，过期的会话会径直进入未认证流程。
 
 ## 第三步: 定义请求函数
 
@@ -212,7 +221,7 @@ createApp().render({
     hasPermission(token) {
       return token.startsWith("demo:");
     },
-    dictionaryQueryFn: undefined,
+    codeSetQueryFn: undefined,
     fileBaseUrl: "/files"
   },
   appVersionNotification: {
@@ -221,6 +230,8 @@ createApp().render({
   }
 });
 ```
+
+`codeSetQueryFn` 是宿主提供的码集查询函数（以 `"sys.user.gender"` 这类字符串键名索引的选项列表）；在后端提供该接口之前，先保持 `undefined` 即可——参见[码集](../guide/code-sets.md)。
 
 ## 第八步: 添加一个真实页面
 

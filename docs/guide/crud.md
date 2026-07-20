@@ -65,6 +65,19 @@ That is why the form is rendered by scene instead of being one static form:
 renderForm={scene => <Form scene={scene} />}
 ```
 
+### How the Scene Form Is Presented
+
+The scene form opens in a modal by default; each `openForm` call can choose a drawer instead (`mode: "drawer"`). Since v2.12.0, the `formLayout` prop adjusts the label layout inside either container — the same `{ layout, labelAlign, labelWidth }` fields the `Form` component takes directly:
+
+```tsx
+<CrudPage
+  formLayout={{ layout: "vertical" }}  // vertical labels suit narrow drawers
+  ...
+/>
+```
+
+See [Forms](./forms.md#label-layout-formlayout) for the layout model and [Crud and CrudPage](../components/crud.md) for `openForm`'s full option list.
+
 ## Why `createCrudKit()` Matters
 
 `createCrudKit()` locks a page's own generic types into a reusable local toolkit:

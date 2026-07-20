@@ -15,7 +15,7 @@ It can be understood as an enterprise-oriented UI wrapper around TanStack Form. 
 ## Typical Usage
 
 ```tsx
-import { Grid, useDictionaryOptionsSelect, useFormContext } from "@vef-framework-react/components";
+import { Grid, useCodeSetOptionsSelect, useFormContext } from "@vef-framework-react/components";
 import { z } from "@vef-framework-react/shared";
 
 const validators = {
@@ -26,7 +26,7 @@ const validators = {
 export function UserForm() {
   const { AppField } = useFormContext<{ name: string; gender: string }>();
 
-  const { gender } = useDictionaryOptionsSelect({
+  const { gender } = useCodeSetOptionsSelect({
     gender: "common.gender"
   });
 
@@ -77,6 +77,26 @@ const { AppField } = useFormContext<FormValues>();
 
 This is the pattern to reach for once a form grows beyond a single component — a search bar, a scene-specific form body, and a footer of actions can each pull `AppField` from the same form context instead of threading form state through props.
 
+## Label Layout: `FormLayout`
+
+Every field wrapper reads its label placement from a shared form-layout context. The three fields — `layout` (`"horizontal"` by default), `labelAlign` (`"right"`), and `labelWidth` (`100`) — can be set once on the `Form` component and apply to every field inside:
+
+```tsx
+<Form layout="vertical">
+  {/* every AppField renders its label above the control */}
+</Form>
+```
+
+When the `Form` element is not yours to render — inside `FormModal`, `FormDrawer`, or a CRUD scene form — pass the same three fields through the `formLayout` prop instead (added in v2.12.0):
+
+```tsx
+<FormDrawer formLayout={{ layout: "vertical" }} ... />
+
+<CrudPage formLayout={{ layout: "vertical" }} ... />
+```
+
+Vertical labels are the usual choice for narrow drawers, where a 100px label column costs too much width. The `FormLayout` type is exported from `@vef-framework-react/components`.
+
 ## Validation with `z`
 
 ```tsx
@@ -118,17 +138,17 @@ const deptTreeSelectProps = useDataOptionsTreeSelect({
 });
 ```
 
-### Data Dictionary
+### Code Sets
 
 ```tsx
-const { gender } = useDictionaryOptionsSelect({
+const { gender } = useCodeSetOptionsSelect({
   gender: "common.gender"
 });
 
 // <field.Select {...gender} />
 ```
 
-`useDictionaryOptionsSelect(keys, options?)` returns a `{ alias: SelectProps }` map. Pass `{ filterable: true }` (or per-key `{ key: { key: "...", filterable: true } }`) to enable pinyin search — see [Data Dictionaries](./data-dictionaries.md) for where the underlying data comes from.
+`useCodeSetOptionsSelect(keys, options?)` returns a `{ alias: SelectProps }` map. Pass `{ filterable: true }` (or per-key `{ key: "...", filterable: true }` as the alias value) to enable pinyin search — see [Code Sets](./code-sets.md) for where the underlying data comes from and how keys become a typed union.
 
 ## Dependent Fields & Linkage
 
@@ -251,10 +271,10 @@ To wire an entirely custom control into a dependent field, see [Custom Form Comp
 
 ## Why the Split Matters
 
-Keeping data sourcing (`useDataOptionsSelect()`, `useDictionaryOptionsSelect()`, ...) separate from field rendering (`AppField`) and layout (`Grid`) means:
+Keeping data sourcing (`useDataOptionsSelect()`, `useCodeSetOptionsSelect()`, ...) separate from field rendering (`AppField`) and layout (`Grid`) means:
 
 - option-loading logic can be reused across a create form, an edit form, and a search bar
-- a field component never needs to know whether its options come from a dictionary, a query, or a tree
+- a field component never needs to know whether its options come from a code set, a query, or a tree
 - swapping a field's data source does not touch its layout or validation
 
 For the full set of available field components (`field.Input`, `field.Select`, `field.Bool`, and the rest), see [Form](../components/form.md).

@@ -42,7 +42,7 @@ export default function Demo() {
 ```tsx
 <OperationButton
   requiredPermissions="user:delete"
-  danger
+  color="danger"
   confirmable
   confirmTitle="Delete User"
   confirmDescription="This action cannot be undone."
@@ -69,7 +69,7 @@ export default function Demo() {
       </OperationButton>
       <OperationButton
         requiredPermissions="user:delete"
-        danger
+        color="danger"
         confirmable
         onClick={async () => deleteUser(record.id)}
       >
@@ -82,19 +82,20 @@ export default function Demo() {
 
 ## API
 
-`OperationButton` 继承了 `ActionButton` 的属性（`size`、`variant`、`type`、`danger` 除外），并叠加了 `PermissionGate` 的属性：
+`OperationButton` 继承了 [`ActionButton`](./action-button.md) 的属性（移除了 `size`、`variant`、`type`、`danger`），并叠加了 [`PermissionGate`](./permission-gate.md) 的权限属性：
 
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
-| `requiredPermissions` | `string \| string[]` | — | 所需的权限令牌 |
+| `requiredPermissions` | `string \| string[]` | — | 所需的权限令牌；为空时按钮不经权限门直接渲染 |
 | `checkMode` | `'any' \| 'all'` | `'any'` | 权限校验模式 |
 | `confirmable` | `boolean` | `false` | 执行前显示确认提示 |
 | `confirmMode` | `'popover' \| 'dialog'` | `'popover'` | 确认框 UI 样式 |
 | `confirmTitle` | `ReactNode` | `'确认提示'` | 确认标题 |
 | `confirmDescription` | `ReactNode` | `'确定要执行此操作吗？'` | 确认描述文本 |
+| `color` | `ButtonColor` | — | 按钮颜色（例如 `'primary'`、`'danger'`）——用它替代已移除的 `type` / `danger` 属性 |
 | `onClick` | `(e) => Awaitable<void>` | — | 异步点击事件处理函数 |
 
-> 注意：`size`、`variant`、`type` 和 `danger` 由内部固定，无法被覆盖。
+> 注意：`size` 和 `variant` 由内部固定（`size="small"`、`variant="filled"`，尺寸适配表格行），无法被覆盖；`type` 和 `danger` 已从属性中移除——请通过 `color` 设置样式。
 
 ## 对比
 

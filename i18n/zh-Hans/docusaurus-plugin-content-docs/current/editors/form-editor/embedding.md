@@ -37,7 +37,7 @@ function FormDesignerPage() {
 值得关注的 `FormEditorProps`（完整表格见 [Reference](./reference.md#formeditor)）：
 
 - **`initialSchema`** 和 **`registries`** / **`registry`** 只在挂载时读取一次——之后更新它们不会产生任何效果。挂载后如需替换文档，请使用 `FormEditorApi.setSchema`。
-- **`onSchemaChange`** 在每次已提交的编辑上触发，参数为新的 `FormSchema`；**`onPublish`**（与 `publishText` / `publishLoading` 搭配使用）会先跑一遍校验，只有校验通过才会触发——省略 `onPublish` 时，发布按钮根本不会渲染。
+- **`onSchemaChange`** 在每次已提交的编辑上触发，参数为新的 `FormSchema`；**`onPublish`**（与 `publishText` / `publishLoading` 搭配使用）会先跑一遍校验——error 会阻止发布，warning 会请设计者确认——省略 `onPublish` 时，发布按钮根本不会渲染。
 - **`apiRef`** 暴露 `FormEditorApi`：`getSchema` / `setSchema`、`undo` / `redo` / `canUndo` / `canRedo`、`selectNode`、`setDevice`、`setViewMode`。
 - **`evaluators`**、**`dataSourceResolver`**、**`evaluationContext`**、**`contextSources`** 会转发给编辑器自身的实时预览——参见下文的 [Linkage](./linkage.md) 与[加载远程选项](#加载远程选项)。
 
@@ -128,8 +128,8 @@ function ApplicationForm({ schema }: { schema: FormSchema }) {
 
 - **`device`**（默认 `"pc"`）选择要渲染哪种呈现方式。没有设计过的设备（例如没有移动端设计的表单）会渲染空状态，而不是回退到另一种设备。`mobile` 呈现方式渲染的 antd-mobile 控件始终使用 `zh-CN` 语言环境，与宿主应用自身的语言环境无关。
 - **`defaultValues`**、**`disabled`**、**`onSubmit`** 的行为与普通表单一致：只有当 schema 自身的校验规则通过后，`onSubmit` 才会触发。
-- **`fieldPermissions`** 是服务端为每个字段 key 解析出的约束（`Record<string, FieldPermission>`）——它是联动可以在其内部收窄、但永远不能突破的外层边界（`"hidden"` 会彻底卸载该字段，`"visible"` 会将其渲染为只读，`"required"` 会强制执行非空校验，`"editable"` 则不受约束）。见 [Linkage → 字段权限约束](./linkage.md#字段权限约束)。
-- **`apiRef`** 暴露 `FormRendererApi`：`submit()`（运行与 schema 中 `submit` 按钮相同的校验流程）、`reset()`、`getValues()`——供模态框底部确认按钮之类的宿主界面元素使用。
+- **`fieldPermissions`**（v2.10.0）是服务端为每个字段 key 解析出的钳制（`Record<string, FieldPermission>`）——它是联动可以在其内部收窄、但永远不能突破的外层边界（`"hidden"` 会彻底卸载该字段，`"visible"` 会将其渲染为只读，`"required"` 会强制执行非空校验，`"editable"` 则不受钳制）。这层钳制同样把关每一次程序化写入（`assign` / `set_field`），并把提交负载过滤到只剩可写的 key。其标准来源是审批引擎为当前查看者解析出的某个审批节点的权限矩阵，但任何宿主侧解析出的映射都可以。见 [Linkage → 字段权限钳制](./linkage.md#字段权限钳制)。
+- **`apiRef`** 暴露 `FormRendererApi`：`submit()`（运行与 schema 中 `submit` 按钮相同的校验流程）、`reset()`、`getValues()`（原始的实时状态），以及 `getSubmitValues()`（`onSubmit` 此刻将收到的、经过滤后的精确载荷——v2.10.0）——供模态框底部确认按钮之类的宿主界面元素使用。
 - **`evaluators`**、**`dataSourceResolver`**、**`evaluationContext`** 与编辑器同名属性一一对应，驱动的是完全相同的联动引擎——见 [Linkage](./linkage.md)。
 - **`containOverlays`** 会将移动端浮层选择器（遮罩/弹出层）固定在渲染器自身的盒子内，而不是浏览器视口——只在 `device="mobile"` 时有意义，用于桌面端的"手机边框"预览场景。
 

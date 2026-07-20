@@ -94,6 +94,16 @@ const visibleActions = useAuthorizedItems([
 ]);
 ```
 
+## 引擎页面自带权限码
+
+引擎页面（engine pages）各包以导出集合的形式附带了它们的后端权限码，与后端的 `RequiredPermission` 字符串逐字对应：
+
+- `APPROVAL_PERMISSIONS`，来自 `@vef-framework-react/approval`
+- `INTEGRATION_PERMISSIONS`，来自 `@vef-framework-react/integration`
+- `CRON_PERMISSIONS`，来自 `@vef-framework-react/cron`
+
+每个集合都按资源嵌套（`APPROVAL_PERMISSIONS.flow.publish` 即 `"approval.flow.publish"`，`CRON_PERMISSIONS.schedule.manage` 即 `"cron.schedule.manage"`，以此类推）。每个引擎管理页的权限门控都默认取用对应的条目，并可以通过其 `permissions` 属性覆盖——因此把引擎权限映射到自有令牌方案的宿主，只需按页面覆盖，而不必分叉页面。请在后端配好这些权限码；当宿主 UI 围绕引擎页面做组合时，在 `PermissionGate` / `useAuthorizedItems` 中复用同样的常量，而不是重复书写字符串。引擎包本身见 [引擎总览](../engines/overview.md)。
+
 ## 推荐用法
 
 - 让页面代码消费权限，而不是再维护第二套权限来源

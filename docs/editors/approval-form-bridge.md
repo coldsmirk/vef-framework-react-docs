@@ -1,11 +1,11 @@
 ---
 title: Approval Form Bridge
-description: Projects a form-editor FormSchema onto the approval backend's flat form contract, with save-gate validation and an approval-profile registry.
+description: Projects a form-editor FormSchema into the flow editor's field inventory and a designer-side preview of the approval backend's flat field list, with save-gate validation and an approval-profile registry.
 ---
 
 # Approval Form Bridge
 
-`@vef-framework-react/approval-form-bridge` is a pure-function projection library — it renders nothing. It sits between `form-editor` and the approval backend / `approval-flow-editor`, converting a designed `FormSchema` into the flat field contract the Go backend expects, plus the field inventory `ApprovalFlowEditor`'s `plugins.formFields` consumes.
+`@vef-framework-react/approval-form-bridge` is a pure-function projection library — it renders nothing. It sits between `form-editor` and the approval backend / `approval-flow-editor`, converting a designed `FormSchema` into the field inventory `ApprovalFlowEditor`'s `plugins.formFields` consumes, plus a designer-side preview of the flat field list the Go backend derives from the deployed schema.
 
 ## `createApprovalRegistries`
 
@@ -47,17 +47,22 @@ interface ProjectionResult {
 
 Walks the schema **once** and derives both outputs from that single pass, so they can never disagree:
 
-- **`fields`** — the flat `ApprovalFormField[]` inventory, matching what the Go backend's own parser (`internal/approval/formeditor`) derives from the deployed schema at deploy time. Kept in lockstep with the backend through shared golden fixtures.
-- **`formFields`** — the same inventory reshaped as `FormFieldDefinition[]`, ready to pass straight into `ApprovalFlowEditor`'s `plugins.formFields`.
+- **`fields`** — the flat `ApprovalFormField[]` inventory, matching what the Go backend's own parser (`internal/approval/formeditor`) derives from the deployed schema at deploy time. Kept in lockstep with the backend through shared golden fixtures (`__fixtures__/formeditor-parity/`). `sortOrder` is the walk's emission index; `label` falls back to the field's `key` when unset.
+- **`formFields`** — the same inventory reshaped as `FormFieldDefinition[]`, ready to pass straight into `ApprovalFlowEditor`'s `plugins.formFields`. A `table` field carries its `columns`; a field whose visibility form linkage can toggle off (its own hide-capable linkage, a hidden default, or a hide-capable ancestor container) is annotated `hasConditionalVisibility: true`, which the flow editor's field-permission table turns into a "required + linkage-hidden can deadlock the approval" warning (see [Approval Flow Editor: Host Integration](./approval-flow-editor/host-integration.md#formfields)).
 
-This is a designer-side aid, not part of the deploy path: the backend receives the rich `FormSchema` verbatim and derives the flat field list itself. `projectFormSchema` exists to preview that derivation and catch contract-fit problems before deploy.
+This is a designer-side aid, not part of the deploy path: the backend receives the rich `FormSchema` verbatim (`DeployFlowCmd.FormSchema`) and derives the flat field list itself. `projectFormSchema` exists to preview that derivation and catch contract-fit problems before deploy.
+
+:::warning[Migration: v2.10.0 changed the projection result and the deploy payload]
+Before v2.10.0 the projection produced a wrapper object — `ProjectionResult.definition: ApprovalFormDefinition` (`{ fields: ApprovalFormField[] }`) — and that flat definition **was** the deploy payload (`DeployFlowCmd.FormDefinition`). v2.10.0 (breaking, `36dff11`) flattened the result to the bare `fields: ApprovalFormField[]` array and moved deploy onto the rich schema: the backend now receives the `FormSchema` itself and derives the flat list server-side, so the projection can never drift from what actually deploys. The `ApprovalFormDefinition` type was removed from the package exports — migrate `projection.definition.fields` to `projection.fields`, and send the schema (not the projection) at deploy.
+:::
 
 ### Projection rules
 
-- **Both device presentations are walked** (pc first, then mobile) and **deduplicated by key** — the submitted data contract is shared across devices, so a mobile-only field still projects, and a field appearing on both devices projects once.
-- **Cross-device conflicts are errors.** If the same key maps to a different `ApprovalFieldKind` on pc vs. mobile (`cross_device_kind_mismatch`), or a detail-table's column set differs between devices (`cross_device_table_mismatch`), the pc projection wins but the issue is raised — the losing device would submit a value shape the deployed definition rejects.
+- **Both device presentations are walked** (pc first, then mobile) and **deduplicated by key** — the submitted data contract is shared across devices, so a mobile-only field still projects, and a field appearing on both devices (or twice on one device) projects once, first sighting winning.
+- **Widget classification runs before the dedupe** (v2.10.0, mirroring the Go parser's `classifyWidget`-before-seen order): an unmappable or unknown widget breaks the submit contract on *every* device, so a key first sighted as a mappable widget and sighted again as an unmappable one still errors — no matter which device sees the key first. Repeat sightings of an already-failed key are deduped to a single issue.
+- **Cross-device conflicts are errors.** If the same key maps to a different `ApprovalFieldKind` on pc vs. mobile (`cross_device_kind_mismatch`), or a detail-table's column set differs between devices (`cross_device_table_mismatch`, compared as the ordered `key:kind` column signature), the pc projection wins but the issue is raised — the losing device would submit a value shape the deployed definition rejects. A same-kind divergence in options or validation is *not* detected (documented limitation).
 - **Only root-scope keyed nodes become fields.** Layout containers (rows, sections, tabs) are transparent; only a node that binds a value opens a field.
-- **A subform becomes a single-level `table` field** — its template's keyed leaves become columns. A subform nested inside another subform's template is a contract violation (`nested_subform_unsupported`; approval detail tables are single-level only).
+- **A subform becomes a single-level `table` field** — its template's keyed leaves become columns (duplicate column keys dedupe, first sighting wins). A subform nested inside another subform's template is a contract violation (`nested_subform_unsupported`; approval detail tables are single-level only). `minRows` ≥ 1 sets `isRequired`; `minRows` / `maxRows` become the field's `validation.minLength` / `maxLength` row-count bounds.
 - **Conservation rule: nothing is silently dropped.** A keyed node whose widget type can't be mapped is always an error-severity `ProjectionIssue`, never a silent omission — approval form data is a closed contract, and an unprojected field would cause every submit to be rejected.
 
 ### Supported field types
@@ -82,7 +87,7 @@ This is a designer-side aid, not part of the deploy path: the backend receives t
 | `ApprovalFieldOption` | `{ label: string; value: unknown }` |
 | `ApprovalValidationRule` | `{ minLength?, maxLength?, min?, max?, pattern?, message? }` — on a `table` field, `minLength`/`maxLength` bound the row count, not a string length |
 
-`options` is only populated for a `select` field whose source is an inline `static` list or a `ref` to a form-global `static` data source; a remote source (or a dangling `ref`) is resolved by the host at runtime, so the projection omits `options` and raises `options_not_static` — the backend then accepts any submitted value for that field. `columnType` mirrors the backend's `ColumnDataType` and is only meaningful under `table` storage mode; a `decimal` column with no configured `precision` raises `decimal_scale_missing` (a warning — the storage layer rounds to 0 decimal places).
+`options` is only populated for a `select` field whose source is an inline `static` list or a `ref` to a form-global `static` data source; a remote source (or a dangling `ref`) is resolved by the host at runtime, so the projection omits `options` and raises `options_not_static` — the backend then accepts any submitted value for that field. `columnType` mirrors the backend's `ColumnDataType` and is only meaningful under `table` storage mode; an explicit designer override is always honored, but a number field with no configured `precision` deliberately emits **no** `columnType` (the widget-inferred `"integer"` would make the Go runtime reject fractional values, so the backend falls back to a gate-free numeric column). A `decimal` column with no configured `precision` raises `decimal_scale_missing` (a warning — the storage layer rounds to 0 decimal places); with a positive `precision`, it is emitted as `scale`. `defaultValue` and `props` exist on the wire contract but are never emitted by the projector — they are declared so hand-built or host-enriched definitions round-trip losslessly.
 
 ## `validateApprovalSchema`
 
@@ -119,7 +124,7 @@ if (!result.valid) {
 
 ## Projection issues
 
-`ProjectionIssue`: `{ path: string; code: ProjectionIssueCode; severity: "error" | "warning"; message: string }`. `path` is the field-key chain — `"amount"` for a top-level field, `"items.price"` for a detail-table column.
+`ProjectionIssue`: `{ path: string; code: ProjectionIssueCode; severity: "error" | "warning"; message: string }`. `path` is the field-key chain — `"amount"` for a top-level field, `"items.price"` for a detail-table column. As with form-editor's `ValidationIssue`, `message` is pre-rendered Chinese product copy; program against `code` and `path`.
 
 | Code | Severity | Meaning |
 | --- | --- | --- |

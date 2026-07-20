@@ -102,7 +102,7 @@ export function createTestApiClient(): ApiClient {
 }
 
 interface ProviderOverrides {
-  /** 供权限相关组件使用的权限与字典接线。 */
+  /** 供权限相关组件使用的权限与码集接线。 */
   appContext?: AppContext;
   /** 当测试需要跨多次渲染保持缓存连续时，传入共享的 client。 */
   apiClient?: ApiClient;

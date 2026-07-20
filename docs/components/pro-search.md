@@ -81,6 +81,13 @@ function AdvancedSearch() {
 />
 ```
 
+## Layout Behavior
+
+- The bar is a two-side flex row: `extra` sits on the left, and the search controls (toggler + basic fields + actions) right-align in a shrinkable, wrapping area — long toolbars and narrow containers degrade gracefully instead of overflowing. Below the `sm` breakpoint the bar stacks vertically and the controls left-align at full width.
+- When `advancedSearch` is provided, an advanced-search toggler button is rendered automatically before the basic fields; the panel expands below the bar. No prop is needed to enable the toggler.
+- Field controls inside the search area get a fixed width for visual rhythm: `Input` / `Select` / `TreeSelect` are `200px` (including inputs using `allowClear` / `prefix` / `suffix`, whose affix wrapper is sized instead of the inner input), and range pickers are `360px`.
+- The search and reset buttons only render when `basicSearch` or `advancedSearch` is present.
+
 ## API
 
 | Prop | Type | Default | Description |
@@ -88,14 +95,14 @@ function AdvancedSearch() {
 | `className` | `string` | — | CSS class name |
 | `defaultValues` | `TValues` | — | Initial search values |
 | `basicSearch` | `ReactNode` | — | Inline search fields |
-| `advancedSearch` | `ReactNode` | — | Collapsible advanced search fields |
+| `advancedSearch` | `ReactNode` | — | Collapsible advanced search fields; also enables the built-in advanced-search toggler |
 | `extra` | `ReactNode` | — | Extra content on the left side |
 | `disabled` | `boolean` | — | Disable the search form |
-| `loading` | `boolean` | — | Loading state for the search button |
-| `defaultAdvancedSearchVisible` | `boolean` | — | Initial visibility of advanced search (uncontrolled) |
+| `loading` | `boolean` | — | Loading state for the search button; also disables the form while pending |
+| `defaultAdvancedSearchVisible` | `boolean` | `false` | Initial visibility of advanced search (uncontrolled) |
 | `advancedSearchVisible` | `boolean` | — | Controlled visibility of advanced search |
 | `onAdvancedSearchVisibleChange` | `(visible: boolean) => void` | — | Called when advanced search visibility changes |
-| `onSearch` | `(values: TValues) => void` | — | Called when search is submitted |
-| `onReset` | `(defaultValues?) => void` | — | Called when search is reset |
+| `onSearch` | `(values: TValues) => void` | — | Called with the current form values when the search button is pressed |
+| `onReset` | `(defaultValues?: TValues) => void` | — | Called when search is reset (deferred one macrotask so the native form reset finishes propagating first) |
 | `searchButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Search button customization |
 | `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` to hide |

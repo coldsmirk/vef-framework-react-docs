@@ -67,6 +67,11 @@ export default function SideMenu() {
 
 Icon size and color are not configurable via props — the icon always renders at `1.2em` and inherits `color` from its parent. All other standard Lucide props are supported.
 
+## Loading and Fallback Behavior
+
+- Icon data is lazily loaded on first use and cached; a neutral placeholder glyph renders while loading. Loading is funneled through a shared, concurrency-capped loader, so a grid full of icons never fires one request per cell at once.
+- A `name` that is not in the current Lucide set (e.g. a stale name persisted in a database) renders an "unknown icon" fallback glyph instead of breaking.
+
 ## Available Icon Names
 
 `DynamicIconName` is a union type of all supported Lucide icon names (kebab-case). The full list is available via the `dynamicIconNames` Set export:

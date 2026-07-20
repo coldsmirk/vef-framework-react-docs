@@ -33,7 +33,7 @@ const plugins: EditorPlugins = {
 | Field | Type | Purpose |
 | --- | --- | --- |
 | `pickers` | `Partial<Record<PrincipalKind, FC<PickerProps>>>` | Resolves concrete ids for `user` / `role` / `department` assignees and CC recipients. A kind left unset degrades gracefully to an inline hint instead of a picker. |
-| `formFields` | `FormFieldDefinition[]` | The form's top-level field inventory — feeds the condition editor, the field-permission table, and `validateFlowDefinition`'s `fieldPermissions` cross-check. |
+| `formFields` | `FormFieldDefinition[]` | The form's top-level field inventory — feeds the condition editor, the field-permission table, and `validateFlowDefinition`'s `fieldPermissions` cross-check. Leaving it `undefined` means "no inventory available" and is distinct from `[]` — see [`formFields`](#formfields) below. |
 | `globalSubjects` | `FormFieldDefinition[]` | Host-declared variables the condition editor offers alongside the built-in applicant attributes and `formFields`. |
 
 ### Pickers
@@ -77,6 +77,16 @@ function createUserPicker(): FC<PickerProps> {
 ### `formFields`
 
 Typically sourced from `@vef-framework-react/approval-form-bridge`'s `projectFormSchema(schema).formFields` — see [Approval Form Bridge](../approval-form-bridge.md) — but any `FormFieldDefinition[]` works, including a hand-written one for a flow that isn't backed by a designed form.
+
+Since v2.10.0 the inventory is **tri-state**, and the editor passes it through to `validateFlowDefinition` as-is (including `undefined`):
+
+- **`undefined`** (the field omitted) — the inventory is *unavailable*: a host rendering the flow editor without any form integration. The live validation and the publish gate skip only the key-existence cross-check (`field_permission_key_unknown`), since there is nothing to check keys against; the permission-value and CC-subset checks still run. A definition with dangling `fieldPermissions` keys is *not* flagged in this state, so a form-less host is never falsely blocked.
+- **`[]`** (an explicit empty array) — the form is known to have *zero* fields: every `fieldPermissions` entry is a dangling reference and errors, mirroring the backend's "flow whose form has zero fields" case.
+- **A populated array** — every `fieldPermissions` key must name an entry, and the condition editor / field-permission table render from it.
+
+Pass the projection's real `formFields` (populated or `[]`) whenever a form exists; omit the plugin field entirely only when there is genuinely no form integration.
+
+A projection-sourced entry may carry `hasConditionalVisibility: true` (v2.10.0), meaning form linkage can hide that field at runtime. The field-permission table pairs this with a per-row warning: granting `required` on such a field can deadlock the approval — the backend's required check is linkage-blind, so if linkage hides the field at approval time, its empty value rejects the approve forever. The warning is a non-blocking tooltip (the combination is legitimate when the approver can edit the controlling field) and never enters `validateFlowDefinition`'s publish gate. A related conflict *is* blocking: pairing a `required` permission with `timeoutAction: "auto_pass"` raises `field_permission_required_auto_pass`, because the auto-pass timeout path finishes the node without the manual-approve required check (see [API Reference → Validation](./reference.md#validation)).
 
 ### `globalSubjects`
 
@@ -137,7 +147,9 @@ const errors = validateFlowDefinition(definition, formFields);
 // errors: FlowValidationError[] — empty means the flow is deploy-ready
 ```
 
-Mirrors the backend's deploy-time `ValidateFlowDefinition` rule-for-rule, but — unlike the backend, which returns the first error — collects every violation so a host can surface them all at once. `formFields` defaults to `[]`; pass the same list handed to `plugins.formFields` so `fieldPermissions` keys are cross-checked against the real field inventory (omitting it is only safe when the definition carries no field permissions).
+Mirrors the backend's deploy-time `ValidateFlowDefinition` rule-for-rule — including, since v2.10.0, the field-permission rules (permission values must be in-vocabulary, keys must name real form fields, CC nodes are restricted to `visible`/`hidden`, and a `required` permission must not pair with an auto-pass timeout) — but, unlike the backend, which returns the first error, collects every violation so a host can surface them all at once. A definition that passes this validator passes backend deploy validation.
+
+The second parameter is the [tri-state `formFields` inventory](#formfields): pass the same list handed to `plugins.formFields` so `fieldPermissions` keys are cross-checked against the real field inventory. `[]` means "the form has zero fields" (every permission key errors); omitting the argument means "no inventory available" and skips only the key-existence check.
 
 Use it to gate a save/deploy action outside the editor's own publish button — for example, disabling a wizard's "next step" control:
 

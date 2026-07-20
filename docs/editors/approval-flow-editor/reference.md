@@ -43,11 +43,16 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 | `NodeDefinition` | `{ id: string; kind: NodeKind; position: XYPosition; data?: NodeDataMap[kind] }` (discriminated union on `kind`) |
 | `EdgeDefinition` | `{ id?: string; source: string; target: string; sourceHandle?: string; data?: Record<string, unknown> }` — `sourceHandle` binds a `condition` node's outgoing edge to a branch id |
 | `NodeKind` | `"start" \| "approval" \| "handle" \| "condition" \| "cc" \| "end"` |
-| `FlowNode`, `FlowEdge` | Live (in-memory) node/edge shapes, re-exported from `@coldsmirk/nodeloom-core`. Convert to/from `FlowDefinition` via `toFlowDefinition` / `fromFlowDefinition`. |
+| `FlowNode`, `FlowEdge` | Live (in-memory) canvas shapes, defined by this package: `FlowNode` is the union of the per-kind typed `@xyflow/react` nodes (below); `FlowEdge` is xyflow's `Edge`. Convert to/from `FlowDefinition` via `toFlowDefinition` / `fromFlowDefinition`. |
+| `StartNode`, `ApprovalNode`, `HandleNode`, `CcNode` | Per-kind typed live nodes — `Node<StartNodeData, "start">`, `Node<ApprovalNodeData, "approval">`, `Node<HandleNodeData, "handle">`, `Node<CcNodeData, "cc">`. On a live node React Flow's `type` carries the kind (it drives node rendering); only the wire-level `NodeDefinition` lifts it to `kind`, and the node's business fields sit directly on `data` — the exact `NodeDataMap[kind]` shape the wire carries. The `end` / `condition` aliases exist internally but are not exported. |
+
+:::info[Version note: the nodeloom era (v2.7.0 – v2.12.0)]
+From v2.7.0 through v2.12.0 the editor's state engine was `@coldsmirk/nodeloom-core`, and the live shapes were nodeloom's uniform ones: every node carried `type: "flowNode"`, the kind discriminator lived at `data.kind`, and the business fields sat under `data.config`. `FlowNode` / `FlowEdge` / `EditorState` were nodeloom re-exports, and the per-kind node aliases were not exported. An unreleased change after v2.12.0 (`81e3ade`) drops the dependency and restores the hand-written engine this page describes — per-kind typed nodes with the business fields directly on `data`. The wire format (`FlowDefinition` / `NodeDefinition` / `EdgeDefinition`) and the `toFlowDefinition` / `fromFlowDefinition` signatures were untouched by both moves, so persisted definitions are unaffected. The migration history lives in the [release notes](../../reference/release-notes.md).
+:::
 
 ## Node data by kind
 
-`NodeDataMap` maps each `NodeKind` to its data shape; `AnyNodeData` is the union (`NodeDataMap[NodeKind]`). Every kind's data includes `name?: string` (display name) and `description?: string`.
+`NodeDataMap` maps each `NodeKind` to its data shape; `AnyNodeData` is the union of all six (defined as `FlowNode["data"]`). Every kind's data includes `name?: string` (display name) and `description?: string`. These shapes serve double duty: they are the wire `NodeDefinition.data` payloads **and** the live nodes' `data` — the serializer translates only the kind discriminator (`kind` ↔ React Flow's `type`), never the data.
 
 | Kind | Type | Fields (beyond name/description) |
 | --- | --- | --- |
@@ -92,11 +97,13 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 | `ConditionOperator` | Derived from `CONDITION_OPERATORS` — see [Host Integration](./host-integration.md#condition-operators) |
 | `ConditionGroup` | `{ conditions: ConditionDefinition[] }` — conditions AND-ed within a group |
 | `ConditionBranchDefinition` | `{ id: string; label: string; conditionGroups?: ConditionGroup[]; isDefault?: boolean; priority: number }` |
-| `FormFieldDefinition` | `{ key: string; kind: FieldKind; label: string; options?: FieldOptionDefinition[]; columns?: FormFieldDefinition[] }` |
+| `FormFieldDefinition` | `{ key: string; kind: FieldKind; label: string; options?: FieldOptionDefinition[]; columns?: FormFieldDefinition[]; hasConditionalVisibility?: boolean }` |
 | `FieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `FieldOptionDefinition` | `{ label: string; value: unknown }` |
 
 `ConditionDefinition.aggregate` scopes an aggregate fold (`sum` / `count` / `avg`, mirroring the backend's `AggregateKind`) over a detail-table `subject`; `column` names the numeric column to fold (unset for `count`, which folds rows).
+
+`FormFieldDefinition.hasConditionalVisibility` (v2.10.0) is a designer-side hint: `true` when the field's visibility can be toggled off by form linkage — its own hide-capable linkage, a hidden default, or a hide-capable ancestor container. The field-permission table shows a non-blocking warning when a node grants `required` on such a field, because the backend's required check is linkage-blind: if the field is hidden at approval time, its empty value would reject the approve forever. It is populated by `approval-form-bridge`'s `projectFormSchema` and absent when the inventory came from elsewhere.
 
 ## Enums
 
@@ -118,11 +125,13 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 ```ts
 function validateFlowDefinition(
   definition: FlowDefinition,
-  formFields: FormFieldDefinition[] = []
+  formFields?: FormFieldDefinition[]
 ): FlowValidationError[];
 ```
 
-`FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`.
+`FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`. `message` is human-readable Chinese product copy matching the editor's UI language; program against `code` and the id fields.
+
+`formFields` is tri-state (v2.10.0): `undefined` means the field inventory is *unavailable* (a host with no form integration) — only the key-existence check (`field_permission_key_unknown`) is skipped; an explicit `[]` means the form is known to have *zero* fields, making every `fieldPermissions` entry a dangling reference. See [Host Integration → Validation](./host-integration.md#validation-validateflowdefinition).
 
 `FlowValidationCode` is a closed set mirroring the backend's deploy-time checks:
 
@@ -171,7 +180,7 @@ function validateFlowDefinition(
 | `aggregate_column_forbidden` | A `count` aggregate selected a column. |
 | `aggregate_on_expression` | An expression condition carries an aggregate. |
 
-**Assignees, CC, and field permissions** (approval / handle / cc nodes)
+**Assignees, CC, and field permissions** (approval / handle / cc nodes) — the field-permission codes landed in v2.10.0, mirroring the backend's deploy-time `ValidateFieldPermissions`, so a permission mistake surfaces in the designer instead of at deploy
 
 | Code | Meaning |
 | --- | --- |
@@ -185,8 +194,9 @@ function validateFlowDefinition(
 | `fallback_users_required` | `emptyAssigneeAction: "transfer_specified"` with no `fallbackUserIds`. |
 | `admin_users_required` | `emptyAssigneeAction: "transfer_admin"` with no `adminUserIds`. |
 | `invalid_field_permission` | A `fieldPermissions` value outside `FieldPermission`. |
-| `field_permission_key_unknown` | A `fieldPermissions` key isn't in the supplied `formFields`. |
+| `field_permission_key_unknown` | A `fieldPermissions` key isn't in the supplied `formFields`. Skipped when `formFields` is omitted (`undefined`) — there is no inventory to check against. |
 | `cc_field_permission_not_allowed` | A CC node's `fieldPermissions` value outside `visible`/`hidden`. |
+| `field_permission_required_auto_pass` | A task node pairs a `"required"` field permission with `timeoutAction: "auto_pass"` — the timeout path finishes the node without the manual-approve required check, so the required field could pass through empty. Runs regardless of the `formFields` tri-state (it inspects only the node's own data). |
 
 **Approval-specific**
 
@@ -244,10 +254,22 @@ For advanced state inspection — e.g. testing, or reading the live graph progra
 | Export | Signature |
 | --- | --- |
 | `useEditorStore` | `<T>(selector: (state: EditorState) => T) => T` |
-| `useEditorStoreApi` | `() => StoreApi<EditorState>` |
-| `EditorState` | `{ nodes: FlowNode[]; edges: FlowEdge[]; selectedNodeId: string \| null; canUndo: boolean; canRedo: boolean; addNode(node): boolean; ... }` (re-exported from `@coldsmirk/nodeloom-core`) |
+| `useEditorStoreApi` | `() => UnboundStore<EditorState>` — a zustand store api (with the `subscribeWithSelector` / `immer` middlewares), from core's `createComponentStore` |
+| `EditorState` | The full store state + actions — this package's own type since the hand-written engine returned (see the version note above; it was a `@coldsmirk/nodeloom-core` re-export from v2.7.0 to v2.12.0) |
 
-Both hooks resolve against the store `<ApprovalFlowEditor>` mounts internally — there is no host-facing slot to render additional components inside that provider tree, so these are primarily useful for reading state (e.g. via `useEditorStoreApi().getState()`) rather than for mounting custom UI inside the canvas.
+`EditorState` is the intersection of five slices (the slice types themselves are internal; only `EditorState` is exported):
+
+| Slice | State | Actions |
+| --- | --- | --- |
+| Graph | `nodes: FlowNode[]`, `edges: FlowEdge[]` | `onNodesChange` / `onEdgesChange` / `onConnect` (xyflow change handlers); `addNode(type: NodeKind, position: XYPosition, data?: Partial<AnyNodeData>) => string \| null` — the new node's id, or `null` when refused (readonly, or the kind's max count reached); `removeNode(nodeId)` — refused for readonly / non-deletable kinds, prunes connected edges and rollback-target references; `removeEdge(edgeId)`; `updateNodeData(nodeId, data: Partial<AnyNodeData>)`; `updateNodePositions(positions: Map<string, XYPosition>)` — batch position commit (auto-layout); `updateConditionBranch(nodeId, branchId, patch)`; `addConditionBranch(nodeId)` — inserts before the default branch; `removeConditionBranch(nodeId, branchId)` — cascades removal of the branch's edges |
+| Interaction | `selectedNodeId: string \| null`, `hoveredEdgeId: string \| null`, `readonly: boolean` | `selectNode(nodeId \| null)`, `setHoveredEdgeId(edgeId \| null)`, `setReadonly(readonly)` |
+| Flow | `isDirty: boolean` | `loadDefinition(definition)` — hydrates (empty definition seeds start→end) and resets selection, dirty flag, and the undo timeline; `toDefinition() => FlowDefinition` — a detached deep copy; `reset()` |
+| Validation | `validationIssues: FlowValidationError[]`, `nodeIssueCounts: Record<string, number>` — issue count per node id, so node chrome subscribes only to its own entry | `setValidationIssues(issues)` |
+| History | `past: HistoryEntry[]`, `future: HistoryEntry[]` — `HistoryEntry = { nodes: FlowNode[]; edges: FlowEdge[] }` (whole-graph snapshots; view state is never checkpointed) | `undo()`, `redo()` |
+
+There are no `canUndo` / `canRedo` members (the nodeloom store had them): derive them as `past.length > 0` / `future.length > 0`. A few members are internal plumbing (`changeVersion`, `checkpoint`, `breakCoalescing`) — visible on the type but not meant for hosts.
+
+Both hooks resolve against the store `<ApprovalFlowEditor>` mounts internally — there is no host-facing slot to render additional components inside that provider tree (the provider itself is deliberately not exported), so these are primarily useful for reading state (e.g. via `useEditorStoreApi().getState()`) rather than for mounting custom UI inside the canvas.
 
 ## Visual tokens
 

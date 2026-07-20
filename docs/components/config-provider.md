@@ -107,7 +107,7 @@ export default function MyComponent() {
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `isDarkMode` | `boolean` | `false` | Enable dark mode |
-| `colors` | `Partial<Record<SemanticColor, string>>` | — | Override semantic colors |
+| `colors` | `Partial<Record<SemanticColor, PresetColor \| string>>` | — | Override semantic colors (`primary` / `success` / `warning` / `error` / …) with a preset color name or any CSS color |
 | `globalCssVars` | `Record<'--vef-${string}', string \| number>` | — | Global CSS variables (must be prefixed with `--vef-`) |
 | `globalStyle` | `CSSInterpolation` | — | Global CSS-in-JS styles |
 

@@ -98,5 +98,7 @@ Patched onto the Ant Design `UploadFile` once a file finishes uploading — read
 | Field | Type | Description |
 |-------|------|-------------|
 | `key` | `string` | Object key (e.g. `priv/2026/05/12/abc.png`) |
-| `url` | `string` | Resolved fetch URL — composed from `fileBaseUrl` unless `resolveFileUrl` is supplied |
+| `sourceUrl` | `string` | Resolved source URL — composed from `fileBaseUrl` unless `resolveFileUrl` is supplied. Deliberately kept separate from antd's navigable `UploadFile.url`, so authenticated files are never rendered as native list links (see [Upload — Authenticated Files](./upload.md#authenticated-files-and-url-isolation)) |
 | `fileName` | `string` | Original client-supplied filename echoed back by the backend |
+
+Previews of non-image files dispatch to the app's [file-preview host](./file-preview.md) through the shared `Upload` preview chain.

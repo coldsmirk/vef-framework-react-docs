@@ -7,7 +7,7 @@ description: "An ECharts wrapper component with React integration, theme support
 
 An ECharts wrapper component with React integration, theme support, and chart linking.
 
-> **VEF-specific component.** Wraps [Apache ECharts](https://echarts.apache.org/) via `echarts-for-react`.
+> **VEF-specific component.** Wraps [Apache ECharts](https://echarts.apache.org/) directly (no `echarts-for-react`) with a React lifecycle-safe `useChart` hook.
 
 ## When to Use
 
@@ -42,6 +42,8 @@ export default function Demo() {
 ```
 
 Built-in themes: `"walden"`, `"wonderland"`. You can also pass a custom ECharts theme object.
+
+When the app is in dark mode (via [`ConfigProvider`](./config-provider.md)), a built-in theme name automatically switches to its dark variant (`walden-dark` / `wonderland-dark`) — and back — on the live chart instance. Custom theme objects are used as-is.
 
 ## Loading State
 

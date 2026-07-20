@@ -186,7 +186,7 @@ const menus: UserMenu[] = [
 框架不在客户端过滤菜单树。它实际做的是：
 
 - **页面级访问就是菜单树本身。** `menuPathSet`——由 `fetchUserInfo` 的返回值构建——是用户在布局之下可以访问的路由模板白名单。后端对某个用户省略一条菜单，就等于同时收回了那个页面。
-- **令牌校验是另一条独立的轴。** 同一份 `UserInfo` 里的 `permissionTokens` 落进 `useAppStore`，驱动按钮级和元素级的检查（`PermissionGate`、`useHasPermissions`、`useAuthorizedItems`）——见 [权限](./permissions.md)。
+- **令牌校验是另一条独立的轴。** 同一份 `UserInfo` 里的 `permissionTokens` 落进 `useAppStore`，驱动按钮级和元素级的检查（`PermissionGate`、`useIsAuthorized`、`useAuthorizedItems`）——见 [权限](./permissions.md)。
 
 所以在 VEF 里，"按权限过滤的菜单"的含义是：后端在返回 `UserInfo` 之前按用户过滤好 `menus`，前端对渲染和路由都信任这个结果。如果你需要按令牌隐藏一份*本地静态*的条目列表——比如设置页的分区列表——那是 `useAuthorizedItems()` 的用武之地，而不是侧边栏。
 

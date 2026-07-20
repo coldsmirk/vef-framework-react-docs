@@ -87,7 +87,7 @@ export default function Demo() {
 | `viewportRef` | `Ref<HTMLDivElement>` | — | Ref for the viewport element |
 | `viewportClassName` | `string` | — | Class for the viewport element |
 | `viewportStyle` | `CSSProperties` | — | Style for the viewport element |
-| `overscrollBehavior` | `CSSProperties['overscrollBehavior']` | — | Overscroll behavior |
+| `overscrollBehavior` | `CSSProperties['overscrollBehavior']` | `'none'` | Behavior when scrolling beyond the boundaries (scroll chaining to the parent is disabled by default) |
 | `onScrollPositionChange` | `(position: { x: number; y: number }) => void` | — | Scroll position change callback |
 | `onTopReached` | `() => void` | — | Fired when scrolled to the top |
 | `onBottomReached` | `() => void` | — | Fired when scrolled to the bottom |

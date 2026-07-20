@@ -78,6 +78,13 @@ export default function Demo() {
 
 每个 `*Key` 选项都可以是字符串路径（例如 `"user.name"`）或提取函数。
 
-返回 `{ treeProps, isFetching, searchValue, setSearchValue }`。
+### `useDataOptionsTree` 返回值
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `treeProps` | `TreeProps<DataOptionWithPinyin>` | 可直接展开的 props：`treeData`（搜索时过滤为匹配节点及其祖先）、`fieldNames`（`title: 'label'`、`key: 'value'`、`children`）、`showLine`（不带叶子图标）、`autoExpandParent`、`blockNode` 和 `filterTreeNode` |
+| `isFetching` | `boolean` | 查询是否正在获取数据 |
+| `searchValue` | `string` | 当前搜索关键词 |
+| `setSearchValue` | `(value: string) => void` | 设置搜索关键词——接到你自己的搜索输入框上；匹配时比较 `label` / `description`、其完整拼音及拼音首字母 |
 
 其余属性请参阅 [Ant Design Tree 文档](https://ant.design/components/tree/)。

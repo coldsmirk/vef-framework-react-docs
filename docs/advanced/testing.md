@@ -102,7 +102,7 @@ export function createTestApiClient(): ApiClient {
 }
 
 interface ProviderOverrides {
-  /** Permission and dictionary wiring for permission-aware components. */
+  /** Permission and code-set wiring for permission-aware components. */
   appContext?: AppContext;
   /** Pass a shared client when a test needs cache continuity across renders. */
   apiClient?: ApiClient;

@@ -43,11 +43,16 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 | `NodeDefinition` | `{ id: string; kind: NodeKind; position: XYPosition; data?: NodeDataMap[kind] }`（基于 `kind` 的可辨识联合类型） |
 | `EdgeDefinition` | `{ id?: string; source: string; target: string; sourceHandle?: string; data?: Record<string, unknown> }`——`sourceHandle` 把一个 `condition` 节点的外出边绑定到某条分支 id |
 | `NodeKind` | `"start" \| "approval" \| "handle" \| "condition" \| "cc" \| "end"` |
-| `FlowNode`、`FlowEdge` | 实时（内存中）的节点 / 边形态，从 `@coldsmirk/nodeloom-core` 重新导出。通过 `toFlowDefinition` / `fromFlowDefinition` 与 `FlowDefinition` 互转。 |
+| `FlowNode`、`FlowEdge` | 实时（内存中）的画布形态，由本包自行定义: `FlowNode` 是各按类型定型的 `@xyflow/react` 节点（见下一行）的联合类型；`FlowEdge` 是 xyflow 的 `Edge`。通过 `toFlowDefinition` / `fromFlowDefinition` 与 `FlowDefinition` 互转。 |
+| `StartNode`、`ApprovalNode`、`HandleNode`、`CcNode` | 按类型定型的实时节点——`Node<StartNodeData, "start">`、`Node<ApprovalNodeData, "approval">`、`Node<HandleNodeData, "handle">`、`Node<CcNodeData, "cc">`。在实时节点上，由 React Flow 的 `type` 承载节点类型（它驱动节点渲染）；只有 wire 层的 `NodeDefinition` 才把它提升为 `kind`，而节点的业务字段直接位于 `data` 上——正是 wire 所承载的那个 `NodeDataMap[kind]` 形态。`end` / `condition` 的别名在内部存在，但未导出。 |
+
+:::info[版本提示: nodeloom 时代（v2.7.0 – v2.12.0）]
+从 v2.7.0 到 v2.12.0，编辑器的状态引擎是 `@coldsmirk/nodeloom-core`，实时形态采用的是 nodeloom 的统一形状: 每个节点都携带 `type: "flowNode"`，节点类型判别字段位于 `data.kind`，业务字段则位于 `data.config` 之下。`FlowNode` / `FlowEdge` / `EditorState` 曾是 nodeloom 的重导出，且按类型划分的节点别名没有导出。v2.12.0 之后一次尚未发布的变更（`81e3ade`）移除了这一依赖，恢复了本页所描述的手写状态引擎——按类型定型的节点，业务字段直接位于 `data` 上。两次变动都没有触及 wire 格式（`FlowDefinition` / `NodeDefinition` / `EdgeDefinition`）和 `toFlowDefinition` / `fromFlowDefinition` 的签名，因此已持久化的定义不受影响。迁移历史见[版本说明](../../reference/release-notes.md)。
+:::
 
 ## 按类型划分的节点数据
 
-`NodeDataMap` 把每种 `NodeKind` 映射到它的数据形态；`AnyNodeData` 是它们的联合类型（`NodeDataMap[NodeKind]`）。每种类型的数据都包含 `name?: string`（显示名称）和 `description?: string`。
+`NodeDataMap` 把每种 `NodeKind` 映射到它的数据形态；`AnyNodeData` 是全部六种的联合类型（定义为 `FlowNode["data"]`）。每种类型的数据都包含 `name?: string`（显示名称）和 `description?: string`。这些形态身兼二职: 它们既是 wire 上的 `NodeDefinition.data` 载荷，**也**是实时节点的 `data`——序列化器只翻译类型判别字段（`kind` ↔ React Flow 的 `type`），从不触碰数据。
 
 | 种类 | 类型 | 字段（除 name / description 外） |
 | --- | --- | --- |
@@ -92,11 +97,13 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 | `ConditionOperator` | 从 `CONDITION_OPERATORS` 派生——见 [宿主集成](./host-integration.md#条件运算符) |
 | `ConditionGroup` | `{ conditions: ConditionDefinition[] }`——组内条件为 AND 关系 |
 | `ConditionBranchDefinition` | `{ id: string; label: string; conditionGroups?: ConditionGroup[]; isDefault?: boolean; priority: number }` |
-| `FormFieldDefinition` | `{ key: string; kind: FieldKind; label: string; options?: FieldOptionDefinition[]; columns?: FormFieldDefinition[] }` |
+| `FormFieldDefinition` | `{ key: string; kind: FieldKind; label: string; options?: FieldOptionDefinition[]; columns?: FormFieldDefinition[]; hasConditionalVisibility?: boolean }` |
 | `FieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `FieldOptionDefinition` | `{ label: string; value: unknown }` |
 
 `ConditionDefinition.aggregate` 为某个明细表 `subject` 圈定一次聚合折叠（`sum` / `count` / `avg`，对应后端的 `AggregateKind`）；`column` 指定要折叠的数值列（`count` 不需要，因为它折叠的是行）。
+
+`FormFieldDefinition.hasConditionalVisibility`（v2.10.0）是一个设计器侧提示: 当该字段的可见性可能被表单联动关掉时为 `true`——它自身带有具备隐藏能力的联动、默认隐藏，或某个祖先容器具备隐藏能力。当某个节点在这样的字段上授予 `required` 权限时，字段权限表会显示一条非阻塞警告，因为后端的必填检查并不感知联动: 如果字段在审批时被隐藏，它的空值会让通过操作永远被拒绝。该标注由 `approval-form-bridge` 的 `projectFormSchema` 填充；当字段清单来自其他途径时则不存在。
 
 ## 枚举
 
@@ -118,11 +125,13 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 ```ts
 function validateFlowDefinition(
   definition: FlowDefinition,
-  formFields: FormFieldDefinition[] = []
+  formFields?: FormFieldDefinition[]
 ): FlowValidationError[];
 ```
 
-`FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`。
+`FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`。`message` 是与编辑器 UI 语言一致的人类可读中文产品文案；请针对 `code` 和各个 id 字段编程。
+
+`formFields` 是三态的（v2.10.0）: `undefined` 表示字段清单*不可用*（宿主没有任何表单集成）——只会跳过 key 存在性检查（`field_permission_key_unknown`）；显式传入 `[]` 表示已确认表单有*零个*字段，此时每一条 `fieldPermissions` 条目都是悬空引用。见 [宿主集成 → 校验](./host-integration.md#校验-validateflowdefinition)。
 
 `FlowValidationCode` 是一个封闭集合，对应后端部署时的各项检查:
 
@@ -171,7 +180,7 @@ function validateFlowDefinition(
 | `aggregate_column_forbidden` | `count` 聚合选择了某一列。 |
 | `aggregate_on_expression` | 某个表达式条件携带了 aggregate。 |
 
-**审批人、抄送与字段权限**（approval / handle / cc 节点）
+**审批人、抄送与字段权限**（approval / handle / cc 节点）——字段权限相关代码于 v2.10.0 加入，对应后端部署时的 `ValidateFieldPermissions`，因此权限配置错误会在设计器中暴露，而不是等到部署时才发现
 
 | 代码 | 含义 |
 | --- | --- |
@@ -185,8 +194,9 @@ function validateFlowDefinition(
 | `fallback_users_required` | `emptyAssigneeAction: "transfer_specified"` 但没有 `fallbackUserIds`。 |
 | `admin_users_required` | `emptyAssigneeAction: "transfer_admin"` 但没有 `adminUserIds`。 |
 | `invalid_field_permission` | 某个 `fieldPermissions` 值不在 `FieldPermission` 之内。 |
-| `field_permission_key_unknown` | 某个 `fieldPermissions` key 不存在于传入的 `formFields` 中。 |
+| `field_permission_key_unknown` | 某个 `fieldPermissions` key 不存在于传入的 `formFields` 中。当 `formFields` 省略（`undefined`）时跳过——没有可供比对的清单。 |
 | `cc_field_permission_not_allowed` | 某个 CC 节点的 `fieldPermissions` 值不在 `visible` / `hidden` 之内。 |
+| `field_permission_required_auto_pass` | 某个任务节点把 `"required"` 字段权限与 `timeoutAction: "auto_pass"` 配在一起——超时路径会在不经过人工审批必填检查的情况下结束该节点，因此必填字段可能带着空值通过。无论 `formFields` 处于三态中的哪一态都会运行（它只检查节点自身的数据）。 |
 
 **Approval 专属**
 
@@ -244,10 +254,22 @@ function validateFlowDefinition(
 | 导出 | 签名 |
 | --- | --- |
 | `useEditorStore` | `<T>(selector: (state: EditorState) => T) => T` |
-| `useEditorStoreApi` | `() => StoreApi<EditorState>` |
-| `EditorState` | `{ nodes: FlowNode[]; edges: FlowEdge[]; selectedNodeId: string \| null; canUndo: boolean; canRedo: boolean; addNode(node): boolean; ... }`（从 `@coldsmirk/nodeloom-core` 重新导出） |
+| `useEditorStoreApi` | `() => UnboundStore<EditorState>`——一个 zustand store api（带 `subscribeWithSelector` / `immer` 中间件），来自 core 的 `createComponentStore` |
+| `EditorState` | 完整的 store 状态 + 动作——自手写状态引擎回归后，这是本包自己的类型（见上方版本提示；v2.7.0 到 v2.12.0 期间它是 `@coldsmirk/nodeloom-core` 的重导出） |
 
-两个 hook 都解析自 `<ApprovalFlowEditor>` 内部挂载的 store——没有面向宿主的插槽可以在那个 provider 树内部渲染额外组件，所以这两个 hook 主要用于读取状态（例如通过 `useEditorStoreApi().getState()`），而不是用于在画布内部挂载自定义 UI。
+`EditorState` 是五个切片（slice）的交集（切片类型本身是内部实现；只有 `EditorState` 被导出）:
+
+| 切片 | 状态 | 动作 |
+| --- | --- | --- |
+| Graph | `nodes: FlowNode[]`、`edges: FlowEdge[]` | `onNodesChange` / `onEdgesChange` / `onConnect`（xyflow 变更处理器）；`addNode(type: NodeKind, position: XYPosition, data?: Partial<AnyNodeData>) => string \| null`——返回新节点的 id，被拒绝时返回 `null`（只读，或该类型已达数量上限）；`removeNode(nodeId)`——只读或不可删除的类型会被拒绝，会一并清理相连的边和回退目标引用；`removeEdge(edgeId)`；`updateNodeData(nodeId, data: Partial<AnyNodeData>)`；`updateNodePositions(positions: Map<string, XYPosition>)`——批量提交位置（自动布局用）；`updateConditionBranch(nodeId, branchId, patch)`；`addConditionBranch(nodeId)`——插入到默认分支之前；`removeConditionBranch(nodeId, branchId)`——级联移除该分支的边 |
+| Interaction | `selectedNodeId: string \| null`、`hoveredEdgeId: string \| null`、`readonly: boolean` | `selectNode(nodeId \| null)`、`setHoveredEdgeId(edgeId \| null)`、`setReadonly(readonly)` |
+| Flow | `isDirty: boolean` | `loadDefinition(definition)`——完成水合（空定义会填充 start→end），并重置选中状态、脏标记与撤销时间线；`toDefinition() => FlowDefinition`——一份脱离的深拷贝；`reset()` |
+| Validation | `validationIssues: FlowValidationError[]`、`nodeIssueCounts: Record<string, number>`——每个节点 id 的问题计数，这样节点外观只需订阅自己的那一项 | `setValidationIssues(issues)` |
+| History | `past: HistoryEntry[]`、`future: HistoryEntry[]`——`HistoryEntry = { nodes: FlowNode[]; edges: FlowEdge[] }`（整图快照；视图状态从不进入检查点） | `undo()`、`redo()` |
+
+没有 `canUndo` / `canRedo` 成员（nodeloom 的 store 曾有过）: 请用 `past.length > 0` / `future.length > 0` 自行推导。少数成员属于内部管线（`changeVersion`、`checkpoint`、`breakCoalescing`）——在类型上可见，但不面向宿主。
+
+两个 hook 都解析自 `<ApprovalFlowEditor>` 内部挂载的 store——没有面向宿主的插槽可以在那个 provider 树内部渲染额外组件（provider 本身就是刻意不导出的），所以这两个 hook 主要用于读取状态（例如通过 `useEditorStoreApi().getState()`），而不是用于在画布内部挂载自定义 UI。
 
 ## 视觉 tokens
 

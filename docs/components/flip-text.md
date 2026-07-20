@@ -1,11 +1,11 @@
 ---
 title: "FlipText"
-description: "Animates text with a character-by-character flip effect using GSAP."
+description: "Animates text with a character-by-character flip effect using Motion."
 ---
 
 # FlipText
 
-Animates text with a character-by-character flip effect using GSAP.
+Animates text with a character-by-character flip effect using [Motion](https://motion.dev/) (re-exported through `@vef-framework-react/core`).
 
 > **VEF-specific component.** Not part of Ant Design.
 

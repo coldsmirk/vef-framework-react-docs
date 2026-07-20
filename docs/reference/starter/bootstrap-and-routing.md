@@ -93,6 +93,39 @@ Access-denied-route helper for unauthorized entry behavior (navigates back or to
 - `emitUnauthenticated(): void` — signals the unauthenticated event that `createRouter` listens for.
 - `handleClientLogout(router): void` — clears auth state and redirects to the login route.
 
+## `setupAppVersionNotification`
+
+```ts
+function setupAppVersionNotification(options?: AppVersionNotificationOptions): (() => void) | undefined;
+```
+
+Polls the deployed `index.html` for a newer `<meta name="app-version">` (the value injected from `VEF_APP_VERSION` — see [Dev Package](../dev/overview.md#runtime-injected-vef_app_)) and shows a sticky update notification when the fetched version compares greater than the running one. When the page declares `<meta name="app-changelog">`, the changelog JSON (an `AppChangelog[]`) is fetched and the entry matching the new version is rendered into the notification. Polling pauses while the tab is hidden and re-checks immediately on return.
+
+Returns a cleanup function that stops polling, or `undefined` when `enabled` is `false`. It is wired automatically by `createApp().render({ appVersionNotification })`; call it manually only outside that path.
+
+`AppVersionNotificationOptions` fields:
+
+| Option | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `enabled` | `boolean` | `false` | Master switch; the setup is a no-op (returns `undefined`) when off |
+| `basePath` | `string` | `"/"` | Base path the deployed `index.html` and changelog JSON are fetched from (cache-busted) |
+| `checkInterval` | `number` | `60` | Polling interval in **seconds**; `0` disables the timer (checks then only happen on tab-visibility changes) |
+| `title` | `ReactNode` | built-in Chinese text | Notification title; the detected version is appended |
+| `description` | `ReactNode` | built-in Chinese text | Leading notification body text |
+| `confirmText` | `ReactNode` | built-in Chinese text | Confirm button label |
+| `cancelText` | `ReactNode` | built-in Chinese text | Cancel button label |
+| `onConfirm` | `() => void` | `location.reload()` | Confirm handler |
+| `onCancel` | `() => void` | — | Cancel handler, called after the notification closes |
+
+`AppChangelog` fields (one entry per released version in the changelog JSON):
+
+| Field | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `version` | `string` | required | Version this entry describes; matched against the newly detected version |
+| `date` | `string` | — | Release date, shown in the notification footer |
+| `description` | `string` | — | Highlighted release summary |
+| `changes` | `string[]` | — | Bullet list of changes |
+
 ## Route Constants
 
 - `LOGIN_ROUTE_PATH` / `LOGIN_ROUTE_ID`

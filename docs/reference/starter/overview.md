@@ -13,7 +13,7 @@ It mainly covers three areas:
 2. routing (`createRouter`, the route-option helpers)
 3. app-level state (`useAppStore`, `useTabStore`, `useThemeStore`)
 
-The application shell itself — the root app, layouts, login, and status pages (`App`, `Layout`, `Login`, `AccessDenied`, `Error`, `NotFound`, `NProgress`, and friends) — is **internal**: none of it is exported from the package. It is configured entirely through the functions above; see [Application Shell](./application-shell.md) for the option shapes each one accepts.
+The application shell itself — the root app, layouts, login, and status pages (`App`, `Layout`, `Login`, `AccessDenied`, `Error`, `NotFound`, `NProgress`, and friends) — is **internal**: none of it is exported from the package. It is configured entirely through the functions above; see [Application Shell](./application-shell.md) for the option shapes each one accepts. The one shell piece that *is* exported is the built-in `PasswordChangeChallenge` login-challenge renderer, which hosts register themselves — see [Login challenges](./application-shell.md#login-challenges).
 
 Page-level containers, form dialogs, tables, and the CRUD stack live in `@vef-framework-react/components` — see [Components / CRUD](../../components/crud.md).
 
@@ -21,7 +21,7 @@ Page-level containers, form dialogs, tables, and the CRUD stack live in `@vef-fr
 
 1. [Bootstrap and Routing](./bootstrap-and-routing.md)
 2. [Application Shell](./application-shell.md)
-3. [Stores, Constants, and Types](./stores-and-types.md)
+3. [Stores and Types](./stores-and-types.md)
 
 ## Common Exports
 
@@ -33,4 +33,5 @@ Page-level containers, form dialogs, tables, and the CRUD stack live in `@vef-fr
 - `createLoginRouteOptions`
 - `createAccessDeniedRouteOptions`
 - `setupAppVersionNotification`
+- `PasswordChangeChallenge` / `PASSWORD_CHANGE_CHALLENGE_TYPE`
 - `useAppStore` / `useTabStore` / `useThemeStore`

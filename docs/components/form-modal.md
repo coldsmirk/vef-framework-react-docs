@@ -61,6 +61,7 @@ export default function CreateUserModal({ open, onClose }) {
 | `defaultValues` | `TValues` | — | Initial form values |
 | `disabled` | `boolean` | `false` | Disable the form |
 | `formComponent` | `ElementType` | `"form"` | Element type for the inner form wrapper |
+| `formLayout` | `FormLayout` | — | Layout of the form items inside the modal — `layout` (`'horizontal' \| 'vertical'`), `labelAlign` and `labelWidth`. Defaults to the horizontal, right-aligned label layout (see [Form](./form.md)) |
 | `mutationFn` | `MutationFunction<ApiResult<TData>, TValues>` | — | Mutation to execute on submit |
 | `mutationMeta` | `MutationMeta` | — | Mutation metadata (e.g. `invalidates`) |
 | `beforeSubmit` | `(values) => Awaitable<TValues>` | — | Transform values before submission |

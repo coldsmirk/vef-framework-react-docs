@@ -7,7 +7,7 @@ description: "集成 React、支持主题和图表联动的 ECharts 封装组件
 
 集成 React、支持主题和图表联动的 ECharts 封装组件。
 
-> **VEF 特有组件。** 通过 `echarts-for-react` 封装 [Apache ECharts](https://echarts.apache.org/)。
+> **VEF 专属组件。** 直接封装 [Apache ECharts](https://echarts.apache.org/)（不经 `echarts-for-react`），并提供 React 生命周期安全的 `useChart` Hook。
 
 ## 何时使用
 
@@ -42,6 +42,8 @@ export default function Demo() {
 ```
 
 内置主题：`"walden"`、`"wonderland"`。你也可以传入自定义的 ECharts 主题对象。
+
+当应用处于暗色模式（经由 [`ConfigProvider`](./config-provider.md)）时，内置主题名会在运行中的图表实例上自动切换到其暗色变体（`walden-dark` / `wonderland-dark`），并可自动切回。自定义主题对象则原样使用。
 
 ## 加载状态
 

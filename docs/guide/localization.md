@@ -9,13 +9,13 @@ VEF ships with Simplified Chinese as its only built-in language: the Ant Design 
 
 This page is about the **language of framework-provided UI chrome** — built-in button labels, confirmation dialogs, validation messages, and date formatting. VEF does not include a translation framework: there is no message catalog, no `t()` function, and no per-user language switching. If your product needs full multi-language support, bring your own i18n library for your own pages; use this page to control the framework-supplied texts around them.
 
-The value of this page is precision: every row below states whether a text **can** be overridden, and through what mechanism. Anything listed as not overridable is a fact of v2.9.0, not an omission.
+The value of this page is precision: every row below states whether a text **can** be overridden, and through what mechanism. Anything listed as not overridable is a fact of v2.12.0, not an omission.
 
 ## Where the Chinese Defaults Come From
 
 Four independent layers produce Chinese text, and each is switched (or not) separately:
 
-| Layer | Wiring in v2.9.0 | What it controls |
+| Layer | Wiring in v2.12.0 | What it controls |
 | --- | --- | --- |
 | Ant Design locale | [`ConfigProvider`](../components/config-provider.md) hard-codes the `zh_CN` locale. `ConfigProviderProps` has no `locale` prop. | All antd built-in texts: Modal/Popconfirm OK and Cancel, pagination page-size dropdown, DatePicker panels, Transfer, empty states, and so on. |
 | dayjs global locale | The chrono utilities in `@vef-framework-react/shared` set the global dayjs locale to `zh-cn` (and register plugins) lazily, the first time any of them runs. See [Chrono](../reference/shared/chrono-event-validation.md). | Localized date output (`LLLL`-style formats, relative time) from framework utilities and any dayjs formatting in your code. |
@@ -38,9 +38,9 @@ export function RootLayout({ children }: PropsWithChildren) {
 }
 ```
 
-Two caveats, both verified against the v2.9.0 wiring:
+Two caveats, both verified against the v2.12.0 wiring:
 
-- **Add `antd` to your app's own dependencies, matching the framework's range** (`^6.5.0` for v2.9.0). The override only works if your import resolves to the same antd copy the framework uses; a second copy would create a separate React context that framework components never read.
+- **Add `antd` to your app's own dependencies, matching the framework's range** (`^6.5.0` for v2.12.0). The override only works if your import resolves to the same antd copy the framework uses; a second copy would create a separate React context that framework components never read.
 - **Imperative helpers stay on the outer locale.** `showConfirm`, `showSuccessAlert`, message and notification helpers dispatch through context holders captured directly under the framework's `ConfigProvider` — *above* your nested provider. Their built-in OK/Cancel buttons remain Chinese unless you pass `okText` / `cancelText` per call (see the contract table).
 
 ### Zod validation messages
@@ -68,11 +68,11 @@ getNow();           // forces the framework's one-time dayjs setup (zh-cn + plug
 dayjs.locale("en"); // now safe — the framework will not re-assert zh-cn
 ```
 
-Your app's `dayjs` must resolve to the same copy the framework uses (declare a compatible range; the framework pins `^1.11.21` at v2.9.0). Note that DatePicker/Calendar *panel* text follows the antd locale, not the dayjs global — and regardless of locale, `formatDuration` always outputs `天`/`小时`/`分钟` and the quarter format is `YYYY-Q季度` (both hard-coded).
+Your app's `dayjs` must resolve to the same copy the framework uses (declare a compatible range; the framework pins `^1.11.21` at v2.12.0). Note that DatePicker/Calendar *panel* text follows the antd locale, not the dayjs global — and regardless of locale, `formatDuration` always outputs `天`/`小时`/`分钟` and the quarter format is `YYYY-Q季度` (both hard-coded).
 
 ## Override Contract
 
-Framework-provided Chinese defaults and their override mechanism, verified against the v2.9.0 source:
+Framework-provided Chinese defaults and their override mechanism, verified against the v2.12.0 source:
 
 | Component / area | Chinese default | Override |
 | --- | --- | --- |
@@ -87,8 +87,9 @@ Framework-provided Chinese defaults and their override mechanism, verified again
 | CRUD form footer | `提交` / `重置` | `formActionsRenderers` per scene |
 | [`ProSearch`](../components/pro-search.md) buttons | `搜索` / `重置` | `searchButtonProps` / `resetButtonProps` (set `children`) |
 | [`ProTable`](../components/pro-table.md) operation column header | `操作` | `operationColumn.title` |
-| [`EditableTable`](../components/editable-table.md) row actions | `编辑` / `删除` / `保存` / `取消` | `texts` prop |
-| `EditableTable` operation column header | `操作` | `operation.title` |
+| [`EditableTable`](../components/editable-table.md) row actions | `编辑` / `删除` / `保存` / `取消` | `operationColumn.texts` |
+| `EditableTable` operation column header | `操作` | `operationColumn.title` |
+| `EditableTable` table texts (e.g. empty state) | antd table defaults | `locale` prop, forwarded to the underlying table (v2.12.0) |
 | [`Upload`](../components/upload.md) trigger button | `上传` | pass `children` |
 | [FormEditor](../editors/form-editor/reference.md) / [ApprovalFlowEditor](../editors/approval-flow-editor/reference.md) publish button | `发布` | `publishText` prop |
 
@@ -96,7 +97,7 @@ Everything not in this table that renders Chinese is in the "Chinese-only" list 
 
 ## Worked Example: an English Admin UI
 
-The full set of changes for a team shipping an English-language product on VEF v2.9.0.
+The full set of changes for a team shipping an English-language product on VEF v2.12.0.
 
 Bootstrap, before `createApp().render()`:
 
@@ -138,14 +139,19 @@ showConfirm("Publish this version?", { title: "Confirm", okText: "OK", cancelTex
 
 <ProTable operationColumn={{ title: "Actions", width: 160, render: renderActions }} />
 
-<EditableTable texts={{ edit: "Edit", delete: "Delete", save: "Save", cancel: "Cancel" }} />
+<EditableTable
+  operationColumn={{
+    title: "Actions",
+    texts: { edit: "Edit", delete: "Delete", save: "Save", cancel: "Cancel" }
+  }}
+/>
 ```
 
 Since the defaults live in each component rather than in a global config, teams typically wrap the most-used ones (`ActionButton`, `Bool`, `ProSearch`) in thin project components that bake in the English texts once.
 
 After all of the above, the surfaces in the next section are still Chinese — review whether any of them appear in your product before committing to VEF for an English UI.
 
-## What Is Chinese-Only Today (v2.9.0)
+## What Is Chinese-Only Today (v2.12.0)
 
 These strings have no override prop, no config entry, and no locale hook:
 

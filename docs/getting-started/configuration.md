@@ -50,21 +50,35 @@ export default defineCommitlintConfig();
 
 ## Environment Variable Conventions
 
-The Vite configuration exported by `@vef-framework-react/dev` prioritizes the `env/` directory and recognizes two prefixes:
+The Vite configuration exported by `@vef-framework-react/dev` reads `.env` files from the `env/` directory (not the project root) and recognizes two prefixes:
 
 | Prefix | Purpose |
 | --- | --- |
-| `VEF_APP_` | Injects application-level config |
-| `VEF_BUILD_` | Controls build and dev-server behavior |
+| `VEF_APP_` | Injects application-level config into the running app |
+| `VEF_BUILD_` | Controls build and dev-server behavior, resolved once at build time |
 
 Common variables are typically used like this:
 
-| Variable | Purpose |
-| --- | --- |
-| `VEF_APP_NAME` | Application name used for injected constants |
-| `VEF_BUILD_BASE_PUBLIC_PATH` | Build base path |
-| `VEF_BUILD_OUTPUT_DIR` | Output directory |
-| `VEF_BUILD_SERVER_PORT` | Local dev-server port |
+| Variable | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `VEF_APP_NAME` | `string` | `vef-app` (scaffold) | Application name shown in the built-in HTML shell; also names the production config global |
+| `VEF_BUILD_BASE_PUBLIC_PATH` | `string` | `/` | Public base path assets and `app.config.js` are served from |
+| `VEF_BUILD_OUTPUT_DIR` | `string` | `dist` | Build output directory |
+| `VEF_BUILD_SERVER_PORT` | `number` | `3833` | Local dev-server port (`strictPort` is on, so the port must be free) |
+
+The full variable catalog — including `VEF_APP_TITLE`, `VEF_APP_FAVICON`, `VEF_APP_VERSION`, `VEF_APP_CHANGELOG`, and `VEF_APP_API_BASE_URL` — lives in [Dev Package](../reference/dev/overview.md#environment-variables).
+
+## Injected Globals
+
+`defineViteConfig` injects three compile-time globals, declared for TypeScript by `@vef-framework-react/dev/types` (already included in the recommended `tsconfig`):
+
+| Global | Type | Value | Purpose |
+| --- | --- | --- | --- |
+| `__VEF_FRAMEWORK_VERSION__` | `string` | Fixed by the dev package (currently `1.0.0`) | Identifies the injected config layer's version |
+| `__VEF_APP_VERSION__` | `string` | The `version` field of the project's `package.json` at build time | The compile-time app version; independent of the runtime-advertised `VEF_APP_VERSION` variable |
+| `__VEF_APP_CONFIG__` | `Readonly<Record<string, string>>` | All `VEF_APP_*` variables, keyed by their full names | The runtime app configuration |
+
+`__VEF_APP_CONFIG__` behaves differently per mode: in development it is built inline from `import.meta.env`; in a production build it reads `window.__PRODUCTION__VEF_<NAME>__CONF__`, the global assigned by the generated `<outputDir>/app.config.js` (`<NAME>` is `VEF_APP_NAME` in `CONSTANT_CASE`, or `APP` when unset). Editing `app.config.js` after a build changes the runtime configuration without rebuilding — see [Dev Package](../reference/dev/overview.md#runtime-injected-vef_app_) for the full mechanics.
 
 ## Common Scripts
 

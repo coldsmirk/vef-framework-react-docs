@@ -26,7 +26,7 @@ createApiClient({
 });
 ```
 
-These fields determine how the framework interprets request success, token refresh behavior, and whether the user should be sent back to login. See [HTTP and API Client](../reference/core/http-and-api.md) for the full `HttpClientOptions` field reference.
+These fields determine how the framework interprets request success, token refresh behavior, and whether the user should be sent back to login. `tokenExpiredCode` and `refreshToken` only apply to JWT-style sessions — opaque-token backends omit both, and any 401 goes straight to the re-login path (see [Authentication](./authentication.md) for the two session styles). See [HTTP and API Client](../reference/core/http-and-api.md) for the full `HttpClientOptions` field reference.
 
 ## Business Errors and Network Errors
 
@@ -36,6 +36,8 @@ Errors can be roughly understood in two categories:
 - network errors: timeout, offline, 4xx/5xx, or other transport-level failures
 
 VEF's `HttpClient` handles the first case for you, which removes a lot of repetitive “if code !== 0 then toast” page logic.
+
+This also holds for file endpoints: when a `requestFile` / `download` call receives the backend's JSON business envelope instead of file content (a failed export, an expired link), the client detects the envelope — even inside a binary response body — and throws a `BusinessError` with the usual warning feedback instead of handing the JSON over as a file. See [Data Fetching](./data-fetching.md#fetching-files-with-authentication).
 
 ## Unauthenticated and Unauthorized
 

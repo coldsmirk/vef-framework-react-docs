@@ -14,6 +14,8 @@ description: "一个整合了表单状态、mutation 执行以及提交/重置�
 - 在侧边抽屉中打开的新建/编辑表单。
 - 需要比弹窗更多垂直空间的表单。
 
+表单内容高于抽屉时会在抽屉主体内滚动；主体的底部内边距会保留在最后一个字段之后，因此滚动到底时内容也不会紧贴底部操作区。
+
 ## 基础用法
 
 ```tsx
@@ -62,6 +64,7 @@ export default function EditUserDrawer({ open, onClose }) {
 | `defaultValues` | `TValues` | — | 表单初始值 |
 | `disabled` | `boolean` | `false` | 禁用表单 |
 | `formComponent` | `ElementType` | `"form"` | 内部表单容器使用的元素类型 |
+| `formLayout` | `FormLayout` | — | 抽屉内表单项的布局——`layout`（`'horizontal' \| 'vertical'`）、`labelAlign` 和 `labelWidth`。默认为水平、标签右对齐的布局（见 [Form](./form.md)） |
 | `mutationFn` | `MutationFunction<ApiResult<TData>, TValues>` | — | 提交时执行的 mutation |
 | `mutationMeta` | `MutationMeta` | — | mutation 元数据 |
 | `beforeSubmit` | `(values) => Awaitable<TValues>` | — | 提交前转换表单值 |

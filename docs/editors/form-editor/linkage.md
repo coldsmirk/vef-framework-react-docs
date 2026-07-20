@@ -41,7 +41,7 @@ type LinkageCondition =
   | { kind: "expression"; source: string };
 ```
 
-A **leaf** compares one source's value with an operator; **`LINKAGE_OPERATORS`** is the full set: `eq` / `ne` / `gt` / `lt` / `gte` / `lte` / `contains`, plus `empty` / `notEmpty` (no `value` needed — a value counts as empty when it is nullish, `""`, `[]`, or an array of only-empty entries; `0` and `false` are not empty). `sourceKey` is a sibling field's `key` by default; a `$`-rooted path (`$user.departmentId`, `$vars.quota`, `$form.someKey`) resolves against the [evaluation context](#host-context) instead. A **group** combines children with `all` (short-circuits on the first `false`) or `any` (short-circuits on the first `true`). An **expression** is an escape hatch for anything the visual builder can't express — plain JavaScript run through the [default evaluator](#expression-and-script-evaluation) or a host override.
+A **leaf** compares one source's value with an operator; **`LINKAGE_OPERATORS`** is the full set: `eq` / `ne` / `gt` / `lt` / `gte` / `lte` / `contains`, plus `empty` / `notEmpty` (no `value` needed — a value counts as empty when it is nullish, a blank string *after trimming*, `[]`, or an array of only-empty entries; `0` and `false` are not empty). Strings are trimmed since v2.10.0, matching the Go backend's `isEmptyFormValue`, so a whitespace-only value fails `required` client-side instead of bouncing off the server with no inline error. `sourceKey` is a sibling field's `key` by default; a `$`-rooted path (`$user.departmentId`, `$vars.quota`, `$form.someKey`) resolves against the [evaluation context](#host-context) instead. A **group** combines children with `all` (short-circuits on the first `false`) or `any` (short-circuits on the first `true`). An **expression** is an escape hatch for anything the visual builder can't express — plain JavaScript run through the [default evaluator](#expression-and-script-evaluation) or a host override.
 
 ```json
 {
@@ -74,7 +74,7 @@ Every action carries a `type` that puts it in exactly one of two families — `i
 
 | `type` | Effect |
 | --- | --- |
-| `set_field` | imperative one-shot write to another field (`targetKey`) — distinct from the continuous self-`assign` |
+| `set_field` | imperative one-shot write to another field (`targetKey`) — distinct from the continuous self-`assign`; dropped when the target is clamped non-writable (see [Field permission clamp](#field-permission-clamp)) |
 | `set_variable` | writes a form-global `$vars` entry |
 | `refresh_data_source` | bumps a data source's refresh nonce, forcing every field referencing it to re-resolve |
 | `alert` | shows a message at a given `level` (`ALERT_LEVELS`: `info` / `success` / `warning` / `error`) |
@@ -140,16 +140,25 @@ Supply overrides via the `evaluators` prop on `FormEditor` / `FormRenderer` (see
 
 ## Field permission clamp
 
-`FieldPermission` (`"hidden" | "visible" | "editable" | "required"`) is a **server-resolved** interactivity clamp, separate from linkage — passed to `FormRenderer` as `fieldPermissions: Record<string, FieldPermission>`, keyed by root-scope field `key` (see [Embedding → FormRenderer](./embedding.md#formrenderer)). It is the *outer bound*: linkage may narrow within it but never widen past it.
+`FieldPermission` (`"hidden" | "visible" | "editable" | "required"`) is a **server-resolved** interactivity clamp, separate from linkage — passed to `FormRenderer` as `fieldPermissions: Record<string, FieldPermission>`, keyed by root-scope field `key` (see [Embedding → FormRenderer](./embedding.md#formrenderer)). It landed in v2.10.0 as the client half of the approval engine's per-node field permissions (it mirrors the backend's `approval.Permission` and approval-flow-editor's `FieldPermission` literal-for-literal), but is host-agnostic — any server that resolves per-viewer permissions can feed it. It is the *outer bound*: linkage may narrow within it but never widen past it.
 
 | Value | Effect |
 | --- | --- |
 | `"hidden"` | never mounted; value never submitted |
 | `"visible"` | mounted read-only (via the disabled channel); value excluded from payload and validation, never required |
 | `"editable"` | no clamp — linkage governs alone |
-| `"required"` | editable and always required, overruling a linkage `optional` outcome |
+| `"required"` | editable and always required, overruling a linkage `optional` outcome; fails an empty value at submit even without a static `validate.required` |
 
-An absent prop, or an absent key within it, means no clamp for that field. A keyed `subform` is clamped whole — its template fields are never addressed individually, since permissions address root-scope keys only.
+An absent prop, or an absent key within it, means no clamp for that field — the renderer stays fully permissive unless the server says otherwise; a host wanting default-deny materializes the full map server-side. A keyed `subform` is clamped whole — its template fields are never addressed individually, since permissions address root-scope keys only (a subform-level `"required"` means "at least one row").
+
+**Every programmatic write is gated too** (breaking, v2.10.0). The state lane's continuous `assign` and the effect lane's one-shot `set_field` land in one shared write gate, so the clamp holds on every write path, not just user edits:
+
+- A write whose target's top-level key is clamped non-writable (`"visible"` / `"hidden"`) is **dropped silently**, mirroring the render path's never-crash posture. A non-writable field's pending `assign` outcome is likewise suppressed, so no phantom edit reaches a field the server would reject.
+- A write of the value the target already holds (deep-equal) is dropped — an identical write would otherwise read as a change and re-fire an `always`-retriggered rule forever.
+- A programmatic write never runs the target's change listeners or marks it touched, so a `load`-effect write never surfaces a premature validation error; the written value is still validated like an edit.
+- The gate resolves a path-shaped target (`"lines[0].amount"`) to its top-level binding (`lines`) before checking the clamp; inside a subform row's own scope no clamp applies (top-level permissions never address template fields).
+
+Two helper exports back the gate and are available to hosts building their own permission-aware chrome: `getFieldPermission(permissions, key)` (own-property-guarded lookup) and `isWritableFieldPermission(permission)` (`true` for `undefined` / `"editable"` / `"required"`). The submit payload carries only writable keys — see `FormRendererApi.getSubmitValues` in the [Reference](./reference.md#formrendererapi) for previewing exactly what would submit.
 
 ## Validation
 

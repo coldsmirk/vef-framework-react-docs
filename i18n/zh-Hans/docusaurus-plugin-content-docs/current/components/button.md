@@ -107,7 +107,9 @@ export default function Demo() {
 
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
-| `type` | `'primary' \| 'default' \| 'dashed' \| 'text' \| 'link'` | `'default'` | 按钮样式类型 |
+| `type` | `'primary' \| 'default' \| 'dashed' \| 'text' \| 'link'` | `'default'` | 按钮样式类型（`color` + `variant` 的语法糖） |
+| `color` | `ButtonColor`——`'default' \| 'primary' \| 'danger'` 或预设颜色 | — | 按钮颜色；与 `variant` 组合实现精细样式控制 |
+| `variant` | `ButtonVariant`——`'outlined' \| 'dashed' \| 'solid' \| 'filled' \| 'text' \| 'link'` | — | 按钮变体；与 `color` 组合使用 |
 | `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | 按钮尺寸（`'middle'` 是 `'medium'` 的废弃别名） |
 | `loading` | `boolean \| { delay?: number }` | `false` | 显示加载状态 |
 | `disabled` | `boolean` | `false` | 禁用按钮 |
@@ -115,7 +117,7 @@ export default function Demo() {
 | `ghost` | `boolean` | `false` | 使背景透明 |
 | `block` | `boolean` | `false` | 让按钮宽度自适应父容器 |
 | `icon` | `ReactNode` | — | 图标元素 |
-| `iconPosition` | `'start' \| 'end'` | `'start'` | 图标位置 |
+| `iconPlacement` | `'start' \| 'end'` | `'start'` | 图标位置（`iconPosition` 是废弃别名） |
 | `shape` | `'default' \| 'circle' \| 'round'` | `'default'` | 按钮形状 |
 | `href` | `string` | — | 跳转链接（渲染为 `<a>`） |
 | `target` | `string` | — | 与 `<a>` 的 target 属性相同 |

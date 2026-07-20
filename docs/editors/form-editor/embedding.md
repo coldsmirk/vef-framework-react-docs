@@ -37,7 +37,7 @@ function FormDesignerPage() {
 Notable `FormEditorProps` (the full table is in the [Reference](./reference.md#formeditor)):
 
 - **`initialSchema`** and **`registries`** / **`registry`** are read once, on mount — updating them later has no effect. Use `FormEditorApi.setSchema` to replace the document after mount.
-- **`onSchemaChange`** fires with the new `FormSchema` on every committed edit; **`onPublish`** (paired with `publishText` / `publishLoading`) runs a validation pass first and only fires on success — the publish button is not rendered at all when `onPublish` is omitted.
+- **`onSchemaChange`** fires with the new `FormSchema` on every committed edit; **`onPublish`** (paired with `publishText` / `publishLoading`) runs a validation pass first — errors block publishing, warnings ask the designer for confirmation — and the publish button is not rendered at all when `onPublish` is omitted.
 - **`apiRef`** exposes `FormEditorApi`: `getSchema` / `setSchema`, `undo` / `redo` / `canUndo` / `canRedo`, `selectNode`, `setDevice`, `setViewMode`.
 - **`evaluators`**, **`dataSourceResolver`**, **`evaluationContext`**, **`contextSources`** forward into the editor's own live preview — see [Linkage](./linkage.md) and [Loading remote options](#loading-remote-options) below.
 
@@ -128,8 +128,8 @@ Notable `FormRendererProps` (full table in the [Reference](./reference.md#formre
 
 - **`device`** (default `"pc"`) selects which presentation to render. An undesigned device (e.g. a form with no mobile design) renders an empty state rather than falling back to the other device. The `mobile` presentation always renders its antd-mobile controls under a `zh-CN` locale, regardless of the host application's own locale.
 - **`defaultValues`**, **`disabled`**, **`onSubmit`** behave like an ordinary form: `onSubmit` only fires after the schema's own validation rules pass.
-- **`fieldPermissions`** is a server-resolved clamp per field key (`Record<string, FieldPermission>`) — the outer bound that linkage may narrow within but never widen past (`"hidden"` unmounts a field entirely, `"visible"` renders it read-only, `"required"` forces the empty check, `"editable"` is unclamped). See [Linkage → Field permission clamp](./linkage.md#field-permission-clamp).
-- **`apiRef`** exposes `FormRendererApi`: `submit()` (runs the same validation pipeline as a schema `submit` button), `reset()`, `getValues()` — for host chrome like a modal footer's confirm button.
+- **`fieldPermissions`** (v2.10.0) is a server-resolved clamp per field key (`Record<string, FieldPermission>`) — the outer bound that linkage may narrow within but never widen past (`"hidden"` unmounts a field entirely, `"visible"` renders it read-only, `"required"` forces the empty check, `"editable"` is unclamped). The clamp also gates every programmatic write (`assign` / `set_field`) and filters the submit payload down to writable keys. The canonical source is the approval engine resolving one approval node's permission matrix for the current viewer, but any host-resolved map works. See [Linkage → Field permission clamp](./linkage.md#field-permission-clamp).
+- **`apiRef`** exposes `FormRendererApi`: `submit()` (runs the same validation pipeline as a schema `submit` button), `reset()`, `getValues()` (the raw live state), and `getSubmitValues()` (the exact filtered payload `onSubmit` would receive — v2.10.0) — for host chrome like a modal footer's confirm button.
 - **`evaluators`**, **`dataSourceResolver`**, **`evaluationContext`** mirror the editor's props of the same name and drive the exact same linkage engine — see [Linkage](./linkage.md).
 - **`containOverlays`** pins mobile overlay pickers (masks/sheets) to the renderer's own box instead of the browser viewport — only meaningful with `device="mobile"`, for a desktop "phone frame" preview.
 

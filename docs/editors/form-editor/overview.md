@@ -13,7 +13,7 @@ There is no code generation step and no second "runtime" format: the same field 
 
 Reach for the form editor when a form's shape needs to be **authored by someone other than a developer** — an admin configuring an intake form, a business user building an approval request form — or when your application manages many structurally similar but not identical forms (workflow node forms, per-tenant custom fields, dynamic surveys). For a form whose fields are fixed at development time, the plain [`useForm`](../../components/form.md) wrapper is simpler and needs no schema layer.
 
-The engine is explicitly tuned for **forms with hundreds of fields**: the schema mutators use structural sharing so a single-field edit rebuilds only the path to that field, the canvas rows and runtime field cells are memoized against that sharing, and linkage expression/script compilation is cached — so a keystroke in one field does not re-evaluate or re-render the other 300.
+The engine is explicitly tuned for **forms with hundreds of fields**: the schema mutators use structural sharing so a single-field edit rebuilds only the path to that field, the canvas rows and runtime field cells are memoized against that sharing, and linkage expression/script compilation is cached — so a keystroke in one field does not re-evaluate or re-render the other 300. The designer chrome is tuned for large forms too (v2.10.0): selecting a block — including after a drop, which now keeps the moved block selected — scrolls it into view on the canvas, dragging a container lifts a compact chip instead of the whole nested subtree (so the drop zones underneath stay visible), and a selection field's static options reorder by drag in the properties panel.
 
 ## The `FormEditor` / `FormRenderer` split
 

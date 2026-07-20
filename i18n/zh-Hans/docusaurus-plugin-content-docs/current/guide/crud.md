@@ -65,6 +65,19 @@ CRUD 表单很少只有一种形态。新建流程和编辑流程通常存在一
 renderForm={scene => <Form scene={scene} />}
 ```
 
+### 场景表单的呈现方式
+
+场景表单默认在模态框中打开；每次 `openForm` 调用都可以改选抽屉（`mode: "drawer"`）。自 v2.12.0 起，`formLayout` 属性可以调整任一容器内部的标签布局——与 `Form` 组件直接接受的 `{ layout, labelAlign, labelWidth }` 字段完全相同：
+
+```tsx
+<CrudPage
+  formLayout={{ layout: "vertical" }}  // vertical labels suit narrow drawers
+  ...
+/>
+```
+
+布局模型见 [表单](./forms.md#标签布局formlayout)；`openForm` 的完整选项列表见 [Crud 与 CrudPage](../components/crud.md)。
+
 ## 为什么 `createCrudKit()` 很重要
 
 `createCrudKit()` 把一个页面自身的泛型类型固定进一个可复用的局部工具集：

@@ -15,7 +15,7 @@ VEF 的表单能力主要来自 `@vef-framework-react/components`，两个主要
 ## 典型用法
 
 ```tsx
-import { Grid, useDictionaryOptionsSelect, useFormContext } from "@vef-framework-react/components";
+import { Grid, useCodeSetOptionsSelect, useFormContext } from "@vef-framework-react/components";
 import { z } from "@vef-framework-react/shared";
 
 const validators = {
@@ -26,7 +26,7 @@ const validators = {
 export function UserForm() {
   const { AppField } = useFormContext<{ name: string; gender: string }>();
 
-  const { gender } = useDictionaryOptionsSelect({
+  const { gender } = useCodeSetOptionsSelect({
     gender: "common.gender"
   });
 
@@ -77,6 +77,26 @@ const { AppField } = useFormContext<FormValues>();
 
 一旦表单规模超出单个组件，这就是应该采用的模式——搜索栏、场景相关的表单主体、操作按钮区的页脚，都可以从同一个表单上下文中取出 `AppField`，而不必通过 props 层层传递表单状态。
 
+## 标签布局：`FormLayout`
+
+每个字段包装器都从共享的表单布局上下文中读取标签摆放方式。三个字段——`layout`（默认 `"horizontal"`）、`labelAlign`（`"right"`）和 `labelWidth`（`100`）——只需在 `Form` 组件上设置一次，就会应用到内部的每个字段：
+
+```tsx
+<Form layout="vertical">
+  {/* every AppField renders its label above the control */}
+</Form>
+```
+
+当 `Form` 元素不由你渲染时——在 `FormModal`、`FormDrawer` 或 CRUD 场景表单内部——改为通过 `formLayout` 属性传入同样的三个字段（v2.12.0 新增）：
+
+```tsx
+<FormDrawer formLayout={{ layout: "vertical" }} ... />
+
+<CrudPage formLayout={{ layout: "vertical" }} ... />
+```
+
+对于较窄的抽屉，纵向标签是常规选择——100px 的标签列会占掉太多宽度。`FormLayout` 类型从 `@vef-framework-react/components` 导出。
+
 ## 用 `z` 做校验
 
 ```tsx
@@ -118,17 +138,17 @@ const deptTreeSelectProps = useDataOptionsTreeSelect({
 });
 ```
 
-### 数据字典
+### 码集
 
 ```tsx
-const { gender } = useDictionaryOptionsSelect({
+const { gender } = useCodeSetOptionsSelect({
   gender: "common.gender"
 });
 
 // <field.Select {...gender} />
 ```
 
-`useDictionaryOptionsSelect(keys, options?)` 返回一个 `{ alias: SelectProps }` 映射。传入 `{ filterable: true }`（或针对某个 key 单独传入 `{ key: { key: "...", filterable: true } }`）可以启用拼音搜索——底层数据的来源见 [数据字典](./data-dictionaries.md)。
+`useCodeSetOptionsSelect(keys, options?)` 返回一个 `{ alias: SelectProps }` 映射。传入 `{ filterable: true }`（或把别名的值换成按键配置 `{ key: "...", filterable: true }`）可以启用拼音搜索——底层数据从哪里来、键名如何变成类型化的联合类型，见 [码集](./code-sets.md)。
 
 ## 字段依赖与联动
 
@@ -251,10 +271,10 @@ const type = useFormStore(form.store, state => state.values.type);
 
 ## 为什么要做这种拆分
 
-把数据来源（`useDataOptionsSelect()`、`useDictionaryOptionsSelect()` 等）与字段渲染（`AppField`）和布局（`Grid`）分开，意味着：
+把数据来源（`useDataOptionsSelect()`、`useCodeSetOptionsSelect()` 等）与字段渲染（`AppField`）和布局（`Grid`）分开，意味着：
 
 - 选项加载逻辑可以在新建表单、编辑表单和搜索栏之间复用
-- 字段组件永远不需要知道自己的选项到底来自字典、查询还是树形数据
+- 字段组件永远不需要知道自己的选项到底来自码集、查询还是树形数据
 - 更换某个字段的数据来源不会影响它的布局或校验逻辑
 
 完整的可用字段组件列表（`field.Input`、`field.Select`、`field.Bool` 等）见 [Form 表单](../components/form.md)。

@@ -107,7 +107,7 @@ export default function MyComponent() {
 | Field | Type | Default | 说明 |
 |-------|------|---------|-------------|
 | `isDarkMode` | `boolean` | `false` | 启用暗色模式 |
-| `colors` | `Partial<Record<SemanticColor, string>>` | — | 覆盖语义化颜色 |
+| `colors` | `Partial<Record<SemanticColor, PresetColor \| string>>` | — | 用预设颜色名或任意 CSS 颜色覆盖语义化颜色（`primary` / `success` / `warning` / `error` / ……） |
 | `globalCssVars` | `Record<'--vef-${string}', string \| number>` | — | 全局 CSS 变量（必须以 `--vef-` 为前缀） |
 | `globalStyle` | `CSSInterpolation` | — | 全局 CSS-in-JS 样式 |
 

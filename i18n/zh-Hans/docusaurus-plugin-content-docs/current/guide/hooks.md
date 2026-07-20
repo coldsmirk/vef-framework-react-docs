@@ -1,6 +1,6 @@
 ---
 title: Hooks
-description: 完整的 VEF hook 目录 —— 权限检查、数据字典、上传、加载状态，以及深/浅比较辅助工具。
+description: 完整的 VEF hook 目录 —— 权限检查、码集、服务端推送、上传、加载状态，以及深/浅比较辅助工具。
 ---
 
 # Hooks
@@ -11,8 +11,9 @@ description: 完整的 VEF hook 目录 —— 权限检查、数据字典、上�
 
 | Hook | 用途 |
 | --- | --- |
-| `useDictionaryQuery` | 从应用的数据字典函数中拉取选项 |
+| `useCodeSetQuery` | 从应用的码集函数中拉取选项 |
 | `useDataOptionsQuery` | 把任意的列表数据转换成统一的选项结构 |
+| `usePushMessage` | 订阅服务端推送的消息信封，并自动清理 |
 | `useCheckPermission` | 获取一个可复用的权限判断函数 |
 | `useIsAuthorized` | 判断当前权限是否满足某个条件 |
 | `useAuthorizedItems` | 按权限过滤配置项 |
@@ -20,14 +21,14 @@ description: 完整的 VEF hook 目录 —— 权限检查、数据字典、上�
 | `useHasFetching` | 判断某一类查询是否仍在加载 |
 | `useHasMutating` | 判断某一类变更是否仍在执行 |
 
-## `useDictionaryQuery`
+## `useCodeSetQuery`
 
-一旦在 `createApp().render()` 中提供了 `appContext.dictionaryQueryFn`，就可以用别名映射的方式请求字典。每个别名会成为解析结果上的一个 key：
+一旦在 `createApp().render()` 中提供了 `appContext.codeSetQueryFn`，就可以用别名映射的方式请求码集。每个别名会成为解析结果上的一个 key：
 
 ```tsx
-const { data, isFetching } = useDictionaryQuery({
+const { data, isFetching } = useCodeSetQuery({
   gender: "common.gender",
-  status: "user.status"
+  status: "md.staff.status"
 });
 
 // data is `undefined` until the query resolves.
@@ -36,10 +37,17 @@ const genderOptions = data?.gender ?? [];
 
 注意事项：
 
-- `useDictionaryQuery(keys, options?)` 返回原生的 `UseQueryResult<TData>`；在请求成功完成之前，`data` 都是 `undefined`。
+- `useCodeSetQuery(keys, options?)` 返回原生的 `UseQueryResult<TData>`；在请求成功完成之前，`data` 都是 `undefined`。
 - `options.enabled` 用于推迟请求，例如在上游参数尚未就绪时。
 - `options.select` 允许调用方对解析后的别名映射做二次加工。它的引用会被透传给 React Query，因此需要用模块作用域、`as const`、`useMemo` 或 `useCallback` 把 `keys` 和 `select` 稳定下来，避免每次渲染都让 memoization 失效。
-- 典型的 select 用法优先使用 `useDictionaryOptionsSelect`（位于 `@vef-framework-react/components`，见 [数据字典](./data-dictionaries.md)），它对 `useDictionaryQuery` 做了一层封装，按别名直接产出可以展开使用的 `SelectProps`。
+- 键名可以通过 `Register['codeSetKeys']` 扩充被约束为类型化的联合类型——通常由 `vef gen:code-set-keys` 生成；见 [码集](./code-sets.md)。
+- 典型的 select 用法优先使用 `useCodeSetOptionsSelect`（位于 `@vef-framework-react/components`，见 [码集](./code-sets.md)），它对 `useCodeSetQuery` 做了一层封装，按别名直接产出可以展开使用的 `SelectProps`。
+
+:::info
+
+`useCodeSetQuery` 是 `useDictionaryQuery` 更名后的新名称（尚未发布，位于 v2.12.0 之后）。完整的旧名到新名对照表见 [码集](./code-sets.md)。
+
+:::
 
 ## `useDataOptionsQuery`
 
@@ -57,6 +65,22 @@ const roleOptions = useDataOptionsQuery({
 ```
 
 它返回 `options`、查询状态字段，以及底层查询结果的其余部分。
+
+## `usePushMessage`
+
+在一个 `PushClient` 上订阅某种信封类型的服务端推送消息，并在卸载时自动取消订阅。传 `"*"` 可接收所有消息：
+
+```tsx
+import { usePushMessage } from "@vef-framework-react/hooks";
+
+import { pushClient } from "../push-client";
+
+usePushMessage<OrderStatusPayload>(pushClient, "order.status_changed", message => {
+  console.log("Order updated:", message.payload);
+});
+```
+
+客户端通常是用 `@vef-framework-react/core` 的 `createPushClient` 创建的应用级单例。每当 `client`、`type` 或处理器的引用变化时，订阅都会重新建立；在高频渲染的组件中请用 `useCallback` 稳定处理器。完整接线方式见 [服务端推送](./server-push.md)，客户端 API 见 [服务端推送（参考）](../reference/core/push.md)。
 
 ## 权限相关 Hooks
 

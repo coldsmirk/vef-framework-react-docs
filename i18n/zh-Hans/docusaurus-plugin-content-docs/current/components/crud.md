@@ -43,7 +43,7 @@ export const {
 
 ```tsx
 import { ActionButton, CrudPage, Icon, OperationButton } from '@vef-framework-react/components';
-import { EditIcon, PlusIcon, TrashIcon } from 'lucide-react';
+import { EditIcon, TrashIcon } from 'lucide-react';
 
 import { ActionButtonGroup, OperationButtonGroup } from './helpers';
 
@@ -57,7 +57,7 @@ function OperationColumn({ row }: { row: UserRow }) {
           </OperationButton>
           <OperationButton
             confirmable
-            danger
+            color="danger"
             icon={<Icon component={TrashIcon} />}
             onClick={async () => {
               await deleteRow(row);
@@ -132,6 +132,17 @@ openForm({ scene: 'create' });
 openForm({ scene: 'update', values: row, mode: 'drawer', drawerConfig: { placement: 'right' } });
 ```
 
+`openForm` 接受：
+
+| 选项 | 类型 | 说明 |
+|--------|------|-------------|
+| `scene` | `CrudFormScene<TSceneFormValues>` | 要打开的场景（必填） |
+| `values` | `Partial<TSceneFormValues[TScene]>` | 本次调用的初始表单值（例如正在编辑的行），合并覆盖在 `sceneDefaultFormValues` 之上 |
+| `title` | `ReactNode` | 表单标题；内置场景默认为 `"创建"` / `"修改"` |
+| `width` | `Length \| Partial<Record<Breakpoint, Length>>` | 表单宽度——固定长度，或按断点的响应式映射。默认是从 `95vw`（`xxs`）到 `40vw`（`xxl`）的响应式映射 |
+| `mode` | `CrudFormMode` | `"modal"`（默认）或 `"drawer"` |
+| `drawerConfig` | `CrudFormDrawerConfig` | drawer 专属选项：`placement`（默认 `"right"`） |
+
 ## 行为说明
 
 - `delete` 或 `deleteMany` 成功后，`Crud` 会自动清除内部选择状态——依赖 `selectedRows` 的工具栏按钮会自动重新禁用。
@@ -176,14 +187,15 @@ formActionsRenderers={{
 | `advancedSearch` | `ReactNode` | 高级（可折叠）搜索字段 |
 | `sceneDefaultFormValues` | `PartialDeep<TSceneFormValues>` | 各场景的默认表单值 |
 | `formComponent` | `ElementType` | 场景表单内层包装器的元素类型（默认：`"div"`） |
+| `formLayout` | `FormLayout` | 场景表单 modal/drawer 内表单项的布局——`layout`、`labelAlign`、`labelWidth`（见 [Form](./form.md)）。默认为水平布局 |
 | `renderForm` | `(scene) => ReactNode` | 各场景的表单内容 |
 | `beforeFormSubmit` | `(scene, values) => Awaitable<values>` | 提交前转换表单值 |
 | `afterFormSubmit` | `(scene, values, result) => Awaitable<void>` | 提交成功后调用 |
 | `formMutationFns` | `CrudFormMutationFns<TSceneFormValues>` | 各场景的提交 mutation |
 | `formActionsRenderers` | `CrudFormActionsRenderers<TSceneFormValues>` | 各场景的自定义页脚操作渲染器，接收 `(formApi, defaults)` |
-| `deleteMutationFn` | `MutationFunction` | 单行删除 |
-| `deleteManyMutationFn` | `MutationFunction` | 批量删除 |
-| `mutationMeta` | `(mutationKey) => MutationMeta` | mutation 元数据提供者（例如查询失效） |
+| `deleteMutationFn` | `MutationFunction<ApiResult<unknown>, TRow>` | 单行删除 mutation，接入 store 的 `delete` 动作 |
+| `deleteManyMutationFn` | `MutationFunction<ApiResult<unknown>, TRow[]>` | 批量删除 mutation，接入 store 的 `deleteMany` 动作 |
+| `mutationMeta` | `(mutationKey: string) => MutationMeta \| undefined` | mutation 元数据提供者（例如查询失效），会以每个 mutation 的 key 调用 |
 | `toolbarActions` | `ReactNode` | 工具栏操作按钮 |
 | `queryEnabled` | `(params?) => boolean` | 列表查询是否应当执行 |
 | `queryParams` | `TParams` | 额外的查询参数，变化时会触发重新获取数据 |

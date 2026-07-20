@@ -1,11 +1,11 @@
 ---
 title: "FlipText"
-description: "使用 GSAP 实现逐字符翻转动画效果。"
+description: "使用 Motion 实现逐字符翻转的文字动画效果。"
 ---
 
 # FlipText
 
-使用 GSAP 实现逐字符翻转动画效果。
+使用 [Motion](https://motion.dev/)（经 `@vef-framework-react/core` 重导出）实现逐字符翻转的文字动画效果。
 
 > **VEF 专属组件。** 不属于 Ant Design。
 

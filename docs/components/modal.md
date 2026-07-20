@@ -148,7 +148,7 @@ VEF adds a `draggable` prop (`@default false`) that lets the user reposition the
 | `centered` | `boolean` | `false` | Vertically center the modal |
 | `closable` | `boolean` | `true` | Show close icon |
 | `maskClosable` | `boolean` | `true` | Close on mask click |
-| `destroyOnClose` | `boolean` | `false` | Unmount children on close |
+| `destroyOnHidden` | `boolean` | `false` | Unmount children on close (`destroyOnClose` is a deprecated alias) |
 | `forceRender` | `boolean` | `false` | Pre-render content |
 | `keyboard` | `boolean` | `true` | Close on Escape key |
 | `zIndex` | `number` | `1000` | z-index |
@@ -157,6 +157,6 @@ VEF adds a `draggable` prop (`@default false`) that lets the user reposition the
 
 ## Best Practices
 
-- Set `destroyOnClose` when the modal contains a form to reset state on close.
+- Set `destroyOnHidden` when the modal contains a form to reset state on close.
 - Avoid deeply nested modals; use `Drawer` for secondary panels.
 - Use `Modal.confirm` for simple yes/no confirmations; use `ActionButton` with `confirmable` for inline table actions.

@@ -107,7 +107,9 @@ export default function Demo() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `type` | `'primary' \| 'default' \| 'dashed' \| 'text' \| 'link'` | `'default'` | Button style type |
+| `type` | `'primary' \| 'default' \| 'dashed' \| 'text' \| 'link'` | `'default'` | Button style type (syntax sugar over `color` + `variant`) |
+| `color` | `ButtonColor` — `'default' \| 'primary' \| 'danger'` or a preset color | — | Button color; combines with `variant` for fine-grained styling |
+| `variant` | `ButtonVariant` — `'outlined' \| 'dashed' \| 'solid' \| 'filled' \| 'text' \| 'link'` | — | Button variant; combines with `color` |
 | `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Button size (`'middle'` is a deprecated alias for `'medium'`) |
 | `loading` | `boolean \| { delay?: number }` | `false` | Show loading state |
 | `disabled` | `boolean` | `false` | Disable the button |
@@ -115,7 +117,7 @@ export default function Demo() {
 | `ghost` | `boolean` | `false` | Make background transparent |
 | `block` | `boolean` | `false` | Fit button width to parent |
 | `icon` | `ReactNode` | — | Icon element |
-| `iconPosition` | `'start' \| 'end'` | `'start'` | Icon position |
+| `iconPlacement` | `'start' \| 'end'` | `'start'` | Icon placement (`iconPosition` is a deprecated alias) |
 | `shape` | `'default' \| 'circle' \| 'round'` | `'default'` | Button shape |
 | `href` | `string` | — | Redirect URL (renders as `<a>`) |
 | `target` | `string` | — | Same as `<a>` target |

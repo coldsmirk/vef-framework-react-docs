@@ -125,15 +125,15 @@ Each `*Key` option accepts either a string path (e.g. `"user.name"`) or an extra
 
 The hook returns `SelectProps` that can be spread directly onto `<Select>`.
 
-## VEF Enhancement: `useDictionaryOptionsSelect`
+## VEF Enhancement: `useCodeSetOptionsSelect`
 
-For data-dictionary-backed options, `useDictionaryOptionsSelect` wraps `useDictionaryQuery` and returns ready-to-spread `SelectProps` per alias:
+For code-set-backed options, `useCodeSetOptionsSelect` wraps `useCodeSetQuery` and returns ready-to-spread `SelectProps` per alias:
 
 ```tsx
-import { Select, useDictionaryOptionsSelect } from '@vef-framework-react/components';
+import { Select, useCodeSetOptionsSelect } from '@vef-framework-react/components';
 
 export default function Demo() {
-  const { gender, status } = useDictionaryOptionsSelect({
+  const { gender, status } = useCodeSetOptionsSelect({
     gender: 'common.gender',
     status: { key: 'common.status', filterable: true },
   });
@@ -147,7 +147,42 @@ export default function Demo() {
 }
 ```
 
-The first argument maps each alias to a dictionary key string, or `{ key, filterable? }` to override filtering per alias. The optional second argument, `{ filterable }`, sets the default for aliases that don't specify their own. See [Data Dictionaries](../guide/data-dictionaries.md).
+All aliases are fetched in one batched code-set query. See [Code Sets](../guide/code-sets.md) for the backing query and app-context wiring.
+
+### `useCodeSetOptionsSelect` Signature
+
+```ts
+function useCodeSetOptionsSelect<const T extends CodeSetAliasMap>(
+  keys: T,
+  options?: UseCodeSetOptionsSelectOptions
+): UseCodeSetOptionsSelectResult<T>;
+```
+
+**`keys`** (`CodeSetAliasMap`, required) maps each alias to a `CodeSetKeyValue` — either a code set key string, or a `CodeSetKeyConfig` object:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `key` | `CodeSetKey` | required | The code set key (typed via the `Register` augmentation, otherwise `string`) |
+| `filterable` | `boolean` | the hook-level `filterable` | Per-alias override for search filtering |
+
+**`options`** (`UseCodeSetOptionsSelectOptions`, optional):
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `filterable` | `boolean` | `false` | Whether each select should enable search; aliases with their own `filterable` config win over this default |
+
+**Result** (`UseCodeSetOptionsSelectResult<T>` = `Record<keyof T, SelectProps<Key, DataOptionWithPinyin<DataOption>>>`) — one `SelectProps` object per alias, each carrying:
+
+| Field | Value | Description |
+|-------|-------|-------------|
+| `options` | `DataOptionWithPinyin<DataOption>[]` | The code set entries (including nested `children`), each enhanced with precomputed pinyin for `label` and `description` |
+| `loading` | `boolean` | `true` while the batched code-set query is fetching |
+| `fieldNames` | `{ label, value, options: 'children', groupLabel: 'label' }` | Maps `DataOption`'s shape onto the select |
+| `maxTagCount` | `'responsive'` | Collapses excess tags in multiple mode |
+| `listHeight` | `280` | Dropdown list height |
+| `notFoundContent` | `Loader` while fetching | Shows a loader instead of "no data" during the initial fetch |
+| `showSearch` | `boolean` | The resolved per-alias filterable flag |
+| `filterOption` | `(input, option) => boolean` | Matches `label` / `description`, their full pinyin, and pinyin initials (only set when filterable) |
 
 ## API
 

@@ -125,16 +125,34 @@ interface ColumnSettingsConfig {
 
 ### `OperationColumnConfig<TRow>`
 
-```ts
-interface OperationColumnConfig<TRow> {
-  width?: Length;
-  title?: ReactNode;
-  requiredPermissions?: string[];
-  render: (row: TRow, index: number) => ReactNode;
-}
-```
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `width` | `Length` | 列宽。没有内置默认值——请设置固定宽度，避免固定在末尾的操作列吸走表格的剩余空间；框架惯例是两个操作按钮用 `160` px（这也是 [`EditableTable`](./editable-table.md) 的默认值） |
+| `title` | `ReactNode` | 列标题；默认为 `"操作"`。启用列设置时，列设置图标会渲染在标题旁 |
+| `requiredPermissions` | `string[]` | 显示操作列所需的权限令牌 |
+| `render` | `(row: TRow, index: number) => ReactNode` | 渲染某一行的操作单元格（必填） |
 
-`requiredPermissions` 会在当前用户不持有所列权限令牌中的任何一个时，隐藏整个操作列（包括表头）。
+`requiredPermissions` 会在当前用户不持有所列权限令牌中的任何一个时，隐藏整个操作列（包括表头）。操作列始终固定在表格末尾。
+
+### `RowSelectionConfig<TRow>`
+
+以 `rowSelection` 传入（或传 `true` 使用全部默认值）：
+
+| 字段 | 类型 | 说明 |
+|-------|------|-------------|
+| `rowSelectDisabled` | `(model: TRow) => boolean` | 对函数返回 `true` 的行禁用选择 |
+| `checkStrictly` | `boolean` | 严格勾选表格行，父子行的选择互不关联 |
+| `hideSelectAll` | `boolean` | 隐藏表头中的全选复选框 |
+| `preserveSelectedRowKeys` | `boolean` | 即使 key 已不存在于 `dataSource` 中也保留选择 |
+| `defaultSelectedRowKeys` | `Key[]` | 初始选中的行 key |
+
+### `ProTableRef`
+
+| 成员 | 类型 | 说明 |
+|--------|------|-------------|
+| `refetch` | `() => void` | 手动触发数据重新获取（例如外部数据变化后） |
+| `onLoading` | `(callback: () => void) => () => void` | 注册表格开始加载时调用的回调；返回取消订阅函数 |
+| `onLoaded` | `(callback: () => void) => () => void` | 注册表格加载完成时调用的回调；返回取消订阅函数 |
 
 ### `ProTableSubscriber`
 

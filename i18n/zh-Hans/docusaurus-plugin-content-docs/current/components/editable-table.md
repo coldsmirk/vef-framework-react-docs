@@ -88,12 +88,14 @@ export default function Demo() {
 
 ## 操作列覆盖
 
+追加的操作列默认使用固定的 `160`px 宽度（恰好容纳内置的两个操作按钮）。当 `renderRowActions` 增加了额外操作时，请把它加宽：
+
 ```tsx
 <EditableTable<Row>
   columns={columns}
   rowKey="id"
   value={rows}
-  operationColumn={{ title: 'Actions', width: 160 }}
+  operationColumn={{ title: 'Actions', width: 220 }}
   onChange={setRows}
 />
 ```
@@ -116,6 +118,7 @@ export default function Demo() {
 | `operationColumn` | `EditableOperationColumnConfig` | — | 操作列覆盖（标题/宽度/按钮文案） |
 | `size` | `TableProps<TRow>["size"]` | — | 表格密度，转发给底层表格 |
 | `pagination` | `TableProps<TRow>["pagination"]` | `false` | 客户端分页配置，转发给底层表格 |
+| `locale` | `TableProps<TRow>["locale"]` | — | 表格文案覆盖（例如更紧凑的 `emptyText`），转发给底层表格 |
 
 ### EditableColumn\<TRow\>
 
@@ -142,9 +145,9 @@ export default function Demo() {
 
 | 字段 | 类型 | 说明 |
 |-------|------|-------------|
-| `title` | `ReactNode` | 操作列标题 |
-| `width` | `Length` | 操作列宽度 |
-| `texts` | `EditableRowActionsTexts` | 按钮文案覆盖 |
+| `title` | `ReactNode` | 操作列标题；默认为 `"操作"` |
+| `width` | `Length` | 操作列宽度。默认固定为 `160` px，足以容纳内置的两个操作按钮——若不固定宽度，弹性布局的表格会把所有剩余空间都分给操作列。当 `renderRowActions` 增加了额外操作时请加宽 |
+| `texts` | `EditableRowActionsTexts` | 内置行操作按钮的自定义文案 |
 
 ### EditableRowActionsTexts
 

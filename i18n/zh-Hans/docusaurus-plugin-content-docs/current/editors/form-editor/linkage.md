@@ -41,7 +41,7 @@ type LinkageCondition =
   | { kind: "expression"; source: string };
 ```
 
-一个**叶子（leaf）**条件用某个运算符比较某个来源的值；**`LINKAGE_OPERATORS`** 是完整的运算符集合：`eq` / `ne` / `gt` / `lt` / `gte` / `lte` / `contains`，外加 `empty` / `notEmpty`（不需要 `value`——当值为 nullish、`""`、`[]`，或数组中所有项都为空时，该值即视为空；`0` 和 `false` 不算空）。`sourceKey` 默认是某个同级字段的 `key`；以 `$` 为根的路径（`$user.departmentId`、`$vars.quota`、`$form.someKey`）会改为对照[求值上下文](#宿主上下文)解析。一个**组（group）**条件用 `all`（遇到第一个 `false` 即短路）或 `any`（遇到第一个 `true` 即短路）来组合子条件。一个**表达式（expression）**条件是一个逃生舱口，用于表达可视化构建器无法表达的任何逻辑——通过[默认求值器](#表达式与脚本求值)或宿主自定义的求值器运行的纯 JavaScript。
+一个**叶子（leaf）**条件用某个运算符比较某个来源的值；**`LINKAGE_OPERATORS`** 是完整的运算符集合：`eq` / `ne` / `gt` / `lt` / `gte` / `lte` / `contains`，外加 `empty` / `notEmpty`（不需要 `value`——当值为 nullish、*去除首尾空白后*为空的字符串、`[]`，或数组中所有项都为空时，该值即视为空；`0` 和 `false` 不算空）。自 v2.10.0 起字符串会先做 trim，与 Go 后端的 `isEmptyFormValue` 保持一致，因此一个只含空白字符的值会在客户端就通不过 `required`，而不是被服务端弹回却没有任何内联错误提示。`sourceKey` 默认是某个同级字段的 `key`；以 `$` 为根的路径（`$user.departmentId`、`$vars.quota`、`$form.someKey`）会改为对照[求值上下文](#宿主上下文)解析。一个**组（group）**条件用 `all`（遇到第一个 `false` 即短路）或 `any`（遇到第一个 `true` 即短路）来组合子条件。一个**表达式（expression）**条件是一个逃生舱口，用于表达可视化构建器无法表达的任何逻辑——通过[默认求值器](#表达式与脚本求值)或宿主自定义的求值器运行的纯 JavaScript。
 
 ```json
 {
@@ -74,7 +74,7 @@ type LinkageCondition =
 
 | `type` | 效果 |
 | --- | --- |
-| `set_field` | 对另一个字段（`targetKey`）执行一次性的命令式写入——区别于持续生效的自我 `assign` |
+| `set_field` | 对另一个字段（`targetKey`）执行一次性的命令式写入——区别于持续生效的自我 `assign`；当目标被钳制为不可写时会被丢弃（见[字段权限钳制](#字段权限钳制)） |
 | `set_variable` | 写入一个表单全局的 `$vars` 条目 |
 | `refresh_data_source` | 递增某个数据源的刷新 nonce，强制每个引用它的字段重新解析 |
 | `alert` | 以指定 `level`（`ALERT_LEVELS`：`info` / `success` / `warning` / `error`）展示一条消息 |
@@ -138,18 +138,27 @@ interface LinkageEvaluators {
 
 `contextSources: LinkageContextSource[]`（`{ key, label }`，例如 `{ key: "$user.departmentId", label: "Applicant department" }`）纯粹是设计时的元数据——它会把这些宿主路径连同表单自身的字段一起，填充到可视化条件构建器的来源选择器中。无论某个以 `$` 为根的路径是否在此处声明过，运行时都会对照当前的 `EvaluationContext` 解析它，因此一个手写的、引用了未声明路径的条件依然可以正常工作。
 
-## 字段权限约束
+## 字段权限钳制
 
-`FieldPermission`（`"hidden" | "visible" | "editable" | "required"`）是一种**服务端解析**的交互性约束，独立于联动规则——以 `fieldPermissions: Record<string, FieldPermission>` 的形式传给 `FormRenderer`，按根作用域字段 `key` 索引（见 [Embedding → FormRenderer](./embedding.md#formrenderer)）。它是*外层边界*：联动可以在其内部收窄，但永远不能突破它。
+`FieldPermission`（`"hidden" | "visible" | "editable" | "required"`）是一种**服务端解析**的交互性钳制，独立于联动规则——以 `fieldPermissions: Record<string, FieldPermission>` 的形式传给 `FormRenderer`，按根作用域字段 `key` 索引（见 [Embedding → FormRenderer](./embedding.md#formrenderer)）。它在 v2.10.0 中落地，是审批引擎按节点字段权限的客户端一半（与后端的 `approval.Permission` 和 approval-flow-editor 的 `FieldPermission` 逐字对应），但并不绑定任何宿主——任何能按查看者解析权限的服务端都可以为它供数。它是*外层边界*：联动可以在其内部收窄，但永远不能突破它。
 
 | 取值 | 效果 |
 | --- | --- |
 | `"hidden"` | 永不挂载；值永不提交 |
 | `"visible"` | 以只读方式挂载（通过禁用通道实现）；值不参与提交载荷与校验，永不必填 |
-| `"editable"` | 无约束——完全由联动规则决定 |
-| `"required"` | 可编辑且始终必填，覆盖联动规则得出的 `optional` 结果 |
+| `"editable"` | 无钳制——完全由联动规则决定 |
+| `"required"` | 可编辑且始终必填，覆盖联动规则得出的 `optional` 结果；提交时空值会不通过，即使没有静态的 `validate.required` |
 
-省略该属性、或该属性中省略某个 key，都表示该字段没有约束。带 key 的 `subform` 是整体被约束的——它的模板字段不能被单独寻址，因为权限只针对根作用域的 key 生效。
+省略该属性、或该属性中省略某个 key，都表示该字段没有钳制——除非服务端另有说明，渲染器保持完全宽松；想要"默认拒绝"的宿主应在服务端物化出完整的权限映射。带 key 的 `subform` 是整体被钳制的——它的模板字段不能被单独寻址，因为权限只针对根作用域的 key 生效（子表单级的 `"required"` 意味着"至少一行"）。
+
+**每一次程序化写入同样会被把关**（破坏性变更，v2.10.0）。状态一侧持续生效的 `assign` 与副作用一侧一次性的 `set_field` 会落入同一个共享写入关卡，因此钳制在每一条写入路径上都成立，而不仅仅是用户编辑：
+
+- 目标顶层 key 被钳制为不可写（`"visible"` / `"hidden"`）的写入会被**静默丢弃**，与渲染路径"绝不崩溃"的姿态一致。不可写字段待生效的 `assign` 结果同样会被压制，因此不会有任何幽灵编辑抵达一个服务端本会拒绝的字段。
+- 写入的值与目标当前持有的值相同（深度相等）时会被丢弃——否则一次原样写入会被视为变更，让一条 `"always"` 重触发的规则永远重复触发。
+- 程序化写入永远不会运行目标的 change 监听器，也不会将其标记为已触碰（touched），因此 `load` 副作用的写入不会过早浮现校验错误；写入的值仍会像一次编辑那样被校验。
+- 关卡会先把路径形态的目标（`"lines[0].amount"`）解析到其顶层绑定（`lines`）再检查钳制；在子表单行自己的作用域内不施加任何钳制（顶层权限永远不会寻址模板字段）。
+
+有两个辅助导出支撑着这个关卡，可供构建自有权限感知界面的宿主使用：`getFieldPermission(permissions, key)`（带自有属性守卫的查找）和 `isWritableFieldPermission(permission)`（对 `undefined` / `"editable"` / `"required"` 返回 `true`）。提交负载只携带可写的 key——要精确预览将会提交的内容，见参考中的 `FormRendererApi.getSubmitValues`（[Reference](./reference.md#formrendererapi)）。
 
 ## 校验
 

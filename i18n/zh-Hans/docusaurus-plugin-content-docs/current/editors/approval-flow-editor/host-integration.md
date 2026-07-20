@@ -33,7 +33,7 @@ const plugins: EditorPlugins = {
 | 字段 | 类型 | 用途 |
 | --- | --- | --- |
 | `pickers` | `Partial<Record<PrincipalKind, FC<PickerProps>>>` | 为 `user` / `role` / `department` 三类审批人和抄送收件人解析出具体的 id。某个类型未设置时会优雅降级为一段内联提示，而不是渲染选择器。 |
-| `formFields` | `FormFieldDefinition[]` | 表单的顶层字段清单——供条件编辑器、字段权限表以及 `validateFlowDefinition` 的 `fieldPermissions` 交叉校验使用。 |
+| `formFields` | `FormFieldDefinition[]` | 表单的顶层字段清单——供条件编辑器、字段权限表以及 `validateFlowDefinition` 的 `fieldPermissions` 交叉校验使用。保留为 `undefined` 表示"没有可用的字段清单"，与 `[]` 含义不同——见下方 [`formFields`](#formfields)。 |
 | `globalSubjects` | `FormFieldDefinition[]` | 宿主声明的变量，条件编辑器会把它们与内置的申请人属性和 `formFields` 一起提供给用户选择。 |
 
 ### 选择器
@@ -77,6 +77,16 @@ function createUserPicker(): FC<PickerProps> {
 ### `formFields`
 
 通常来自 `@vef-framework-react/approval-form-bridge` 的 `projectFormSchema(schema).formFields`——见 [审批表单桥接](../approval-form-bridge.md)——但任何 `FormFieldDefinition[]` 都可以用，包括为一个没有对应设计表单的流程手写的字段清单。
+
+自 v2.10.0 起，这份清单是**三态**的，编辑器会把它原样透传给 `validateFlowDefinition`（包括 `undefined`）:
+
+- **`undefined`**（省略该字段）——清单*不可用*: 宿主在没有任何表单集成的情况下渲染流程编辑器。实时校验与发布关卡只会跳过 key 存在性交叉检查（`field_permission_key_unknown`），因为没有可供比对 key 的对象；权限取值检查与 CC 子集检查仍会运行。此状态下带有悬空 `fieldPermissions` key 的定义*不会*被标记，因此无表单的宿主永远不会被误拦。
+- **`[]`**（显式的空数组）——已确认表单有*零个*字段: 每一条 `fieldPermissions` 条目都是悬空引用并报错，对应后端"表单有零个字段的流程"这一情形。
+- **非空数组**——每个 `fieldPermissions` key 都必须指向某个条目，条件编辑器 / 字段权限表也据此渲染。
+
+只要表单存在，就把投影产出的真实 `formFields`（非空或 `[]`）传进来；只有在确实没有任何表单集成时，才彻底省略这个插件字段。
+
+来自投影的条目可能携带 `hasConditionalVisibility: true`（v2.10.0），表示表单联动可能在运行时隐藏该字段。字段权限表会为其配上一条逐行警告: 在这样的字段上授予 `required` 可能让审批死锁——后端的必填检查并不感知联动，因此如果联动在审批时隐藏了该字段，它的空值会让通过操作永远被拒绝。这条警告是一个非阻塞的 tooltip（当审批人可以编辑控制字段时，这种组合是合理的），永远不会进入 `validateFlowDefinition` 的发布关卡。与之相关的另一种冲突*是*阻塞性的: 把 `required` 权限与 `timeoutAction: "auto_pass"` 配在一起会引发 `field_permission_required_auto_pass`，因为自动通过的超时路径会在不经过人工审批必填检查的情况下结束该节点（见 [API 参考 → 校验](./reference.md#校验)）。
 
 ### `globalSubjects`
 
@@ -137,7 +147,9 @@ const errors = validateFlowDefinition(definition, formFields);
 // errors: FlowValidationError[] — empty means the flow is deploy-ready
 ```
 
-它与后端部署时的 `ValidateFlowDefinition` 规则逐条对应，但与后端（只返回第一个错误）不同的是，它会收集全部违规项，让宿主可以一次性把它们都展示出来。`formFields` 默认是 `[]`；把传给 `plugins.formFields` 的同一份列表也传给它，这样 `fieldPermissions` 的 key 才会与真实字段清单做交叉校验（只有当定义里根本不含字段权限时，省略它才是安全的）。
+它与后端部署时的 `ValidateFlowDefinition` 规则逐条对应——自 v2.10.0 起也包括字段权限规则（权限取值必须在词表之内、key 必须指向真实的表单字段、CC 节点只允许 `visible` / `hidden`、`required` 权限不得与自动通过的超时配在一起）——但与后端（只返回第一个错误）不同的是，它会收集全部违规项，让宿主可以一次性把它们都展示出来。通过这个校验器的定义，也一定能通过后端的部署校验。
+
+第二个参数就是那份[三态的 `formFields` 清单](#formfields): 把传给 `plugins.formFields` 的同一份列表也传给它，这样 `fieldPermissions` 的 key 才会与真实字段清单做交叉校验。`[]` 表示"表单有零个字段"（每个权限 key 都会报错）；省略该参数表示"没有可用的字段清单"，只会跳过 key 存在性检查。
 
 用它来在编辑器自身的发布按钮之外，为一个保存 / 部署操作设置关卡——比如禁用向导里的“下一步”控件:
 

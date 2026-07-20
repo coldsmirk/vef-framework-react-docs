@@ -32,10 +32,10 @@ function BasicSearch() {
   return (
     <>
       <AppField name="keyword">
-        {(field) => <field.Input noWrapper placeholder="关键词" />}
+        {(field) => <field.Input noWrapper placeholder="Keyword" />}
       </AppField>
       <AppField name="status">
-        {(field) => <field.Select noWrapper placeholder="状态" options={STATUS_OPTIONS} />}
+        {(field) => <field.Select noWrapper placeholder="Status" options={STATUS_OPTIONS} />}
       </AppField>
     </>
   );
@@ -64,10 +64,10 @@ function AdvancedSearch() {
   return (
     <>
       <AppField name="createdAfter">
-        {(field) => <field.DatePicker noWrapper placeholder="创建时间晚于" />}
+        {(field) => <field.DatePicker noWrapper placeholder="Created after" />}
       </AppField>
       <AppField name="department">
-        {(field) => <field.Select noWrapper placeholder="部门" options={DEPARTMENT_OPTIONS} />}
+        {(field) => <field.Select noWrapper placeholder="Department" options={DEPARTMENT_OPTIONS} />}
       </AppField>
     </>
   );
@@ -81,6 +81,13 @@ function AdvancedSearch() {
 />
 ```
 
+## 布局行为
+
+- 搜索栏是一个两端对齐的 flex 行：`extra` 位于左侧，搜索控件（折叠开关 + 基础字段 + 操作按钮）在一个可收缩、可换行的区域内靠右对齐——过长的工具栏和过窄的容器会优雅降级而不是溢出。在 `sm` 断点以下，搜索栏改为纵向堆叠，控件以全宽靠左对齐。
+- 提供 `advancedSearch` 时，会自动在基础字段之前渲染一个高级搜索折叠开关按钮；面板在搜索栏下方展开。启用折叠开关不需要任何额外属性。
+- 搜索区域内的字段控件会获得固定宽度以保持视觉节奏：`Input` / `Select` / `TreeSelect` 为 `200px`（包括使用 `allowClear` / `prefix` / `suffix` 的输入框，此时被定宽的是 affix 包装层而非内部输入框），范围选择器为 `360px`。
+- 只有当 `basicSearch` 或 `advancedSearch` 存在时，才会渲染搜索和重置按钮。
+
 ## API
 
 | Prop | Type | Default | 说明 |
@@ -88,14 +95,14 @@ function AdvancedSearch() {
 | `className` | `string` | — | CSS 类名 |
 | `defaultValues` | `TValues` | — | 搜索初始值 |
 | `basicSearch` | `ReactNode` | — | 内联搜索字段 |
-| `advancedSearch` | `ReactNode` | — | 可折叠的高级搜索字段 |
+| `advancedSearch` | `ReactNode` | — | 可折叠的高级搜索字段；同时启用内置的高级搜索折叠开关 |
 | `extra` | `ReactNode` | — | 左侧额外内容 |
 | `disabled` | `boolean` | — | 禁用搜索表单 |
-| `loading` | `boolean` | — | 搜索按钮的加载状态 |
-| `defaultAdvancedSearchVisible` | `boolean` | — | 高级搜索的初始可见性（非受控） |
+| `loading` | `boolean` | — | 搜索按钮的加载状态；等待期间同时禁用表单 |
+| `defaultAdvancedSearchVisible` | `boolean` | `false` | 高级搜索的初始可见性（非受控） |
 | `advancedSearchVisible` | `boolean` | — | 高级搜索的可见性（受控） |
 | `onAdvancedSearchVisibleChange` | `(visible: boolean) => void` | — | 高级搜索可见性变化时调用 |
-| `onSearch` | `(values: TValues) => void` | — | 搜索提交时调用 |
-| `onReset` | `(defaultValues?) => void` | — | 搜索重置时调用 |
+| `onSearch` | `(values: TValues) => void` | — | 点击搜索按钮时携带当前表单值调用 |
+| `onReset` | `(defaultValues?: TValues) => void` | — | 搜索重置时调用（延后一个宏任务，让原生表单重置先传播完成） |
 | `searchButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | 搜索按钮自定义配置 |
 | `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | 重置按钮自定义配置；设为 `false` 可隐藏 |

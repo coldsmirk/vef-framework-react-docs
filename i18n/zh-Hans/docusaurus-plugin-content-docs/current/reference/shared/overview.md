@@ -5,7 +5,7 @@ description: "@vef-framework-react/shared 涵盖的内容，以及四个主题�
 
 # Shared 包概览
 
-`@vef-framework-react/shared` 是框架中通用的纯函数基础包。除内部使用的少量浏览器 API（`crypto`、`atob`/`btoa`）外，不依赖 React 或 DOM。它主要包含：
+`@vef-framework-react/shared` 是框架中通用的纯函数基础包。除内部使用的少量浏览器 API（供 base64 混淆辅助函数使用的 `atob`/`btoa`、供可选的 FingerprintJS 种子 id 生成器使用的 `navigator`）外，不依赖 React 或 DOM。它主要包含：
 
 1. 类型工具
 2. 日期、格式化与校验辅助函数

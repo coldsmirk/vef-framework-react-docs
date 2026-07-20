@@ -14,6 +14,8 @@ A drawer panel that combines form state, mutation execution, and submit/reset ac
 - Create and edit forms that open in a side drawer.
 - Forms that benefit from more vertical space than a modal provides.
 
+Form content taller than the drawer scrolls inside the drawer body; the body's bottom padding is kept after the last field, so scrolled to the end the content never sits flush against the footer actions.
+
 ## Basic Usage
 
 ```tsx
@@ -62,6 +64,7 @@ export default function EditUserDrawer({ open, onClose }) {
 | `defaultValues` | `TValues` | — | Initial form values |
 | `disabled` | `boolean` | `false` | Disable the form |
 | `formComponent` | `ElementType` | `"form"` | Element type for the inner form wrapper |
+| `formLayout` | `FormLayout` | — | Layout of the form items inside the drawer — `layout` (`'horizontal' \| 'vertical'`), `labelAlign` and `labelWidth`. Defaults to the horizontal, right-aligned label layout (see [Form](./form.md)) |
 | `mutationFn` | `MutationFunction<ApiResult<TData>, TValues>` | — | Mutation to execute on submit |
 | `mutationMeta` | `MutationMeta` | — | Mutation metadata |
 | `beforeSubmit` | `(values) => Awaitable<TValues>` | — | Transform values before submission |

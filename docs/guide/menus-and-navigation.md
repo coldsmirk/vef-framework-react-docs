@@ -186,7 +186,7 @@ A tab's identity is its full path plus its actual params and search, so `/report
 The framework does not filter the menu tree on the client. What it does instead:
 
 - **Page-level access is the menu tree itself.** `menuPathSet` — built from whatever `fetchUserInfo` returned — is the whitelist of route templates the user may visit under the layout. A backend that omits a menu for a user has, by that same act, revoked the page.
-- **Token checks are a separate axis.** `permissionTokens` from the same `UserInfo` payload land in `useAppStore` and drive button- and element-level checks (`PermissionGate`, `useHasPermissions`, `useAuthorizedItems`) — see [Permissions](./permissions.md).
+- **Token checks are a separate axis.** `permissionTokens` from the same `UserInfo` payload land in `useAppStore` and drive button- and element-level checks (`PermissionGate`, `useIsAuthorized`, `useAuthorizedItems`) — see [Permissions](./permissions.md).
 
 So "permission-filtered menus" in VEF means: the backend filters `menus` per user before returning `UserInfo`, and the frontend trusts the result for both rendering and routing. If you need to hide a *local, static* list of items by token — a settings page's section list, for example — that is what `useAuthorizedItems()` is for, not the sidebar.
 

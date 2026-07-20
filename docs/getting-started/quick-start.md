@@ -53,11 +53,18 @@ import { createApiClient } from "@vef-framework-react/starter";
 
 export const apiClient = createApiClient({
   http: {
-    baseUrl: import.meta.env.VITE_API_BASE_URL,
+    // Injected from VEF_APP_API_BASE_URL by the dev plugin (see Configuration)
+    baseUrl: __VEF_APP_CONFIG__.VEF_APP_API_BASE_URL,
     okCode: 0,
     tokenExpiredCode: 1002,
     timeout: 30_000,
     async refreshToken(tokens) {
+      // JWT-mode backends return a refresh token; since v2.10.0 the field is
+      // optional, so guard it before the exchange.
+      if (!tokens.refreshToken) {
+        throw new Error("No refresh token");
+      }
+
       const response = await fetch("/api/auth/refresh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,6 +80,8 @@ export const apiClient = createApiClient({
   }
 });
 ```
+
+`AuthTokens.refreshToken` is optional: backends that issue stateful opaque-token sessions (server-side sliding expiration) return no refresh token — on such a backend, omit the `refreshToken` callback entirely and expired sessions go straight to the unauthenticated flow.
 
 ## Step 3: Define Request Functions
 
@@ -212,7 +221,7 @@ createApp().render({
     hasPermission(token) {
       return token.startsWith("demo:");
     },
-    dictionaryQueryFn: undefined,
+    codeSetQueryFn: undefined,
     fileBaseUrl: "/files"
   },
   appVersionNotification: {
@@ -221,6 +230,8 @@ createApp().render({
   }
 });
 ```
+
+`codeSetQueryFn` is the host's code set lookup (option lists keyed by strings such as `"sys.user.gender"`); leave it `undefined` until the backend exposes one — see [Code Sets](../guide/code-sets.md).
 
 ## Step 8: Add a Real Page
 

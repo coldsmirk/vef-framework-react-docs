@@ -86,7 +86,7 @@ export default function Demo() {
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |
 | `onChange` | `(value: boolean) => void` | — | 变化回调函数 |
-| `children` | `ReactNode` | — | 标签文本（用于 `checkbox` 变体） |
+| `children` | `ReactNode` | — | 标签文本（用于 `switch` / `checkbox` 变体） |
 
 ## 变体行为
 

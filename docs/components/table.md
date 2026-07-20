@@ -138,7 +138,7 @@ const pagination = usePaginationProps({
 });
 ```
 
-`usePaginationProps` accepts `{ paginationParams, total }` and returns `TablePaginationConfig`. Handle `onChange` separately to update `paginationParams`.
+`usePaginationProps` accepts `{ paginationParams: PaginationParams, total: number }` and returns a `TablePaginationConfig` with the framework's standard settings: `current` / `pageSize` derived from `paginationParams` (defaulting to page `1`, size `15`), `showSizeChanger`, the preset `pageSizeOptions` (`[10, 15, 20, 30, 40, 50, 100]`, also exported standalone), a "第 x - y 条 / 共 n 条" total renderer, and bottom-end placement. Handle `onChange` separately to update `paginationParams`.
 
 ## API
 

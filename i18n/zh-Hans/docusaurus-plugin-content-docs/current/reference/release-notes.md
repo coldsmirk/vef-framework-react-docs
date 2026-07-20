@@ -1,15 +1,248 @@
 ---
 title: 版本说明与升级指南
-description: 每个已发布版本的破坏性变更、新特性和值得关注的修复，并附带升级前后的对照代码。
+description: 每个已发布版本以及未发布变更的破坏性变更、新特性和值得关注的修复，并附带升级前后的对照代码。
 ---
 
 # 版本说明与升级指南
 
-所有已发布的包在同一个仓库中同步发版：一次发布提交会把每个 `packages/*/package.json` 提升到同一版本号，并打上 `vX.Y.Z` 标签。升级时应把所有 `@vef-framework-react/*` 依赖一起升级——[安装](../getting-started/installation.md)将它们统一固定为 `^2.9.0` 正是出于这个原因。不支持在同一应用中混用不同版本的包。
+所有包在同一个仓库中同步发版：一次发布提交会提升每个 `packages/*/package.json` 的版本号，并打上 `vX.Y.Z` 标签。版本提升是按包、相对其自身 manifest 应用的（发布脚本在每个包中运行 `pnpm version`），因此所有包的增量相同——但一个在版本周期中途加入的包，会从其脚手架声明的版本起步，在仓库的 `sync-meta` 维护脚本将其与根版本重新对齐之前，它的版本号可能落后于标签。这不是理论上的可能：**v2.12.0 这次发布把 `@vef-framework-react/integration` 发成了 2.10.0**，而其他所有包都发为 2.12.0。
 
-包的*集合*本身也会随版本变化：v2.7.0 移除了 `@vef-framework-react/expression`，v2.8.0 新增了 `@vef-framework-react/approval-form-bridge`——两者在下文中都有说明。
+因此升级规则是：把所有 `@vef-framework-react/*` 依赖一起升级，每个都升到*同一次*发布所发出的版本——[安装](../getting-started/installation.md)固定了当前的版本组合。不支持在同一应用中混用来自不同发布的包。
 
-版本按从新到旧排列。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
+包的*集合*本身也会随版本变化：v2.7.0 移除了 `@vef-framework-react/expression`，v2.8.0 新增了 `@vef-framework-react/approval-form-bridge`，v2.12.0 新增了 `@vef-framework-react/approval` 和 `@vef-framework-react/integration`，下一个版本将新增 `@vef-framework-react/cron`——下文对它们均有说明。
+
+版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
+
+## 未发布（v2.12.0 之后，截至 2026-07-20）
+
+已合并到 main 分支但尚未进入任何带标签的发布。如果你只消费带标签的发布，这些变更会随下一个版本到达。
+
+### 破坏性变更："dictionary" 全面更名为 "code set"
+
+数据字典（data dictionary）词汇在所有包中统一更名为**码集**（code set）。线上契约未受影响——宿主仍然提供一个把键名字符串映射为 `DataOption[]` 的查询函数——但所有包含 "dictionary" 的导出名都发生了变化。概念指南见[码集](../guide/code-sets.md)。
+
+**hooks** — 查询 hook 及其整个类型家族：
+
+```ts
+// Before (≤ v2.12.0)
+import {
+  resolveDictKey,
+  useDictionaryQuery,
+  type DictionaryAliasMap,
+  type DictionaryKey,
+  type DictionaryKeyConfig,
+  type DictionaryKeyValue,
+  type DictionaryQueryData,
+  type UseDictionaryQueryOptions
+} from "@vef-framework-react/hooks";
+
+// After
+import {
+  resolveCodeSetKey,
+  useCodeSetQuery,
+  type CodeSetAliasMap,
+  type CodeSetKey,
+  type CodeSetKeyConfig,
+  type CodeSetKeyValue,
+  type CodeSetQueryData,
+  type UseCodeSetQueryOptions
+} from "@vef-framework-react/hooks";
+```
+
+`Register` 扩充成员随之变化——约束了键名的项目必须更新自己的 `declare module` 块：
+
+```ts
+declare module "@vef-framework-react/hooks" {
+  interface Register {
+    // Before: dictionaryKeys: "sys.menu.type" | "sys.user.gender";
+    codeSetKeys: "sys.menu.type" | "sys.user.gender";
+  }
+}
+```
+
+**core** — `AppContext.dictionaryQueryFn` 现为 `AppContext.codeSetQueryFn`。请更新传给 `createApp().render()` 的 `appContext`：
+
+```ts
+createApp().render({
+  // ...
+  appContext: {
+    hasPermission,
+    // Before: dictionaryQueryFn: findCodeSetEntries,
+    codeSetQueryFn: findCodeSetEntries,
+    fileBaseUrl: "/files"
+  }
+});
+```
+
+**components** — `useDictionaryOptionsSelect` 现为 `useCodeSetOptionsSelect`；其选项/结果类型 `UseDictionaryOptionsSelectOptions` / `UseDictionaryOptionsSelectResult` 现为 `UseCodeSetOptionsSelectOptions` / `UseCodeSetOptionsSelectResult`。
+
+**dev** — 代码生成模块同步更名（见 [Dev 包](./dev/overview.md#代码生成)）：
+
+- CLI 命令：`vef gen:dictionary-keys` → `vef gen:code-set-keys`。
+- `code-generation.config.ts`：`dictionaryKeys` 配置块 → `codeSetKeys`，其拉取函数 `fetchDictionaryKeys` → `fetchCodeSetKeys`。
+- 默认输出文件：`src/types/dictionary.gen.ts` → `src/types/code-set-keys.gen.ts`；生成的联合类型为 `CodeSetKey`（原为 `DictionaryKey`），扩充的是 `Register.codeSetKeys`。
+- 编程式导出：`generateDictionaryKeys` → `generateCodeSetKeys`（连同其 `Options` / `Result` 类型）、`renderDictionaryKeysFile` → `renderCodeSetKeysFile`（连同 `RenderCodeSetKeysOptions`）、`DICTIONARY_AUGMENT_TARGET` → `CODE_SET_AUGMENT_TARGET`、`DictionaryKeyEntry` → `CodeSetKeyEntry`、`DictionaryKeysConfig` → `CodeSetKeysConfig`。
+
+更名配置之后，请删除旧的生成文件并重新运行 `vef gen:code-set-keys`，使扩充指向新的 `codeSetKeys` 成员。
+
+### 破坏性变更：approval-flow-editor 回归手写状态引擎
+
+编辑器的状态引擎重新改为手写实现，`@coldsmirk/nodeloom-core` 依赖已移除。这逆转了 v2.7.0 引入的内存节点形状（见下文对应章节）；线上（wire）格式依旧未受影响。
+
+```ts
+// v2.7.0 – v2.12.0 (nodeloom shapes): kind at data.kind, business fields under data.config
+import type { FlowNode } from "@vef-framework-react/approval-flow-editor";
+const isUrgent = (node: FlowNode) =>
+  node.data.kind === "approval" && node.data.config.name === "Urgent";
+
+// After (typed xyflow nodes): kind at node.type, business fields directly on data
+import type { FlowNode } from "@vef-framework-react/approval-flow-editor";
+const isUrgent = (node: FlowNode) =>
+  node.type === "approval" && node.data.name === "Urgent";
+```
+
+- `FlowNode` 现在是包内定义的、由类型化 `@xyflow/react` 节点组成的可辨识联合（`Node<StartNodeData, "start"> | … | Node<CcNodeData, "cc">`）；`FlowEdge` 是 xyflow 的 `Edge`。二者都不再是 nodeloom 的再导出。
+- 按种类划分的节点别名重新导出——但只有 `StartNode`、`ApprovalNode`、`HandleNode` 和 `CcNode`。与 v2.7.0 之前不同，`ConditionNode` 和 `EndNode` 保持内部；它们的数据形状（`ConditionNodeData`、`EndNodeData`）仍然导出。
+- `AnyNodeData` 保留，作为节点数据联合类型（`FlowNode["data"]`）的别名。
+- 内部 store 重构为分片（slice）结构；通过 `useEditorStore` 做选择的宿主需要（再次）适配新的 `EditorState` 形状。
+- **线上格式未受影响。**`toFlowDefinition` / `fromFlowDefinition` 以及 `NodeDefinition`（`value` / `onChange`）契约保持不变——序列化器现在负责 `node.type` ↔ `kind` 的映射。已保存的流程定义无需迁移即可加载。
+
+### 新特性
+
+- **新包：`@vef-framework-react/cron`** — 面向持久化定时调度引擎的开箱即用管理页面：`CronSchedulePage` 和 `CronRunPage`（外加 `RunDetailDrawer`、表单模型辅助函数和 `CRON_PERMISSIONS`）。调度列表筛选拆分为基础与高级两个面板；已暂停的调度会隐藏其触发游标。参见[引擎](../engines/overview.md)。尚未发布到 npm——随下一个版本首发。
+- **core** — 面向 vef 服务端推送通道的 `PushClient`（及其工厂函数 `createPushClient`）：一条仅下行的 WebSocket，投递 `PushMessage` 消息信封（`{ id, type, payload?, time }`）。`subscribe(type, handler)` 按信封类型注册（`"*"` 接收全部消息），并返回取消订阅函数。传输层断连会以带抖动的指数退避重连（`PushReconnectOptions`），每次尝试都重新读取访问令牌（通过 `__accessToken` 查询参数发送）；终止性关闭码 `4401`（`PUSH_CLOSE_SESSION_INVALID`）和 `4429`（`PUSH_CLOSE_TOO_MANY_CONNECTIONS`）经由 `onSessionInvalid` / `onConnectionRejected` 暴露，且永不重连。按契约，投递是尽力而为的——请把它当作实时提示，把可靠状态留在常规 API 后面。
+- **hooks** — `usePushMessage(client, type, handler)` 订阅一种信封类型，并在卸载时自动清理。
+- **integration** — 码表管理页面（`IntegrationCodeMapPage`），为映射代码提供自动补全；码表的码集从宿主目录中选取，并支持手动输入兜底。
+
+### 值得关注的修复
+
+- **components** — pro-search 的折叠切换按钮传递了正确的 antd 图标属性（V 形折叠图标恢复渲染）；操作区域改为响应式尺寸，使搜索控件可以在工具栏内容旁收缩。
+
+## v2.12.0 (2026-07-17)
+
+两个包加入集合：**`@vef-framework-react/approval`**（首发版本为 2.12.0）和 **`@vef-framework-react/integration`**（首发版本为 **2.10.0**——其 manifest 在版本周期中途才脚手架生成；见本页顶部的版本号说明）。在后续发布将其重新对齐之前，请把 `integration` 固定为 `^2.10.0`。
+
+从 v2.11.0 升级无需迁移。该发布包含两个标记为 breaking 的提交，但它们都是在 approval 包首次发布之前对其进行的重塑：设计器种子数据的重做（精简版本摘要）以及标签套件从 `approval` 移入 `components`。对已发布版本的消费者来说，标签套件的移动是纯新增——该套件以新导出的形式落在 `components` 中。
+
+### 新包：`@vef-framework-react/approval`
+
+面向审批引擎的开箱即用管理与运行时页面，端到端内嵌流程设计器：`ApprovalFlowPage`（含 `FlowDesignerDrawer` / `FlowVersionsDrawer`）、`ApprovalTaskCenterPage`、`ApprovalMyInstancesPage`、`ApprovalInitiatePage`（含 `StartInstanceDrawer`）、`ApprovalAdminPage`、`ApprovalCategoryPage` 和 `ApprovalDelegationPage`，外加用于宿主提供选择器的 `ApprovalProvider` / `useApprovalPlugins` / `toEditorPlugins`，以及 `APPROVAL_PERMISSIONS`。参见[引擎](../engines/overview.md)。
+
+首个版本中值得关注的行为：设计器通过精简的 `FlowVersionSummary` 记录从最近部署的版本播种（完整定义按版本通过带显式 `versionId` 的 `getGraph` 拉取）；流程标签显示在实例详情上；实例详情操作栏新增移除办理人；指标加载失败时提供重试操作。
+
+### 新包：`@vef-framework-react/integration`
+
+面向集成引擎的开箱即用管理页面：`IntegrationSystemPage`、`IntegrationAdapterPage`、`IntegrationContractPage`、`IntegrationRoutePage` 和 `IntegrationConsolePage`，外加 `INTEGRATION_PERMISSIONS`。参见[引擎](../engines/overview.md)。
+
+首个版本中值得关注的行为：带内部滚动区域的全高控制台工作台；感知认证方案的认证参数编辑器，带专用凭据字段；每个脚本编辑器中的脚本 API 自动补全，并从补全目录渲染可悬浮查看的脚本文档；带目录过滤的契约标签管理；以及 JSON Schema 关键字补全和高亮的线上追踪报文体。
+
+### 新特性
+
+- **components** — 标签套件（从未发布的 approval 包中移入，因此在这里以新导出的形式落地）：`LabelsEditor`、`LabelsDisplay`、`LabelFilterSelect`，辅助函数 `formatLabelFilters` / `parseLabelFilters` / `isValidLabel`，以及常量 `LABEL_KEY_PATTERN`。
+- **components** — `FlexTabs` 与 `Labeled` 布局原语，分别用于全高标签页布局和风格一致的带标签值展示。
+- **components** — 代码编辑器：声明式的 `completions` 属性（`CompletionEntry[]`）在语言自身补全之外追加 API 补全（在 `"json"` 中，条目会在属性名字符串内以对象键的形式补全）；`"xml"` 语言加入内置列表；悬浮的格式化操作（`showFormat`，默认 `true`）通过 prettier 无损格式化 JSON。
+- **components** — `formLayout` 可在 `FormModal`、`FormDrawer` 和 `Crud` 上透传；`EditableTable` 会把 `locale` 转发给底层表格。
+
+### 值得关注的修复
+
+- **core** — 路径参数替换只在路径段起始处匹配，且要求参数名以字母或下划线开头，因此绝对 URL 中的端口（`https://minio.local:9000/…`）和路径段中间的冒号（`/schedule/12:30`）永远不会被当作参数。
+- **components** — 过期的异步格式化结果不再覆盖更新的按键输入；代码编辑器的 tooltip 渲染在 antd 浮层（弹窗、抽屉）之上；可编辑表格的操作列获得固定的默认宽度；抽屉表单内容不再与底部操作区重叠。
+
+## v2.11.0 (2026-07-15)
+
+### 破坏性变更：请求生命周期按调用隔离
+
+`ApiClient.createQueryFn` 过去只在定义时调用**一次**你的工厂函数，并通过共享可变状态注入"当前查询"的中止信号——并发或交错的异步查询可能观察到彼此的信号。现在工厂函数在**每次查询执行时**运行一次，每个处理器都会收到一个绑定到本次执行中止信号的调用作用域 `HttpClient` 代理（并与传给请求方法的任何显式 `options.signal` 组合）。
+
+契约变化：**工厂函数必须无副作用、不得跨执行保留状态、不能执行一次性初始化。**请把此类代码移出工厂函数：
+
+```ts
+// Before (≤ v2.10.0): the factory body ran once and could hold shared state
+const findUserPage = apiClient.createQueryFn("findUserPage", http => {
+  const columnCache = buildColumnCache(); // one-time setup — no longer safe here
+  return async (params: UserSearch) => http.post("/api/user/page", { data: params });
+});
+
+// After (≥ v2.11.0): one-time setup lives outside; the factory only closes over it
+const columnCache = buildColumnCache();
+const findUserPage = apiClient.createQueryFn(
+  "findUserPage",
+  http => async (params: UserSearch) => http.post("/api/user/page", { data: params })
+);
+```
+
+`createMutationFn` 不变——它仍然只构造一次。
+
+令牌刷新协调也按同一原则重建。在配置了 `tokenExpiredCode` 的 401 上，`HttpClient` 会发布一个共享的刷新 promise；并发的新请求通过请求作用域、感知中止的等待器等待，并在令牌续期后继续。现在可以依赖的行为：
+
+- 取消一个等待中的请求（或其 401 触发了刷新的那个请求）**不会**取消全局刷新。
+- 刷新成功后，仍然存活的触发请求会用续期后的令牌重试。
+- 自动刷新失败时，`onUnauthenticated` 恰好被调用一次——即使触发请求在此期间已被取消。
+- `ensureTokenRefreshed(false)` 只有在该调用*拥有*（即发起了）这轮刷新时才会抑制未认证回调；加入进行中的刷新无法覆盖发起者的失败策略。
+
+同一版本还规范了文件响应：在期望文件的位置返回后端 JSON 业务信封的响应，会以 `BusinessError` 的形式暴露，而不是被当作文件内容返回；原始（非信封）下载响应也能被正确处理。
+
+### 新特性
+
+- **core** — `HttpClient.requestFile(url, options?)` 以客户端完整的请求语义（Bearer 注入、401 刷新重试、路径参数、中止信号）把文件拉取为 `Blob`，返回 `HttpFileResponse`——`{ blob: Blob; filename?: string }`，文件名解析自 `Content-Disposition`。`download()` 现在构建于其上，并保留其触发浏览器下载的行为。`requestFile` 与其他请求方法一样参与 `createQueryFn` 的信号注入。
+- **components** — 文件预览契约：框架不捆绑任何查看器库；改由 `FilePreviewProvider` 安装一个应用级预览宿主（`FilePreviewHandler`），`Upload` 及构建在其上的一切组件会把非图片文件规范化为 `FilePreviewTarget` 后派发给它（`toFilePreviewTarget`，读取上传/水合时打上的 `UploadedFileMeta`）。图片保留内置的 `Image` 弹窗。随之而来的行为变化：没有接收方 provider 时，框架会给出警告，不再把无法证明认证要求的 URL 交给浏览器。私有文件由宿主通过 `HttpClient.requestFile` / `HttpClient.download` 拉取。playground 演示了一个基于 `@file-viewer/react` 的完整宿主。
+
+### 值得关注的修复
+
+- **components** — 带认证的上传预览按文件各自独立解析其源 URL，不再在条目间共享状态。
+
+## v2.10.0 (2026-07-13)
+
+### 破坏性变更：`AuthTokens.refreshToken` 变为可选
+
+签发有状态不透明令牌（opaque token）会话的后端（服务端滑动续期——没有刷新往返）不会返回刷新令牌；只有 JWT 模式的后端才会返回。类型现在如实反映了这一点：
+
+```ts
+// Before (≤ v2.9.0)
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+// After (≥ v2.10.0)
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken?: string;
+}
+```
+
+这纯粹是一次编译期迁移：任何把 `tokens.refreshToken` 读入 `string` 类型槽位的代码——最常见的是传给 `createApiClient` 的 `refreshToken` 回调——现在必须处理 `undefined`：
+
+```ts
+async refreshToken(tokens) {
+  if (!tokens.refreshToken) {
+    // Opaque-token session: nothing to refresh; let the request fail as expired.
+    throw new Error("No refresh token");
+  }
+  // ... exchange tokens.refreshToken as before
+}
+```
+
+使用不透明令牌后端的宿主可以直接省略 `refreshToken` 回调——此时 401 路径会径直进入 `onUnauthenticated`。
+
+### 破坏性变更：form-editor 与 approval-form-bridge 契约收紧
+
+本版本包含两项编辑器栈的破坏性变更；细节见[可视化编辑器](../editors/overview.md)：
+
+- **form-editor** — 每次编程式写入都要经过字段权限钳制，因此对当前权限标记为只读或隐藏的字段的写入不再生效。
+- **approval-form-bridge** — 投影输出裸字段数组（`ProjectionResult.fields: ApprovalFormField[]` 取代了 `definition` 包装对象），富表单 schema 改为在部署时发送。`ApprovalFormDefinition` 类型已移除且没有替代品——见[迁移说明](../editors/approval-form-bridge.md)。
+
+### 新特性
+
+- **starter** — 面向后端强制修改密码登录挑战的内置 `password_change` 挑战渲染器：`PasswordChangeChallenge` 组件、常量 `PASSWORD_CHANGE_CHALLENGE_TYPE`（`"password_change"`），以及 `PasswordChangeChallengeSpec` / `PasswordChangeChallengeData` / `PasswordChangeChallengeProps` / `PasswordChangeReason` 类型。请在 `challengeRenderers` 中注册并扩充 `Register['challenges']`——参见[应用壳层](./starter/application-shell.md#登录挑战)。
+- **approval-flow-editor** — 设计器中的三态 `formFields` 清单与必填自动通过镜像；部署时的字段权限校验在设计时同步镜像。
+- **form-editor** — 运行时字段状态由服务端解析的 `fieldPermissions` 钳制；堆叠块新增宽度/最小/最大/对齐尺寸设置；设计器会把选中项滚动到可视区域、新增容器拖拽把手，并支持选项重新排序。
+- **approval-form-bridge** — 跨设备分类保持同步；隐藏的必填字段会在投影时产生警告。
+
+### 值得关注的修复
+
+- **components** — 当输入框使用 `allowClear` 时，pro-search 字段保持宽度不变。
+- **dev** — `VEF_APP_NAME` 现在对注入的配置全局变量生效。`defineViteConfig` 此前只从 `env/` 加载 `VEF_BUILD_*` 变量，导致该名称从未到达配置插件；此外，生产环境的 `__VEF_APP_CONFIG__` define 与生成的 `app.config.js` 推导全局变量名的方式不同，可能不一致。现在两侧解析出同一个 `__PRODUCTION__VEF_<CONSTANT_CASE_NAME>__CONF__` 全局变量。参见 [Dev 包](./dev/overview.md#运行时注入vef_app_)。
 
 ## v2.9.0 (2026-07-06)
 
@@ -25,7 +258,7 @@ description: 每个已发布版本的破坏性变更、新特性和值得关注�
 
 ### 新特性
 
-- **新包：`@vef-framework-react/approval-form-bridge`** — 连接 `form-editor` schema 与审批后端扁平表单契约的纯函数投影桥。导出 `projectFormSchema`、`createApprovalRegistries`、`validateApprovalSchema` 和 `APPROVAL_EXCLUDED_FIELD_TYPES`。请将其加入依赖，版本号与其他包保持一致。参见[审批表单桥](../editors/approval-form-bridge.md)。
+- **新包：`@vef-framework-react/approval-form-bridge`** — 连接 `form-editor` schema 与审批后端扁平表单契约的纯函数投影桥。导出 `projectFormSchema`、`createApprovalRegistries`、`validateApprovalSchema` 和 `APPROVAL_EXCLUDED_FIELD_TYPES`。请将其加入依赖，版本号与其他包保持一致。参见[审批表单桥接](../editors/approval-form-bridge.md)。
 - **approval-flow-editor** — 设计器现在镜像后端的聚合与分支条件校验，包括明细表聚合条件，使契约违规在设计时就能暴露，而不是等到部署时。
 
 ### 值得关注的修复
@@ -71,7 +304,7 @@ $form.age >= 18 && $form.status === "active"
 
 ### 破坏性变更：approval-flow-editor 状态引擎重建于 nodeloom 之上
 
-编辑器的状态引擎重建于 `@coldsmirk/nodeloom-core`。内存中的节点和边现在采用 nodeloom 的统一形状：每个节点的 `type` 都是 `"flowNode"`，节点种类判别字段位于 `data.kind`，业务字段则位于 `data.config` 之下。
+编辑器的状态引擎重建于 `@coldsmirk/nodeloom-core`。内存中的节点和边现在采用 nodeloom 的统一形状：每个节点都携带 `type: "flowNode"`，节点种类判别字段位于 `data.kind`，业务字段则位于 `data.config` 之下。
 
 ```ts
 // Before (≤ v2.6.0): per-kind xyflow node types
@@ -115,10 +348,10 @@ starter 应用切换器的 `AppItem.icon` 从 kebab-case 的 lucide 图标*名�
 
 ```tsx
 // Before (≤ v2.4.4)
-{ key: "crm", name: "CRM", icon: "briefcase" }
+{ id: "crm", name: "CRM", icon: "briefcase" }
 
 // After (≥ v2.5.0)
-{ key: "crm", name: "CRM", icon: <DynamicIcon name="briefcase" /> }
+{ id: "crm", name: "CRM", icon: <DynamicIcon name="briefcase" /> }
 ```
 
 ### 新特性

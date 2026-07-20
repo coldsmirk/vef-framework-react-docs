@@ -42,7 +42,7 @@ If the user lacks `user:edit` permission, the button is not rendered at all.
 ```tsx
 <OperationButton
   requiredPermissions="user:delete"
-  danger
+  color="danger"
   confirmable
   confirmTitle="Delete User"
   confirmDescription="This action cannot be undone."
@@ -69,7 +69,7 @@ If the user lacks `user:edit` permission, the button is not rendered at all.
       </OperationButton>
       <OperationButton
         requiredPermissions="user:delete"
-        danger
+        color="danger"
         confirmable
         onClick={async () => deleteUser(record.id)}
       >
@@ -82,19 +82,20 @@ If the user lacks `user:edit` permission, the button is not rendered at all.
 
 ## API
 
-`OperationButton` extends `ActionButton` props (except `size`, `variant`, `type`, `danger`) plus `PermissionGate` props:
+`OperationButton` extends [`ActionButton`](./action-button.md) props (except `size`, `variant`, `type`, and `danger`, which are removed) plus the permission props of [`PermissionGate`](./permission-gate.md):
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `requiredPermissions` | `string \| string[]` | — | Required permission token(s) |
+| `requiredPermissions` | `string \| string[]` | — | Required permission token(s); when empty, the button renders without a permission gate |
 | `checkMode` | `'any' \| 'all'` | `'any'` | Permission check mode |
 | `confirmable` | `boolean` | `false` | Show confirmation before executing |
 | `confirmMode` | `'popover' \| 'dialog'` | `'popover'` | Confirmation UI style |
 | `confirmTitle` | `ReactNode` | `'确认提示'` | Confirmation title |
 | `confirmDescription` | `ReactNode` | `'确定要执行此操作吗？'` | Confirmation description |
+| `color` | `ButtonColor` | — | Button color (e.g. `'primary'`, `'danger'`) — use this instead of the removed `type` / `danger` props |
 | `onClick` | `(e) => Awaitable<void>` | — | Async click handler |
 
-> Note: `size`, `variant`, `type`, and `danger` are fixed internally and cannot be overridden.
+> Note: `size` and `variant` are fixed internally (`size="small"`, `variant="filled"`, sized to fit table rows) and cannot be overridden; `type` and `danger` are removed from the props — style through `color`.
 
 ## Comparison
 

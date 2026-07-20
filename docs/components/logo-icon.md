@@ -27,8 +27,8 @@ export default function AppLogo() {
 
 ## API
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `primaryColor` | `string` | Primary color of the logo |
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `primaryColor` | `string` | the blue-500 palette color | Primary color of the logo; the secondary strokes use the 400 shade derived from the same palette |
 
-All standard SVG props (`width`, `height`, `className`, `style`, etc.) are also supported.
+All standard SVG props (`width`, `height`, `className`, `style`, etc.) are also supported. Without an explicit size the logo renders at `1em`, scaling with the surrounding font size.

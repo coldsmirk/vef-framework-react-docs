@@ -49,9 +49,13 @@ Official docs: [Mantine Hooks](https://mantine.dev/hooks/)
 
 ## Hotkey Exports
 
+Passed through as-is from `react-hotkeys-hook`:
+
 - `HotkeysProvider`
 - `useHotkeys`
 - `useHotkeysContext`
 - `useRecordHotkeys`
+- `HotkeyCallback` — type of the callback passed to `useHotkeys`
+- `HotkeysOptions` — the hook's options type (react-hotkeys-hook's `Options`, renamed)
 
 Official docs: [react-hotkeys-hook](https://react-hotkeys-hook.vercel.app/)

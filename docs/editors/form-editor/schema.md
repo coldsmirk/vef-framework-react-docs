@@ -158,6 +158,17 @@ A block carries at most one meaningful layout prop, selected by its parent — t
 | `columnWidth` | a `table` subform column | fixed pixel width; omitted shares remaining width |
 | `stack` | a direct child of a stack body (root / `section` / `tabs` pane / `stack` subform row) | `{ width?, minWidth?, maxWidth?: CssLength, align?: "start" \| "center" \| "end" }`, `CssLength = { value: number; unit: "px" \| "%" }` |
 
+`stack: StackSlot` (v2.10.0) sizes and places a block in the one parent context that otherwise leaves it full-width — the stack body. Field by field:
+
+| `StackSlot` field | Type | Default | Effect |
+| --- | --- | --- | --- |
+| `width` | `CssLength` | omitted resolves to `100%` | The block's CSS `width`. `%` is relative to the stack's width, `px` is absolute. `value` must be ≥ 1 — a zero box would collapse the block. |
+| `minWidth` | `CssLength` | omitted = CSS default (`0`) | CSS `min-width` floor; a `value` of `0` is valid here (unlike `width` / `maxWidth`). |
+| `maxWidth` | `CssLength` | omitted = unconstrained | CSS `max-width` cap; `value` must be ≥ 1. Combine with a `%` `width` for responsive sizing (e.g. `width: 100%` capped by `maxWidth: 480px`). |
+| `align` | `"start" \| "center" \| "end"` | omitted = document flow (reads as start) | Cross-axis placement, realized as auto margins, so it only bites once a `width` / `maxWidth` narrows the block below the stack's width — a no-op at full width. |
+
+The slot is ignored in a `grid` / `flex` / `table`-subform parent, where `span` / `flex` / `columnWidth` apply instead. `validateSchema` checks the shape on import (`stack_invalid`): a non-record slot, an out-of-range or malformed `CssLength`, or an unknown `align` fails. Lengths are authored as explicit `{ value, unit }` — never raw CSS strings — so a persisted length is always a valid, re-editable dimension.
+
 A stacking body's own vertical rhythm is `gap: GapScale` (`"small" | "medium" | "large"`, `DEFAULT_GAP_SCALE = "medium"`, valid values in `GAP_SCALES`) on the `PresentationLayer` itself or on a `section` / `tabs` / `stack`-subform — omitted means inherit the form-level (or subform-level) default. `linkage` (see [Linkage](./linkage.md)) is honored on **any** block, leaf or container.
 
 ## Editing the tree
@@ -178,7 +189,7 @@ Read/query the tree with `walkNodes` / `walkFields` (depth-first visitors receiv
 
 ## Validating an imported schema
 
-`FormEditor`'s own mutators always produce a well-formed tree. `validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` is the boundary guard for schema that did **not** come from the editor — a pasted import, an API payload. It checks the data envelope, per-presentation id/key uniqueness and key grammar, span ranges, known field types (against the registries you pass in), option-source shapes, and delegates to `validateLinkageSchema` (see [Linkage → Validation](./linkage.md#validation)) once the structural pass is clean. A result is `valid` (and carries the narrowed `schema`) as long as it has no *error*-severity issue — *warning*-severity issues (dangling references, empty condition groups) are legitimate mid-authoring state and round-trip through export → import.
+`FormEditor`'s own mutators always produce a well-formed tree. `validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` is the boundary guard for schema that did **not** come from the editor — a pasted import, an API payload. It checks the data envelope, per-presentation id/key uniqueness and key grammar, span ranges, [stack-slot shapes](#layout-and-sizing) (v2.10.0), known field types (against the registries you pass in), option-source shapes, and delegates to `validateLinkageSchema` (see [Linkage → Validation](./linkage.md#validation)) once the structural pass is clean. A result is `valid` (and carries the narrowed `schema`) as long as it has no *error*-severity issue — *warning*-severity issues (dangling references, empty condition groups) are legitimate mid-authoring state and round-trip through export → import.
 
 ## Table-storage projection
 
@@ -188,4 +199,4 @@ For a host that persists submitted values in a relational column per keyed field
 
 `toFormFieldDefinitions(schema): FormFieldDefinition[]` flattens the same root-scope keyed field inventory into the coarse `{ key, kind: FieldKind, label, options? }` shape `@vef-framework-react/approval-flow-editor` consumes through its `EditorPlugins.formFields` seam to drive its per-node field-permission matrix. `FieldKind` is a lossy, lowest-common-denominator set (`"input" | "textarea" | "select" | "number" | "date" | "upload"`) shared with the Go backend's `FieldKind`.
 
-This mapping is intentionally simple and is **not** the authoritative approval integration path — for approval-backend integrations, project the schema with `projectFormSchema` from [`@vef-framework-react/approval-form-bridge`](../approval-form-bridge.md) instead. It walks the schema once and derives the same `FormFieldDefinition[]` shape (as `formFields`) alongside the flat `ApprovalFormField[]` the Go backend's own parser expects (as `fields`), with a conservation rule — an unprojectable keyed field is always a reported error, never a silent drop.
+This mapping is intentionally simple and is **not** the authoritative approval integration path — for approval-backend integrations, project the schema with `projectFormSchema` from [`@vef-framework-react/approval-form-bridge`](../approval-form-bridge.md) instead. It walks the schema once and derives a richer `FormFieldDefinition[]` (as `formFields`) alongside the flat `ApprovalFormField[]` the Go backend's own parser expects (as `fields`), with a conservation rule — an unprojectable keyed field is always a reported error, never a silent drop. Where this function collapses subforms away and folds every widget into a nearest kind, the bridge projects a subform as a `table` entry with its `columns` and annotates linkage-hideable fields with `hasConditionalVisibility` for the flow editor's permission table.

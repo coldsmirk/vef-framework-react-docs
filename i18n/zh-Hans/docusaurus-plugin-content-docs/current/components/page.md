@@ -116,3 +116,21 @@ const height = useViewportHeight();
 ```
 
 > 在 `<Page scrollable>` 之外调用 `useViewportHeight` 会抛出异常——它读取的 context 值只有 `Page` 会提供，且仅在 `scrollable` 为 `true` 时提供。
+
+### 入场 Hook
+
+`Page` 在挂载时播放入场动画，并把"页面已经就位"暴露为一个信号。次级动效、自动聚焦、引导提示或推迟的重型初始化都可以以它为触发点，在入场结束后再开始，而不是与入场动画抢占资源：
+
+| 导出 | 类型 | 说明 |
+|--------|------|-------------|
+| `usePageEntranceEffect` | `(effect: () => void \| (() => void)) => void` | 在宿主 `Page` 的入场安定后运行一次 `effect`——若已经安定（包括在 `Page` 之外）则立即运行。不引发任何重渲染。清理函数在卸载时运行；若页面重载重放了入场动画，effect 会重新武装 |
+| `usePageEntranceSettled` | `() => boolean` | 入场是否已结束（在 `Page` 之外立即为 `true`）。会订阅组件——入场安定时组件重渲染一次。当安定状态驱动渲染时使用 |
+| `PageEntranceStore` | `{ isSettled(): boolean; subscribe(listener): () => void }` | context 所承载的底层 store 类型 |
+
+CSS 也可以直接选中 `Page` 根节点的 `data-entrance` 属性。
+
+```tsx
+usePageEntranceEffect(() => {
+  chart.startEntranceSequence();
+});
+```

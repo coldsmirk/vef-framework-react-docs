@@ -26,7 +26,7 @@ createApiClient({
 });
 ```
 
-这些字段决定了框架如何判断一次请求是否成功、令牌刷新行为，以及用户是否应该被送回登录页。完整的 `HttpClientOptions` 字段参考见 [HTTP 与 API 客户端](../reference/core/http-and-api.md)。
+这些字段决定了框架如何判断一次请求是否成功、令牌刷新行为，以及用户是否应该被送回登录页。`tokenExpiredCode` 和 `refreshToken` 只适用于 JWT 风格的会话——不透明令牌后端两者都不配置，任何 401 都会直接走重新登录路径（两种会话风格见 [认证](./authentication.md)）。完整的 `HttpClientOptions` 字段参考见 [HTTP 与 API 客户端](../reference/core/http-and-api.md)。
 
 ## 业务错误与网络错误
 
@@ -36,6 +36,8 @@ createApiClient({
 - 网络错误：超时、离线、4xx/5xx，或其他传输层失败
 
 VEF 的 `HttpClient` 会替你处理第一种情况，这消除了大量重复的“if code !== 0 就弹提示”式页面逻辑。
+
+这一点对文件接口同样成立：当一次 `requestFile` / `download` 调用收到的是后端的 JSON 业务信封而不是文件内容（一次失败的导出、一个过期的链接）时，客户端会检测出这个信封——即使它藏在二进制响应体里——并抛出 `BusinessError` 并给出常规的警告反馈，而不是把这份 JSON 当作文件交给你。见 [数据请求](./data-fetching.md#带认证地获取文件)。
 
 ## 未认证与无权限
 

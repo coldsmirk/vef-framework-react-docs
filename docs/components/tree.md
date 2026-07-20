@@ -78,6 +78,13 @@ export default function Demo() {
 
 Each `*Key` option accepts either a string path (e.g. `"user.name"`) or an extractor function.
 
-Returns `{ treeProps, isFetching, searchValue, setSearchValue }`.
+### `useDataOptionsTree` Result
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `treeProps` | `TreeProps<DataOptionWithPinyin>` | Ready-to-spread props: `treeData` (filtered down to matching nodes plus their ancestors while searching), `fieldNames` (`title: 'label'`, `key: 'value'`, `children`), `showLine` (without leaf icons), `autoExpandParent`, `blockNode`, and `filterTreeNode` |
+| `isFetching` | `boolean` | Whether the query is fetching |
+| `searchValue` | `string` | The current search keyword |
+| `setSearchValue` | `(value: string) => void` | Set the search keyword — wire it to your own search input; matching compares `label` / `description`, their full pinyin, and pinyin initials |
 
 For all other props, see [Ant Design Tree documentation](https://ant.design/components/tree/).

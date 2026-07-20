@@ -116,3 +116,21 @@ const height = useViewportHeight();
 ```
 
 > `useViewportHeight` throws if called outside a `<Page scrollable>` — it reads a context value that only `Page` provides, and only when `scrollable` is `true`.
+
+### Entrance Hooks
+
+`Page` plays an entrance animation on mount and exposes "the page has finished arriving" as a signal. Secondary motion, auto-focus, guided hints, or deferred heavy initialization can key off it so they start after the entrance instead of competing with it:
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `usePageEntranceEffect` | `(effect: () => void \| (() => void)) => void` | Runs `effect` once the hosting `Page`'s entrance has settled — immediately when already settled (including outside a `Page`). Causes zero re-renders. The cleanup runs on unmount, and the effect re-arms if a page reload replays the entrance |
+| `usePageEntranceSettled` | `() => boolean` | Whether the entrance has finished (immediately `true` outside a `Page`). Subscribes the component — it re-renders once when the entrance settles. Use when the settled state drives rendering |
+| `PageEntranceStore` | `{ isSettled(): boolean; subscribe(listener): () => void }` | The underlying store type carried by the context |
+
+CSS can also target the `Page` root's `data-entrance` attribute directly.
+
+```tsx
+usePageEntranceEffect(() => {
+  chart.startEntranceSequence();
+});
+```

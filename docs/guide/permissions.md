@@ -94,6 +94,16 @@ const visibleActions = useAuthorizedItems([
 ]);
 ```
 
+## Engine Pages Ship Their Own Permission Codes
+
+The engine-page packages come with their backend permission codes as exported collections, mirroring the backend `RequiredPermission` strings verbatim:
+
+- `APPROVAL_PERMISSIONS` from `@vef-framework-react/approval`
+- `INTEGRATION_PERMISSIONS` from `@vef-framework-react/integration`
+- `CRON_PERMISSIONS` from `@vef-framework-react/cron`
+
+Each collection is nested by resource (`APPROVAL_PERMISSIONS.flow.publish` is `"approval.flow.publish"`, `CRON_PERMISSIONS.schedule.manage` is `"cron.schedule.manage"`, and so on). Every engine management page defaults its permission gates to the matching entries and accepts overrides through its `permissions` prop — so a host that maps engine permissions onto its own token scheme overrides per page instead of forking the pages. Provision the codes on the backend and, where host UI composes around engine pages, reuse the same constants in `PermissionGate` / `useAuthorizedItems` rather than repeating the strings. See [Engines Overview](../engines/overview.md) for the engine packages themselves.
+
 ## Recommended Usage
 
 - let page code consume permissions instead of maintaining a second permission source

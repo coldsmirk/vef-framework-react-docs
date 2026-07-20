@@ -41,6 +41,24 @@ pnpm add @vef-framework-react/approval-flow-editor
 pnpm add @vef-framework-react/approval-form-bridge
 ```
 
+## 可选的引擎包
+
+有三个包为 VEF 后端引擎提供开箱即用的管理页面——每个包都导出成品页面组件（连同其权限目录），可直接挂载到应用路由上。参见[引擎](../engines/overview.md)。
+
+| 包 | 一句话说明 |
+| --- | --- |
+| `@vef-framework-react/approval` | 审批引擎页面：流程设计器、任务中心、实例视图、管理、分类、委托 |
+| `@vef-framework-react/integration` | 集成引擎页面：系统、适配器、契约、路由，以及一个控制台工作台 |
+| `@vef-framework-react/cron` | 持久化定时调度页面：调度与运行历史 |
+
+```bash
+pnpm add @vef-framework-react/approval
+pnpm add @vef-framework-react/integration
+pnpm add @vef-framework-react/cron
+```
+
+版本注意事项：截至 v2.12.0 发布，`approval` 以 2.12.0 发布，但 `integration` 以 **2.10.0** 发布（其 manifest 在版本周期中途才脚手架生成；见[版本说明](../reference/release-notes.md)），而 `cron` 尚未发布到 npm——它随 v2.12.0 之后的下一个版本首发。请始终安装同一次发布所发出的版本组合。
+
 ## 通常需要哪些包
 
 | 场景 | 需要的包 |
@@ -52,8 +70,11 @@ pnpm add @vef-framework-react/approval-form-bridge
 | 集成可视化表单设计器 | `@vef-framework-react/form-editor` |
 | 集成审批流设计器 | `@vef-framework-react/approval-flow-editor` |
 | 将 form-editor 的 Schema 投影为审批流 | `@vef-framework-react/approval-form-bridge` |
+| 审批引擎管理页面 | `@vef-framework-react/approval` |
+| 集成引擎管理页面 | `@vef-framework-react/integration` |
+| 定时调度管理页面 | `@vef-framework-react/cron` |
 
-在大多数应用中，`starter` 会和 `components`、`core`、`hooks`、`shared` 一起使用。这三个编辑器包都是可选的，并且彼此独立——只添加应用实际需要嵌入的那些。
+在大多数应用中，`starter` 会和 `components`、`core`、`hooks`、`shared` 一起使用。编辑器包和引擎包都是可选的，并且彼此独立——只添加应用实际需要嵌入的那些。
 
 ## `package.json` 示例
 
@@ -63,16 +84,16 @@ pnpm add @vef-framework-react/approval-form-bridge
 {
   "dependencies": {
     "@tanstack/react-router": "^1.170.17",
-    "@vef-framework-react/components": "^2.9.0",
-    "@vef-framework-react/core": "^2.9.0",
-    "@vef-framework-react/hooks": "^2.9.0",
-    "@vef-framework-react/shared": "^2.9.0",
-    "@vef-framework-react/starter": "^2.9.0",
+    "@vef-framework-react/components": "^2.12.0",
+    "@vef-framework-react/core": "^2.12.0",
+    "@vef-framework-react/hooks": "^2.12.0",
+    "@vef-framework-react/shared": "^2.12.0",
+    "@vef-framework-react/starter": "^2.12.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@vef-framework-react/dev": "^2.9.0",
+    "@vef-framework-react/dev": "^2.12.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",
@@ -80,6 +101,15 @@ pnpm add @vef-framework-react/approval-form-bridge
   }
 }
 ```
+
+## Peer 依赖要求
+
+以下内容已对照 v2.12.0 各包的 manifest 核实:
+
+- `starter` 声明的 peer 依赖为 `@tanstack/react-router >=1`、`react` / `react-dom >=19`，以及同级的 `components` / `core` / `hooks` / `shared` 包 `>=2`——上面的最小安装可以全部满足。
+- `dev` 声明的 peer 依赖为 `vite ^8.0.0`、`eslint ^10.0.0`、`stylelint ^17.0.0`、`@commitlint/cli ^21.0.0`、`husky ^9.1.7` 和 `lint-staged ^17.0.0`，这也是它们出现在 dev 依赖安装命令中的原因。
+- 每个运行时包（`core`、`components`、`hooks`、各编辑器包、各引擎包）的 peer 依赖都只有 `react >=19`。
+- `antd`（`^6.5.0`）是 `components` 的常规依赖，而不是 peer 依赖——应用不需要自行安装它。
 
 ## 必需的 Vite 配置
 

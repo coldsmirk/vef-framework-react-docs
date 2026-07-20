@@ -9,8 +9,8 @@ description: Signatures for every key, path, pinyin, table-update, and tree-proc
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `hashKey` | `(key: unknown) => string` | Serializes any value to a stable JSON string, sorting object keys (and symbol keys after them) so structurally-equal inputs hash identically regardless of key order. |
-| `mergeWith` | `<T extends object>(target: T, source: Partial<T>, overrideExisting?: boolean) => T` | Merges `source` into `target` in place, skipping `undefined` source values; only overwrites existing target values when `overrideExisting` is `true` (default `false`). |
+| `hashKey` | `(key: unknown) => string` | Serializes any value to a stable JSON string, sorting object keys (and symbol keys after them, prefixed `@@`) so structurally-equal inputs hash identically regardless of key order. Used as the framework's `queryKeyHashFn`. |
+| `mergeWith` | `<T extends object>(target: T, source: Partial<T>, overrideExisting?: boolean) => T` | **Shallow**, top-level merge of `source` into `target`, in place (the mutated `target` is also returned). `undefined` source values are always skipped; a defined target value is only overwritten when `overrideExisting` is `true` (default `false` — i.e. fill in missing values only). |
 
 ## Path Helpers
 
@@ -33,14 +33,14 @@ Built on `path-browserify` (POSIX-style, browser-safe).
 
 ## Pinyin Helpers
 
-Built on `pinyin-pro`, with the modern Chinese dictionary preloaded on first use.
+Built on `pinyin-pro`, with the modern Chinese word data (`@pinyin-pro/data/modern`) loaded lazily on first use for accurate polyphone resolution.
 
 | Export | Signature | Description |
 | --- | --- | --- |
-| `WithPinyin<T, K>` | `type WithPinyin<T extends AnyObject, K extends keyof T & string>` | Adds `${K}Pinyin` / `${K}PinyinInitials` fields (optional if `T[K]` is optional) for each string key `K`. |
-| `getPinyin` | `(text: string) => string[]` | Full pinyin syllables for each character in `text`, memoized per input string. |
+| `WithPinyin<T, K>` | `type WithPinyin<T extends AnyObject, K extends keyof T & string>` | Adds `${K}Pinyin` / `${K}PinyinInitials` fields for each key `K` — required when `T[K]` is a required string, optional when `T[K]` is optional, and omitted entirely for non-string keys. |
+| `getPinyin` | `(text: string) => string[]` | Full toneless pinyin syllables for each character in `text` (non-Chinese runs kept as consecutive text, surnames read as surnames), memoized per input string. |
 | `getPinyinInitials` | `(text: string) => string[]` | First-letter initials for each character in `text`, memoized per input string. |
-| `withPinyin` | `<T extends AnyObject, K extends keyof T & string>(obj: T, ...keys: K[]) => WithPinyin<T, K>` | Returns a shallow copy of `obj` with `{key}Pinyin` / `{key}PinyinInitials` fields added for each given string key, e.g. `withPinyin({ name: "张三" }, "name")` → adds `namePinyin` / `namePinyinInitials`. |
+| `withPinyin` | `<T extends AnyObject, K extends keyof T & string>(obj: T, ...keys: K[]) => WithPinyin<T, K>` | Returns a shallow copy of `obj` with `{key}Pinyin` / `{key}PinyinInitials` fields added for each given key whose value is a string, e.g. `withPinyin({ name: "张三" }, "name")` → adds `namePinyin` / `namePinyinInitials`. |
 
 ## Table Update Helpers
 

@@ -1,18 +1,19 @@
 ---
 title: "CodeEditor"
-description: "A CodeMirror 6 code editor with syntax highlighting, light/dark theming, and an imperative ref API."
+description: "A CodeMirror 6 code editor with syntax highlighting, light/dark theming, declarative completions, one-click formatting, and an imperative ref API."
 ---
 
 # CodeEditor
 
-A CodeMirror 6 code editor with syntax highlighting, light/dark theming, and an imperative ref API.
+A CodeMirror 6 code editor with syntax highlighting, light/dark theming, declarative completions, one-click formatting, and an imperative ref API.
 
 > **VEF-specific component.** Built on [`@uiw/react-codemirror`](https://uiwjs.github.io/react-codemirror/). Not part of Ant Design.
 
 ## When to Use
 
-- Editing structured or code-like content (JSON, JavaScript/TypeScript, SQL, Markdown, Python) inline in a form or admin tool, where a plain `Input.TextArea` doesn't provide syntax highlighting.
+- Editing structured or code-like content (JSON, JavaScript/TypeScript, SQL, Markdown, Python, XML) inline in a form or admin tool, where a plain `Input.TextArea` doesn't provide syntax highlighting.
 - The editor should follow the app's dark mode automatically (`theme="auto"`, the default) rather than needing a manually wired light/dark toggle.
+- You want to offer host-specific autocomplete (injected bindings, JSON Schema keywords) without writing CodeMirror completion sources — the declarative `completions` catalog covers that.
 - Language packages are code-split — only the languages actually mounted are downloaded, so mounting a `CodeEditor` with `language="sql"` doesn't pull in the JSON or Python grammar.
 
 ## Basic Usage
@@ -51,6 +52,52 @@ import { rust } from '@codemirror/lang-rust';
 
 <CodeEditor language={rust()} value={value} onChange={setValue} />
 ```
+
+## Formatting
+
+Languages with a built-in formatter show a floating format action (wand icon) in the top-right corner while the editor is hovered or focused. It is controlled by `showFormat` (default `true`) and never appears on read-only editors or on languages without a formatter:
+
+- `"json"` — formatted through prettier's `json` parser. This is lossless: number literals beyond `2^53` (e.g. large numeric ids) are reprinted verbatim instead of being rounded the way a `JSON.parse` / `JSON.stringify` round-trip would. A fully minified document is expanded to a multi-line layout.
+- `"javascript"` / `"typescript"` — formatted through prettier's standalone build (`babel` / `babel-ts` parsers), loaded lazily on first use so prettier never enters the initial bundle.
+
+Formatting uses the editor's `tabSize` as the indent width. If the document cannot be parsed, an error message is shown and the content is left untouched. Because the formatter runs asynchronously, a result is discarded if the user typed while it was computing — new keystrokes are never overwritten.
+
+```tsx
+<CodeEditor language="json" showFormat={false} value={value} onChange={setValue} />
+```
+
+## Completions
+
+Pass a declarative completion catalog through `completions` to offer autocomplete entries without touching CodeMirror APIs. Entries form a tree:
+
+- On `"javascript"` / `"typescript"`, root entries complete as global identifiers, and an entry's `children` complete after `label.` — suitable for describing host-injected bindings and libraries. The catalog merges with the language's own completions instead of replacing them.
+- On `"json"`, root entries complete as object keys inside property-name strings (e.g. a JSON Schema keyword catalog). At a bare key position, the fully quoted key is inserted on an explicit completion request (`Ctrl+Space`). Value positions are never matched.
+- Other languages ignore the catalog — for a custom language extension, register a completion source through `extensions` instead.
+
+```tsx
+import type { CompletionEntry } from '@vef-framework-react/components';
+
+// Keep the reference stable (module scope / useMemo) — a fresh array each
+// render reconfigures the live editor.
+const completions: CompletionEntry[] = [
+  {
+    label: 'http',
+    type: 'namespace',
+    info: 'Host-injected HTTP client',
+    children: [
+      { label: 'get', type: 'function', detail: '(url, options?)', info: 'Send a GET request' },
+      { label: 'post', type: 'function', detail: '(url, body?, options?)', info: 'Send a POST request' },
+    ],
+  },
+  { label: 'context', type: 'variable', info: 'Execution context of the current run' },
+];
+
+<CodeEditor language="javascript" completions={completions} value={value} onChange={setValue} />
+```
+
+The lower-level completion source builder `completeFromEntries(entries)` is also exported for wiring the same catalog into custom CodeMirror setups.
+
+Completion popups (and other CodeMirror tooltips) are rendered under `document.body` at an elevated z-index, so they stay visible when the editor is mounted inside an antd `Modal` or `Drawer` and are not clipped by the editor's rounded-corner container.
 
 ## Sizing
 
@@ -143,14 +190,31 @@ Use the `field.CodeEditor` field component inside `<form.AppField>`, which owns 
 | `bordered` | `boolean` | `true` | Render the container border |
 | `className` | `string` | — | Additional class on the outer wrapper |
 | `style` | `CSSProperties` | — | Inline style on the outer wrapper |
-| `extensions` | `Extension[]` | — | Extra CodeMirror extensions appended after the built-in setup and language |
+| `completions` | `CompletionEntry[]` | — | Declarative completion catalog. On `"javascript"` / `"typescript"` entries complete as identifiers (with `children` completing after `label.`) alongside the language's own completions; on `"json"` entries complete as object keys inside property-name strings. Other languages ignore it. Pass a stable reference — a fresh array each render reconfigures the live editor |
+| `showFormat` | `boolean` | `true` | Show the floating format action when the language has a built-in formatter (`"json"`, `"javascript"`, `"typescript"` — all via prettier, loaded on first use). Never shown for read-only editors |
+| `extensions` | `Extension[]` | — | Extra CodeMirror extensions appended after the built-in setup and language — use for linters, custom keymaps, or any other CodeMirror extension |
 | `basicSetupOptions` | `BasicSetupOptions` | — | Fine-grained overrides for `@uiw/codemirror-extensions-basic-setup`; takes precedence over the dedicated boolean props |
+
+### CompletionEntry
+
+One entry of the declarative completion catalog. Entries form a tree: root entries complete as globals, and an entry's `children` complete after `label.`.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | `string` | — | The identifier to insert (required) |
+| `type` | `string` | `"namespace"` for entries with `children`, else `"variable"` | Completion icon kind, in CodeMirror vocabulary: `"function"`, `"method"`, `"property"`, `"variable"`, `"namespace"`, `"class"`, `"constant"`, ... |
+| `detail` | `string` | — | Short signature or annotation rendered after the label, e.g. `"(url, options?)"` |
+| `info` | `string` | — | Documentation shown in the info panel next to the selected option |
+| `boost` | `number` | — | Ranking boost (`-99..99`) applied when options score equally |
+| `children` | `CompletionEntry[]` | — | Members offered after `label.` |
 
 ### CodeEditorLanguage
 
 ```ts
-type CodeEditorLanguage = "json" | "javascript" | "typescript" | "markdown" | "sql" | "python";
+type CodeEditorLanguage = "json" | "javascript" | "typescript" | "markdown" | "sql" | "python" | "xml";
 ```
+
+To use a language outside this list, install the corresponding `@codemirror/lang-*` package and pass its extension through `language` (or `extensions`).
 
 ### CodeEditorTheme
 

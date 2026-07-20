@@ -30,7 +30,7 @@ const buttons: ActionButtonConfig[] = [
   {
     key: 'delete',
     label: 'Delete',
-    danger: true,
+    color: 'danger',
     confirmable: true,
     confirmTitle: 'Delete Record',
     confirmDescription: 'This cannot be undone.',
@@ -72,7 +72,7 @@ const buttons: ActionButtonConfig<User>[] = [
     key: 'deactivate',
     label: 'Deactivate',
     hidden: (ctx) => ctx.status === 'inactive',
-    danger: true,
+    color: 'danger',
     onClick: async (ctx) => { await deactivateUser(ctx.id); },
   },
 ];
@@ -112,22 +112,24 @@ const buttons: ActionButtonConfig<User>[] = [
 
 ### ActionButtonConfig
 
+标注为*可计算*的字段既接受静态值，也接受 `(context: TContext) => value` 函数；仅在给定上下文类型时才能使用函数形式。
+
 | Field | Type | Default | 说明 |
 |-------|------|---------|-------------|
 | `key` | `string` | required | 唯一标识 |
-| `label` | `ReactNode` | — | 按钮文本 |
-| `type` | `ButtonType` | — | 按钮类型 |
-| `danger` | `boolean` | `false` | 危险样式 |
-| `disabled` | `boolean \| (ctx) => boolean` | `false` | 禁用条件 |
-| `hidden` | `boolean \| (ctx) => boolean` | `false` | 隐藏条件 |
-| `confirmable` | `boolean` | `false` | 是否需要确认 |
-| `confirmMode` | `'popover' \| 'dialog'` | `'popover'` | 确认框 UI 样式 |
-| `confirmTitle` | `ReactNode` | — | 确认标题 |
-| `confirmDescription` | `ReactNode` | — | 确认描述文本 |
-| `requiredPermissions` | `string \| string[]` | — | 所需权限令牌 |
-| `checkMode` | `'any' \| 'all'` | `'any'` | 权限校验模式 |
-| `onClick` | `(ctx?: TContext) => Awaitable<void>` | — | 点击事件处理函数 |
+| `label` | `string` | required | 按钮文本；也会被插值到默认确认描述中 |
+| `color` | `ButtonColor` | — | 按钮颜色（例如 `'primary'`、`'danger'`），转发给底层的 `ActionButton` |
+| `variant` | `ButtonVariant` | — | 按钮变体（例如 `'solid'`、`'outlined'`、`'filled'`、`'text'`、`'link'`），转发给底层的 `ActionButton` |
 | `icon` | `ReactNode` | — | 按钮图标 |
+| `disabled` | `boolean \| (ctx: TContext) => boolean` | `false` | 禁用条件（*可计算*） |
+| `hidden` | `boolean \| (ctx: TContext) => boolean` | `false` | 隐藏条件（*可计算*） |
+| `confirmable` | `boolean \| (ctx: TContext) => boolean` | `false` | 是否需要确认（*可计算*） |
+| `confirmMode` | `'popover' \| 'dialog'` 或 `(ctx) => ...` | `'popover'` | 确认框 UI 样式（*可计算*） |
+| `confirmTitle` | `ReactNode` 或 `(ctx) => ReactNode` | `'确认提示'` | 确认标题（*可计算*） |
+| `confirmDescription` | `ReactNode` 或 `(ctx) => ReactNode` | `` `确定要${label}吗？` `` | 确认描述文本（*可计算*） |
+| `requiredPermissions` | `string[]` | — | 权限令牌；未通过校验的按钮会被过滤掉 |
+| `checkMode` | `'any' \| 'all'` | `'any'` | 权限校验模式 |
+| `onClick` | `(context: TContext) => Awaitable<void>` | required | 点击事件处理函数；接收按钮组的 `context`（未给定上下文类型时无参数） |
 
 ## 最佳实践
 

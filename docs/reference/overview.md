@@ -1,13 +1,13 @@
 ---
 title: Package API Map
-description: Which of the nine published packages to open first for a given need, with links into the dry reference for each.
+description: Which of the twelve packages to open first for a given need, with links into the dry reference for each.
 ---
 
 # Package API Map
 
 This section is dry, information-oriented reference: per-package signatures, types, and option tables. It does not repeat the "why" — that lives in [Guides](../guide/routing.md) — or component prop tables and examples, which live in [Components](../components/overview.md).
 
-This page answers a narrower question first: given a need, which of the nine published packages should be opened, and where does its reference live?
+This page answers a narrower question first: given a need, which of the twelve packages should be opened, and where does its reference live?
 
 ## `@vef-framework-react/starter`
 
@@ -56,14 +56,14 @@ Reference: component prop tables and examples live in [Components](../components
 
 ## `@vef-framework-react/core`
 
-The runtime foundation: HTTP client, API client (Axios + TanStack Query), state management (Zustand/Jotai/XState), Immer, selector-based contexts, and an SSE client.
+The runtime foundation: HTTP client, API client (Axios + TanStack Query), state management (Zustand/Jotai/XState), Immer, selector-based contexts, an SSE client, and the `push` module — a WebSocket client for the vef server push channel.
 
 Best suited for:
 
 - query and mutation
 - stores and atoms
 - permission checks
-- HTTP and SSE
+- HTTP, SSE, and server push (`PushClient`)
 - chunked, resumable file uploads (Storage / Uploader)
 
 Start with:
@@ -74,24 +74,27 @@ Start with:
 - `createComponentStore`
 - `atom`
 - `checkPermission`
+- `createPushClient`
 
 Reference: [Core Package](./core/overview.md)
 
 ## `@vef-framework-react/hooks`
 
-Reusable React hook library: permission, event, dictionary, upload, and deep-compare hooks, plus stable re-exports of common Mantine / hotkey hooks.
+Reusable React hook library: permission, event, code-set, push, upload, and deep-compare hooks, plus stable re-exports of common Mantine / hotkey hooks.
 
 Best suited for:
 
-- data dictionaries
+- code sets
 - option transformation
 - loading-state checks
 - permission-aware filtering and checks
+- server push subscriptions
 
 Start with:
 
-- `useDictionaryQuery`
+- `useCodeSetQuery`
 - `useDataOptionsQuery`
+- `usePushMessage`
 - `useHasFetching`
 - `useHasMutating`
 - `useAuthorizedItems`
@@ -175,9 +178,62 @@ Start with:
 
 Reference: [Visual Editors / Approval Form Bridge](../editors/approval-form-bridge.md)
 
+## `@vef-framework-react/approval`
+
+Drop-in management and runtime pages for the approval engine, embedding the flow designer end to end.
+
+Best suited for:
+
+- mounting the approval center (flow designer, task center, instance views) onto routes
+- host-supplied principal pickers via `ApprovalProvider`
+- approval permission catalogs
+
+Start with:
+
+- `ApprovalFlowPage`
+- `ApprovalTaskCenterPage`
+- `ApprovalProvider`
+- `APPROVAL_PERMISSIONS`
+
+Reference: [Engines / Approval](../engines/approval/overview.md)
+
+## `@vef-framework-react/integration`
+
+Drop-in management pages for the integration engine: systems, adapters, contracts, routes, code maps, and a console workbench.
+
+Best suited for:
+
+- mounting the integration management console onto routes
+- integration permission catalogs
+
+Start with:
+
+- `IntegrationSystemPage`
+- `IntegrationConsolePage`
+- `INTEGRATION_PERMISSIONS`
+
+Reference: [Engines / Integration](../engines/integration/overview.md)
+
+## `@vef-framework-react/cron`
+
+Drop-in management pages for the durable cron scheduling engine: schedules and run history.
+
+Best suited for:
+
+- mounting cron schedule and run-history pages onto routes
+- cron permission catalogs
+
+Start with:
+
+- `CronSchedulePage`
+- `CronRunPage`
+- `CRON_PERMISSIONS`
+
+Reference: [Engines / Cron](../engines/cron/overview.md)
+
 ## `@vef-framework-react/dev`
 
-Shared Vite, ESLint, Stylelint, and Commitlint configuration for VEF-based projects.
+Shared Vite, ESLint, Stylelint, and Commitlint configuration for VEF-based projects, plus the `vef` CLI and the code-set key generator.
 
 Best suited for:
 
@@ -185,6 +241,7 @@ Best suited for:
 - ESLint rules
 - Stylelint rules
 - Commitlint rules
+- generating the `CodeSetKey` union from the backend catalog
 
 Start with:
 
@@ -192,5 +249,6 @@ Start with:
 - `defineEslintConfig`
 - `defineStylelintConfig`
 - `defineCommitlintConfig`
+- `defineCodeGenerationConfig`
 
 Reference: [Dev Package](./dev/overview.md)

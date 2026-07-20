@@ -27,8 +27,8 @@ export default function AppLogo() {
 
 ## API
 
-| Prop | Type | 说明 |
-|------|------|-------------|
-| `primaryColor` | `string` | Logo 的主色 |
+| Prop | Type | Default | 说明 |
+|------|------|---------|-------------|
+| `primaryColor` | `string` | 调色板 blue-500 颜色 | Logo 的主色；次要笔画使用由同一调色板推导出的 400 色阶 |
 
-同时也支持所有标准 SVG 属性（如 `width`、`height`、`className`、`style` 等）。
+同时也支持所有标准 SVG 属性（如 `width`、`height`、`className`、`style` 等）。未显式指定尺寸时，Logo 以 `1em` 渲染，随周围字号缩放。

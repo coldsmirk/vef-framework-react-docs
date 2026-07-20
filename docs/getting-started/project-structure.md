@@ -34,6 +34,9 @@ src/
       sys/
   router/
     context.ts
+  types/
+    augmentation.ts
+    code-set-keys.gen.ts
   main.ts
 ```
 
@@ -47,6 +50,7 @@ src/
 | `hooks/` | Reusable page hooks | uploads, modal state, composed behaviors |
 | `pages/` | Route entries and page implementations | `route.tsx`, page components, local helpers |
 | `router/` | Router instance and router context | `createRouter()`, `RouterContext` |
+| `types/` | Module augmentations and generated type files | the `Register` augmentation, `code-set-keys.gen.ts` from `vef gen:code-set-keys` |
 
 ## Typical Page Directory Split
 

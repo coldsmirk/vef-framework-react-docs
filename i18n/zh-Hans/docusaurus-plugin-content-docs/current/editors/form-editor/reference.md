@@ -25,7 +25,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | 属性 | 类型 | 说明 |
 | --- | --- | --- |
 | `brand` | `ToolbarBrand`（`{ name?, tag?, icon? }`） | 工具栏品牌标识；默认使用框架自身的名称/图标。 |
-| `onPublish` | `(schema: FormSchema) => void` | 先执行一次校验；省略时不渲染发布按钮。 |
+| `onPublish` | `(schema: FormSchema) => void` | 先执行一次校验（error 会阻止发布，warning 会请求确认）；省略时不渲染发布按钮。 |
 | `publishText` | `string` | 默认为 `"发布"`。当省略 `onPublish` 时被忽略。 |
 | `publishLoading` | `boolean` | 发布按钮的加载状态。当省略 `onPublish` 时被忽略。 |
 
@@ -77,7 +77,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `device` | `PresentationDevice`（`"pc" \| "mobile"`） | 默认 `"pc"`。 |
 | `defaultValues` | `Record<string, unknown>` | — |
 | `disabled` | `boolean` | — |
-| `fieldPermissions` | `Record<string, FieldPermission>` | 服务端解析的约束——见 [Linkage](./linkage.md#字段权限约束)。 |
+| `fieldPermissions` | `Record<string, FieldPermission>` | 服务端解析的钳制——见 [Linkage](./linkage.md#字段权限钳制)。 |
 | `evaluators` | `LinkageEvaluators` | 见 [Linkage](./linkage.md#可插拔求值器)。 |
 | `dataSourceResolver` | `DataSourceResolver` | 见 [Embedding](./embedding.md#加载远程选项)。 |
 | `evaluationContext` | `EvaluationContext` | 见 [Linkage](./linkage.md#宿主上下文)。 |
@@ -91,7 +91,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | --- | --- |
 | `submit` | `() => Promise<void>` —— 与 schema 中 `submit` 按钮相同的校验流程 |
 | `reset` | `() => void` |
-| `getValues` | `() => Record<string, unknown>` |
+| `getValues` | `() => Record<string, unknown>` —— 原始（RAW）的实时表单状态，包含隐藏字段播种的默认值，以及只读（被钳制为不可写）的值 |
+| `getSubmitValues` | `() => Record<string, unknown>` —— 提交流水线此刻将交给 `onSubmit` 的精确内容：实时值经过同一套载荷过滤（丢弃实际隐藏的字段、排除被钳制为不可写的 key、子表单逐行递归处理），但不运行校验，也不走提交生命周期。在 v2.10.0 中与[字段权限钳制](./linkage.md#字段权限钳制)一同新增 |
 
 ## 字段注册表
 
@@ -373,6 +374,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `defaultEvaluateScriptAction` | `(source, values, context?) => LinkageScriptResult \| void` |
 | `isStateAction` / `isEffectAction` | `(action: FieldLinkageAction) => action is StateAction / EffectAction` |
 | `isFieldEventTriggerKind` | `(kind: LinkageTriggerKind) => boolean` |
+| `getFieldPermission` | `(permissions: Record<string, FieldPermission> \| undefined, key: string) => FieldPermission \| undefined` —— 带自有属性守卫的查找（key 与 `Object` 原型成员同名的字段永远不会读到原型上的槽位）。v2.10.0 新增 |
+| `isWritableFieldPermission` | `(permission: FieldPermission \| undefined) => boolean` —— 对 `undefined`（没有钳制条目）、`"editable"` 和 `"required"` 返回 `true`；对 `"visible"` / `"hidden"` 返回 `false`。v2.10.0 新增 |
 | `STATE_ACTION_TYPES` | `readonly StateActionType[]`（`show, hide, enable, disable, require, optional, assign, script`） |
 | `EFFECT_ACTION_TYPES` | `readonly EffectActionType[]`（`set_field, set_variable, refresh_data_source, alert, api_call, navigate, submit, reset`） |
 | `LINKAGE_ACTION_TYPES` | `readonly LinkageActionType[]` —— 上面两者的并集 |

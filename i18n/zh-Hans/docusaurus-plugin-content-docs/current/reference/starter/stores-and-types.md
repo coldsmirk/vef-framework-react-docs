@@ -53,7 +53,7 @@ description: app/tab/theme 三个 Zustand store，以及 @vef-framework-react/st
 - `AppCustomState` —— `AppState.custom` 的形状；默认为 `AnyObject`，可经 `Register['appCustomState']` 收窄
 - `ChallengeSpec` —— `{ data?: unknown; response: unknown }`，一种登录挑战类型的契约
 - `ResolvedChallenges` —— 从 `Register['challenges']` 解析出的挑战类型注册表，未增补时为开放的 `Record<string, ChallengeSpec>`
-- `Register` —— 空接口，各项目通过 `declare module` 增补，用于细化 `UserInfo['details']`、`AppState.custom`、`UserMenuMeta` 以及登录挑战注册表
+- `Register` —— 空接口，各项目通过 `declare module` 增补，用于细化 `UserInfo['details']`、`AppState.custom`、`UserMenuMeta` 以及登录挑战注册表。对于内置的 `password_change` 挑战，请在 `PASSWORD_CHANGE_CHALLENGE_TYPE` 下注册 `PasswordChangeChallengeSpec`——参见[登录挑战](./application-shell.md#登录挑战)
 - `UserDetails` —— 当 `Register['userDetails']` 未被增补时的兜底形状（`Record<string, unknown>`）
 - `OrderSpec` —— `{ column: string; direction: "asc" | "desc" }`
 

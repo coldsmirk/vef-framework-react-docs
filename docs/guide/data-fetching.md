@@ -51,6 +51,11 @@ export const findUserPage = apiClient.createQueryFn(
 );
 ```
 
+Since v2.11.0, request lifecycles are isolated per query execution: the outer factory (`http => ...`) runs once **per execution**, and the `http` it receives is scoped to that invocation — its abort signal is this query's signal, so cancelling one query can never abort another query's request, even when they run concurrently. Two practical consequences:
+
+- Keep the factory side-effect-free: it must not retain state across executions or perform one-time setup (module scope is the place for that).
+- Query cancellation (unmount, `queryClient.cancelQueries`) propagates into the HTTP request automatically. If you also pass your own `signal` in request options, the two are **combined** — either one aborts the request — instead of the query's signal replacing yours as in earlier versions.
+
 This pattern appears frequently in project code:
 
 ```ts
@@ -133,6 +138,42 @@ export const findUserPage = apiClient.createQueryFn(
 ```
 
 Defining query functions this way means the same `findUserPage` can back a `useQuery()` call, a `ProTable`, or a `CrudPage` without reshaping parameters at each call site — see [Tables](./tables.md) and [CRUD Pages](./crud.md).
+
+## Fetching Files with Authentication
+
+Files behind the API cannot be fetched with a plain `<a href>` — the request would go out without the Bearer header. `HttpClient` has two methods for this, both with the full request semantics of the client (token injection, 401 refresh-and-retry, path parameters, abort signal):
+
+- `requestFile(url, options?)` — fetches the file and resolves to `{ blob, filename? }` (`HttpFileResponse`); `filename` is parsed from the `Content-Disposition` response header when the server sends one. Use it when the bytes are consumed in code: previews, object URLs, custom persistence.
+- `download(url, options?)` — calls `requestFile` and hands the blob to the browser as a download. Its extra `filename` option overrides the saved name — a string replaces it, and a function receives the server-provided name and returns the final one. Without a server filename, the fallback name is `download`.
+
+Both accept `method` (`"get"` or `"post"`, default `"get"`), `data`, `params`, `onProgress` (download progress callback), and the usual `signal` / `headers`. Both are proxied like every other request method, so they work inside query and mutation functions — and in query functions they participate in automatic cancellation:
+
+```ts
+export const exportUserList = apiClient.createMutationFn(
+  "export_user_list",
+  http => (params: UserSearch) => http.download("/api/user/export", {
+    method: "post",
+    data: params,
+    filename: name => `users-${Date.now()}-${name}`
+  })
+);
+```
+
+```ts
+// Rendering a protected image from a blob:
+export const fetchAvatar = apiClient.createQueryFn(
+  "fetch_avatar",
+  http => async ({ userId }: { userId: string }) => {
+    const { blob } = await http.requestFile("/api/user/:userId/avatar", {
+      params: { userId }
+    });
+
+    return URL.createObjectURL(blob);
+  }
+);
+```
+
+Error handling is taken care of: when a "file" endpoint fails and returns the backend's JSON business envelope instead of file content, the client detects it — including in binary response bodies — and throws a `BusinessError` with the usual warning feedback, rather than handing you (or saving) a JSON error file.
 
 ## Skip Authentication for Specific Requests
 

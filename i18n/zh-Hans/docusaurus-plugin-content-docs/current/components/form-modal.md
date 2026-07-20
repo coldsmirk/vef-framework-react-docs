@@ -61,6 +61,7 @@ export default function CreateUserModal({ open, onClose }) {
 | `defaultValues` | `TValues` | — | 表单初始值 |
 | `disabled` | `boolean` | `false` | 禁用表单 |
 | `formComponent` | `ElementType` | `"form"` | 内部表单容器使用的元素类型 |
+| `formLayout` | `FormLayout` | — | 弹窗内表单项的布局——`layout`（`'horizontal' \| 'vertical'`）、`labelAlign` 和 `labelWidth`。默认为水平、标签右对齐的布局（见 [Form](./form.md)） |
 | `mutationFn` | `MutationFunction<ApiResult<TData>, TValues>` | — | 提交时执行的 mutation |
 | `mutationMeta` | `MutationMeta` | — | mutation 元数据（例如 `invalidates`） |
 | `beforeSubmit` | `(values) => Awaitable<TValues>` | — | 提交前转换表单值 |
@@ -74,7 +75,7 @@ export default function CreateUserModal({ open, onClose }) {
 | `children` | `ReactNode \| (formApi) => ReactNode` | — | 表单内容 |
 
 ```tsx
-// 在默认按钮旁添加自定义按钮
+// Add a custom button alongside the defaults
 renderActions={(formApi, { submitButton, resetButton }) => (
   <>
     <Button onClick={handleDraft}>Save Draft</Button>

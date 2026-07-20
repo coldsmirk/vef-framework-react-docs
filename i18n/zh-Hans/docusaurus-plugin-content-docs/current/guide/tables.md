@@ -1,16 +1,17 @@
 ---
 title: 表格
-description: 何时使用纯展示型的 Table，何时使用与查询集成的 ProTable。
+description: 何时使用纯展示型的 Table、与查询集成的 ProTable，或表单受控的 EditableTable。
 ---
 
 # 表格
 
-VEF 有两层表格能力，都从 `@vef-framework-react/components` 导出：
+VEF 有三层表格能力，都从 `@vef-framework-react/components` 导出：
 
 1. `Table` —— 仅做展示
 2. `ProTable` —— 页面级表格，已经把查询、分页、选择和列设置集成在一起
+3. `EditableTable` —— 用于内联编辑一组行数据的受控表单控件
 
-在两者之间做选择，归结为一个问题：这张表格是自己负责数据请求，还是页面已经拿到了行数据？
+在前两者之间做选择，归结为一个问题：这张表格是自己负责数据请求，还是页面已经拿到了行数据？`EditableTable` 则在类别上就不同——它编辑数据，而不是展示数据。
 
 ## 什么时候 `Table` 就够了
 
@@ -71,6 +72,17 @@ import { ProTable } from "@vef-framework-react/components";
 ## `ProTableSubscriber`
 
 当页脚内容或某个局部操作只需要读取表格内部状态时，`ProTableSubscriber` 通常比引入额外的外部状态更合适。它的 API 见 [ProTable](../components/pro-table.md)。
+
+## 行数据需要内联编辑时：`EditableTable`
+
+`EditableTable` 是一个受控表单控件，而不是查询组件：`value` 是完整的行数组，每次编辑/新增/删除都会通过 `onChange` 发出下一份数组，全程不涉及任何请求。同一时刻只有一行处于编辑态；每一列都定义一个只读插槽（`renderView`）和一个编辑器插槽（`renderEditor`），并支持行级校验器。它适合内嵌子列表的场景——表单里的订单行、配置页里的参数行——由外层表单统一提交整个数组。
+
+把它组合进页面时，有两个默认值值得了解：
+
+- 追加的操作列默认固定宽度为 **160px**，按内置的一对操作（编辑/删除或保存/取消）设定。当 `renderRowActions` 增加额外操作时，请通过 `operationColumn.width` 加宽。
+- `locale` 属性会转发给底层表格（v2.12.0），因此一个紧凑的空状态只需一行：`locale={{ emptyText: "暂无记录" }}`。
+
+完整的属性与列 API 见 [EditableTable](../components/editable-table.md)。
 
 ## `ProTable` 与 `CrudPage`
 

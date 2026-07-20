@@ -97,7 +97,7 @@ The root route (`createRootRouteOptions()`), login route (`createLoginRouteOptio
 
 Routing decides which page renders; layout components decide how it is framed. VEF splits that into two layers:
 
-- **Application-level layout** — `Layout` / `BaseLayout` (from `@vef-framework-react/starter`). This is the persistent shell: menu, user section, tabs, and the content area. It is generally not written from scratch — `createLayoutRouteOptions()` assembles it from the props passed to it (`title`, `onLogout`, and the rest of `LayoutProps`).
+- **Application-level layout** — the `Layout` / `BaseLayout` shell internal to `@vef-framework-react/starter` (not exported): menu, user section, tabs, and the content area. It is not written from scratch — `createLayoutRouteOptions()` assembles it from the props passed to it (`title`, `onLogout`, and the other layout options; see [Application Shell](../reference/starter/application-shell.md)).
 - **Page-level containers** — `Page` / `FlexCard` (from `@vef-framework-react/components`). These live inside the shell and frame a single page's content.
 
 ### `Page`

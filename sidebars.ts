@@ -30,13 +30,14 @@ const sidebars: SidebarsConfig = {
         "guide/routing",
         "guide/menus-and-navigation",
         "guide/data-fetching",
+        "guide/server-push",
         "guide/forms",
         "guide/tables",
         "guide/crud",
         "guide/state-management",
         "guide/authentication",
         "guide/permissions",
-        "guide/data-dictionaries",
+        "guide/code-sets",
         "guide/theming",
         "guide/localization",
         "guide/error-handling",
@@ -58,7 +59,9 @@ const sidebars: SidebarsConfig = {
             "components/stack",
             "components/center",
             "components/group",
-            "components/scroll-area"
+            "components/scroll-area",
+            "components/flex-tabs",
+            "components/labeled"
           ]
         },
         {
@@ -90,7 +93,8 @@ const sidebars: SidebarsConfig = {
             "components/upload",
             "components/icon-picker",
             "components/file-upload",
-            "components/generic-select"
+            "components/generic-select",
+            "components/labels"
           ]
         },
         {
@@ -119,7 +123,9 @@ const sidebars: SidebarsConfig = {
             "components/chart",
             "components/code-highlighter",
             "components/code-editor",
-            "components/keyboard"
+            "components/file-preview",
+            "components/keyboard",
+            "components/utilities"
           ]
         },
         {
@@ -189,6 +195,43 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Engine Pages",
+      collapsed: true,
+      items: [
+        "engines/overview",
+        {
+          type: "category",
+          label: "Approval",
+          collapsed: true,
+          items: [
+            "engines/approval/overview",
+            "engines/approval/pages",
+            "engines/approval/reference"
+          ]
+        },
+        {
+          type: "category",
+          label: "Integration",
+          collapsed: true,
+          items: [
+            "engines/integration/overview",
+            "engines/integration/pages",
+            "engines/integration/reference"
+          ]
+        },
+        {
+          type: "category",
+          label: "Cron",
+          collapsed: true,
+          items: [
+            "engines/cron/overview",
+            "engines/cron/reference"
+          ]
+        }
+      ]
+    },
+    {
+      type: "category",
       label: "API Reference",
       collapsed: true,
       items: [
@@ -204,6 +247,7 @@ const sidebars: SidebarsConfig = {
             "reference/core/store-and-atom",
             "reference/core/context",
             "reference/core/storage",
+            "reference/core/push",
             "reference/core/sse-motion-dnd-immer"
           ]
         },

@@ -30,7 +30,7 @@ const buttons: ActionButtonConfig[] = [
   {
     key: 'delete',
     label: 'Delete',
-    danger: true,
+    color: 'danger',
     confirmable: true,
     confirmTitle: 'Delete Record',
     confirmDescription: 'This cannot be undone.',
@@ -72,7 +72,7 @@ const buttons: ActionButtonConfig<User>[] = [
     key: 'deactivate',
     label: 'Deactivate',
     hidden: (ctx) => ctx.status === 'inactive',
-    danger: true,
+    color: 'danger',
     onClick: async (ctx) => { await deactivateUser(ctx.id); },
   },
 ];
@@ -112,22 +112,24 @@ const buttons: ActionButtonConfig<User>[] = [
 
 ### ActionButtonConfig
 
+Fields marked *computed* accept either a static value or a `(context: TContext) => value` function; the function form is only available when a context type is given.
+
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `key` | `string` | required | Unique key |
-| `label` | `ReactNode` | — | Button label |
-| `type` | `ButtonType` | — | Button type |
-| `danger` | `boolean` | `false` | Danger style |
-| `disabled` | `boolean \| (ctx) => boolean` | `false` | Disable condition |
-| `hidden` | `boolean \| (ctx) => boolean` | `false` | Hide condition |
-| `confirmable` | `boolean` | `false` | Require confirmation |
-| `confirmMode` | `'popover' \| 'dialog'` | `'popover'` | Confirm UI style |
-| `confirmTitle` | `ReactNode` | — | Confirm title |
-| `confirmDescription` | `ReactNode` | — | Confirm description |
-| `requiredPermissions` | `string \| string[]` | — | Required permission tokens |
-| `checkMode` | `'any' \| 'all'` | `'any'` | Permission check mode |
-| `onClick` | `(ctx?: TContext) => Awaitable<void>` | — | Click handler |
+| `label` | `string` | required | Button label; also interpolated into the default confirm description |
+| `color` | `ButtonColor` | — | Button color (e.g. `'primary'`, `'danger'`), forwarded to the underlying `ActionButton` |
+| `variant` | `ButtonVariant` | — | Button variant (e.g. `'solid'`, `'outlined'`, `'filled'`, `'text'`, `'link'`), forwarded to the underlying `ActionButton` |
 | `icon` | `ReactNode` | — | Button icon |
+| `disabled` | `boolean \| (ctx: TContext) => boolean` | `false` | Disable condition (*computed*) |
+| `hidden` | `boolean \| (ctx: TContext) => boolean` | `false` | Hide condition (*computed*) |
+| `confirmable` | `boolean \| (ctx: TContext) => boolean` | `false` | Require confirmation (*computed*) |
+| `confirmMode` | `'popover' \| 'dialog'` or `(ctx) => ...` | `'popover'` | Confirm UI style (*computed*) |
+| `confirmTitle` | `ReactNode` or `(ctx) => ReactNode` | `'确认提示'` | Confirm title (*computed*) |
+| `confirmDescription` | `ReactNode` or `(ctx) => ReactNode` | `` `确定要${label}吗？` `` | Confirm description (*computed*) |
+| `requiredPermissions` | `string[]` | — | Permission tokens; buttons failing the check are filtered out |
+| `checkMode` | `'any' \| 'all'` | `'any'` | Permission check mode |
+| `onClick` | `(context: TContext) => Awaitable<void>` | required | Click handler; receives the group's `context` (no argument when no context type is given) |
 
 ## Best Practices
 

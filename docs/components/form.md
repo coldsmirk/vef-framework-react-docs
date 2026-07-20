@@ -26,38 +26,41 @@ interface LoginForm {
 }
 
 export default function LoginPage() {
-  const form = useForm<LoginForm>({
-    defaultValues: {
-      username: '',
-      password: '',
-    },
+  // The form data type is inferred from `defaultValues` (annotate it rather
+  // than passing explicit generics — `useForm` has one generic per validator slot).
+  const form = useForm({
+    defaultValues: { username: '', password: '' } as LoginForm,
     onSubmit: async ({ value }) => {
       await login(value);
     },
   });
 
   return (
-    <form.Form layout="vertical">
-      <form.AppField
-        name="username"
-        validators={{ onChange: ({ value }) => !value ? 'Required' : undefined }}
-      >
-        {(field) => (
-          <field.Input label="Username" placeholder="Enter username" />
-        )}
-      </form.AppField>
+    <form.AppForm>
+      <form.Form layout="vertical">
+        <form.AppField
+          name="username"
+          validators={{ onChange: ({ value }) => !value ? 'Required' : undefined }}
+        >
+          {(field) => (
+            <field.Input label="Username" placeholder="Enter username" />
+          )}
+        </form.AppField>
 
-      <form.AppField name="password">
-        {(field) => (
-          <field.Password label="Password" placeholder="Enter password" />
-        )}
-      </form.AppField>
+        <form.AppField name="password">
+          {(field) => (
+            <field.Password label="Password" placeholder="Enter password" />
+          )}
+        </form.AppField>
 
-      <form.SubmitButton>Login</form.SubmitButton>
-    </form.Form>
+        <form.SubmitButton>Login</form.SubmitButton>
+      </form.Form>
+    </form.AppForm>
   );
 }
 ```
+
+`form.AppForm` is the form-context provider: the built-in form components (`form.Form`, `form.SubmitButton`, `form.ResetButton`) and `useFormContext` must be rendered inside it. `form.AppField` binds one field and exposes the field components through its render prop.
 
 ## Available Field Components
 
@@ -115,41 +118,57 @@ All field components are accessed via `field.*` inside a `form.AppField` render 
 
 ## Form Layout
 
+`form.Form` establishes the layout context for every field item inside it: `layout` (`'horizontal' | 'vertical'`), `labelAlign`, and `labelWidth`. The defaults are the horizontal, right-aligned layout with a `100`px label column. Individual field items can override any of these via their own `FormItemProps`:
+
 ```tsx
-// Horizontal layout with label width
-<form.Form layout="horizontal">
+// Vertical layout for the whole form
+<form.Form layout="vertical">
   <form.AppField name="name">
-    {(field) => (
-      <field.Input label="Name" labelWidth={100} />
-    )}
+    {(field) => <field.Input label="Name" />}
   </form.AppField>
 </form.Form>
 
-// Inline layout
-<form.Form layout="inline">
-  ...
+// Horizontal layout with a wider label column
+<form.Form layout="horizontal" labelWidth={140}>
+  <form.AppField name="name">
+    {(field) => <field.Input label="Name" />}
+  </form.AppField>
 </form.Form>
+```
+
+The same three settings form the `FormLayout` type, which [`FormModal`](./form-modal.md), [`FormDrawer`](./form-drawer.md), and [`Crud`](./crud.md) accept as their `formLayout` prop:
+
+```ts
+interface FormLayout {
+  layout?: 'horizontal' | 'vertical';
+  labelAlign?: 'left' | 'right';
+  labelWidth?: number;
+}
 ```
 
 ## Field Groups
 
-Use `withFieldGroup` to create reusable groups of fields:
+Use `withFieldGroup` to create reusable groups of fields bound to a sub-tree of the form values. It takes `{ defaultValues, render, props? }`; `render` receives a `group` API whose `AppField` names are relative to where the group is mounted:
 
 ```tsx
 import { withFieldGroup } from '@vef-framework-react/components';
 
-const AddressGroup = withFieldGroup<{ city: string; zip: string }>(
-  ({ form }) => (
+const AddressGroup = withFieldGroup({
+  defaultValues: { city: '', zip: '' },
+  render: ({ group }) => (
     <>
-      <form.AppField name="city">
+      <group.AppField name="city">
         {(field) => <field.Input label="City" />}
-      </form.AppField>
-      <form.AppField name="zip">
+      </group.AppField>
+      <group.AppField name="zip">
         {(field) => <field.Input label="ZIP" />}
-      </form.AppField>
+      </group.AppField>
     </>
-  )
-);
+  ),
+});
+
+// Mount the group on any form whose values contain a matching sub-tree:
+<AddressGroup form={form} fields="shippingAddress" />
 ```
 
 ## `createFormOptions`
@@ -159,8 +178,8 @@ Use `createFormOptions` to define reusable form configurations:
 ```tsx
 import { createFormOptions } from '@vef-framework-react/components';
 
-const loginFormOptions = createFormOptions<LoginForm>({
-  defaultValues: { username: '', password: '' },
+const loginFormOptions = createFormOptions({
+  defaultValues: { username: '', password: '' } as LoginForm,
   onSubmit: async ({ value }) => { /* ... */ },
 });
 
@@ -172,7 +191,7 @@ const form = useForm(loginFormOptions);
 
 ### `useForm(options)`
 
-Accepts all [`@tanstack/react-form` FormOptions](https://tanstack.com/form/latest/docs/reference/formApi), returns a `FormApi` with additional VEF field components.
+Accepts all [`@tanstack/react-form` FormOptions](https://tanstack.com/form/latest/docs/reference/formApi), returns a `FormApi` extended with the VEF form components (`Form`, `SubmitButton`, `ResetButton` under `form.*` / `form.AppForm`), the field components (under `form.AppField`'s render prop), and the `createField` helper.
 
 | Option | Type | Description |
 |--------|------|-------------|
@@ -183,22 +202,85 @@ Accepts all [`@tanstack/react-form` FormOptions](https://tanstack.com/form/lates
 
 ### `FormItemProps` (shared by all field components)
 
+Every field component accepts its wrapped control's own props plus these form-item props (`FieldComponentProps<TFieldProps> = TFieldProps & FormItemProps`):
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `label` | `ReactNode` | — | Field label |
-| `labelWidth` | `number` | — | Label width in pixels |
-| `labelAlign` | `'left' \| 'right'` | — | Label text alignment |
-| `layout` | `'horizontal' \| 'vertical' \| 'inline'` | — | Override form layout |
+| `labelWidth` | `number` | inherited from the form layout (default `100`) | Label width in pixels |
+| `labelAlign` | `'left' \| 'right'` | inherited (default `'right'`) | Label text alignment |
+| `layout` | `'horizontal' \| 'vertical'` | inherited (default `'horizontal'`) | Override the form layout for this item |
 | `extra` | `ReactNode` | — | Extra hint below field |
 | `required` | `boolean` | — | Show required marker |
-| `noWrapper` | `boolean` | `false` | Render without form item wrapper |
+| `noWrapper` | `boolean` | `false` | Render the bare control without the form-item wrapper (label/error scaffolding) — used in search bars and table editors |
 
 ### `form.Form` Props
 
+A polymorphic layout/context provider — it renders a native `<form>` by default and provides the layout and disabled contexts. When rendering a native `<form>`, submit and reset events are wired to the form API automatically (`preventDefault` + `handleSubmit()` / `reset()`); `onSubmit` / `onSubmitCapture` are excluded from the props.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `layout` | `'horizontal' \| 'vertical' \| 'inline'` | `'horizontal'` | Form layout |
-| `onSubmit` | `(e) => void` | — | Native form submit (handled automatically) |
+| `layout` | `'horizontal' \| 'vertical'` | `'horizontal'` | Form item layout |
+| `labelAlign` | `'left' \| 'right'` | `'right'` | Label text alignment |
+| `labelWidth` | `number` | `100` | Label column width in pixels |
+| `disabled` | `boolean` | `false` | Disable every field inside (provided through context) |
+| `component` | `ElementType` | `"form"` | Element type to render; non-`form` elements skip the native submit/reset wiring |
+| *(rest)* | `ComponentPropsWithoutRef<TComponent>` | — | Any prop of the rendered element (`className`, `style`, …) |
+
+### `form.SubmitButton` Props
+
+A [`Button`](./button.md) bound to the form state: it renders `type="primary"` with `htmlType="submit"`, shows a loading state while the form `isSubmitting`, and disables itself while the form `canSubmit` is `false` or the surrounding form is disabled.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `onSubmit` | `() => void` | — | Click handler; only needed outside a native `<form>` (e.g. wire it to `form.handleSubmit`) |
+| `children` | `ReactNode` | `'提交'` | Button label |
+| *(rest)* | `ButtonProps` except `htmlType` / `onClick` / `onClickCapture` | — | Any other Button prop (`icon`, `size`, `danger`, …) |
+
+### `form.ResetButton` Props
+
+A [`Button`](./button.md) with `htmlType="reset"`, disabled while the form `isSubmitting` or the surrounding form is disabled.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `onReset` | `() => void` | — | Click handler; only needed outside a native `<form>` (e.g. wire it to `form.reset`) |
+| `children` | `ReactNode` | `'重置'` | Button label |
+| *(rest)* | `ButtonProps` except `htmlType` / `onClick` / `onClickCapture` | — | Any other Button prop |
+
+### `useFormContext<TFormData>()`
+
+Read the nearest form API from context — used by field components rendered outside the `form.*` render props, e.g. search fields inside [`ProSearch`](./pro-search.md) or custom form actions. Returns the same `FormApi` as `useForm`, typed by the `TFormData` you pass.
+
+### `useFormStore(form.store, selector)`
+
+Re-export of TanStack Form's `useStore` for subscribing to form state slices (values, errors, `canSubmit`, …) with render optimization:
+
+```tsx
+const username = useFormStore(form.store, (state) => state.values.username);
+```
+
+### `withForm` / `withFieldGroup`
+
+Re-exports of TanStack Form's HOCs, pre-bound to the VEF field and form components. `withForm` builds a reusable form component around shared form options; `withFieldGroup` builds a reusable group of fields for a value sub-tree (see Field Groups above).
+
+### `form.createField` / `restoreFieldOptions`
+
+`form.createField(name, options)` defines a field as data — for building form definitions as homogeneous arrays (e.g. a config-driven form engine). `options` extends every bound `<form.AppField>` option (`validators`, `listeners`, `defaultValue`, `asyncDebounceMs`, `mode`, …) plus:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `render` | `(field: typeof fieldComponents) => ReactNode` | The render-prop body, scoped to the injected field components |
+| `renderMeta` | `TMeta extends AnyObject` | Arbitrary metadata consumed by the surrounding map (e.g. layout span, visibility) |
+
+It returns a `FormFieldItem<TFormData, TMeta>`: `{ name, fieldOptions?, render, renderMeta? }`, where `fieldOptions` is type-erased (`ErasedFieldOptions<TFormData>`) so items with different field names can live in one array. At the render site, `restoreFieldOptions(item.fieldOptions)` restores them for spreading:
+
+```tsx
+items.map((item) => (
+  <form.AppField key={item.name} name={item.name} {...restoreFieldOptions(item.fieldOptions)}>
+    {item.render}
+  </form.AppField>
+));
+```
 
 ## Best Practices
 

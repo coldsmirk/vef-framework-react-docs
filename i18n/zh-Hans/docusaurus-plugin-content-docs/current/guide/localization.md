@@ -9,13 +9,13 @@ VEF 内置的唯一语言是简体中文：Ant Design 的 locale 是 `zh_CN`，`
 
 本篇讨论的是**框架自带界面文案的语言** —— 内置按钮标签、确认对话框、校验消息和日期格式化。VEF 不包含翻译框架：没有文案目录，没有 `t()` 函数，也没有按用户切换语言的能力。如果产品需要完整的多语言支持，请为自己的页面引入 i18n 库；本篇帮助你处理页面周围那些由框架提供的文案。
 
-本篇的价值在于精确：下面每一行都明确说明某段文案**能否**被覆盖，以及通过什么机制。凡是标注为不可覆盖的，都是 v2.9.0 的事实，而非文档遗漏。
+本篇的价值在于精确：下面每一行都明确说明某段文案**能否**被覆盖，以及通过什么机制。凡是标注为不可覆盖的，都是 v2.12.0 的事实，而非文档遗漏。
 
 ## 中文默认值从哪里来
 
 有四个相互独立的层会产出中文文案，切换（或无法切换）的方式各不相同：
 
-| 层 | v2.9.0 的接线方式 | 影响范围 |
+| 层 | v2.12.0 的接线方式 | 影响范围 |
 | --- | --- | --- |
 | Ant Design locale | [`ConfigProvider`](../components/config-provider.md) 硬编码了 `zh_CN` locale。`ConfigProviderProps` 没有 `locale` 属性。 | 所有 antd 内置文案：Modal/Popconfirm 的确定与取消、分页每页条数下拉、DatePicker 面板、Transfer、空状态等。 |
 | dayjs 全局 locale | `@vef-framework-react/shared` 的 chrono 工具在首次被调用时，惰性地把 dayjs 全局 locale 设为 `zh-cn`（并注册插件）。见 [Chrono](../reference/shared/chrono-event-validation.md)。 | 框架工具以及你自己代码中 dayjs 的本地化输出（`LLLL` 类格式、相对时间）。 |
@@ -29,7 +29,7 @@ VEF 内置的唯一语言是简体中文：Ant Design 的 locale 是 `zh_CN`，`
 VEF 的 `ConfigProvider` 没有暴露 antd locale，但 antd 自己的 `ConfigProvider` 嵌套时会与外层合并 —— 未传入的属性（主题、前缀）保留框架的值。在路由树内嵌套一层即可：
 
 ```tsx
-// 包裹所有页面的布局组件（例如根路由）
+// A layout component that wraps every page (e.g. your root route)
 import { ConfigProvider } from "antd";
 import enUS from "antd/locale/en_US";
 
@@ -38,9 +38,9 @@ export function RootLayout({ children }: PropsWithChildren) {
 }
 ```
 
-两个注意事项，均已对照 v2.9.0 的接线验证：
+两个注意事项，均已对照 v2.12.0 的接线验证：
 
-- **在应用自己的依赖里声明 `antd`，且版本范围与框架一致**（v2.9.0 对应 `^6.5.0`）。覆盖生效的前提是你的导入解析到与框架同一份 antd 拷贝；出现第二份拷贝会产生独立的 React context，框架组件永远读不到。
+- **在应用自己的依赖里声明 `antd`，且版本范围与框架一致**（v2.12.0 对应 `^6.5.0`）。覆盖生效的前提是你的导入解析到与框架同一份 antd 拷贝；出现第二份拷贝会产生独立的 React context，框架组件永远读不到。
 - **命令式辅助函数仍停留在外层 locale。** `showConfirm`、`showSuccessAlert`、message 和 notification 辅助函数通过直接挂在框架 `ConfigProvider` 之下（在你嵌套的 provider *之上*）捕获的 context holder 派发。它们内置的确定/取消按钮仍是中文，除非每次调用时传 `okText` / `cancelText`（见契约表）。
 
 ### Zod 校验消息
@@ -64,15 +64,15 @@ dayjs locale **没有受支持的切换方式**。框架是惰性断言 `zh-cn` 
 import { getNow } from "@vef-framework-react/shared";
 import dayjs from "dayjs";
 
-getNow();           // 强制触发框架的一次性 dayjs 初始化（zh-cn + 插件）
-dayjs.locale("en"); // 此时安全 —— 框架不会再重设 zh-cn
+getNow();           // forces the framework's one-time dayjs setup (zh-cn + plugins)
+dayjs.locale("en"); // now safe — the framework will not re-assert zh-cn
 ```
 
-应用的 `dayjs` 必须解析到与框架同一份拷贝（声明兼容的版本范围；框架在 v2.9.0 使用 `^1.11.21`）。注意 DatePicker/Calendar 的*面板*文案跟随 antd locale 而非 dayjs 全局设置 —— 且无论 locale 如何，`formatDuration` 始终输出 `天`/`小时`/`分钟`，季度格式固定为 `YYYY-Q季度`（两者均为硬编码）。
+应用的 `dayjs` 必须解析到与框架同一份拷贝（声明兼容的版本范围；框架在 v2.12.0 使用 `^1.11.21`）。注意 DatePicker/Calendar 的*面板*文案跟随 antd locale 而非 dayjs 全局设置 —— 且无论 locale 如何，`formatDuration` 始终输出 `天`/`小时`/`分钟`，季度格式固定为 `YYYY-Q季度`（两者均为硬编码）。
 
 ## 覆盖契约
 
-框架提供的中文默认值及其覆盖机制，均已对照 v2.9.0 源码验证：
+框架提供的中文默认值及其覆盖机制，均已对照 v2.12.0 源码验证：
 
 | 组件 / 区域 | 中文默认值 | 覆盖方式 |
 | --- | --- | --- |
@@ -87,8 +87,9 @@ dayjs.locale("en"); // 此时安全 —— 框架不会再重设 zh-cn
 | CRUD 表单底部 | `提交` / `重置` | 按场景的 `formActionsRenderers` |
 | [`ProSearch`](../components/pro-search.md) 按钮 | `搜索` / `重置` | `searchButtonProps` / `resetButtonProps`（设置 `children`） |
 | [`ProTable`](../components/pro-table.md) 操作列表头 | `操作` | `operationColumn.title` |
-| [`EditableTable`](../components/editable-table.md) 行操作 | `编辑` / `删除` / `保存` / `取消` | `texts` 属性 |
-| `EditableTable` 操作列表头 | `操作` | `operation.title` |
+| [`EditableTable`](../components/editable-table.md) 行操作 | `编辑` / `删除` / `保存` / `取消` | `operationColumn.texts` |
+| `EditableTable` 操作列表头 | `操作` | `operationColumn.title` |
+| `EditableTable` 表格文案（如空状态） | antd 表格默认值 | `locale` 属性，转发给底层表格（v2.12.0） |
 | [`Upload`](../components/upload.md) 触发按钮 | `上传` | 传入 `children` |
 | [FormEditor](../editors/form-editor/reference.md) / [ApprovalFlowEditor](../editors/approval-flow-editor/reference.md) 发布按钮 | `发布` | `publishText` 属性 |
 
@@ -96,7 +97,7 @@ dayjs.locale("en"); // 此时安全 —— 框架不会再重设 zh-cn
 
 ## 实战示例：搭建英文管理后台
 
-在 VEF v2.9.0 上交付英文产品所需的完整改动集。
+在 VEF v2.12.0 上交付英文产品所需的完整改动集。
 
 启动阶段，在 `createApp().render()` 之前：
 
@@ -105,9 +106,9 @@ import { getNow, z } from "@vef-framework-react/shared";
 import { en } from "zod/locales";
 import dayjs from "dayjs";
 
-z.config(en());     // 英文默认校验消息
-getNow();           // 先强制触发框架的一次性 dayjs 初始化……
-dayjs.locale("en"); // ……再夺回 locale（非受支持行为但有效；见上文）
+z.config(en());     // English default validation messages
+getNow();           // force the framework's one-time dayjs setup...
+dayjs.locale("en"); // ...then win the locale (unsupported but effective; see above)
 ```
 
 根布局，包裹所有路由页面：
@@ -138,14 +139,19 @@ showConfirm("Publish this version?", { title: "Confirm", okText: "OK", cancelTex
 
 <ProTable operationColumn={{ title: "Actions", width: 160, render: renderActions }} />
 
-<EditableTable texts={{ edit: "Edit", delete: "Delete", save: "Save", cancel: "Cancel" }} />
+<EditableTable
+  operationColumn={{
+    title: "Actions",
+    texts: { edit: "Edit", delete: "Delete", save: "Save", cancel: "Cancel" }
+  }}
+/>
 ```
 
 由于默认值存在于各个组件而非全局配置，团队通常会把最常用的组件（`ActionButton`、`Bool`、`ProSearch`）包成薄薄的项目级组件，把英文文案一次性固化进去。
 
 完成以上全部步骤后，下一节列出的界面仍是中文 —— 在决定用 VEF 做英文界面之前，请先确认这些界面是否会出现在你的产品里。
 
-## 当前仅有中文的部分（v2.9.0）
+## 当前仅有中文的部分（v2.12.0）
 
 以下文案没有覆盖属性、没有配置项，也没有 locale 钩子：
 

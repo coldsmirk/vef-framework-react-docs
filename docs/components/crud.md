@@ -43,7 +43,7 @@ export const {
 
 ```tsx
 import { ActionButton, CrudPage, Icon, OperationButton } from '@vef-framework-react/components';
-import { EditIcon, PlusIcon, TrashIcon } from 'lucide-react';
+import { EditIcon, TrashIcon } from 'lucide-react';
 
 import { ActionButtonGroup, OperationButtonGroup } from './helpers';
 
@@ -57,7 +57,7 @@ function OperationColumn({ row }: { row: UserRow }) {
           </OperationButton>
           <OperationButton
             confirmable
-            danger
+            color="danger"
             icon={<Icon component={TrashIcon} />}
             onClick={async () => {
               await deleteRow(row);
@@ -132,6 +132,17 @@ openForm({ scene: 'create' });
 openForm({ scene: 'update', values: row, mode: 'drawer', drawerConfig: { placement: 'right' } });
 ```
 
+`openForm` accepts:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `scene` | `CrudFormScene<TSceneFormValues>` | The scene to open (required) |
+| `values` | `Partial<TSceneFormValues[TScene]>` | Initial form values for this invocation (e.g. the row being edited), merged over `sceneDefaultFormValues` |
+| `title` | `ReactNode` | Form title; defaults to `"创建"` / `"修改"` for the built-in scenes |
+| `width` | `Length \| Partial<Record<Breakpoint, Length>>` | Form width — a fixed length or a responsive per-breakpoint map. Defaults to a responsive map from `95vw` (`xxs`) down to `40vw` (`xxl`) |
+| `mode` | `CrudFormMode` | `"modal"` (default) or `"drawer"` |
+| `drawerConfig` | `CrudFormDrawerConfig` | Drawer-only options: `placement` (default `"right"`) |
+
 ## Behavior Notes
 
 - After `delete` or `deleteMany` succeed, `Crud` automatically clears the internal selection state — toolbar buttons that depend on `selectedRows` re-disable on their own.
@@ -176,14 +187,15 @@ formActionsRenderers={{
 | `advancedSearch` | `ReactNode` | Advanced (collapsible) search fields |
 | `sceneDefaultFormValues` | `PartialDeep<TSceneFormValues>` | Default form values per scene |
 | `formComponent` | `ElementType` | Element type for the scene form's inner wrapper (default: `"div"`) |
+| `formLayout` | `FormLayout` | Layout of the form items inside the scene form modal/drawer — `layout`, `labelAlign`, `labelWidth` (see [Form](./form.md)). Defaults to the horizontal layout |
 | `renderForm` | `(scene) => ReactNode` | Form content per scene |
 | `beforeFormSubmit` | `(scene, values) => Awaitable<values>` | Transform values before submit |
 | `afterFormSubmit` | `(scene, values, result) => Awaitable<void>` | Called after a successful submit |
 | `formMutationFns` | `CrudFormMutationFns<TSceneFormValues>` | Submit mutation per scene |
 | `formActionsRenderers` | `CrudFormActionsRenderers<TSceneFormValues>` | Custom footer action renderer per scene, receives `(formApi, defaults)` |
-| `deleteMutationFn` | `MutationFunction` | Single-row delete |
-| `deleteManyMutationFn` | `MutationFunction` | Batch delete |
-| `mutationMeta` | `(mutationKey) => MutationMeta` | Mutation meta provider (e.g. query invalidation) |
+| `deleteMutationFn` | `MutationFunction<ApiResult<unknown>, TRow>` | Single-row delete mutation, wired to the store's `delete` action |
+| `deleteManyMutationFn` | `MutationFunction<ApiResult<unknown>, TRow[]>` | Batch delete mutation, wired to the store's `deleteMany` action |
+| `mutationMeta` | `(mutationKey: string) => MutationMeta \| undefined` | Mutation meta provider (e.g. query invalidation), called with each mutation's key |
 | `toolbarActions` | `ReactNode` | Toolbar action buttons |
 | `queryEnabled` | `(params?) => boolean` | Whether the list query should run |
 | `queryParams` | `TParams` | Additional query parameters that trigger a refetch when changed |

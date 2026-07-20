@@ -158,6 +158,17 @@ type FieldOptionSource =
 | `columnWidth` | 作为 `table` 子表单的一列时 | 固定像素宽度；省略则平分剩余宽度 |
 | `stack` | 作为堆叠体（根节点 / `section` / `tabs` 面板 / `stack` 子表单的一行）的直接子节点时 | `{ width?, minWidth?, maxWidth?: CssLength, align?: "start" \| "center" \| "end" }`，`CssLength = { value: number; unit: "px" \| "%" }` |
 
+`stack: StackSlot`（v2.10.0）用于在唯一一个原本让节点占满整行的父级上下文——堆叠体——中设置节点的尺寸与摆放位置。逐字段说明：
+
+| `StackSlot` 字段 | 类型 | 默认值 | 效果 |
+| --- | --- | --- | --- |
+| `width` | `CssLength` | 省略时解析为 `100%` | 节点的 CSS `width`。`%` 相对于堆叠体的宽度，`px` 是绝对值。`value` 必须 ≥ 1——宽度为零的盒子会让节点坍缩。 |
+| `minWidth` | `CssLength` | 省略 = CSS 默认值（`0`） | CSS `min-width` 下限；这里 `value` 取 `0` 是合法的（与 `width` / `maxWidth` 不同）。 |
+| `maxWidth` | `CssLength` | 省略 = 不设上限 | CSS `max-width` 上限；`value` 必须 ≥ 1。与 `%` 形式的 `width` 组合可实现响应式尺寸（例如 `width: 100%` 配合 `maxWidth: 480px` 封顶）。 |
+| `align` | `"start" \| "center" \| "end"` | 省略 = 文档流（视觉上等于 start） | 交叉轴上的摆放位置，通过自动 margin 实现，因此只有当 `width` / `maxWidth` 让节点窄于堆叠体时才会起作用——满宽时是空操作。 |
+
+当父级是 `grid` / `flex` / `table` 类子表单时，该插槽会被忽略，此时生效的分别是 `span` / `flex` / `columnWidth`。`validateSchema` 在导入时会检查其形态（`stack_invalid`）：非记录类型的插槽、越界或格式错误的 `CssLength`，或未知的 `align` 都会失败。长度总是以显式的 `{ value, unit }` 形式书写——绝不使用原始 CSS 字符串——因此持久化下来的长度永远是一个合法、可再次编辑的尺寸。
+
 堆叠体自身的垂直间距节奏是 `gap: GapScale`（`"small" | "medium" | "large"`，`DEFAULT_GAP_SCALE = "medium"`，合法取值见 `GAP_SCALES`），可设置在 `PresentationLayer` 本身，或设置在 `section` / `tabs` / `stack` 类子表单上——省略则继承表单级（或子表单级）的默认值。`linkage`（见 [Linkage](./linkage.md)）在**任意**节点上都生效，无论叶子字段还是容器。
 
 ## 编辑节点树
@@ -178,7 +189,7 @@ type FieldOptionSource =
 
 ## 校验导入的 schema
 
-`FormEditor` 自身的修改器始终产出结构良好的树。`validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` 是针对**非**来自编辑器的 schema（粘贴导入、API 载荷）的边界守卫。它会检查数据信封、每个呈现层内 id/key 的唯一性与 key 的语法规则、span 取值范围、已知字段类型（对照你传入的注册表）、选项数据源的结构，并在结构性检查通过后委托给 `validateLinkageSchema`（见 [Linkage → 校验](./linkage.md#校验)）。只要没有*error*级别的问题，结果就是 `valid`（并携带收窄后的 `schema`）——*warning*级别的问题（悬空引用、空条件组）属于编写过程中的合法中间状态，会在导出→导入的往返过程中保留下来。
+`FormEditor` 自身的修改器始终产出结构良好的树。`validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` 是针对**非**来自编辑器的 schema（粘贴导入、API 载荷）的边界守卫。它会检查数据信封、每个呈现层内 id/key 的唯一性与 key 的语法规则、span 取值范围、[stack 插槽形态](#布局与尺寸)（v2.10.0）、已知字段类型（对照你传入的注册表）、选项数据源的结构，并在结构性检查通过后委托给 `validateLinkageSchema`（见 [Linkage → 校验](./linkage.md#校验)）。只要没有*error*级别的问题，结果就是 `valid`（并携带收窄后的 `schema`）——*warning*级别的问题（悬空引用、空条件组）属于编写过程中的合法中间状态，会在导出→导入的往返过程中保留下来。
 
 ## 表存储投影
 
@@ -188,4 +199,4 @@ type FieldOptionSource =
 
 `toFormFieldDefinitions(schema): FormFieldDefinition[]` 会将同一份根作用域带 key 字段清单，扁平化为粗粒度的 `{ key, kind: FieldKind, label, options? }` 结构，供 `@vef-framework-react/approval-flow-editor` 通过其 `EditorPlugins.formFields` 接口消费，驱动其按节点划分的字段权限矩阵。`FieldKind` 是一个有损的、取最大公约数的集合（`"input" | "textarea" | "select" | "number" | "date" | "upload"`），与 Go 后端的 `FieldKind` 共用。
 
-这份映射刻意保持简单，**并非**权威的审批集成路径——对于审批后端集成，应改用 [`@vef-framework-react/approval-form-bridge`](../approval-form-bridge.md) 中的 `projectFormSchema` 来投影 schema。它只遍历一次 schema，就同时推导出相同的 `FormFieldDefinition[]` 结构（作为 `formFields`）以及 Go 后端自身解析器所期望的扁平化 `ApprovalFormField[]`（作为 `fields`），并遵循一条守恒规则——无法投影的带 key 字段永远会被上报为错误，绝不会被静默丢弃。
+这份映射刻意保持简单，**并非**权威的审批集成路径——对于审批后端集成，应改用 [`@vef-framework-react/approval-form-bridge`](../approval-form-bridge.md) 中的 `projectFormSchema` 来投影 schema。它只遍历一次 schema，就同时推导出一份更丰富的 `FormFieldDefinition[]`（作为 `formFields`）以及 Go 后端自身解析器所期望的扁平化 `ApprovalFormField[]`（作为 `fields`），并遵循一条守恒规则——无法投影的带 key 字段永远会被上报为错误，绝不会被静默丢弃。本函数会把子表单折叠掉、把每种控件归并到最接近的 kind；而桥接包则会把子表单投影为携带 `columns` 的 `table` 条目，并为可能被联动隐藏的字段标注 `hasConditionalVisibility`，供流程编辑器的权限表使用。
