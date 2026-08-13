@@ -146,6 +146,7 @@ openForm({ scene: 'update', values: row, mode: 'drawer', drawerConfig: { placeme
 ## 行为说明
 
 - `delete` 或 `deleteMany` 成功后，`Crud` 会自动清除内部选择状态——依赖 `selectedRows` 的工具栏按钮会自动重新禁用。
+- 关闭场景表单（通过 store 的 `closeForm`、modal/drawer 关闭图标或编程方式关闭）会重置表单状态，因此下一次 `openForm` 从全新的值开始——之前编辑的内容会被丢弃。
 - `formActionsRenderers[scene]` 接收 `(formApi, defaults)`，其中 `defaults` 暴露了框架默认的 `submitButton` 和 `resetButton`，使自定义操作布局也能保留标准按钮：
 
 ```tsx

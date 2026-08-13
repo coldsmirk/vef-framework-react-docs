@@ -89,7 +89,7 @@ VEF applications typically expose domain APIs through `apiClient.createQueryFn()
 
 ```ts title="src/apis/auth.ts"
 import type { AuthTokens } from "@vef-framework-react/core";
-import type { LoginParams } from "@vef-framework-react/starter";
+import type { LoginParams, UserInfo } from "@vef-framework-react/starter";
 
 import { apiClient } from "../api";
 
@@ -104,6 +104,19 @@ export const login = apiClient.createMutationFn(
       message: result.message,
       tokens: result.data
     };
+  }
+);
+
+export const logout = apiClient.createMutationFn(
+  "logout",
+  http => () => http.post("/api/logout")
+);
+
+export const getUserInfo = apiClient.createQueryFn(
+  "get_user_info",
+  http => async () => {
+    const result = await http.get<UserInfo>("/api/user/info");
+    return result.data;
   }
 );
 ```
@@ -156,7 +169,7 @@ export const Route = createFileRoute(INDEX_ROUTE_ID)(
 
 ## Step 5: Create Login and Access-Denied Routes
 
-```tsx title="src/pages/_common/login.tsx"
+```ts title="src/pages/_common/login.ts"
 import { createFileRoute } from "@tanstack/react-router";
 import { createLoginRouteOptions, LOGIN_ROUTE_ID } from "@vef-framework-react/starter";
 
@@ -170,7 +183,7 @@ export const Route = createFileRoute(LOGIN_ROUTE_ID)(
 );
 ```
 
-```tsx title="src/pages/_common/access-denied.tsx"
+```ts title="src/pages/_common/access-denied.ts"
 import { createFileRoute } from "@tanstack/react-router";
 import { ACCESS_DENIED_ROUTE_ID, createAccessDeniedRouteOptions } from "@vef-framework-react/starter";
 
@@ -234,6 +247,22 @@ createApp().render({
 `codeSetQueryFn` is the host's code set lookup (option lists keyed by strings such as `"sys.user.gender"`); leave it `undefined` until the backend exposes one — see [Code Sets](../guide/code-sets.md).
 
 ## Step 8: Add a Real Page
+
+First, define a dashboard API query:
+
+```ts title="src/apis/dashboard.ts"
+import { apiClient } from "../api";
+
+export const getDashboard = apiClient.createQueryFn(
+  "get_dashboard",
+  http => async () => {
+    const result = await http.get<{ message: string }>("/api/dashboard");
+    return result.data;
+  }
+);
+```
+
+Then wire it into a route:
 
 ```tsx title="src/pages/_layout/index/route.tsx"
 import { createFileRoute } from "@tanstack/react-router";

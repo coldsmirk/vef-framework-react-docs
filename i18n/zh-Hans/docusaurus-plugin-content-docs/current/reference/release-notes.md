@@ -9,13 +9,56 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 因此升级规则是：把所有 `@vef-framework-react/*` 依赖一起升级，每个都升到*同一次*发布所发出的版本——[安装](../getting-started/installation.md)固定了当前的版本组合。不支持在同一应用中混用来自不同发布的包。
 
-包的*集合*本身也会随版本变化：v2.7.0 移除了 `@vef-framework-react/expression`，v2.8.0 新增了 `@vef-framework-react/approval-form-bridge`，v2.12.0 新增了 `@vef-framework-react/approval` 和 `@vef-framework-react/integration`，下一个版本将新增 `@vef-framework-react/cron`——下文对它们均有说明。
+包的*集合*本身也会随版本变化：v2.7.0 移除了 `@vef-framework-react/expression`，v2.8.0 新增了 `@vef-framework-react/approval-form-bridge`，v2.12.0 新增了 `@vef-framework-react/approval` 和 `@vef-framework-react/integration`，v2.13.0 新增了 `@vef-framework-react/cron`——下文对它们均有说明。
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
-## 未发布（v2.12.0 之后，截至 2026-07-20）
+## 未发布（v2.15.0 之后）
 
-已合并到 main 分支但尚未进入任何带标签的发布。如果你只消费带标签的发布，这些变更会随下一个版本到达。
+v2.15.0 之后尚无已合并的变更。
+
+## v2.15.0 (2026-08-07)
+
+无破坏性变更。
+
+### 新特性
+
+- **approval** — 节点办理人悬浮在实例流程图之上：每个审批节点以人员叠层渲染其办理人和候选人，无需打开节点详情即可看到该步骤背后的人员。
+- **starter** — 部门选择挑战类型现在将 `meta` 载荷文档化在 `Register['challenges']` 示例中；starter 类型通过 `ResolvedChallenges` 携带该形状，内联声明展示了预期的 `departments` 与 `organizations` 结构。
+
+## v2.14.0 (2026-08-05)
+
+无破坏性变更。
+
+### 新特性
+
+- **hooks** — `useStoredFileNames(keys)` 把存储对象键解析为其上传时记录的原始文件名、大小和 MIME 类型；上传字段通过同一解析水合显示名称，使存储键渲染为上传者选择的文件名。
+- **integration** — 契约目录支持按标签过滤；码表条目编辑器在映射补全中建议宿主代码。
+
+### 值得关注的修复
+
+- **components** — Crud 场景表单在通过 store 的 `closeForm` 关闭时会重置；表单状态不再在程序化关闭再打开的周期中残留。
+- **dev** — `deps:check` 的 GHSA 富化容忍 null CVSS 分数；没有分数的公告不再导致报告崩溃。
+
+## v2.13.1 (2026-07-28)
+
+无破坏性变更。approval 包的补丁发布，外加两个在 v2.13.0 和补丁之间落地的特性。
+
+### 新特性
+
+- **core** — 可选的请求体传输编码：`HttpClientOptions.defaultBodyEncoding` 和每请求的 `bodyEncoding` 选项（`BodyEncoding`：`"none"` | `"base64"` | `"gzip+base64"`）对 JSON 请求体进行编码，使代码形状的载荷能够通过对它们误报的中间件（WAF / 代理）；服务端的 body-encoding 中间件在解析前逆转编码。`"none"` 使单个请求退出客户端级默认。
+- **integration** — 当客户端设置了 `defaultBodyEncoding` 时，携带脚本的请求体会被传输编码。
+
+### 值得关注的修复
+
+- **approval** — 流程设计器在保存开放（无限制）流程时不再提交发起人规则。
+- **approval** — 瞬时时间线条目（开始和结束在同一时刻）折叠为单个时间戳，不再渲染两个。
+- **approval** — `TimelineEntryKind` 新增 `"end"` 种类，使终端时间线条目具有正确的类型。
+- **core** — 当基于 `Uint8Array` 的转换不可用时（较旧的运行时和部分浏览器环境），base64 编码回退到 `btoa`。
+
+## v2.13.0 (2026-07-21)
+
+一个包加入集合：**`@vef-framework-react/cron`**（首发版本为 2.13.0）。本版本包含三个破坏性变更：数据字典词汇全面更名为 "code set"，approval-flow-editor 状态引擎回归手写实现（逆转 v2.7.0 的 nodeloom 重建），以及委托窗口字段按动词形式约定重命名。
 
 ### 破坏性变更："dictionary" 全面更名为 "code set"
 
@@ -85,6 +128,10 @@ createApp().render({
 
 更名配置之后，请删除旧的生成文件并重新运行 `vef gen:code-set-keys`，使扩充指向新的 `codeSetKeys` 成员。
 
+### 新包：`@vef-framework-react/cron`
+
+面向持久化定时调度引擎的开箱即用管理页面：`CronSchedulePage` 和 `CronRunPage`（外加 `RunDetailDrawer`、表单模型辅助函数和 `CRON_PERMISSIONS`）。调度列表筛选拆分为基础与高级两个面板；已暂停的调度会隐藏其触发游标。参见[引擎](../engines/overview.md)。
+
 ### 破坏性变更：approval-flow-editor 回归手写状态引擎
 
 编辑器的状态引擎重新改为手写实现，`@coldsmirk/nodeloom-core` 依赖已移除。这逆转了 v2.7.0 引入的内存节点形状（见下文对应章节）；线上（wire）格式依旧未受影响。
@@ -107,12 +154,26 @@ const isUrgent = (node: FlowNode) =>
 - 内部 store 重构为分片（slice）结构；通过 `useEditorStore` 做选择的宿主需要（再次）适配新的 `EditorState` 形状。
 - **线上格式未受影响。**`toFlowDefinition` / `fromFlowDefinition` 以及 `NodeDefinition`（`value` / `onChange`）契约保持不变——序列化器现在负责 `node.type` ↔ `kind` 的映射。已保存的流程定义无需迁移即可加载。
 
+### 破坏性变更：委托窗口字段重命名为 startsAt / endsAt
+
+委托类型（`Delegation` 和 `DelegationParams`）将其窗口字段从 `startTime` / `endTime` 重命名为 `startsAt` / `endsAt`。请更新所有读写这些字段的代码：
+
+```ts
+// Before (≤ v2.12.0)
+const start = delegation.startTime;
+const end = delegation.endTime;
+
+// After (≥ v2.13.0)
+const start = delegation.startsAt;
+const end = delegation.endsAt;
+```
+
 ### 新特性
 
-- **新包：`@vef-framework-react/cron`** — 面向持久化定时调度引擎的开箱即用管理页面：`CronSchedulePage` 和 `CronRunPage`（外加 `RunDetailDrawer`、表单模型辅助函数和 `CRON_PERMISSIONS`）。调度列表筛选拆分为基础与高级两个面板；已暂停的调度会隐藏其触发游标。参见[引擎](../engines/overview.md)。尚未发布到 npm——随下一个版本首发。
 - **core** — 面向 vef 服务端推送通道的 `PushClient`（及其工厂函数 `createPushClient`）：一条仅下行的 WebSocket，投递 `PushMessage` 消息信封（`{ id, type, payload?, time }`）。`subscribe(type, handler)` 按信封类型注册（`"*"` 接收全部消息），并返回取消订阅函数。传输层断连会以带抖动的指数退避重连（`PushReconnectOptions`），每次尝试都重新读取访问令牌（通过 `__accessToken` 查询参数发送）；终止性关闭码 `4401`（`PUSH_CLOSE_SESSION_INVALID`）和 `4429`（`PUSH_CLOSE_TOO_MANY_CONNECTIONS`）经由 `onSessionInvalid` / `onConnectionRejected` 暴露，且永不重连。按契约，投递是尽力而为的——请把它当作实时提示，把可靠状态留在常规 API 后面。
 - **hooks** — `usePushMessage(client, type, handler)` 订阅一种信封类型，并在卸载时自动清理。
-- **integration** — 码表管理页面（`IntegrationCodeMapPage`），为映射代码提供自动补全；码表的码集从宿主目录中选取，并支持手动输入兜底。
+- **integration** — 码表的码集从宿主目录中选取，并支持手动输入兜底。
+- **approval** — 实例详情在流程名称旁显示流程代码。
 
 ### 值得关注的修复
 

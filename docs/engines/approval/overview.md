@@ -5,7 +5,7 @@ description: What @vef-framework-react/approval ships — the approval engine's 
 
 # Approval Package Overview
 
-`@vef-framework-react/approval` (v2.12.0, first released with framework v2.12.0 on 2026‑07‑17) is the frontend console for the VEF server's approval workflow engine. It covers both sides of the engine in one package:
+`@vef-framework-react/approval` (v2.15.0, released with framework v2.15.0 on 2026‑08‑07) is the frontend console for the VEF server's approval workflow engine. It covers both sides of the engine in one package:
 
 - **Self-service** — what a regular employee sees: initiate an approval, process tasks, track submissions and carbon copies. Backed by the user-scoped `approval/my` and `approval/instance` resources, which carry no permission codes.
 - **Management** — what an administrator sees: flow categories, the flow designer with versioning, delegations, and a supervision console (cross-user instances/tasks, business write-back convergence, engine metrics). Backed by the permission-coded `approval/category`, `approval/flow`, `approval/delegation`, and `approval/admin` resources.

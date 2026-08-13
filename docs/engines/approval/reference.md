@@ -215,7 +215,7 @@ The supervision detail of an instance: the same header / form / timeline / graph
 
 ### `InstanceHeader`
 
-The shared instance header: title + status tag, then the identity fields as one descriptions block (审批单号 with copy, 所属流程, 申请人, 提交时间, plus 当前节点 / 完成时间 / 业务单据 / 流程标签 when present). `businessRef` renders through the provider's `renderBusinessRef`. Pass `labels` on operator-facing views (the admin detail) and omit it on applicant-facing ones.
+The shared instance header: title + status tag, then the identity fields as one descriptions block (审批单号 with copy, 所属流程, 流程编码, 申请人, 提交时间, plus 当前节点 / 完成时间 / 业务单据 / 流程标签 when present). `businessRef` renders through the provider's `renderBusinessRef`. Pass `labels` on operator-facing views (the admin detail) and omit it on applicant-facing ones.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -223,6 +223,7 @@ The shared instance header: title + status tag, then the identity fields as one 
 | `status` | `InstanceStatus` | — | Lifecycle status (rendered as `InstanceStatusTag`). |
 | `instanceNo` | `string` | — | Business-facing instance number (copyable). |
 | `flowName` | `string` | — | Owning flow's name. |
+| `flowCode` | `string` | — | Owning flow's stable code (copyable). |
 | `applicant` | `UserInfo` | — | Applicant snapshot. |
 | `createdAt` | `string` | — | Submission time. |
 | `finishedAt` | `string` | — | Completion time (omitted while running). |
@@ -254,7 +255,7 @@ The chronological transit record of an instance: one entry per traversed node (a
 
 ### `InstanceFlowGraphViewer`
 
-The read-only, progress-annotated map of an instance's flow: node positions come from the designer verbatim, progress colors the borders (blue = in motion, green = passed, red = rejected, orange = returned; unreached nodes fade back). Pan and zoom only — nothing is editable.
+The read-only, progress-annotated map of an instance's flow: node positions come from the designer verbatim, progress colors the borders (blue = in motion, green = passed, red = rejected, orange = returned) and dashes the outline of everything the instance never reached, and the people involved float above each node they touched. Pan and zoom only — nothing is editable.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -371,7 +372,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 
 | Type | Fields | Notes |
 | --- | --- | --- |
-| `Delegation` | extends `FullAudited` + `delegatorId: string`, `delegateeId: string`, `flowCategoryId?: string \| null`, `flowId?: string \| null`, `startTime: string`, `endTime: string`, `isActive: boolean`, `reason?: string \| null` | During the active window, tasks assigned to the delegator are routed to the delegatee. Scope narrows via `flowCategoryId` / `flowId`; both empty means all flows. |
+| `Delegation` | extends `FullAudited` + `delegatorId: string`, `delegateeId: string`, `flowCategoryId?: string \| null`, `flowId?: string \| null`, `startsAt: string`, `endsAt: string`, `isActive: boolean`, `reason?: string \| null` | During the active window, tasks assigned to the delegator are routed to the delegatee. Scope narrows via `flowCategoryId` / `flowId`; both empty means all flows. |
 | `DelegationParams` | same fields plus `id?: string` | Create/update payload. |
 | `DelegationSearch` | `delegatorId?: string`, `delegateeId?: string`, `isActive?: boolean` | List search. |
 
@@ -449,7 +450,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `CompletedTask` | `taskId`, `instanceId`, `instanceTitle`, `instanceNo`, `flowName` (`string`), `flowIcon?: string`, `applicant: UserInfo`, `nodeName: string`, `status: string`, `finishedAt?: string` | A task the current user already processed. |
 | `MyCCRecord` | `ccRecordId`, `instanceId`, `instanceTitle`, `instanceNo`, `flowName` (`string`), `flowIcon?: string`, `applicant: UserInfo`, `nodeName?: string`, `isRead: boolean`, `createdAt: string` | A CC notification addressed to the current user. |
 | `PendingCounts` | `pendingTaskCount: number`, `unreadCcCount: number` | Badge counts. |
-| `MyInstanceInfo` | `instanceId`, `instanceNo`, `title`, `flowName` (`string`), `flowIcon?: string`, `labels?: Record<string, string>`, `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the detail. `formData` is already stripped of fields this viewer may not see; `labels` are read from the mutable flow at query time (display identity, not version-pinned). |
+| `MyInstanceInfo` | `instanceId`, `instanceNo`, `title`, `flowId` (`string`), `flowCode: string`, `flowName` (`string`), `flowIcon?: string`, `labels?: Record<string, string>`, `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the detail. `formData` is already stripped of fields this viewer may not see; `labels` are read from the mutable flow at query time (display identity, not version-pinned). |
 | `RollbackTarget` | `nodeId: string`, `name: string` | One valid rollback destination, resolved server-side from the node's rollback config and the visit trail. |
 | `RemovableAssignee` | `taskId: string`, `assignee: UserInfo`, `status: string` | One peer task eligible for removal; `status` is the peer task's status verbatim (`pending` / `waiting`). |
 | `ViewerTask` | `taskId: string`, `nodeId: string`, `isOpinionRequired: boolean`, `addAssigneeTypes?: AddAssigneeType[]`, `rollbackTargets?: RollbackTarget[]`, `removableAssignees?: RemovableAssignee[]` | The viewer's pending task: what `process_task` should target plus the node-level action configuration — the client never re-derives engine semantics. |
@@ -465,7 +466,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | --- | --- | --- |
 | `AdminInstance` | `instanceId`, `instanceNo`, `title`, `tenantId`, `flowId`, `flowName` (`string`), `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeName?: string`, `createdAt: string`, `finishedAt?: string` | Admin list row. |
 | `AdminTask` | `taskId`, `instanceId`, `instanceTitle`, `flowName`, `nodeName` (`string`), `assignee: UserInfo`, `status: TaskStatus`, `createdAt: string`, `deadline?: string`, `finishedAt?: string` | Admin task row. |
-| `AdminInstanceInfo` | `instanceId`, `instanceNo`, `title`, `tenantId`, `flowId`, `flowName`, `flowVersionId` (`string`), `labels?: Record<string, string>`, `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the admin detail. |
+| `AdminInstanceInfo` | `instanceId`, `instanceNo`, `title`, `tenantId`, `flowId`, `flowCode: string`, `flowName`, `flowVersionId` (`string`), `labels?: Record<string, string>`, `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the admin detail. |
 | `AdminInstanceDetail` | `instance: AdminInstanceInfo`, `formSchema?: FormSchema`, `timeline: TimelineEntry[]`, `flowGraph: InstanceFlowGraph` | The raw audit trail stays on the paginated action-log query. |
 | `AdminActionLog` | `logId: string`, `action: ActionType`, `nodeId?`, `taskId?` (`string`), `operator: UserInfo`, `transferTo?: UserInfo`, `rollbackToNodeId?: string`, `addedAssignees?: UserInfo[]`, `removedAssignees?: UserInfo[]`, `ccUsers?: UserInfo[]`, `opinion?: string`, `attachments?: string[]`, `createdAt: string` | One audit entry. |
 | `ApprovalMetrics` | `tenantId: string`, `capturedAt: string`, `instanceCounts: Partial<Record<InstanceStatus, number>>`, `taskCounts: Partial<Record<TaskStatus, number>>`, `timeoutTaskCount: number`, `avgCompletionSeconds: number`, `pendingBindingFailures: number`, `businessProjectionCounts: Partial<Record<BindingProjectionStatus, number>>`, `pendingBusinessProjections: number` | `avgCompletionSeconds` is the average end-to-end duration in seconds over completed instances; `-1` means no completed instances yet. |
@@ -485,8 +486,8 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `NodeParticipant` | `taskId: string`, `user: UserInfo`, `delegator?: UserInfo`, `status: string`, `deadline?: string`, `isTimeout?: boolean`, `opinion?: string`, `attachments?: string[]`, `actionTime?: string`, `transferTo?: UserInfo` | One assignee's involvement at an approval/handle node during a single visit; `taskId` is what task operations are submitted against; outcome details are fused from the action log that finished the task. |
 | `Activity` | `action: ActivityAction`, `operator: UserInfo`, `opinion?: string`, `attachments?: string[]`, `transferTo?: UserInfo`, `target?: UserInfo`, `rollbackToNodeId?: string`, `rollbackToNodeName?: string`, `addedAssignees?: UserInfo[]`, `removedAssignees?: UserInfo[]`, `ccUsers?: UserInfo[]`, `createdAt: string` | A side action recorded at a node. Decisions themselves (approve / handle / reject) live on the participant that made them, not here. |
 | `CCRecipient` | `user: UserInfo`, `readAt?: string` | One CC recipient, with the read receipt when confirmed. |
-| `TimelineEntryKind` | `"start" \| "approval" \| "handle" \| "cc" \| "withdraw" \| "terminate"` | Node entries plus withdraw/terminate milestones. |
-| `TimelineEntry` | `kind: TimelineEntryKind`, `nodeId?`, `name?` (`string`), `status?: NodeVisitStatus`, `executionType?`, `approvalMethod?`, `passRule?`, `passRatio?` (`string`), `participants?: NodeParticipant[]`, `ccRecipients?: CCRecipient[]`, `activities?: Activity[]`, `startedAt: string`, `finishedAt?: string` | One step of the chronological account of the path an instance actually took; entries end at the node currently in progress — unreached nodes are not predicted. `passRatio` is a percentage in `(0, 100]` serialized as a decimal string. |
+| `TimelineEntryKind` | `"start" \| "approval" \| "handle" \| "cc" \| "end" \| "withdraw" \| "terminate"` | Node entries plus the end node and withdraw/terminate milestones. |
+| `TimelineEntry` | `kind: TimelineEntryKind`, `nodeId?`, `name?` (`string`), `status?: NodeVisitStatus`, `executionType?`, `approvalMethod?`, `passRule?`, `passRatio?` (`string`), `participants?: NodeParticipant[]`, `ccRecipients?: CCRecipient[]`, `activities?: Activity[]`, `startedAt: string`, `finishedAt?: string` | One step of the chronological account of the path an instance actually took; entries end at the node currently in progress — unreached nodes are not predicted. The `end` kind marks reaching the end node on a passing finish. `passRatio` is a percentage in `(0, 100]` serialized as a decimal string. |
 | `FlowGraphNode` | `id: string`, `nodeId: string`, `kind: NodeKind`, `position: { x: number; y: number }`, `data: FlowGraphNodeData` | React Flow–ready node; `kind` selects the node renderer. |
 | `FlowGraphNodeData` | `name: string`, `status: NodeProgressStatus`, `executionType?`, `approvalMethod?`, `passRule?`, `passRatio?` (`string`), `participants?: NodeParticipant[]`, `ccRecipients?: CCRecipient[]`, `activities?: Activity[]`, `startedAt?: string`, `finishedAt?: string` | Runtime payload: display config plus progress and the same participant/CC/activity shapes the timeline uses, aggregated across the node's visits in traversal order. |
 | `FlowGraphEdge` | `id: string`, `source: string`, `target: string`, `sourceHandle?: string` | React Flow–ready edge. |

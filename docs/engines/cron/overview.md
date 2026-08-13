@@ -5,11 +5,7 @@ description: What @vef-framework-react/cron ships — management pages for the V
 
 # Cron Package Overview
 
-`@vef-framework-react/cron` (v2.10.0) is the frontend console for the VEF server's **durable cron store**: schedules that live in the database rather than in code, survive restarts, fire on exactly one node of a cluster, and journal every run. The package ships two pages — schedule management and the read-only run journal — plus the API hooks and building blocks behind them.
-
-:::caution Unreleased package
-The package was added on 2026‑07‑19, after the v2.12.0 tag, and ships with the **next** framework release. It is not yet wired into the playground.
-:::
+`@vef-framework-react/cron` (v2.13.0) is the frontend console for the VEF server's **durable cron store**: schedules that live in the database rather than in code, survive restarts, fire on exactly one node of a cluster, and journal every run. The package ships two pages — schedule management and the read-only run journal — plus the API hooks and building blocks behind them.
 
 ## When to Use
 
@@ -42,7 +38,7 @@ Full-page management of the schedule store, built on `CrudPage` (see [Crud](../.
 
 The list shows name, job handler, trigger kind, a humanized trigger summary (`0 9 * * *（Asia/Shanghai）`, `每 5 分钟`, `单次 · …`), enabled state, and the next/last fire times. **A paused schedule shows a dash for 下次触发**: it keeps its fire cursor internally so resuming can account for the paused gap, but it will not fire at that time — showing it would read as a scheduled run that never happens (`ccef94e`).
 
-Filters split into a **basic** inline field (name) and an **advanced** expandable panel (job handler from `list_jobs`, trigger kind, enabled state) — commit `c8d5dc0`.
+Filters split into a **basic** inline field (`name`) and an **advanced** expandable panel (`jobName` from `list_jobs`, trigger `kind`, `isEnabled`) — commit `46ff52d`.
 
 The drawer form (responsive: `100vw` → `80vw` → 680px) edits the name (rename hint included), the job handler select, the trigger through [`TriggerEditor`](./reference.md#triggereditor) — with a debounced **live preview of the next fire times** (`preview_fires`, validated exactly like a save, errors surfaced inline) — the effective window, misfire/concurrency policies with per-value hints, crash recovery, the timeout as a value+unit pair, the params as JSON text (validated to be a JSON object; empty omits params), and the enabled switch.
 

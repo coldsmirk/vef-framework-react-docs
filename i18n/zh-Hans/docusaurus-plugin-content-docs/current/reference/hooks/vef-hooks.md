@@ -105,7 +105,7 @@ function OrderBadge({ pushClient }) {
 | --- | --- | --- |
 | `useUpload` | `(options?: UseUploadOptions) => UseUploadResult` | 对 core 中支持分片、可续传的 `Uploader` 的 React 适配层，每个使用方同一时刻只作用于一个进行中的上传（再次调用 `upload()` 会取消上一次的执行）。如需并行/批量上传，请直接使用 `@vef-framework-react/core` 中的 `Uploader`。 |
 
-`UseUploadOptions` 对应 [`UploaderOptions`](../core/storage.md#uploaderoptions)（来自 `core`），去掉了由 React 接管的字段（`signal`、`onSessionOpened`），并新增：
+`UseUploadOptions` 对应 [`UploaderOptions`](../core/storage.md#uploaderoptions)（来自 `core`），去掉了由 React 接管的字段（`signal`、`onProgress`、`onStatusChange`、`onSessionOpened`），并新增：
 
 | 选项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -157,3 +157,47 @@ function OrderBadge({ pushClient }) {
 | `useHasMutating` | `(key: string) => boolean` | 是否有键以 `[key]` 开头（非精确匹配）的变更正在执行中。 |
 
 两者都特别适用于页面级的加载状态协调，以及在请求进行期间禁用重复操作。
+
+## 存储文件名解析
+
+| Hook | Signature | Description |
+| --- | --- | --- |
+| `useStoredFileNames` | `(keys: readonly string[]) => Record<string, ResolvedFile>` | 将存储对象 key 解析为后端在上传时记录的文件元数据——原始文件名、内容类型、大小、上传状态及时间戳。结果以 `staleTime: Infinity` 无限期缓存；key 在发起请求前会去重并排序，使带新数组的重渲染命中同一缓存条目。 |
+
+业务模型只保存存储 key（`priv/2026/08/04/<uuid>.pdf`），因此没有这个 hook，重新打开的表单或列表只能显示生成的对象名。该 hook 通过 `resolveFiles` core API 读回记录的原始文件名。
+
+行为说明：
+
+- 该 hook 通过 `useApiClient` 从上下文读取 `apiClient`，并在内部创建类型化的查询函数，因此消费组件无需自行管理 `ApiClient` 或 `QueryClient`。
+- 调用方无权读取的 key 以及后端无记录的 key 会直接从结果映射中缺失——解析是装饰，不是门禁。请求失败时返回空映射。
+- 空的或全部为假值的 key 数组是空操作（`enabled: false`），返回 `{}` 且不发起请求。
+
+```tsx
+import { useStoredFileNames } from "@vef-framework-react/hooks";
+
+function FileList({ keys }: { keys: string[] }) {
+  const names = useStoredFileNames(keys);
+
+  return (
+    <ul>
+      {keys.map(key => (
+        <li key={key}>{names[key]?.originalFilename ?? key}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### `ResolvedFile`
+
+结果映射中每个已解析条目的形状：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `key` | `string` | 存储对象 key |
+| `originalFilename` | `string` | 上传时记录的客户端原始文件名 |
+| `contentType` | `string` | MIME 类型 |
+| `size` | `number` | 文件大小（字节） |
+| `status` | `"uploaded" \| "claimed" \| "deleted"` | 存储生命周期状态 |
+| `uploadedAt` | `string` | 上传时间戳 |
+| `uploadedBy` | `string` | 上传者标识 |

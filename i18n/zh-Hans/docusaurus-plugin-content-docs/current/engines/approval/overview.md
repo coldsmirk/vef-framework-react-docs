@@ -5,7 +5,7 @@ description: "@vef-framework-react/approval 提供什么——审批引擎的管
 
 # 审批包概览
 
-`@vef-framework-react/approval`（v2.12.0，随框架 v2.12.0 于 2026‑07‑17 首次发布）是 VEF 服务端审批工作流引擎的前端控制台。它在一个包里覆盖了引擎的两侧:
+`@vef-framework-react/approval`（v2.15.0，随框架 v2.15.0 于 2026‑08‑07 发布）是 VEF 服务端审批工作流引擎的前端控制台。它在一个包里覆盖了引擎的两侧:
 
 - **自助（self-service）**——普通员工看到的部分: 发起审批、处理任务、跟踪自己的提交与抄送。由用户级作用域的 `approval/my` 与 `approval/instance` 资源支撑，不携带任何权限码。
 - **管理**——管理员看到的部分: 流程分类、带版本管理的流程设计器、委托，以及一个监管控制台（跨用户实例/任务、业务回写收敛、引擎指标）。由带权限码的 `approval/category`、`approval/flow`、`approval/delegation` 和 `approval/admin` 资源支撑。

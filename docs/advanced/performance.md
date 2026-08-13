@@ -92,9 +92,11 @@ The result lands in the same cache that `useQuery()` reads, so the first compone
 
 ## Loading Flags Without Extra State
 
-`useHasFetching(key)` and `useHasMutating(key)` subscribe to the query cache instead of duplicating loading state in `useState` flags:
+`useHasFetching(key)` and `useHasMutating(key)` from `@vef-framework-react/hooks` subscribe to the query cache instead of duplicating loading state in `useState` flags:
 
 ```tsx
+import { useHasMutating } from "@vef-framework-react/hooks";
+
 const isSaving = useHasMutating(createUser.key);
 
 <Button loading={isSaving}>Save</Button>;

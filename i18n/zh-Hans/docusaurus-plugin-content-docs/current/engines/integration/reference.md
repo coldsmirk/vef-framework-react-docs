@@ -9,9 +9,7 @@ description: "@vef-framework-react/integration 每一个导出的详尽参考—
 
 `QueryFunction<TData, TParams>` / `MutationFunction<TData, TParams>` 是框架在 `@vef-framework-react/core` 中带 key 的函数形态；`PaginatedQueryParams<TSearch>` 是 `@vef-framework-react/components` 的 ProTable 查询形态；`ApiResult<T>` 是标准响应信封。
 
-:::info 未发布的导出
-码表领域（`useCodeMapApi`、`useCodeSetApi`、`INTEGRATION_PERMISSIONS.codeMap`、`CodeMap*` / `Code*Catalog` 类型以及 `codes.*` 补全条目）在 v2.12.0 之后加入，将随下一个版本发布。其余内容在 v2.12.0 中均可用。
-:::
+
 
 ## 权限
 
@@ -72,7 +70,7 @@ interface CrudApi<TRow extends { id: string }, TParams, TSearch extends AnyObjec
 
 一个 CRUD 资源的查询与变更函数，形态可直接插入 `CrudPage`: `findPage` 是它的 `queryFn`，`create`/`update` 是它的 `formMutationFns`，`remove`/`removeMany` 是它的删除变更函数（两者接收行对象，镜像框架的 CRUD 契约——见 [Crud](../../components/crud.md)）。
 
-`createCrudApi<TRow, TParams, TSearch>(apiClient: ApiClient, resource: string, keyPrefix: string): CrudApi<TRow, TParams, TSearch>` 针对应用的 API 客户端构建这套函数；`keyPrefix` 为 TanStack Query 缓存键划分命名空间。对遵循同一 wire 契约的宿主自定义资源很有用。
+`createCrudApi<TRow, TParams, TSearch>(apiClient: ApiClient, resource: string, keyPrefix: string, bodyEncoding?: BodyEncoding): CrudApi<TRow, TParams, TSearch>` 针对应用的 API 客户端构建这套函数；`keyPrefix` 为 TanStack Query 缓存键划分命名空间。可选的 `bodyEncoding` 对创建/更新请求体做传输编码——`useSystemApi` 和 `useAdapterApi` 传入 `"gzip+base64"`，让携带脚本资源的请求体能通过检查载荷的中间件。对遵循同一 wire 契约的宿主自定义资源很有用。
 
 ### 资源 CRUD hook
 
@@ -100,8 +98,8 @@ interface CrudApi<TRow extends { id: string }, TParams, TSearch extends AnyObjec
 
 | 函数 | 类型 | 操作 |
 | --- | --- | --- |
-| `dryRun` | `MutationFunction<DryRunResult, DryRunParams>` | `integration/ops.dry_run` |
-| `dryRunInbound` | `MutationFunction<InboundDryRunResult, DryRunInboundParams>` | `integration/ops.dry_run_inbound` |
+| `dryRun` | `MutationFunction<DryRunResult, DryRunParams>` | `integration/ops.dry_run`（请求体使用 `gzip+base64` 编码） |
+| `dryRunInbound` | `MutationFunction<InboundDryRunResult, DryRunInboundParams>` | `integration/ops.dry_run_inbound`（请求体使用 `gzip+base64` 编码） |
 | `testConnection` | `MutationFunction<ConnectionCheck, TestConnectionParams>` | `integration/ops.test_connection` |
 | `diagnoseRoutes` | `MutationFunction<RouteDiagnostics, void>` | `integration/ops.diagnose_routes` |
 

@@ -148,6 +148,8 @@ render(<UserActions />, {
 ```tsx
 import userEvent from "@testing-library/user-event";
 
+import { useForm } from "@vef-framework-react/components";
+
 import { render, screen, waitFor } from "../test-utils";
 
 function UserForm({ onSubmit }: { onSubmit: (values: { name: string }) => void }) {
@@ -199,7 +201,7 @@ const findUserPage = apiClient.createQueryFn<PaginationResult<User>, UserSearchP
 render(<UserTable queryFn={findUserPage} />, { apiClient });
 ```
 
-这样整条查询链路都是真实的——缓存、loading 状态、`useHasFetching()`——但处理函数从不触网。它之所以可行，是因为[应用项目规约](./project-conventions.md)要求 `route.tsx` 以 props 形式把查询函数接入页面组件：测试只是用同样的方式传入一个固定数据版本。
+这样整条查询链路都是真实的——缓存、loading 状态，以及 `@vef-framework-react/hooks` 的 `useHasFetching()`——但处理函数从不触网。它之所以可行，是因为[应用项目规约](./project-conventions.md)要求 `route.tsx` 以 props 形式把查询函数接入页面组件：测试只是用同样的方式传入一个固定数据版本。
 
 当组件直接从 `~apis` 导入 API 函数时，用 `vi.mock("~apis/auth/user", ...)` mock 整个模块，但替身仍然要用 `createQueryFn` 构造，以维持 `key` 契约（工厂函数需要的状态用 `vi.hoisted` 提供）。
 

@@ -76,7 +76,7 @@ export default function UserPage() {
 |------|------|---------|-------------|
 | `className` | `string` | — | Class name for the page container |
 | `margin` | `boolean` | `false` | Apply `var(--vef-spacing-md)` margin to the container |
-| `gap` | `Length` | `var(--vef-spacing-md)` | Gap between grid cells |
+| `gap` | `Length` | `var(--vef-spacing-sm)` | Gap between grid cells |
 | `mainClassName` | `string` | — | Class name for the main content area |
 | `leftAside` | `ReactNode` | — | Left aside content |
 | `leftAsideClassName` | `string` | — | Class name for the left aside |

@@ -246,7 +246,8 @@ interface FileFingerprinter {
 | 导出 | 值 | 说明 |
 | --- | --- | --- |
 | `STORAGE_API_PATH` | `"/api"` | 默认 `apiPath` |
-| `STORAGE_RESOURCE` | `"sys/storage"` | 默认 `resource` |
+| `STORAGE_RESOURCE` | `"sys/storage"` | 上传协议 RPC 的默认 `resource` |
+| `STORAGE_FILE_RESOURCE` | `"sys/storage/file"` | 文件解析 RPC（`resolveFiles`）的默认 `resource` |
 | `STORAGE_VERSION` | `"v1"` | 默认 `version` |
 | `PUBLIC_PREFIX` | `"pub/"` | 匿名可读对象的键前缀 |
 | `PRIVATE_PREFIX` | `"priv/"` | 需鉴权读取对象的键前缀 |

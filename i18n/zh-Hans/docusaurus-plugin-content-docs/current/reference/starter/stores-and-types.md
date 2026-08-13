@@ -57,6 +57,36 @@ description: app/tab/theme 三个 Zustand store，以及 @vef-framework-react/st
 - `UserDetails` —— 当 `Register['userDetails']` 未被增补时的兜底形状（`Record<string, unknown>`）
 - `OrderSpec` —— `{ column: string; direction: "asc" | "desc" }`
 
+### `department_selection` 登录挑战
+
+内置的 `department_selection` 登录挑战在挑战负载和每个部门条目上都携带一个自由格式的 `meta` 字段。框架本身仅传输这些数据；项目声明登录界面实际读取的键。不存在名为 `DepartmentSelectionChallengeMeta` 的导出类型——该形状通过 `Register['challenges']` 增补声明，并由 `ResolvedChallenges` 携带。
+
+每个部门条目有一个可选的 `meta?: { orgId?: string; parentId?: string }`——`orgId` 标识该部门属于哪个组织，`parentId` 用于渲染树形结构。挑战级别的 `meta` 携带 `organizations`——部门所挂靠的组织层级——即 `meta?: { organizations?: Array<{ id: string; name: string; parentId?: string }> }`。
+
+组织数据放在挑战级别的 `meta` 中，而不是作为额外的 `departments` 条目，因为 `departments` 列表中的每个条目都是可选的——把分组节点列在其中会使其成为可选项。
+
+```ts
+declare module "@vef-framework-react/starter" {
+  interface Register {
+    challenges: {
+      department_selection: {
+        data: {
+          departments: Array<{
+            id: string;
+            name: string;
+            meta?: { orgId?: string; parentId?: string };
+          }>;
+          meta?: {
+            organizations?: Array<{ id: string; name: string; parentId?: string }>;
+          };
+        };
+        response: string;
+      };
+    };
+  }
+}
+```
+
 ### 扩展 `UserInfo.details`
 
 `UserInfo.details` 通过 `Register` 接口解析，模式与 `@tanstack/react-query` 中 `mutationMeta` 的用法一致。在项目中增补一次，即可在 `UserInfo` 流经应用的所有位置获得强类型的用户属性:

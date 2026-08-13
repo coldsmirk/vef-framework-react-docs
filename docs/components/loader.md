@@ -61,7 +61,7 @@ export default function Page({ isLoading }: { isLoading: boolean }) {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | — | Spinner size |
+| `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | `'default'` | Spinner size |
 | `description` | `ReactNode` | — | Text shown below the spinner |
 | `descriptionSize` | `number` | — | Font size of the description in pixels |
 

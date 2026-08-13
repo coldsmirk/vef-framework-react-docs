@@ -31,7 +31,6 @@ Every application project MUST start from the following `src/` layout:
 src/
   api/
     index.ts
-    request.ts
   apis/
     auth/
     md/
@@ -42,8 +41,6 @@ src/
     config.ts
     index.ts
   hooks/
-    use-upload/
-      index.ts
     index.ts
   pages/
     __root.ts
@@ -164,7 +161,7 @@ The API layer has two levels, and they MUST stay separate.
 `src/api/` is reserved for application-level API infrastructure.
 
 - `src/api/index.ts` MUST create and export the application `apiClient`.
-- `src/api/request.ts` MUST hold shared request-envelope builders or common request helpers.
+- `src/api/` MAY hold shared request-envelope builders or common request helpers (for example, `src/api/request.ts`).
 - `src/api/` MUST NOT contain domain resources such as `user.ts`, `role.ts`, or `department.ts`.
 
 ### `src/apis/`
@@ -265,7 +262,7 @@ API exports MUST use verb-first, resource-specific names.
 
 ### Import path rules
 
-- Shared application modules MUST be imported through aliases such as `~api`, `~apis`, `~helpers`, `~hooks`, `~router`, and `~types`.
+- Shared application modules MUST be imported through aliases such as `~api`, `~apis`, `~helpers`, `~router`, and `~types`.
 - Page-local modules MUST be imported with relative paths.
 - Long relative imports that climb back to the app root MUST NOT be used when an alias already exists.
 

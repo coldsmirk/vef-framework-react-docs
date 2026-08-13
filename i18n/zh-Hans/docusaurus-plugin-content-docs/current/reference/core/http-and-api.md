@@ -17,7 +17,7 @@ description: HttpClient 与 ApiClient 的签名、选项、请求生命周期与
 
 ### 获取实例
 
-`HttpClient` 不能直接构造——`createHttpClient` 是一个内部工厂函数，并未从包根导出（包根仅将 `HttpClient` 作为**类型**导出）。应用代码应将 `HttpClientOptions` 配置为 `ApiClientOptions.http`，并传递给 `createApiClient`（见下文）；随后可通过 [`HTTP_CLIENT` symbol](#访问底层客户端) 获取配置好的实例。
+`HttpClient` 可以通过导出的 `createHttpClient` 工厂函数创建，但大多数应用应使用 `createApiClient`，以便 HTTP 层与框架的 `QueryClient` 配对。在该路径中，将 `HttpClientOptions` 配置为 `ApiClientOptions.http` 并传递给 `createApiClient`（见下文）；随后可通过 [`HTTP_CLIENT` symbol](#访问底层客户端) 获取配置好的实例。
 
 ```ts
 const httpOptions = {
@@ -56,6 +56,23 @@ const httpOptions = {
 | `showInfoMessage` | `(message: string) => void` | — | 信息提示处理函数（缺省回退到 `console.info`） |
 | `showWarningMessage` | `(message: string) => void` | — | 警告提示处理函数（缺省回退到 `console.warn`）；也用于业务码失败和 400/403 响应 |
 | `showErrorMessage` | `(message: string) => void` | — | 错误提示处理函数（缺省回退到 `console.error`） |
+| `defaultBodyEncoding` | `BodyEncoding` | — | 默认应用于每个请求体的传输编码。单个请求可以用 `"none"` 覆盖（即退出默认编码）；未设置时请求体原样发送 |
+
+### `BodyEncoding`
+
+```ts
+type BodyEncoding = "none" | "base64" | "gzip+base64";
+```
+
+请求体的传输编码方式，用于确保代码形态的负载（集成适配器脚本、信封/认证脚本）能通过对其产生误报的中间件（WAF / 代理）。客户端会添加 `X-Body-Encoding` 请求头；服务端的 body-encoding 中间件会在解析前将其还原。响应端走原生 HTTP gzip，故响应侧无变化。
+
+| 值 | 说明 |
+| --- | --- |
+| `"none"` | 原样发送请求体（也可用于让单个请求退出客户端全局的 `defaultBodyEncoding`） |
+| `"base64"` | 对 UTF-8 JSON 请求体做 base64 编码 |
+| `"gzip+base64"` | 先 gzip 再 base64 编码 UTF-8 JSON 请求体——线上体积更小，且仍为文本形态。运行时无法 gzip（`CompressionStream` 不可用）时回退为 `"base64"` |
+
+编码生效时，请求体会先 JSON 序列化（若非字符串），编码后以文本负载加上 `X-Body-Encoding` 请求头发送。base64 编码优先使用原生 `Uint8Array#toBase64`，不可用时回退到 `btoa`。`multipart`（`FormData`）、二进制（`Blob`）和数组缓冲区请求体永远不会被编码——仅 JSON 形态的负载会。
 
 ### `AuthTokens`
 
@@ -129,10 +146,10 @@ public async ensureTokenRefreshed(triggerCallback = true): Promise<boolean>
 // GET — get<R = unknown, P = unknown>(url, options?: RequestOptions & { params?: P })
 const result = await http.get<UserInfo>("/user/info", { params: { id: 1 } });
 
-// POST — post<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P })
+// POST — post<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P; bodyEncoding?: BodyEncoding })
 const result = await http.post<CreateResult>("/user/create", { data: payload });
 
-// PUT — put<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P })
+// PUT — put<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P; bodyEncoding?: BodyEncoding })
 const result = await http.put<void>("/user/update", { data: payload });
 
 // DELETE — delete<R = unknown, P = unknown>(url, options?: RequestOptions & { params?: P })
@@ -148,6 +165,8 @@ const result = await http.upload<UploadResult>("/file/upload", {
 ```
 
 `upload` 发送 `multipart/form-data`（Axios `postForm`），并通过 Axios 上传进度事件报告进度。若需面向框架 `sys/storage` 后端的分片、可断点续传上传，请改用 [`Uploader`](./storage.md)。
+
+**请求体编码**：`post` 和 `put` 在选项上接受可选的 `bodyEncoding` 字段。设置后（或客户端配置了 `defaultBodyEncoding` 时），JSON 请求体会被传输编码，以通过对其代码形态产生误报的中间件。参见 [`BodyEncoding`](#bodyencoding) 了解编码值及行为。
 
 ### `requestFile`
 

@@ -34,6 +34,8 @@ src/
       sys/
   router/
     context.ts
+    index.ts
+    router.gen.ts
   types/
     augmentation.ts
     code-set-keys.gen.ts
@@ -49,7 +51,7 @@ src/
 | `helpers/` | 与具体领域无关的应用级工具 | 配置读取器、环境变量包装器 |
 | `hooks/` | 可复用的页面级 hooks | 上传、弹窗状态、组合行为 |
 | `pages/` | 路由入口和页面实现 | `route.tsx`、页面组件、局部 helper |
-| `router/` | 路由器实例和路由上下文 | `createRouter()`、`RouterContext` |
+| `router/` | 路由器实例和路由上下文 | `createRouter()`、`RouterContext`、`router.gen.ts` |
 | `types/` | 模块扩充与生成的类型文件 | `Register` 扩充、由 `vef gen:code-set-keys` 生成的 `code-set-keys.gen.ts` |
 
 ## 典型页面目录拆分

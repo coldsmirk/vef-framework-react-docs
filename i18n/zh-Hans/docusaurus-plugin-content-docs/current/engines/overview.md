@@ -17,9 +17,9 @@ VEF 服务端内置了若干后端*引擎*——拥有自己的存储、生命�
 
 | 包 | 版本 | 引擎 | 页面 | 额外集成点 |
 | --- | --- | --- | --- | --- |
-| [`@vef-framework-react/approval`](./approval/overview.md) | 2.12.0（随框架 v2.12.0 发布，2026‑07‑17） | 审批工作流引擎（`approval/*` 资源） | 7 个——任务中心、我的实例、发起门户、分类、流程设计器、委托、管理控制台 | `ApprovalProvider` 插件上下文（选择器、表单注册表、全局变量、业务引用渲染器）；内嵌[审批流编辑器](../editors/approval-flow-editor/overview.md)与[表单编辑器](../editors/form-editor/overview.md) |
-| [`@vef-framework-react/integration`](./integration/overview.md) | 2.10.0（随框架 v2.12.0 发布；码表领域为未发布的 HEAD） | 集成引擎（`integration/*` 资源） | 6 个——契约、系统、适配器、路由、码表、运维控制台 | 带运行时镜像补全与悬停文档的脚本编辑器；感知认证方案的参数编辑器 |
-| [`@vef-framework-react/cron`](./cron/overview.md) | 2.10.0（**未发布**——2026‑07‑19 加入，晚于 v2.12.0） | 持久化定时调度存储（`sys/cron/*` 资源） | 2 个——调度、运行记录 | 带下次触发实时预览的触发器编辑器 |
+| [`@vef-framework-react/approval`](./approval/overview.md) | 2.15.0 | 审批工作流引擎（`approval/*` 资源） | 7 个——任务中心、我的实例、发起门户、分类、流程设计器、委托、管理控制台 | `ApprovalProvider` 插件上下文（选择器、表单注册表、全局变量、业务引用渲染器）；内嵌[审批流编辑器](../editors/approval-flow-editor/overview.md)与[表单编辑器](../editors/form-editor/overview.md) |
+| [`@vef-framework-react/integration`](./integration/overview.md) | 2.15.0 | 集成引擎（`integration/*` 资源） | 6 个——契约、系统、适配器、路由、码表、运维控制台 | 带运行时镜像补全与悬停文档的脚本编辑器；感知认证方案的参数编辑器 |
+| [`@vef-framework-react/cron`](./cron/overview.md) | 2.13.0 | 持久化定时调度存储（`sys/cron/*` 资源） | 2 个——调度、运行记录 | 带下次触发实时预览的触发器编辑器 |
 
 包版本独立于框架 tag 演进: 只有当某个包真正发布时，它的 `version` 才会递增。三个包遵循同一套内部架构——`pages` + `api` + `types` + `permissions`（+ 共享的展示型 `components`），全部从包根部扁平地重新导出。
 
@@ -96,7 +96,7 @@ export const Route = createFileRoute("/_layout/sys/integration-console")({
 });
 ```
 
-playground 的参考路径: 审批页面位于 `/approval/*`（`task-center`、`my-instances`、`initiate`、`category`、`flow`、`delegation`、`admin`），集成页面位于 `/sys/integration-*`（`contract`、`system`、`adapter`、`route`、`code-map`、`console`）。cron 页面尚未接入 playground（该包未发布）；以同样的方式挂载即可，例如 `/sys/cron-schedule` 和 `/sys/cron-run`。
+playground 的参考路径: 审批页面位于 `/approval/*`（`task-center`、`my-instances`、`initiate`、`category`、`flow`、`delegation`、`admin`），集成页面位于 `/sys/integration-*`（`contract`、`system`、`adapter`、`route`、`code-map`、`console`）。cron 页面尚未接入 playground；以同样的方式挂载即可，例如 `/sys/cron-schedule` 和 `/sys/cron-run`。
 
 ## 覆盖权限码
 
@@ -124,7 +124,7 @@ import { ApprovalCategoryPage, APPROVAL_PERMISSIONS } from "@vef-framework-react
 ```bash
 pnpm add @vef-framework-react/approval    # approval engine console (also pulls the editors)
 pnpm add @vef-framework-react/integration # integration engine console
-pnpm add @vef-framework-react/cron        # durable cron console (unreleased — next release)
+pnpm add @vef-framework-react/cron        # durable cron console
 ```
 
 `@vef-framework-react/approval` 依赖 `approval-flow-editor`、`form-editor` 和 `approval-form-bridge`——它的设计器内嵌了这些编辑器，并重新导出选择器契约类型（`EditorPlugins`、`PickerProps`、`PrincipalKind`），因此宿主只从这一个包就能完成全部接线。

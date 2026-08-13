@@ -32,7 +32,7 @@ flowchart LR
 
 Each package works standalone: `approval-flow-editor` only needs a `FormFieldDefinition[]` array (hand-written or sourced any other way), not the bridge specifically; `form-editor` has no dependency on the approval packages at all. The three compose into one pipeline only when a host is building an end-to-end approval-flow designer, as in `@vef-framework-react/approval-flow-editor`'s own playground wizard demo.
 
-For a batteries-included version of that composition, the [approval engine](../engines/approval/overview.md) pages (`@vef-framework-react/approval`, v2.12.0) embed all three packages behind the engine's persistence chain — its flow-designer wizard wires the editors together and re-exports the picker contract types (`EditorPlugins`, `PickerProps`, `PrincipalKind`) from `approval-flow-editor`.
+For a batteries-included version of that composition, the [approval engine](../engines/approval/overview.md) pages (`@vef-framework-react/approval`, v2.15.0) embed all three packages behind the engine's persistence chain — its flow-designer wizard wires the editors together and re-exports the picker contract types (`EditorPlugins`, `PickerProps`, `PrincipalKind`) from `approval-flow-editor`.
 
 ## Where to start
 

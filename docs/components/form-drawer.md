@@ -72,7 +72,7 @@ export default function EditUserDrawer({ open, onClose }) {
 | `onSubmit` | `(values) => Awaitable<void>` | — | Custom submit handler |
 | `onReset` | `(defaultValues?) => void` | — | Called on form reset |
 | `onClose` | `() => void` | — | Called when drawer closes |
-| `renderActions` | `(formApi, defaults: { submitButton, resetButton }) => ReactNode` | — | Custom footer actions; `defaults` carries the default submit/reset buttons to reuse alongside custom ones |
+| `renderActions` | `(formApi, defaults: { submitButton, resetButton }) => ReactNode` | — | Custom footer actions; `defaults` carries the default submit/reset buttons to reuse alongside custom ones; return `null` to hide footer |
 | `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Submit button customization (only used when `renderActions` is not provided) |
 | `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` to hide (only used when `renderActions` is not provided) |
 | `children` | `ReactNode \| (formApi) => ReactNode` | — | Form content |

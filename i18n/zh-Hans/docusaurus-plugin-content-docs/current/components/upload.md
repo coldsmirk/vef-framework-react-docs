@@ -105,6 +105,8 @@ antd 会把 `UploadFile.url` 在文件列表中渲染成原生 `<a>` 链接，�
 | `sourceUrl` | `string` | 用于获取已存储对象的解析后源 URL。与 antd 可导航的 `UploadFile.url` 分开存放，确保带鉴权的文件绝不会以原生列表链接的形式暴露 |
 | `fileName` | `string` | 后端回传的客户端原始文件名 |
 
+若要在上传组件之外将存储 key 解析回其记录的元数据（原始文件名、内容类型、大小、上传状态）——例如在列表或只读表单中——请使用 `@vef-framework-react/hooks` 中的 [`useStoredFileNames`](../reference/hooks/vef-hooks.md#存储文件名解析)。
+
 ### toFilePreviewTarget
 
 ```ts

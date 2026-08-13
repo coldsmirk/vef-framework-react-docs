@@ -102,7 +102,7 @@ Three properties of the subscription registry matter in practice:
 
 - **Subscriptions are independent of the connection.** You can subscribe before `connect()`, and subscriptions survive reconnects and even `close()`/`connect()` cycles — nothing needs re-registering.
 - **Ordering:** for a given message, handlers subscribed to its exact `type` run before `"*"` handlers.
-- **The payload generic is an assertion, not validation.** `subscribe<OrderStatusPayload>` types your handler; the client does not check the wire shape. Malformed frames (non-JSON, or missing a non-empty string `type`) are dropped with a console warning before any handler runs.
+- **The payload generic is an assertion, not validation.** `subscribe<OrderStatusPayload>` types your handler; the client does not check the wire shape. Malformed frames are dropped before any handler runs: non-string frames are discarded silently, while invalid JSON or a missing/empty string `type` is discarded with a console warning.
 
 ## Subscribing from Components: `usePushMessage`
 

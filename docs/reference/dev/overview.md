@@ -173,7 +173,7 @@ Supported commit types:
 The code-generation module produces the project's `CodeSetKey` union from the backend's code set catalog, so every `useCodeSetQuery` call site is checked against real keys. The runtime side of code sets is described in [Code Sets](../../guide/code-sets.md).
 
 :::note Renamed from "dictionary"
-Before the rename that follows v2.12.0, this module used the "dictionary" vocabulary: the CLI command was `vef gen:dictionary-keys`, the config block was `dictionaryKeys` with a `fetchDictionaryKeys` fetcher, the default output was `src/types/dictionary.gen.ts`, and the exports were spelled `generateDictionaryKeys`, `renderDictionaryKeysFile`, `DICTIONARY_AUGMENT_TARGET`, `DictionaryKeyEntry`, and `DictionaryKeysConfig`. See the [release notes](../release-notes.md#unreleased-after-v2120-as-of-2026-07-20) for the full migration.
+Before the rename that follows v2.12.0, this module used the "dictionary" vocabulary: the CLI command was `vef gen:dictionary-keys`, the config block was `dictionaryKeys` with a `fetchDictionaryKeys` fetcher, the default output was `src/types/dictionary.gen.ts`, and the exports were spelled `generateDictionaryKeys`, `renderDictionaryKeysFile`, `DICTIONARY_AUGMENT_TARGET`, `DictionaryKeyEntry`, and `DictionaryKeysConfig`. See the [release notes](../release-notes.md#unreleased-after-v2150) for the full migration.
 :::
 
 ### `defineCodeGenerationConfig`

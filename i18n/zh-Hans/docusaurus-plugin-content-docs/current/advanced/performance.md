@@ -92,9 +92,11 @@ void apiClient.prefetchQuery({
 
 ## 不写额外状态的 loading 标志
 
-`useHasFetching(key)` 和 `useHasMutating(key)` 直接订阅查询缓存，不必再用 `useState` 重复维护 loading 状态：
+`@vef-framework-react/hooks` 中的 `useHasFetching(key)` 和 `useHasMutating(key)` 直接订阅查询缓存，不必再用 `useState` 重复维护 loading 状态：
 
 ```tsx
+import { useHasMutating } from "@vef-framework-react/hooks";
+
 const isSaving = useHasMutating(createUser.key);
 
 <Button loading={isSaving}>保存</Button>;

@@ -9,7 +9,7 @@ description: "VEF 风格的 TanStack Query 重导出、QueryClientOptions 与 mu
 
 ## `QueryClientOptions`
 
-`QueryClient` 不能直接构造——`createQueryClient` 是一个内部工厂函数，并未从包根导出。应用代码应将这些选项配置为 `ApiClientOptions.query`，并传递给 `createApiClient`（参见 [HTTP 与 API 客户端](./http-and-api.md)）：
+`QueryClient` 可以通过导出的 `createQueryClient` 工厂函数创建，但大多数应用应使用 `createApiClient`，以便查询层与框架的 `HttpClient` 配对。在该路径中，将这些选项配置为 `ApiClientOptions.query` 并传递给 `createApiClient`（参见 [HTTP 与 API 客户端](./http-and-api.md)）：
 
 ```ts
 const queryOptions = {

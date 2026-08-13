@@ -105,7 +105,7 @@ Drop-in replacements for the built-in dependency-array hooks when dependencies a
 | --- | --- | --- |
 | `useUpload` | `(options?: UseUploadOptions) => UseUploadResult` | React adapter over core's chunked, resumable `Uploader`, scoped to one in-flight upload per consumer (calling `upload()` again cancels the previous run). For parallel/batch uploads, use `Uploader` from `@vef-framework-react/core` directly. |
 
-`UseUploadOptions` mirrors [`UploaderOptions`](../core/storage.md#uploaderoptions) (from `core`) minus the fields React owns (`signal`, `onSessionOpened`), plus:
+`UseUploadOptions` mirrors [`UploaderOptions`](../core/storage.md#uploaderoptions) (from `core`) minus the fields React owns (`signal`, `onProgress`, `onStatusChange`, `onSessionOpened`), plus:
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -157,3 +157,47 @@ Behavior notes: the persisted resume record is written as soon as the backend co
 | `useHasMutating` | `(key: string) => boolean` | Whether any mutation whose key starts with `[key]` (non-exact match) is currently running. |
 
 Both are especially useful for page-level loading coordination and disabling repeated actions while requests are running.
+
+## Stored File Name Resolution
+
+| Hook | Signature | Description |
+| --- | --- | --- |
+| `useStoredFileNames` | `(keys: readonly string[]) => Record<string, ResolvedFile>` | Resolves stored object keys into the metadata the backend recorded when they were uploaded — original filename, content type, size, upload status, and timestamps. Results are cached indefinitely (`staleTime: Infinity`); keys are deduplicated and sorted before the request is issued so re-renders with a fresh array hit one cache entry. |
+
+A business model stores only the storage key (`priv/2026/08/04/<uuid>.pdf`), so without this hook a re-opened form or list can only show the generated object name. The hook reads the recorded original filename back through the `resolveFiles` core API.
+
+Behavior notes:
+
+- The hook reads `apiClient` from context via `useApiClient` and creates a typed query function internally, so the consuming component does not need to manage the `ApiClient` or `QueryClient` itself.
+- Keys the caller may not read and keys the backend has no record of are simply absent from the result map — resolution is decoration, never a gate. A failed request yields an empty map.
+- An empty or all-falsy key array is a no-op (`enabled: false`) and returns `{}` without issuing a request.
+
+```tsx
+import { useStoredFileNames } from "@vef-framework-react/hooks";
+
+function FileList({ keys }: { keys: string[] }) {
+  const names = useStoredFileNames(keys);
+
+  return (
+    <ul>
+      {keys.map(key => (
+        <li key={key}>{names[key]?.originalFilename ?? key}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### `ResolvedFile`
+
+The shape of each resolved entry in the result map:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `key` | `string` | The storage object key |
+| `originalFilename` | `string` | The original client-supplied filename recorded at upload time |
+| `contentType` | `string` | MIME type |
+| `size` | `number` | File size in bytes |
+| `status` | `"uploaded" \| "claimed" \| "deleted"` | Storage lifecycle status |
+| `uploadedAt` | `string` | Upload timestamp |
+| `uploadedBy` | `string` | Uploader identity |

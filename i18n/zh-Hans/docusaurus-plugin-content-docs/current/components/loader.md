@@ -61,7 +61,7 @@ export default function Page({ isLoading }: { isLoading: boolean }) {
 
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
-| `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | — | 加载图标尺寸 |
+| `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | `'default'` | 加载图标尺寸 |
 | `description` | `ReactNode` | — | 显示在加载图标下方的文本 |
 | `descriptionSize` | `number` | — | 描述文本的字号（像素） |
 

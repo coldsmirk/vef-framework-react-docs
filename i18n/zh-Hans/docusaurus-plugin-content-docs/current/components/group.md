@@ -50,8 +50,8 @@ export default function Demo() {
 
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
-| `gap` | `'small' \| 'medium' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | 子元素间距 |
-| `align` | `CSSProperties['alignItems']` | — | 交叉轴对齐方式 |
+| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | `'small'` | 子元素间距 |
+| `align` | `CSSProperties['alignItems']` | `'center'` | 交叉轴对齐方式 |
 | `justify` | `CSSProperties['justifyContent']` | — | 主轴对齐方式 |
 | `wrap` | `boolean \| CSSProperties['flexWrap']` | — | 换行方式 |
 | `ref` | `Ref<HTMLDivElement>` | — | DOM ref |

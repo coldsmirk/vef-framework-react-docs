@@ -61,7 +61,7 @@ export default defineCommitlintConfig();
 
 | 变量 | 类型 | 默认值 | 用途 |
 | --- | --- | --- | --- |
-| `VEF_APP_NAME` | `string` | `vef-app`（脚手架） | 内置 HTML 外壳中显示的应用名称；同时决定生产配置全局变量的名称 |
+| `VEF_APP_NAME` | `string` | `APP` | 内置 HTML 外壳中显示的应用名称；同时决定生产配置全局变量的名称 |
 | `VEF_BUILD_BASE_PUBLIC_PATH` | `string` | `/` | 静态资源和 `app.config.js` 的公共基础路径 |
 | `VEF_BUILD_OUTPUT_DIR` | `string` | `dist` | 构建输出目录 |
 | `VEF_BUILD_SERVER_PORT` | `number` | `3833` | 本地开发服务器端口（已启用 `strictPort`，端口必须空闲） |
@@ -78,7 +78,7 @@ export default defineCommitlintConfig();
 | `__VEF_APP_VERSION__` | `string` | 构建时项目 `package.json` 的 `version` 字段 | 编译期应用版本；与运行时公布的 `VEF_APP_VERSION` 变量相互独立 |
 | `__VEF_APP_CONFIG__` | `Readonly<Record<string, string>>` | 全部 `VEF_APP_*` 变量，以完整名称为键 | 运行时应用配置 |
 
-`__VEF_APP_CONFIG__` 在不同模式下行为不同: 开发模式下由 `import.meta.env` 内联构建；生产构建中它读取 `window.__PRODUCTION__VEF_<NAME>__CONF__`，即生成的 `<outputDir>/app.config.js` 所赋值的全局变量（`<NAME>` 是 `CONSTANT_CASE` 形式的 `VEF_APP_NAME`，未设置时为 `APP`）。构建完成后直接编辑 `app.config.js` 即可修改运行时配置，无需重新构建——完整机制见 [Dev 包](../reference/dev/overview.md#运行时注入vef_app_)。
+`__VEF_APP_CONFIG__` 在不同模式下行为不同: 开发模式下由 `import.meta.env` 内联构建；生产构建中它读取 `window.__PRODUCTION__VEF_<NAME>__CONF__`，即生成的 `<outputDir>/app.config.js` 所赋值的全局变量。`<NAME>` 是 `VEF_APP_NAME` 转为 `CONSTANT_CASE` 并加上 `VEF_` 前缀的结果；当 `VEF_APP_NAME` 未设置时，默认值为 `APP`，对应的全局变量名为 `__PRODUCTION__VEF_APP__CONF__`。构建完成后直接编辑 `app.config.js` 即可修改运行时配置，无需重新构建——完整机制见 [Dev 包](../reference/dev/overview.md#运行时注入vef_app_)。
 
 ## 常用脚本
 

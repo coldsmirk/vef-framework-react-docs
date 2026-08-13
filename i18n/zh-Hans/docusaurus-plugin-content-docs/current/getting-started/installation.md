@@ -57,7 +57,7 @@ pnpm add @vef-framework-react/integration
 pnpm add @vef-framework-react/cron
 ```
 
-版本注意事项：截至 v2.12.0 发布，`approval` 以 2.12.0 发布，但 `integration` 以 **2.10.0** 发布（其 manifest 在版本周期中途才脚手架生成；见[版本说明](../reference/release-notes.md)），而 `cron` 尚未发布到 npm——它随 v2.12.0 之后的下一个版本首发。请始终安装同一次发布所发出的版本组合。
+版本注意事项：引擎包（`approval`、`integration`、`cron`）与框架版本保持一致，因此请将它们安装成与核心包相同的版本。具体已发布版本见[版本说明](../reference/release-notes.md)。
 
 ## 通常需要哪些包
 
@@ -84,16 +84,16 @@ pnpm add @vef-framework-react/cron
 {
   "dependencies": {
     "@tanstack/react-router": "^1.170.17",
-    "@vef-framework-react/components": "^2.12.0",
-    "@vef-framework-react/core": "^2.12.0",
-    "@vef-framework-react/hooks": "^2.12.0",
-    "@vef-framework-react/shared": "^2.12.0",
-    "@vef-framework-react/starter": "^2.12.0",
+    "@vef-framework-react/components": "^2.15.0",
+    "@vef-framework-react/core": "^2.15.0",
+    "@vef-framework-react/hooks": "^2.15.0",
+    "@vef-framework-react/shared": "^2.15.0",
+    "@vef-framework-react/starter": "^2.15.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@vef-framework-react/dev": "^2.12.0",
+    "@vef-framework-react/dev": "^2.15.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",
@@ -104,7 +104,7 @@ pnpm add @vef-framework-react/cron
 
 ## Peer 依赖要求
 
-以下内容已对照 v2.12.0 各包的 manifest 核实:
+以下内容已对照 v2.15.0 各包的 manifest 核实:
 
 - `starter` 声明的 peer 依赖为 `@tanstack/react-router >=1`、`react` / `react-dom >=19`，以及同级的 `components` / `core` / `hooks` / `shared` 包 `>=2`——上面的最小安装可以全部满足。
 - `dev` 声明的 peer 依赖为 `vite ^8.0.0`、`eslint ^10.0.0`、`stylelint ^17.0.0`、`@commitlint/cli ^21.0.0`、`husky ^9.1.7` 和 `lint-staged ^17.0.0`，这也是它们出现在 dev 依赖安装命令中的原因。

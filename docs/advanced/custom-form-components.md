@@ -93,7 +93,7 @@ function SeverityPicker({ value, onChange, onBlur }: SeverityPickerProps) {
 Wiring it into a form is the same `AppField` usage as any built-in field — validators, `listeners`, and `Subscribe` all compose unchanged:
 
 ```tsx
-import { useFormContext } from "@vef-framework-react/components";
+import { Alert, useFormContext } from "@vef-framework-react/components";
 import { z } from "@vef-framework-react/shared";
 
 function AlertRuleFields() {
@@ -130,7 +130,7 @@ A custom control renders without the `Form.Item` chrome that built-in fields get
     />
 
     {!field.state.meta.isValid && (
-      <Alert title={field.state.meta.errors[0]?.message} type="error" />
+      <Alert message={field.state.meta.errors[0]?.message} type="error" />
     )}
   </>
 )}

@@ -17,9 +17,9 @@ They are deliberately *drop-in*:
 
 | Package | Version | Engine | Pages | Extra integration points |
 | --- | --- | --- | --- | --- |
-| [`@vef-framework-react/approval`](./approval/overview.md) | 2.12.0 (released in framework v2.12.0, 2026‑07‑17) | Approval workflow engine (`approval/*` resources) | 7 — task center, my instances, initiate portal, categories, flow designer, delegations, admin console | `ApprovalProvider` plugin context (pickers, form registries, global subjects, business-ref renderer); embeds the [Approval Flow Editor](../editors/approval-flow-editor/overview.md) and [Form Editor](../editors/form-editor/overview.md) |
-| [`@vef-framework-react/integration`](./integration/overview.md) | 2.10.0 (released in framework v2.12.0; code-map domain is unreleased HEAD) | Integration engine (`integration/*` resources) | 6 — contracts, systems, adapters, routes, code maps, ops console | Script editors with runtime-mirrored completions and hoverable docs; scheme-aware auth parameter editor |
-| [`@vef-framework-react/cron`](./cron/overview.md) | 2.10.0 (**unreleased** — added 2026‑07‑19, after v2.12.0) | Durable cron schedule store (`sys/cron/*` resources) | 2 — schedules, run journal | Trigger editor with live next-fire preview |
+| [`@vef-framework-react/approval`](./approval/overview.md) | 2.15.0 | Approval workflow engine (`approval/*` resources) | 7 — task center, my instances, initiate portal, categories, flow designer, delegations, admin console | `ApprovalProvider` plugin context (pickers, form registries, global subjects, business-ref renderer); embeds the [Approval Flow Editor](../editors/approval-flow-editor/overview.md) and [Form Editor](../editors/form-editor/overview.md) |
+| [`@vef-framework-react/integration`](./integration/overview.md) | 2.15.0 | Integration engine (`integration/*` resources) | 6 — contracts, systems, adapters, routes, code maps, ops console | Script editors with runtime-mirrored completions and hoverable docs; scheme-aware auth parameter editor |
+| [`@vef-framework-react/cron`](./cron/overview.md) | 2.13.0 | Durable cron schedule store (`sys/cron/*` resources) | 2 — schedules, run journal | Trigger editor with live next-fire preview |
 
 Package versions move independently of the framework tag: a package's `version` only bumps when that package publishes. All three follow the same internal architecture — `pages` + `api` + `types` + `permissions` (+ shared presentation `components`), re-exported flat from the package root.
 
@@ -96,7 +96,7 @@ export const Route = createFileRoute("/_layout/sys/integration-console")({
 });
 ```
 
-The playground's reference paths: approval pages under `/approval/*` (`task-center`, `my-instances`, `initiate`, `category`, `flow`, `delegation`, `admin`), integration pages under `/sys/integration-*` (`contract`, `system`, `adapter`, `route`, `code-map`, `console`). The cron pages are not wired into the playground yet (the package is unreleased); mount them the same way, e.g. `/sys/cron-schedule` and `/sys/cron-run`.
+The playground's reference paths: approval pages under `/approval/*` (`task-center`, `my-instances`, `initiate`, `category`, `flow`, `delegation`, `admin`), integration pages under `/sys/integration-*` (`contract`, `system`, `adapter`, `route`, `code-map`, `console`). The cron pages are not wired into the playground yet; mount them the same way, e.g. `/sys/cron-schedule` and `/sys/cron-run`.
 
 ## Overriding permission codes
 
@@ -124,7 +124,7 @@ Each package is installed separately alongside the framework packages you alread
 ```bash
 pnpm add @vef-framework-react/approval    # approval engine console (also pulls the editors)
 pnpm add @vef-framework-react/integration # integration engine console
-pnpm add @vef-framework-react/cron        # durable cron console (unreleased — next release)
+pnpm add @vef-framework-react/cron        # durable cron console
 ```
 
 `@vef-framework-react/approval` depends on `approval-flow-editor`, `form-editor`, and `approval-form-bridge` — its designer embeds them and it re-exports the picker contract types (`EditorPlugins`, `PickerProps`, `PrincipalKind`), so hosts wire everything from the one package.

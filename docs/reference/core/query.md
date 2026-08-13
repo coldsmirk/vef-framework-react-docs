@@ -9,7 +9,7 @@ description: The VEF-flavored TanStack Query re-exports, QueryClientOptions, and
 
 ## `QueryClientOptions`
 
-`QueryClient` is not constructed directly — `createQueryClient` is an internal factory, not exported from the package root. Applications configure these options as `ApiClientOptions.query` and pass them to `createApiClient` (see [HTTP and API Client](./http-and-api.md)):
+`QueryClient` is created through the exported `createQueryClient` factory, but most applications should use `createApiClient` so the query layer is paired with the framework's `HttpClient`. In that path you configure these options as `ApiClientOptions.query` and pass them to `createApiClient` (see [HTTP and API Client](./http-and-api.md)):
 
 ```ts
 const queryOptions = {

@@ -15,7 +15,7 @@ Conventions shared by the five CRUD pages:
 
 ## `IntegrationContractPage`
 
-Full-page contract management: list with code/name/enabled/**label** filters, create/update in a wide drawer (responsive: `100vw` → `90vw` → 920px), and delete (single + batch). The form edits code (immutable after create), name, description, host-owned labels (inline `LabelsEditor` with validation), the **input/output JSON Schemas** in code editors with JSON Schema draft 2020‑12 keyword completions (each keyword documented in the popup), and the enabled switch. Schema editors validate that the text is a JSON object; empty means "don't validate that side". Deleting is refused server-side while routes or adapters reference the contract.
+Full-page contract management: the list splits search into a **basic** inline bar (code, name) and a collapsible **advanced** panel for host-owned **labels**; create/update open in a wide drawer (responsive: `100vw` → `90vw` → 920px), and delete supports single + batch. The form edits code (immutable after create), name, description, host-owned labels (inline `LabelsEditor` with validation), the **input/output JSON Schemas** in code editors with JSON Schema draft 2020‑12 keyword completions (each keyword documented in the popup), and the enabled switch. Schema editors validate that the text is a JSON object; empty means "don't validate that side". Deleting is refused server-side while routes or adapters reference the contract.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -90,14 +90,10 @@ Full-page route management: map route keys to the system serving a contract. The
 
 ## `IntegrationCodeMapPage`
 
-:::info Unreleased
-Added after v2.12.0 (commits `b403919`, `6ec1938`); ships with the next release.
-:::
-
 Full-page [code set](../../guide/code-sets.md) mapping management: per-system bidirectional value translation between the host's canonical coding and the external system's coding. The drawer form (`100vw` → 760px) edits:
 
-- **所属系统** (immutable after create) and the **code set identifier**. On create, when the host registers an enumerable catalog (`mold.CodeSetInspector` on the backend), the identifier is picked from the catalog (`list_code_sets`) and auto-fills the map name; when the catalog reports `supported: false` — or on edit — it falls back to a validated free-text input (letters/digits at the edges, `_ . -` inside, ≤128 chars). Adapter scripts reference the map as `codes.toExternal('<codeSet>', …)`.
-- **映射条目** in an editable table: each side holds one primary value and any number of aliases (entered as tags). Aliases only participate in matching; translations always emit the opposite side's primary. Values keep their JSON type (`1` is a number, `"1"` a string quoted literally) — lookups compare by normalized string form. When the host catalog supports it, a reference line lists the canonical codes (with labels) of the selected set.
+- **所属系统** (immutable after create) and the **code set identifier**. On create, when the host registers an enumerable catalog (`mold.CodeSetInspector` on the backend), the identifier is picked from the catalog (`integration/code_set.list_code_sets`) and auto-fills the map name; when the catalog reports `supported: false` — or on edit — it falls back to a validated free-text input (letters/digits at the edges, `_ . -` inside, ≤128 chars). Adapter scripts reference the map as `codes.toExternal('<codeSet>', …)`.
+- **映射条目** in an editable table: each side holds one primary value and any number of aliases (entered as tags). Aliases only participate in matching; translations always emit the opposite side's primary. Values keep their JSON type (`1` is a number, `"1"` a string quoted literally) — lookups compare by normalized string form. When the host catalog supports it, the primary-value cells suggest host canonical codes and a reference line lists the canonical codes (with labels) of the selected set.
 - **未收录策略** — `reject` (fail closed, default), `passthrough` (return input unchanged), or `fallback` (return the configured per-side fallback values, required when selected). Scripts can override per call with `{ fallback: … }` / `{ passthrough: true }` / `{ reject: true }`.
 
 | Prop | Type | Default | Description |

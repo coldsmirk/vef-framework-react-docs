@@ -9,13 +9,56 @@ All packages release together from a single repository: one release commit bumps
 
 The upgrade rule is therefore: upgrade every `@vef-framework-react/*` dependency together, each to the version published by the *same* release — [Installation](../getting-started/installation.md) pins the current set. Mixing packages from different releases in one app is not supported.
 
-The package *set* itself can change between releases: v2.7.0 removed `@vef-framework-react/expression`, v2.8.0 added `@vef-framework-react/approval-form-bridge`, v2.12.0 added `@vef-framework-react/approval` and `@vef-framework-react/integration`, and the next release adds `@vef-framework-react/cron` — all are called out below.
+The package *set* itself can change between releases: v2.7.0 removed `@vef-framework-react/expression`, v2.8.0 added `@vef-framework-react/approval-form-bridge`, v2.12.0 added `@vef-framework-react/approval` and `@vef-framework-react/integration`, and v2.13.0 added `@vef-framework-react/cron` — all are called out below.
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
-## Unreleased (after v2.12.0, as of 2026-07-20)
+## Unreleased (after v2.15.0)
 
-Merged on the main branch but not yet in a tagged release. If you consume tagged releases only, these changes arrive with the next version.
+No changes merged since v2.15.0 yet.
+
+## v2.15.0 (2026-08-07)
+
+No breaking changes.
+
+### Features
+
+- **approval** — node participants float above the instance flow graph: each approval node renders its assignees and candidates as a people overlay, so the participants behind a step are visible without opening the node detail.
+- **starter** — the department-selection challenge type now documents its `meta` payload in the `Register['challenges']` example; the starter types carry the shape through `ResolvedChallenges`, and the inline declaration shows the expected `departments` and `organizations` structure.
+
+## v2.14.0 (2026-08-05)
+
+No breaking changes.
+
+### Features
+
+- **hooks** — `useStoredFileNames(keys)` resolves stored object keys to their recorded original filenames, sizes, and MIME types; the upload field hydrates display names from the same resolution so stored keys render as the filename the uploader chose.
+- **integration** — contract directory filters by label; code-map entry editor suggests host codes in mapping completions.
+
+### Fixes worth knowing
+
+- **components** — Crud scene form resets when closed via the store's `closeForm` action; the form state no longer survives a programmatic close-and-reopen cycle.
+- **dev** — `deps:check` GHSA enrichment tolerates null CVSS scores; advisories without a score no longer crash the report.
+
+## v2.13.1 (2026-07-28)
+
+No breaking changes. Patch release for the approval package, plus two features that landed between v2.13.0 and the patch.
+
+### Features
+
+- **core** — opt-in request body transport encoding: `HttpClientOptions.defaultBodyEncoding` and the per-request `bodyEncoding` option (`BodyEncoding`: `"none"` | `"base64"` | `"gzip+base64"`) encode JSON bodies so code-shaped payloads survive middleboxes (WAF / proxy) that false-positive on them; the server's body-encoding middleware reverses the encoding before parsing. `"none"` opts a single request out of a client-wide default.
+- **integration** — script-carrying request bodies are transport-encoded when the client has a `defaultBodyEncoding` set.
+
+### Fixes worth knowing
+
+- **approval** — the flow designer no longer submits initiator rules when saving an open (unrestricted) flow.
+- **approval** — an instantaneous timeline entry (start and end at the same moment) collapses to a single timestamp instead of rendering two.
+- **approval** — `TimelineEntryKind` gains the `"end"` kind so terminal timeline entries are typed correctly.
+- **core** — base64 encoding falls back to `btoa` when `Uint8Array`-based conversion is unavailable (older runtimes and some browser contexts).
+
+## v2.13.0 (2026-07-21)
+
+One package joins the set: **`@vef-framework-react/cron`** (first published as 2.13.0). Three breaking changes ship in this release: the data-dictionary vocabulary is renamed to "code set", the approval-flow-editor state engine returns to a hand-written implementation (reversing the v2.7.0 nodeloom rebuild), and the delegation window fields are renamed to the verb-form convention.
 
 ### Breaking: "dictionary" is renamed to "code set" everywhere
 
@@ -85,6 +128,10 @@ createApp().render({
 
 After renaming the config, delete the old generated file and rerun `vef gen:code-set-keys` so the augmentation targets the new `codeSetKeys` member.
 
+### New package: `@vef-framework-react/cron`
+
+Drop-in management pages for the durable cron scheduling engine: `CronSchedulePage` and `CronRunPage` (plus `RunDetailDrawer`, form-model helpers, and `CRON_PERMISSIONS`). Schedule list filters are split into basic and advanced panels; a paused schedule hides its fire cursor. See [Engines](../engines/overview.md).
+
 ### Breaking: approval-flow-editor returns to a hand-written state engine
 
 The editor's state engine is hand-written again and the `@coldsmirk/nodeloom-core` dependency is gone. This reverses the in-memory node shape that v2.7.0 introduced (see that section below); the wire format is once again untouched.
@@ -107,12 +154,26 @@ const isUrgent = (node: FlowNode) =>
 - The internal store was restructured into slices; hosts selecting from `useEditorStore` must adapt to the new `EditorState` shape (again).
 - **The wire format is untouched.** `toFlowDefinition` / `fromFlowDefinition` and the `NodeDefinition` (`value` / `onChange`) contract are unchanged — the serializer now maps `node.type` ↔ `kind`. Saved flow definitions load without migration.
 
+### Breaking: delegation window fields renamed to startsAt / endsAt
+
+The delegation types (`Delegation` and `DelegationParams`) rename their window fields from `startTime` / `endTime` to `startsAt` / `endsAt`. Update any code that reads or writes those fields:
+
+```ts
+// Before (≤ v2.12.0)
+const start = delegation.startTime;
+const end = delegation.endTime;
+
+// After (≥ v2.13.0)
+const start = delegation.startsAt;
+const end = delegation.endsAt;
+```
+
 ### Features
 
-- **New package: `@vef-framework-react/cron`** — drop-in management pages for the durable cron scheduling engine: `CronSchedulePage` and `CronRunPage` (plus `RunDetailDrawer`, form-model helpers, and `CRON_PERMISSIONS`). Schedule list filters are split into basic and advanced panels; a paused schedule hides its fire cursor. See [Engines](../engines/overview.md). Not on npm yet — it first publishes with the next release.
 - **core** — `PushClient` (and the `createPushClient` factory) for the vef server push channel: a downstream-only WebSocket that delivers `PushMessage` envelopes (`{ id, type, payload?, time }`). `subscribe(type, handler)` registers by envelope type (`"*"` receives everything) and returns the unsubscribe function. Transport losses reconnect with jittered exponential backoff (`PushReconnectOptions`), re-reading the access token per attempt (sent as the `__accessToken` query parameter); the terminal close codes `4401` (`PUSH_CLOSE_SESSION_INVALID`) and `4429` (`PUSH_CLOSE_TOO_MANY_CONNECTIONS`) surface through `onSessionInvalid` / `onConnectionRejected` and never reconnect. Delivery is best-effort by contract — treat it as a real-time hint and keep reliable state behind the regular API.
 - **hooks** — `usePushMessage(client, type, handler)` subscribes to one envelope type with automatic cleanup on unmount.
-- **integration** — code map management page (`IntegrationCodeMapPage`) with completions for map codes; code map code sets pick from the host catalog with a manual-entry fallback.
+- **integration** — code map code sets pick from the host catalog with a manual-entry fallback.
+- **approval** — instance detail shows the flow code alongside the flow name.
 
 ### Fixes worth knowing
 

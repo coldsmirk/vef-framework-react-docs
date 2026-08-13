@@ -116,6 +116,8 @@ Full-page flow management: the paginated flow list with keyword / category / act
 
 The full-screen, four-step designer (流程设置 → 表单设计 → 流程设计 → 审阅提交), exported standalone. Each step gates the next: settings must be complete (including a valid business binding in `business` mode and at least one initiator rule unless 全员可发起), the form must pass `validateApprovalSchema`, the flow must pass `validateFlowDefinition` against the projected fields. Submission runs create/update → deploy → optional publish as one chain; every step invalidates the flow list. All step panes stay mounted so editor state survives step switches. The body remounts per opening, so editor seeds never leak between sessions.
 
+The review step counts only the initiator rules that will actually be saved. When 全员可发起 is enabled, the saved payload carries no initiator rules — the two settings are mutually exclusive on the server. The draft still keeps any typed rules so toggling the switch back preserves them, but they are dropped on the way out.
+
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `open` | `boolean` | — | Drawer visibility. |
@@ -175,3 +177,5 @@ If no `hasPermission` is provided by the app context, every tab renders (permiss
 ## Shared detail surface
 
 Every runtime list opens the same drawer — `InstanceDetailDrawer` → `InstanceDetailPanel` — which renders header, the version-pinned form clamped by the viewer's field permissions, the transit timeline, and the progress flow graph. Its action bar derives entirely from the server-resolved `availableActions` / `myTask` context (approve, reject, handle, transfer, rollback, withdraw, resubmit, add/remove assignee, CC, urge), so the offered set can never drift from what the engine accepts. See the [runtime components reference](./reference.md#runtime-components) for props and the endpoint each action calls.
+
+The detail header now also shows the owning flow's `flowCode` (copyable) alongside the flow name. The timeline renders the `end` node as its own entry when an instance passes through it, and collapses an entry whose start and finish timestamps resolve to the same displayed minute into a single timestamp. The flow graph floats the people who touched each node above the node, shades unreached nodes and edges so the actual path stands out, and surfaces the entry/exit timing for reached nodes on hover.

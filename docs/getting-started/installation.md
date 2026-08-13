@@ -57,7 +57,7 @@ pnpm add @vef-framework-react/integration
 pnpm add @vef-framework-react/cron
 ```
 
-Version note: as of the v2.12.0 release, `approval` publishes as 2.12.0 but `integration` publishes as **2.10.0** (its manifest was scaffolded mid-cycle; see [Release Notes](../reference/release-notes.md)), and `cron` is not yet on npm — it first publishes with the release after v2.12.0. Always install the versions published by the same release.
+Version note: the engine packages (`approval`, `integration`, `cron`) are versioned together with the framework release, so install them at the same version as the core packages. See [Release Notes](../reference/release-notes.md) for the exact published versions.
 
 ## Which Packages Are Usually Needed
 
@@ -84,16 +84,16 @@ The following dependency set is close to what a real project would look like:
 {
   "dependencies": {
     "@tanstack/react-router": "^1.170.17",
-    "@vef-framework-react/components": "^2.12.0",
-    "@vef-framework-react/core": "^2.12.0",
-    "@vef-framework-react/hooks": "^2.12.0",
-    "@vef-framework-react/shared": "^2.12.0",
-    "@vef-framework-react/starter": "^2.12.0",
+    "@vef-framework-react/components": "^2.15.0",
+    "@vef-framework-react/core": "^2.15.0",
+    "@vef-framework-react/hooks": "^2.15.0",
+    "@vef-framework-react/shared": "^2.15.0",
+    "@vef-framework-react/starter": "^2.15.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@vef-framework-react/dev": "^2.12.0",
+    "@vef-framework-react/dev": "^2.15.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",
@@ -104,7 +104,7 @@ The following dependency set is close to what a real project would look like:
 
 ## Peer Requirements
 
-Verified against each package manifest at v2.12.0:
+Verified against each package manifest at v2.15.0:
 
 - `starter` declares peers on `@tanstack/react-router >=1`, `react` / `react-dom >=19`, and the sibling `components` / `core` / `hooks` / `shared` packages `>=2` — the minimal install above satisfies all of them.
 - `dev` declares peers on `vite ^8.0.0`, `eslint ^10.0.0`, `stylelint ^17.0.0`, `@commitlint/cli ^21.0.0`, `husky ^9.1.7`, and `lint-staged ^17.0.0`, which is why they appear in the dev-dependency install command.

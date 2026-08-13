@@ -246,7 +246,8 @@ interface FileFingerprinter {
 | Export | Value | Description |
 | --- | --- | --- |
 | `STORAGE_API_PATH` | `"/api"` | Default `apiPath` |
-| `STORAGE_RESOURCE` | `"sys/storage"` | Default `resource` |
+| `STORAGE_RESOURCE` | `"sys/storage"` | Default `resource` for upload protocol RPCs |
+| `STORAGE_FILE_RESOURCE` | `"sys/storage/file"` | Default `resource` for file-resolution RPCs (`resolveFiles`) |
 | `STORAGE_VERSION` | `"v1"` | Default `version` |
 | `PUBLIC_PREFIX` | `"pub/"` | Object-key prefix for anonymous-readable objects |
 | `PRIVATE_PREFIX` | `"priv/"` | Object-key prefix for authenticated-read objects |

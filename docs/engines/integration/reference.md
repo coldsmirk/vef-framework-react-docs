@@ -9,9 +9,7 @@ Everything exported from the root of `@vef-framework-react/integration`, grouped
 
 `QueryFunction<TData, TParams>` / `MutationFunction<TData, TParams>` are the framework's keyed function shapes from `@vef-framework-react/core`; `PaginatedQueryParams<TSearch>` is the ProTable query shape from `@vef-framework-react/components`; `ApiResult<T>` is the standard response envelope.
 
-:::info Unreleased exports
-The code-map domain (`useCodeMapApi`, `useCodeSetApi`, `INTEGRATION_PERMISSIONS.codeMap`, the `CodeMap*` / `Code*Catalog` types, and the `codes.*` completion entries) was added after v2.12.0 and ships with the next release. Everything else is available in v2.12.0.
-:::
+
 
 ## Permissions
 
@@ -72,7 +70,7 @@ interface CrudApi<TRow extends { id: string }, TParams, TSearch extends AnyObjec
 
 The query and mutation functions for one CRUD resource, shaped to plug straight into `CrudPage`: `findPage` is its `queryFn`, `create`/`update` its `formMutationFns`, and `remove`/`removeMany` its delete mutation fns (both receive the row objects, mirroring the framework's CRUD contract — see [Crud](../../components/crud.md)).
 
-`createCrudApi<TRow, TParams, TSearch>(apiClient: ApiClient, resource: string, keyPrefix: string): CrudApi<TRow, TParams, TSearch>` builds that set against the app's API client; `keyPrefix` namespaces the TanStack Query cache keys. Useful for host-defined resources that follow the same wire contract.
+`createCrudApi<TRow, TParams, TSearch>(apiClient: ApiClient, resource: string, keyPrefix: string, bodyEncoding?: BodyEncoding): CrudApi<TRow, TParams, TSearch>` builds that set against the app's API client; `keyPrefix` namespaces the TanStack Query cache keys. The optional `bodyEncoding` transport-encodes create/update bodies — `useSystemApi` and `useAdapterApi` pass `"gzip+base64"` so script-carrying resources survive middleboxes that inspect request payloads. Useful for host-defined resources that follow the same wire contract.
 
 ### Resource CRUD hooks
 
@@ -100,8 +98,8 @@ Each returns a memoized `CrudApi` bound to its resource:
 
 | Function | Type | Operation |
 | --- | --- | --- |
-| `dryRun` | `MutationFunction<DryRunResult, DryRunParams>` | `integration/ops.dry_run` |
-| `dryRunInbound` | `MutationFunction<InboundDryRunResult, DryRunInboundParams>` | `integration/ops.dry_run_inbound` |
+| `dryRun` | `MutationFunction<DryRunResult, DryRunParams>` | `integration/ops.dry_run` (body encoded with `gzip+base64`) |
+| `dryRunInbound` | `MutationFunction<InboundDryRunResult, DryRunInboundParams>` | `integration/ops.dry_run_inbound` (body encoded with `gzip+base64`) |
 | `testConnection` | `MutationFunction<ConnectionCheck, TestConnectionParams>` | `integration/ops.test_connection` |
 | `diagnoseRoutes` | `MutationFunction<RouteDiagnostics, void>` | `integration/ops.diagnose_routes` |
 

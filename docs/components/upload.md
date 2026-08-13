@@ -105,6 +105,8 @@ Per-file storage metadata stamped onto antd `UploadFile`s by the upload family: 
 | `sourceUrl` | `string` | Resolved source URL for fetching the stored object. Kept separate from antd's navigable `UploadFile.url` so authenticated files are never exposed as native list links |
 | `fileName` | `string` | Original client-supplied filename echoed back by the backend |
 
+To resolve stored keys back to their recorded metadata (original filename, content type, size, upload status) outside the upload component — for example in a list or a read-only form — use [`useStoredFileNames`](../reference/hooks/vef-hooks.md#stored-file-name-resolution) from `@vef-framework-react/hooks`.
+
 ### toFilePreviewTarget
 
 ```ts

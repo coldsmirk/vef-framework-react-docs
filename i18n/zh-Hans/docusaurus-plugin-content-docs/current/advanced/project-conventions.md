@@ -31,7 +31,6 @@ description: 每个 VEF 应用项目都必须遵循的强制性命名、放置�
 src/
   api/
     index.ts
-    request.ts
   apis/
     auth/
     md/
@@ -42,8 +41,6 @@ src/
     config.ts
     index.ts
   hooks/
-    use-upload/
-      index.ts
     index.ts
   pages/
     __root.ts
@@ -164,7 +161,7 @@ API 层分为两个层级，它们必须保持分离。
 `src/api/` 专门用于应用级 API 基础设施。
 
 - `src/api/index.ts` 必须创建并导出应用的 `apiClient`。
-- `src/api/request.ts` 必须存放共享的请求信封构建器或通用请求 helper。
+- `src/api/` 可以存放共享的请求信封构建器或通用请求 helper（例如 `src/api/request.ts`）。
 - `src/api/` 禁止包含诸如 `user.ts`、`role.ts`、`department.ts` 之类的领域资源。
 
 ### `src/apis/`
@@ -265,7 +262,7 @@ API 导出必须使用"动词在前、资源明确"的命名方式。
 
 ### 导入路径规则
 
-- 共享应用模块必须通过诸如 `~api`、`~apis`、`~helpers`、`~hooks`、`~router` 和 `~types` 之类的别名导入。
+- 共享应用模块必须通过诸如 `~api`、`~apis`、`~helpers`、`~router` 和 `~types` 之类的别名导入。
 - 页面级模块必须使用相对路径导入。
 - 当已经存在别名时，禁止使用回溯到应用根目录的长相对路径导入。
 

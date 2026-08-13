@@ -17,7 +17,7 @@ The low-level HTTP client built on Axios. It handles:
 
 ### Obtaining an Instance
 
-`HttpClient` is not constructed directly — `createHttpClient` is an internal factory, not exported from the package root (the root exports `HttpClient` as a **type** only). Applications configure `HttpClientOptions` as `ApiClientOptions.http` and pass them to `createApiClient` (see below); the configured instance is then reachable through the [`HTTP_CLIENT` symbol](#accessing-the-underlying-clients).
+`HttpClient` can be created with the exported `createHttpClient` factory, but most applications should use `createApiClient` so the HTTP layer is paired with the framework's `QueryClient`. In that path you configure `HttpClientOptions` as `ApiClientOptions.http` and pass them to `createApiClient` (see below); the configured instance is then reachable through the [`HTTP_CLIENT` symbol](#accessing-the-underlying-clients).
 
 ```ts
 const httpOptions = {
@@ -56,6 +56,23 @@ const httpOptions = {
 | `showInfoMessage` | `(message: string) => void` | — | Info message handler (falls back to `console.info`) |
 | `showWarningMessage` | `(message: string) => void` | — | Warning message handler (falls back to `console.warn`); also used for business-code failures and 400/403 responses |
 | `showErrorMessage` | `(message: string) => void` | — | Error message handler (falls back to `console.error`) |
+| `defaultBodyEncoding` | `BodyEncoding` | — | Transport encoding applied to every request body by default. Individual requests override it (including `"none"` to opt out); absent means the body is sent verbatim |
+
+### `BodyEncoding`
+
+```ts
+type BodyEncoding = "none" | "base64" | "gzip+base64";
+```
+
+How a request body is transport-encoded so a code-shaped payload (an integration adapter script, an envelope/auth script) survives middleboxes (WAF / proxy) that false-positive on it. The client adds the `X-Body-Encoding` header; the server's body-encoding middleware reverses it before parsing. Responses ride native HTTP gzip, so nothing changes on the response side.
+
+| Value | Description |
+| --- | --- |
+| `"none"` | Send the body verbatim (also opts a single request out of a client-wide `defaultBodyEncoding`) |
+| `"base64"` | Base64 of the UTF-8 JSON body |
+| `"gzip+base64"` | Base64 of a gzip stream of the UTF-8 JSON body — smaller on the wire and still text-shaped. Falls back to `"base64"` when the runtime cannot gzip (`CompressionStream` unavailable) |
+
+When the encoding is applied, the body is JSON-stringified (if not already a string), encoded, and sent as a text payload with the `X-Body-Encoding` header set to the applied encoding. The base64 encoding uses the native `Uint8Array#toBase64` where available, falling back to `btoa` for older runtimes. Multipart (`FormData`), binary (`Blob`), and array-buffer bodies are never encoded — only JSON-shaped payloads are.
 
 ### `AuthTokens`
 
@@ -129,10 +146,10 @@ All request methods accept [`RequestOptions`](#requestoptions) (`signal`, `heade
 // GET — get<R = unknown, P = unknown>(url, options?: RequestOptions & { params?: P })
 const result = await http.get<UserInfo>("/user/info", { params: { id: 1 } });
 
-// POST — post<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P })
+// POST — post<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P; bodyEncoding?: BodyEncoding })
 const result = await http.post<CreateResult>("/user/create", { data: payload });
 
-// PUT — put<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P })
+// PUT — put<R = unknown, D = unknown, P = unknown>(url, options?: RequestOptions & { data?: D; params?: P; bodyEncoding?: BodyEncoding })
 const result = await http.put<void>("/user/update", { data: payload });
 
 // DELETE — delete<R = unknown, P = unknown>(url, options?: RequestOptions & { params?: P })
@@ -148,6 +165,8 @@ const result = await http.upload<UploadResult>("/file/upload", {
 ```
 
 `upload` sends `multipart/form-data` (Axios `postForm`) and reports progress through Axios upload-progress events. For chunked, resumable uploads against the framework's `sys/storage` backend, use [`Uploader`](./storage.md) instead.
+
+**Body encoding**: `post` and `put` accept an optional `bodyEncoding` field on their options. When set (or when a `defaultBodyEncoding` is configured on the client), the JSON body is transport-encoded to survive middleboxes that false-positive on code-shaped payloads. See [`BodyEncoding`](#bodyencoding) for the encoding values and behavior.
 
 ### `requestFile`
 

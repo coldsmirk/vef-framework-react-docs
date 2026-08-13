@@ -5,7 +5,7 @@ description: What @vef-framework-react/integration ships — management pages fo
 
 # Integration Package Overview
 
-`@vef-framework-react/integration` (v2.10.0, first released with framework v2.12.0 on 2026‑07‑17) is the frontend console for the VEF server's integration engine — the subsystem that talks to external vendor systems through scripted adapters behind stable, schema-validated contracts.
+`@vef-framework-react/integration` (v2.15.0, released with framework v2.15.0 on 2026‑08‑07) is the frontend console for the VEF server's integration engine — the subsystem that talks to external vendor systems through scripted adapters behind stable, schema-validated contracts.
 
 ## When to Use
 
@@ -28,10 +28,6 @@ The engine's domains map one-to-one onto the package's permission groups and pag
 
 An outbound call flows *host → contract → route → system → adapter script → vendor*; an inbound delivery flows *vendor → system (inbound auth) → adapter script → `dispatch` → business handler*.
 
-:::info Unreleased: the code-map domain
-The whole code-map domain — `IntegrationCodeMapPage`, `useCodeMapApi`, `useCodeSetApi`, the `codeMap` permission group, and the `codes.*` script completions — was added after v2.12.0 (commits `b403919`, `6ec1938`) and ships with the next release. Everything else on this page is released.
-:::
-
 ## The console workbench design
 
 The v2.12.0 cycle redesigned all integration pages around a *console workbench* layout (commits `bdcd65f`, `b0cb7b1`; the approval package adopted the same pattern in `17830fd`):
@@ -49,7 +45,8 @@ Several editing surfaces carry engine-aware assistance:
 - **Contract labels** (`a261401`, `8314fbc`). Contracts carry host-owned `labels` (edited inline with the shared `LabelsEditor`, validated inline), the contract list filters by them, and `useContractDirectory(search)` accepts label filters — so a business-side picker can offer only the contracts tagged for its scene.
 - **JSON Schema keyword completions** (`c826041`). The contract form's input/output schema editors complete JSON Schema draft 2020‑12 keywords as object keys, with per-keyword documentation.
 - **Wire-trace body highlighting** (`c826041`). Captured HTTP exchange bodies are auto-detected: JSON bodies re-indent and highlight, XML highlights verbatim, anything else falls back to a plain block — in both the invocation log detail and the dry-run trace.
-- **Code map editing against the host catalog** (`b403919`, `6ec1938` — unreleased). Adapter scripts translate values with `codes.toExternal` / `codes.toCanonical`; the code-map form picks the code set from the host's registered catalog (`integration/code_set.list_code_sets`, auto-filling the name) with manual free-text fallback when the host registers no enumerable catalog, and the entries editor shows the canonical codes of the selected set as a reference line.
+- **Code map editing against the host catalog** (`cf2fd15`). Adapter scripts translate values with `codes.toExternal` / `codes.toCanonical`; the code-map form picks the code set from the host's registered catalog (`integration/code_set.list_code_sets`, auto-filling the name) with manual free-text fallback when the host registers no enumerable catalog. The entries editor suggests host canonical codes while typing, and a reference line lists the canonical codes of the selected set (`72353da`).
+- **Transport-encoded script bodies** (`ca2a738`). Create/update bodies for script-carrying resources (system outbound/inbound auth scripts, envelope scripts, adapter scripts, and the dry-run console) are transport-encoded with `gzip+base64` so they survive middleboxes that inspect request payloads.
 
 ## Mounting the pages
 

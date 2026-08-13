@@ -93,7 +93,7 @@ function SeverityPicker({ value, onChange, onBlur }: SeverityPickerProps) {
 把它接入表单和使用任何内置字段的 `AppField` 写法一样——validators、`listeners`、`Subscribe` 都可以原样组合：
 
 ```tsx
-import { useFormContext } from "@vef-framework-react/components";
+import { Alert, useFormContext } from "@vef-framework-react/components";
 import { z } from "@vef-framework-react/shared";
 
 function AlertRuleFields() {
@@ -130,7 +130,7 @@ function AlertRuleFields() {
     />
 
     {!field.state.meta.isValid && (
-      <Alert title={field.state.meta.errors[0]?.message} type="error" />
+      <Alert message={field.state.meta.errors[0]?.message} type="error" />
     )}
   </>
 )}

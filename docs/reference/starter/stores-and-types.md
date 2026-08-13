@@ -57,6 +57,36 @@ Batch parameter helper:
 - `UserDetails` — fallback shape (`Record<string, unknown>`) when `Register['userDetails']` is not augmented
 - `OrderSpec` — `{ column: string; direction: "asc" | "desc" }`
 
+### `department_selection` Challenge
+
+The built-in `department_selection` login challenge carries a free-form `meta` field on both the challenge payload and each department entry. The framework itself only transports this data; the project declares the keys the login screen actually reads. There is no exported `DepartmentSelectionChallengeMeta` type — the shape is declared through `Register['challenges']` augmentation, and `ResolvedChallenges` carries it.
+
+Each department entry has an optional `meta?: { orgId?: string; parentId?: string }` — `orgId` identifies which organization owns the department, and `parentId` enables rendering a tree. The challenge-level `meta` carries `organizations` — the organization hierarchy the departments hang off — as `meta?: { organizations?: Array<{ id: string; name: string; parentId?: string }> }`.
+
+Organizations live in the challenge-level `meta` rather than as extra `departments` entries because every entry in the departments list is selectable — a grouping node listed among them would become a choosable one.
+
+```ts
+declare module "@vef-framework-react/starter" {
+  interface Register {
+    challenges: {
+      department_selection: {
+        data: {
+          departments: Array<{
+            id: string;
+            name: string;
+            meta?: { orgId?: string; parentId?: string };
+          }>;
+          meta?: {
+            organizations?: Array<{ id: string; name: string; parentId?: string }>;
+          };
+        };
+        response: string;
+      };
+    };
+  }
+}
+```
+
 ### Extending `UserInfo.details`
 
 `UserInfo.details` resolves through the `Register` interface, mirroring the pattern used by `@tanstack/react-query` for `mutationMeta`. Augment it once in your project to get strongly typed user attributes everywhere `UserInfo` flows through the app:

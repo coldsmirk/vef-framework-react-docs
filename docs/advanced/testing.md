@@ -148,6 +148,8 @@ Forms built with `useForm()` are tested through the rendered DOM with `userEvent
 ```tsx
 import userEvent from "@testing-library/user-event";
 
+import { useForm } from "@vef-framework-react/components";
+
 import { render, screen, waitFor } from "../test-utils";
 
 function UserForm({ onSubmit }: { onSubmit: (values: { name: string }) => void }) {
@@ -199,7 +201,7 @@ const findUserPage = apiClient.createQueryFn<PaginationResult<User>, UserSearchP
 render(<UserTable queryFn={findUserPage} />, { apiClient });
 ```
 
-This keeps the whole query pipeline real — caching, loading states, `useHasFetching()` — while the handler never touches the network. It works because [Project Conventions](./project-conventions.md) has `route.tsx` wire query functions into page components as props: the test passes a canned one the same way.
+This keeps the whole query pipeline real — caching, loading states, and `useHasFetching()` from `@vef-framework-react/hooks` — while the handler never touches the network. It works because [Project Conventions](./project-conventions.md) has `route.tsx` wire query functions into page components as props: the test passes a canned one the same way.
 
 When a component imports its API functions directly from `~apis`, mock the module with `vi.mock("~apis/auth/user", ...)` and still construct the replacements with `createQueryFn` so the `key` contract holds (use `vi.hoisted` for state the factory needs).
 

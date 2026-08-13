@@ -46,10 +46,6 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 | `FlowNode`, `FlowEdge` | Live (in-memory) canvas shapes, defined by this package: `FlowNode` is the union of the per-kind typed `@xyflow/react` nodes (below); `FlowEdge` is xyflow's `Edge`. Convert to/from `FlowDefinition` via `toFlowDefinition` / `fromFlowDefinition`. |
 | `StartNode`, `ApprovalNode`, `HandleNode`, `CcNode` | Per-kind typed live nodes — `Node<StartNodeData, "start">`, `Node<ApprovalNodeData, "approval">`, `Node<HandleNodeData, "handle">`, `Node<CcNodeData, "cc">`. On a live node React Flow's `type` carries the kind (it drives node rendering); only the wire-level `NodeDefinition` lifts it to `kind`, and the node's business fields sit directly on `data` — the exact `NodeDataMap[kind]` shape the wire carries. The `end` / `condition` aliases exist internally but are not exported. |
 
-:::info[Version note: the nodeloom era (v2.7.0 – v2.12.0)]
-From v2.7.0 through v2.12.0 the editor's state engine was `@coldsmirk/nodeloom-core`, and the live shapes were nodeloom's uniform ones: every node carried `type: "flowNode"`, the kind discriminator lived at `data.kind`, and the business fields sat under `data.config`. `FlowNode` / `FlowEdge` / `EditorState` were nodeloom re-exports, and the per-kind node aliases were not exported. An unreleased change after v2.12.0 (`81e3ade`) drops the dependency and restores the hand-written engine this page describes — per-kind typed nodes with the business fields directly on `data`. The wire format (`FlowDefinition` / `NodeDefinition` / `EdgeDefinition`) and the `toFlowDefinition` / `fromFlowDefinition` signatures were untouched by both moves, so persisted definitions are unaffected. The migration history lives in the [release notes](../../reference/release-notes.md).
-:::
-
 ## Node data by kind
 
 `NodeDataMap` maps each `NodeKind` to its data shape; `AnyNodeData` is the union of all six (defined as `FlowNode["data"]`). Every kind's data includes `name?: string` (display name) and `description?: string`. These shapes serve double duty: they are the wire `NodeDefinition.data` payloads **and** the live nodes' `data` — the serializer translates only the kind discriminator (`kind` ↔ React Flow's `type`), never the data.
@@ -255,7 +251,7 @@ For advanced state inspection — e.g. testing, or reading the live graph progra
 | --- | --- |
 | `useEditorStore` | `<T>(selector: (state: EditorState) => T) => T` |
 | `useEditorStoreApi` | `() => UnboundStore<EditorState>` — a zustand store api (with the `subscribeWithSelector` / `immer` middlewares), from core's `createComponentStore` |
-| `EditorState` | The full store state + actions — this package's own type since the hand-written engine returned (see the version note above; it was a `@coldsmirk/nodeloom-core` re-export from v2.7.0 to v2.12.0) |
+| `EditorState` | The full store state + actions — this package's own type since the hand-written engine returned in v2.13.0 |
 
 `EditorState` is the intersection of five slices (the slice types themselves are internal; only `EditorState` is exported):
 
@@ -267,7 +263,7 @@ For advanced state inspection — e.g. testing, or reading the live graph progra
 | Validation | `validationIssues: FlowValidationError[]`, `nodeIssueCounts: Record<string, number>` — issue count per node id, so node chrome subscribes only to its own entry | `setValidationIssues(issues)` |
 | History | `past: HistoryEntry[]`, `future: HistoryEntry[]` — `HistoryEntry = { nodes: FlowNode[]; edges: FlowEdge[] }` (whole-graph snapshots; view state is never checkpointed) | `undo()`, `redo()` |
 
-There are no `canUndo` / `canRedo` members (the nodeloom store had them): derive them as `past.length > 0` / `future.length > 0`. A few members are internal plumbing (`changeVersion`, `checkpoint`, `breakCoalescing`) — visible on the type but not meant for hosts.
+There are no `canUndo` / `canRedo` members: derive them as `past.length > 0` / `future.length > 0`. A few members are internal plumbing (`changeVersion`, `checkpoint`, `breakCoalescing`) — visible on the type but not meant for hosts.
 
 Both hooks resolve against the store `<ApprovalFlowEditor>` mounts internally — there is no host-facing slot to render additional components inside that provider tree (the provider itself is deliberately not exported), so these are primarily useful for reading state (e.g. via `useEditorStoreApi().getState()`) rather than for mounting custom UI inside the canvas.
 

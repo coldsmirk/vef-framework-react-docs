@@ -76,7 +76,7 @@ export default function UserPage() {
 |------|------|---------|-------------|
 | `className` | `string` | — | 页面容器的类名 |
 | `margin` | `boolean` | `false` | 为容器应用 `var(--vef-spacing-md)` 外边距 |
-| `gap` | `Length` | `var(--vef-spacing-md)` | 网格单元格间距 |
+| `gap` | `Length` | `var(--vef-spacing-sm)` | 网格单元格间距 |
 | `mainClassName` | `string` | — | 主内容区域的类名 |
 | `leftAside` | `ReactNode` | — | 左侧边栏内容 |
 | `leftAsideClassName` | `string` | — | 左侧边栏的类名 |

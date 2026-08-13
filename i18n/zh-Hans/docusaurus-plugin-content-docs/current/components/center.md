@@ -50,7 +50,7 @@ export default function LoadingState() {
 
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
-| `gap` | `'small' \| 'medium' \| 'middle' \| 'large' \| CSSProperties['gap']` | — | 子元素间距 |
+| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | `'small'` | 子元素间距 |
 | `className` | `string` | — | CSS 类名 |
 | `style` | `CSSProperties` | — | 内联样式 |
 | `ref` | `Ref<HTMLDivElement>` | — | DOM ref |

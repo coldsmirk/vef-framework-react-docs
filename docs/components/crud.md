@@ -146,6 +146,7 @@ openForm({ scene: 'update', values: row, mode: 'drawer', drawerConfig: { placeme
 ## Behavior Notes
 
 - After `delete` or `deleteMany` succeed, `Crud` automatically clears the internal selection state — toolbar buttons that depend on `selectedRows` re-disable on their own.
+- Closing the scene form (via the store's `closeForm`, the modal/drawer close icon, or programmatically) resets the form state, so the next `openForm` starts from fresh values — edits made in a previous invocation are discarded.
 - `formActionsRenderers[scene]` receives `(formApi, defaults)`, where `defaults` exposes the framework's default `submitButton` and `resetButton` so custom action layouts can keep the standard buttons:
 
 ```tsx

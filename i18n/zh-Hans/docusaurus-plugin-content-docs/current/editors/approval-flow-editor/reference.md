@@ -46,10 +46,6 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 | `FlowNode`、`FlowEdge` | 实时（内存中）的画布形态，由本包自行定义: `FlowNode` 是各按类型定型的 `@xyflow/react` 节点（见下一行）的联合类型；`FlowEdge` 是 xyflow 的 `Edge`。通过 `toFlowDefinition` / `fromFlowDefinition` 与 `FlowDefinition` 互转。 |
 | `StartNode`、`ApprovalNode`、`HandleNode`、`CcNode` | 按类型定型的实时节点——`Node<StartNodeData, "start">`、`Node<ApprovalNodeData, "approval">`、`Node<HandleNodeData, "handle">`、`Node<CcNodeData, "cc">`。在实时节点上，由 React Flow 的 `type` 承载节点类型（它驱动节点渲染）；只有 wire 层的 `NodeDefinition` 才把它提升为 `kind`，而节点的业务字段直接位于 `data` 上——正是 wire 所承载的那个 `NodeDataMap[kind]` 形态。`end` / `condition` 的别名在内部存在，但未导出。 |
 
-:::info[版本提示: nodeloom 时代（v2.7.0 – v2.12.0）]
-从 v2.7.0 到 v2.12.0，编辑器的状态引擎是 `@coldsmirk/nodeloom-core`，实时形态采用的是 nodeloom 的统一形状: 每个节点都携带 `type: "flowNode"`，节点类型判别字段位于 `data.kind`，业务字段则位于 `data.config` 之下。`FlowNode` / `FlowEdge` / `EditorState` 曾是 nodeloom 的重导出，且按类型划分的节点别名没有导出。v2.12.0 之后一次尚未发布的变更（`81e3ade`）移除了这一依赖，恢复了本页所描述的手写状态引擎——按类型定型的节点，业务字段直接位于 `data` 上。两次变动都没有触及 wire 格式（`FlowDefinition` / `NodeDefinition` / `EdgeDefinition`）和 `toFlowDefinition` / `fromFlowDefinition` 的签名，因此已持久化的定义不受影响。迁移历史见[版本说明](../../reference/release-notes.md)。
-:::
-
 ## 按类型划分的节点数据
 
 `NodeDataMap` 把每种 `NodeKind` 映射到它的数据形态；`AnyNodeData` 是全部六种的联合类型（定义为 `FlowNode["data"]`）。每种类型的数据都包含 `name?: string`（显示名称）和 `description?: string`。这些形态身兼二职: 它们既是 wire 上的 `NodeDefinition.data` 载荷，**也**是实时节点的 `data`——序列化器只翻译类型判别字段（`kind` ↔ React Flow 的 `type`），从不触碰数据。
@@ -255,7 +251,7 @@ function validateFlowDefinition(
 | --- | --- |
 | `useEditorStore` | `<T>(selector: (state: EditorState) => T) => T` |
 | `useEditorStoreApi` | `() => UnboundStore<EditorState>`——一个 zustand store api（带 `subscribeWithSelector` / `immer` 中间件），来自 core 的 `createComponentStore` |
-| `EditorState` | 完整的 store 状态 + 动作——自手写状态引擎回归后，这是本包自己的类型（见上方版本提示；v2.7.0 到 v2.12.0 期间它是 `@coldsmirk/nodeloom-core` 的重导出） |
+| `EditorState` | 完整的 store 状态 + 动作——自 v2.13.0 手写状态引擎回归后，这是本包自己的类型 |
 
 `EditorState` 是五个切片（slice）的交集（切片类型本身是内部实现；只有 `EditorState` 被导出）:
 
@@ -267,7 +263,7 @@ function validateFlowDefinition(
 | Validation | `validationIssues: FlowValidationError[]`、`nodeIssueCounts: Record<string, number>`——每个节点 id 的问题计数，这样节点外观只需订阅自己的那一项 | `setValidationIssues(issues)` |
 | History | `past: HistoryEntry[]`、`future: HistoryEntry[]`——`HistoryEntry = { nodes: FlowNode[]; edges: FlowEdge[] }`（整图快照；视图状态从不进入检查点） | `undo()`、`redo()` |
 
-没有 `canUndo` / `canRedo` 成员（nodeloom 的 store 曾有过）: 请用 `past.length > 0` / `future.length > 0` 自行推导。少数成员属于内部管线（`changeVersion`、`checkpoint`、`breakCoalescing`）——在类型上可见，但不面向宿主。
+没有 `canUndo` / `canRedo` 成员: 请用 `past.length > 0` / `future.length > 0` 自行推导。少数成员属于内部管线（`changeVersion`、`checkpoint`、`breakCoalescing`）——在类型上可见，但不面向宿主。
 
 两个 hook 都解析自 `<ApprovalFlowEditor>` 内部挂载的 store——没有面向宿主的插槽可以在那个 provider 树内部渲染额外组件（provider 本身就是刻意不导出的），所以这两个 hook 主要用于读取状态（例如通过 `useEditorStoreApi().getState()`），而不是用于在画布内部挂载自定义 UI。
 
