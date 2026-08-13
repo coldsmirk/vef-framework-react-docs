@@ -106,8 +106,8 @@ Props 以 `TriggerEditorProps` 导出。触发器编辑器: 一个类型切换�
 | --- | --- | --- | --- |
 | `value` | `TriggerFormValues` | — | 编辑器形态的触发器。 |
 | `onChange` | `(value: TriggerFormValues) => void` | — | 每次编辑触发。 |
-| `startsAt` | `string` | — | 调度的生效窗口起点，回传进触发预览。 |
-| `endsAt` | `string` | — | 调度的生效窗口终点，回传进触发预览。 |
+| `startsAt` | `string?` | — | 调度的生效窗口起点，回传进触发预览。 |
+| `endsAt` | `string?` | — | 调度的生效窗口终点，回传进触发预览。 |
 
 ### 触发器辅助函数
 
@@ -129,8 +129,8 @@ Props 以 `TriggerEditorProps` 导出。触发器编辑器: 一个类型切换�
 | --- | --- | --- |
 | `INTERVAL_UNITS` | `DurationUnit[]` | 固定频率间隔触发器（`everyMs`）的单位: 秒 / 分钟 / 小时 / 天。 |
 | `TIMEOUT_UNITS` | `DurationUnit[]` | 按次运行超时（`timeoutMs`）的单位: 毫秒 / 秒 / 分钟。 |
-| `combineDurationMs` | `(value: number, unit: string, units: DurationUnit[]) => number` | 把以 `unit` 表示的值合成毫秒。未知单位回退为第一个（最小）单位；负值收敛为零。 |
-| `splitDurationMs` | `(ms: number, units: DurationUnit[]) => { value: number; unit: string }` | 把毫秒拆分为能整除它的最粗单位，已保存的 `everyMs`/`timeoutMs` 因此能往返为最易读的值+单位。零映射为最小单位、值为零。 |
+| `combineDurationMs` | `(value: number, unit: string, units: DurationUnit[]) => number` | 把以 `unit` 表示的值合成毫秒。数值会先取整为整数；未知单位回退为第一个（最小）单位；负值收敛为零。 |
+| `splitDurationMs` | `(ms: number, units: DurationUnit[]) => { value: number; unit: string }` | 把毫秒拆分为能整除它的最粗单位，已保存的 `everyMs`/`timeoutMs` 因此能往返为最易读的值+单位。零映射为最小单位、值为零；无法被任何单位整除时回退到最小单位。 |
 
 ### 状态与格式化
 

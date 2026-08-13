@@ -59,7 +59,7 @@ export default function EditUserDrawer({ open, onClose }) {
 | `open` | `boolean` | `false` | Whether the drawer is visible |
 | `title` | `ReactNode` | — | Drawer title |
 | `width` | `string \| number` | — | Drawer width |
-| `placement` | `DrawerProps['placement']` | — | Drawer placement |
+| `placement` | `DrawerProps['placement']` | `'right'` | Drawer placement |
 | `resizable` | `boolean` | — | Whether the drawer is resizable |
 | `defaultValues` | `TValues` | — | Initial form values |
 | `disabled` | `boolean` | `false` | Disable the form |

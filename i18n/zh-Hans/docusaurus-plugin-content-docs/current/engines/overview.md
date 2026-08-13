@@ -19,7 +19,7 @@ VEF 服务端内置了若干后端*引擎*——拥有自己的存储、生命�
 | --- | --- | --- | --- | --- |
 | [`@vef-framework-react/approval`](./approval/overview.md) | 2.15.0 | 审批工作流引擎（`approval/*` 资源） | 7 个——任务中心、我的实例、发起门户、分类、流程设计器、委托、管理控制台 | `ApprovalProvider` 插件上下文（选择器、表单注册表、全局变量、业务引用渲染器）；内嵌[审批流编辑器](../editors/approval-flow-editor/overview.md)与[表单编辑器](../editors/form-editor/overview.md) |
 | [`@vef-framework-react/integration`](./integration/overview.md) | 2.15.0 | 集成引擎（`integration/*` 资源） | 6 个——契约、系统、适配器、路由、码表、运维控制台 | 带运行时镜像补全与悬停文档的脚本编辑器；感知认证方案的参数编辑器 |
-| [`@vef-framework-react/cron`](./cron/overview.md) | 2.13.0 | 持久化定时调度存储（`sys/cron/*` 资源） | 2 个——调度、运行记录 | 带下次触发实时预览的触发器编辑器 |
+| [`@vef-framework-react/cron`](./cron/overview.md) | 2.15.0 | 持久化定时调度存储（`sys/cron/*` 资源） | 2 个——调度、运行记录 | 带下次触发实时预览的触发器编辑器 |
 
 包版本独立于框架 tag 演进: 只有当某个包真正发布时，它的 `version` 才会递增。三个包遵循同一套内部架构——`pages` + `api` + `types` + `permissions`（+ 共享的展示型 `components`），全部从包根部扁平地重新导出。
 

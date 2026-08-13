@@ -5,7 +5,7 @@ description: What @vef-framework-react/cron ships — management pages for the V
 
 # Cron Package Overview
 
-`@vef-framework-react/cron` (v2.13.0) is the frontend console for the VEF server's **durable cron store**: schedules that live in the database rather than in code, survive restarts, fire on exactly one node of a cluster, and journal every run. The package ships two pages — schedule management and the read-only run journal — plus the API hooks and building blocks behind them.
+`@vef-framework-react/cron` (v2.15.0) is the frontend console for the VEF server's **durable cron store**: schedules that live in the database rather than in code, survive restarts, fire on exactly one node of a cluster, and journal every run. The package ships two pages — schedule management and the read-only run journal — plus the API hooks and building blocks behind them.
 
 ## When to Use
 
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/_layout/sys/cron-schedule")({
 
 ### `CronRunPage`
 
-Full-page, read-only browser over the run journal. The list shows schedule name, job handler, status badge, node, scheduled/started/finished times, and duration; filters split into a basic field (schedule name) and an advanced panel (job handler, status, node, and a scheduled-time range mapping to the `scheduledAtFrom` / `scheduledAtTo` gte/lte bounds). Rows open a detail drawer (also via the 详情 action) that **refetches the full row through `find_one`** so the complete, untruncated error text is always available; `missed` runs additionally show how many occurrences were dropped.
+Full-page, read-only browser over the run journal. The list shows schedule name, job handler, status badge, node, scheduled/started/finished times, duration, and a missed-count column populated for `missed` runs; filters split into a basic field (schedule name) and an advanced panel (job handler, status, node, and a scheduled-time range mapping to the `scheduledAtFrom` / `scheduledAtTo` gte/lte bounds). Rows open a detail drawer (also via the 详情 action) that **refetches the full row through `find_one`** so the complete, untruncated error text is always available; `missed` runs additionally show how many occurrences were dropped.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |

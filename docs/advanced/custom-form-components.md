@@ -130,7 +130,7 @@ A custom control renders without the `Form.Item` chrome that built-in fields get
     />
 
     {!field.state.meta.isValid && (
-      <Alert message={field.state.meta.errors[0]?.message} type="error" />
+      <Alert title={field.state.meta.errors[0]?.message} type="error" />
     )}
   </>
 )}

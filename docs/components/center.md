@@ -50,7 +50,7 @@ export default function LoadingState() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | `'small'` | Gap between children |
+| `gap` | `'small' \| 'medium' \| 'large' \| CSSProperties['gap']` | `'small'` | Gap between children |
 | `className` | `string` | — | CSS class |
 | `style` | `CSSProperties` | — | Inline style |
 | `ref` | `Ref<HTMLDivElement>` | — | DOM ref |

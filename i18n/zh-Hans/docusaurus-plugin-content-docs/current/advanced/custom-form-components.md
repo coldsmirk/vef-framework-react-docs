@@ -130,7 +130,7 @@ function AlertRuleFields() {
     />
 
     {!field.state.meta.isValid && (
-      <Alert message={field.state.meta.errors[0]?.message} type="error" />
+      <Alert title={field.state.meta.errors[0]?.message} type="error" />
     )}
   </>
 )}

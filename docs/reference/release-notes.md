@@ -172,7 +172,7 @@ const end = delegation.endsAt;
 
 - **core** — `PushClient` (and the `createPushClient` factory) for the vef server push channel: a downstream-only WebSocket that delivers `PushMessage` envelopes (`{ id, type, payload?, time }`). `subscribe(type, handler)` registers by envelope type (`"*"` receives everything) and returns the unsubscribe function. Transport losses reconnect with jittered exponential backoff (`PushReconnectOptions`), re-reading the access token per attempt (sent as the `__accessToken` query parameter); the terminal close codes `4401` (`PUSH_CLOSE_SESSION_INVALID`) and `4429` (`PUSH_CLOSE_TOO_MANY_CONNECTIONS`) surface through `onSessionInvalid` / `onConnectionRejected` and never reconnect. Delivery is best-effort by contract — treat it as a real-time hint and keep reliable state behind the regular API.
 - **hooks** — `usePushMessage(client, type, handler)` subscribes to one envelope type with automatic cleanup on unmount.
-- **integration** — code map code sets pick from the host catalog with a manual-entry fallback.
+- **integration** — code map management page (`IntegrationCodeMapPage`) with completions for map codes; code map code sets pick from the host catalog with a manual-entry fallback.
 - **approval** — instance detail shows the flow code alongside the flow name.
 
 ### Fixes worth knowing

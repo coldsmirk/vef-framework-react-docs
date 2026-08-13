@@ -50,7 +50,7 @@ export default function Demo() {
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `gap` | `'small' \| 'middle' \| 'large' \| CSSProperties['gap']` | `'small'` | Gap between children |
+| `gap` | `'small' \| 'medium' \| 'large' \| CSSProperties['gap']` | `'small'` | Gap between children |
 | `align` | `CSSProperties['alignItems']` | `'center'` | Cross-axis alignment |
 | `justify` | `CSSProperties['justifyContent']` | — | Main-axis alignment |
 | `wrap` | `boolean \| CSSProperties['flexWrap']` | — | Flex wrap |

@@ -172,7 +172,7 @@ const end = delegation.endsAt;
 
 - **core** — 面向 vef 服务端推送通道的 `PushClient`（及其工厂函数 `createPushClient`）：一条仅下行的 WebSocket，投递 `PushMessage` 消息信封（`{ id, type, payload?, time }`）。`subscribe(type, handler)` 按信封类型注册（`"*"` 接收全部消息），并返回取消订阅函数。传输层断连会以带抖动的指数退避重连（`PushReconnectOptions`），每次尝试都重新读取访问令牌（通过 `__accessToken` 查询参数发送）；终止性关闭码 `4401`（`PUSH_CLOSE_SESSION_INVALID`）和 `4429`（`PUSH_CLOSE_TOO_MANY_CONNECTIONS`）经由 `onSessionInvalid` / `onConnectionRejected` 暴露，且永不重连。按契约，投递是尽力而为的——请把它当作实时提示，把可靠状态留在常规 API 后面。
 - **hooks** — `usePushMessage(client, type, handler)` 订阅一种信封类型，并在卸载时自动清理。
-- **integration** — 码表的码集从宿主目录中选取，并支持手动输入兜底。
+- **integration** — 码表管理页面（`IntegrationCodeMapPage`），为映射代码提供自动补全；码表的码集从宿主目录中选取，并支持手动输入兜底。
 - **approval** — 实例详情在流程名称旁显示流程代码。
 
 ### 值得关注的修复

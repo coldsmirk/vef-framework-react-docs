@@ -19,7 +19,7 @@ They are deliberately *drop-in*:
 | --- | --- | --- | --- | --- |
 | [`@vef-framework-react/approval`](./approval/overview.md) | 2.15.0 | Approval workflow engine (`approval/*` resources) | 7 — task center, my instances, initiate portal, categories, flow designer, delegations, admin console | `ApprovalProvider` plugin context (pickers, form registries, global subjects, business-ref renderer); embeds the [Approval Flow Editor](../editors/approval-flow-editor/overview.md) and [Form Editor](../editors/form-editor/overview.md) |
 | [`@vef-framework-react/integration`](./integration/overview.md) | 2.15.0 | Integration engine (`integration/*` resources) | 6 — contracts, systems, adapters, routes, code maps, ops console | Script editors with runtime-mirrored completions and hoverable docs; scheme-aware auth parameter editor |
-| [`@vef-framework-react/cron`](./cron/overview.md) | 2.13.0 | Durable cron schedule store (`sys/cron/*` resources) | 2 — schedules, run journal | Trigger editor with live next-fire preview |
+| [`@vef-framework-react/cron`](./cron/overview.md) | 2.15.0 | Durable cron schedule store (`sys/cron/*` resources) | 2 — schedules, run journal | Trigger editor with live next-fire preview |
 
 Package versions move independently of the framework tag: a package's `version` only bumps when that package publishes. All three follow the same internal architecture — `pages` + `api` + `types` + `permissions` (+ shared presentation `components`), re-exported flat from the package root.
 

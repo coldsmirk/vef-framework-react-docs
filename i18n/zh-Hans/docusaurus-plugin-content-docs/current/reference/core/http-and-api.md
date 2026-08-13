@@ -17,7 +17,7 @@ description: HttpClient 与 ApiClient 的签名、选项、请求生命周期与
 
 ### 获取实例
 
-`HttpClient` 可以通过导出的 `createHttpClient` 工厂函数创建，但大多数应用应使用 `createApiClient`，以便 HTTP 层与框架的 `QueryClient` 配对。在该路径中，将 `HttpClientOptions` 配置为 `ApiClientOptions.http` 并传递给 `createApiClient`（见下文）；随后可通过 [`HTTP_CLIENT` symbol](#访问底层客户端) 获取配置好的实例。
+`HttpClient` 不直接构造——`createHttpClient` 是内部工厂函数，不从包根导出（根仅将 `HttpClient` 作为**类型**导出）。应用通过将 `HttpClientOptions` 配置为 `ApiClientOptions.http` 并传递给 `createApiClient`（见下文）；随后可通过 [`HTTP_CLIENT` symbol](#访问底层客户端) 获取配置好的实例。
 
 ```ts
 const httpOptions = {

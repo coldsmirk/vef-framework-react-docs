@@ -17,7 +17,7 @@ The low-level HTTP client built on Axios. It handles:
 
 ### Obtaining an Instance
 
-`HttpClient` can be created with the exported `createHttpClient` factory, but most applications should use `createApiClient` so the HTTP layer is paired with the framework's `QueryClient`. In that path you configure `HttpClientOptions` as `ApiClientOptions.http` and pass them to `createApiClient` (see below); the configured instance is then reachable through the [`HTTP_CLIENT` symbol](#accessing-the-underlying-clients).
+`HttpClient` is not constructed directly — `createHttpClient` is an internal factory, not exported from the package root (the root exports `HttpClient` as a **type** only). Applications configure `HttpClientOptions` as `ApiClientOptions.http` and pass them to `createApiClient` (see below); the configured instance is then reachable through the [`HTTP_CLIENT` symbol](#accessing-the-underlying-clients).
 
 ```ts
 const httpOptions = {

@@ -106,8 +106,8 @@ Props exported as `TriggerEditorProps`. A trigger editor: a kind switch (cron / 
 | --- | --- | --- | --- |
 | `value` | `TriggerFormValues` | — | The trigger in editor shape. |
 | `onChange` | `(value: TriggerFormValues) => void` | — | Emitted on every edit. |
-| `startsAt` | `string` | — | The schedule's effective-window start, echoed into the fire preview. |
-| `endsAt` | `string` | — | The schedule's effective-window end, echoed into the fire preview. |
+| `startsAt` | `string?` | — | The schedule's effective-window start, echoed into the fire preview. |
+| `endsAt` | `string?` | — | The schedule's effective-window end, echoed into the fire preview. |
 
 ### Trigger helpers
 
@@ -129,8 +129,8 @@ Props exported as `TriggerEditorProps`. A trigger editor: a kind switch (cron / 
 | --- | --- | --- |
 | `INTERVAL_UNITS` | `DurationUnit[]` | Units for the fixed-rate interval trigger (`everyMs`): 秒 / 分钟 / 小时 / 天. |
 | `TIMEOUT_UNITS` | `DurationUnit[]` | Units for the per-run timeout (`timeoutMs`): 毫秒 / 秒 / 分钟. |
-| `combineDurationMs` | `(value: number, unit: string, units: DurationUnit[]) => number` | Combines a value expressed in `unit` into milliseconds. An unknown unit falls back to the first (smallest) unit; a negative value clamps to zero. |
-| `splitDurationMs` | `(ms: number, units: DurationUnit[]) => { value: number; unit: string }` | Splits milliseconds into the coarsest unit that divides it evenly, so a saved `everyMs`/`timeoutMs` round-trips to the most readable value+unit. Zero maps to the smallest unit with a zero value. |
+| `combineDurationMs` | `(value: number, unit: string, units: DurationUnit[]) => number` | Combines a value expressed in `unit` into milliseconds. The value is rounded to an integer; an unknown unit falls back to the first (smallest) unit; a negative value clamps to zero. |
+| `splitDurationMs` | `(ms: number, units: DurationUnit[]) => { value: number; unit: string }` | Splits milliseconds into the coarsest unit that divides it evenly, so a saved `everyMs`/`timeoutMs` round-trips to the most readable value+unit. Zero maps to the smallest unit with a zero value; a value divisible by no unit falls back to the smallest unit. |
 
 ### Status and formatting
 

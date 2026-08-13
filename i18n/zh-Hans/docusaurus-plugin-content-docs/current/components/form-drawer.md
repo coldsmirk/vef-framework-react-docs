@@ -59,7 +59,7 @@ export default function EditUserDrawer({ open, onClose }) {
 | `open` | `boolean` | `false` | 抽屉是否可见 |
 | `title` | `ReactNode` | — | 抽屉标题 |
 | `width` | `string \| number` | — | 抽屉宽度 |
-| `placement` | `DrawerProps['placement']` | — | 抽屉弹出方向 |
+| `placement` | `DrawerProps['placement']` | `'right'` | 抽屉弹出方向 |
 | `resizable` | `boolean` | — | 抽屉是否可调整大小 |
 | `defaultValues` | `TValues` | — | 表单初始值 |
 | `disabled` | `boolean` | `false` | 禁用表单 |
