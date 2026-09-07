@@ -36,6 +36,10 @@ interface PresentationLayer {
 
 `pc` 与 `mobile` 是两棵独立的节点树——同一份表单可以在两种设备上采用完全不同的布局，同时两者绑定的是相同的 `variables` / `dataSources` 以及相同的字段 `key`。`pc` 始终存在；`mobile` 在其设计开始之前一直是 `undefined`，对于未设计过的设备，`FormRenderer` 会显示空状态，而不是回退到 `pc`。
 
+**设计可以不同，数据层不行。** 某个字段只存在于一种设备上、或者两种设备都有但摆在不同的容器里、顺序也不一样——这些都是合理的差异。**分叉的 key** 不是：两棵树命名的是同一个值，所以 `setFieldKey` 会在同一个撤销步骤里连带重命名另一台设备上的孪生字段（在相同值作用域下绑定同一个 key 的那个字段），并且是针对**两棵树**在该作用域下已经绑定的全部 key 去分配新 key，冲突时依次追加 `_2`、`_3`……。放任二者漂移会给后端塞一个幽灵字段——[审批投影](../approval-form-bridge.md#投影规则)会把两种设备的根作用域带 key 节点折叠成一份按 key 去重的清单，于是一个分叉会把同一个字段投影成两个。
+
+有两条边界值得知道。`validateSchema` 检查 id 与 key 唯一性时是**按呈现方式分别检查**的——两棵设备树各自拥有独立的命名空间——所以跨设备这条保证来自编辑器 store 的重命名动作，而不是来自校验。另外，key 的**铸造**（拖入新字段、复制一个字段）仍然只针对当前设备的 layer 分配。
+
 有几个辅助函数用于在按设备划分的 `FormSchema` 与引擎实际遍历的扁平 `PresentationLayer` 之间搭桥：
 
 | 导出 | 签名 | 用途 |
@@ -87,14 +91,23 @@ declare module "@vef-framework-react/form-editor" {
 | `date` | `dateFieldDefinition` | 是 | date-file | 贡献一个 `YYYY-MM-DD` 字符串 |
 | `datetime` | `datetimeFieldDefinition` | 是 | date-file | 贡献一个 `YYYY-MM-DD HH:mm:ss` 字符串 |
 | `daterange` | `dateRangeFieldDefinition` | 是 | date-file | 贡献一个 `[start, end]` 字符串二元组 |
+| `upload` | `uploadFieldDefinition` | 是 | date-file | 由存储服务支撑的文件上传；贡献一个对象 key（或一组 key）——见[下文](#多值字段与上传字段)。它由 `createDefaultRegistry()` / `registerDefaults()` 注册，但定义本身并未从包的入口再导出 |
 | `button` | `buttonDefinition` | 否 | action | 非键控；`action`（html 的 `type`，默认 `"submit"`）与 `buttonType`（视觉样式）相互独立 |
 | `divider` | `dividerDefinition` | 否 | presentation | 带可选内联标题的分节线 |
 | `alert-block` | `alertBlockDefinition` | 否 | presentation | 内联提示横幅 |
 | `paragraph` | `paragraphDefinition` | 否 | presentation | 静态说明文本 |
 
-每个叶子字段都共享 `id`、`label`、`labelPosition`（`"top" | "left" | "right"`），以及[布局尺寸](#布局与尺寸)与[联动](./linkage.md)相关的插槽。标记为"需要 key"的字段还会额外携带一个 `key: string`（数据绑定路径）以及一个可选的 `columnType` 覆盖项（见[表存储投影](#表存储投影)）；大多数字段还实现了 `Validatable`（`validate: { required, minLength, maxLength, min, max, pattern, message }`）——`switch` 是上文提到的唯一例外。各字段接口具体的属性（`placeholder`、`allowClear`、`size`、`dataSource`……）逐一记录在 [Reference](./reference.md#叶子字段接口) 中。
+每个叶子字段都共享 `id`、`label`、`labelPosition`（`"top" | "left" | "right"`），以及[布局尺寸](#布局与尺寸)与[联动](./linkage.md)相关的插槽。标记为"需要 key"的字段还会额外携带一个 `key: string`（数据绑定路径）以及一个可选的 `columnType` 覆盖项（见[表存储投影](#表存储投影)）；大多数字段还实现了 `Validatable`（`validate: { required, minLength, maxLength, min, max, pattern, message }`）——`switch` 是上文提到的唯一例外。`validate.minLength` / `validate.maxLength` 统计的是**字符数（code point）**，与 Go 后端的 `utf8.RuneCountInString` 一致：一个 emoji 或一个增补平面的 CJK 字符在两端都只算一个，因此设计者只写一次的限制，在浏览器和服务端表示的是同一件事。而字段级的 `maxLength`（`textfield` / `textarea` 上的那个）是另一条轴——它是那个"打满 N 个就打不下去"的原生输入上限，由 DOM 强制执行，因此按 UTF-16 code unit 计数。各字段接口具体的属性（`placeholder`、`allowClear`、`size`、`dataSource`……）逐一记录在 [Reference](./reference.md#叶子字段接口) 中。
 
 `mobileFieldDefinitions` 是与之平行的 antd-mobile 渲染器集合——涵盖除 `code-editor`（没有移动端控件；PC → 移动端转换器会将其降级为 `textarea`）之外的所有内置叶子类型，复用各 PC 字段的 `config` 与属性面板描述符，只替换了渲染用的 `Component`。
+
+移动端的 `date` 与 `datetime` 选择器被显式指定了 `1900-01-01` … `2099-12-31 23:59:59` 的范围。antd-mobile 的 `DatePicker` 默认范围是"今年 ± 10 年"，**并且会在渲染滚轮之前先把传入的值夹取到这个窗口里**——于是一个存着 1980 年的出生日期打开时停在今天，什么都不动直接点确定就把今天写了回去，而触发器（它直接格式化存储值）显示的仍然是 1980。窗口之外的日期同样根本无法输入。PC 端的 `DatePicker` 不施加任何范围，而这个值在两种呈现方式之间是共享的，所以移动端的边界必须宽到不会对表单数据构成约束。移动端的 `daterange` 渲染的是 `CalendarPicker`，本身不带边界，从来不受影响。
+
+### 多值字段与上传字段
+
+**`checkbox-group` 的值按选项列表排序，而不是按点击顺序。** antd 的 `Checkbox.Group` 会按选项下标对它抛出的数组排序，而 antd-mobile 的则按勾选先后追加，所以同样的两次点击原本会在桌面端得到 `["read", "music"]`、在手机上得到 `["music", "read"]`——同一个用户意图落成两条不同的存储记录，并且任何人换一台设备重新提交都会凭空多出一个 diff。现在两端的渲染器都会在变更时归一化：值被排成选项列表自身的顺序，任何选项列表已经不再提供的条目会被丢弃，因为后端会拿字段枚举出的选项去校验选择结果，其余一律拒绝。归一化发生在用户的下一次勾选，所以一个陈旧的值不会仅仅因为远程选项列表加载完成就被改写。
+
+**`upload` 字段保存的是存储对象 key，它的空值只有一种形态。** `maxCount` 取默认值 `1` 时，值是单个 key，空值是 `null`；`maxCount > 1` 时值是 key 数组，空值是 `[]`。"从未被碰过"与"被用户清空"刻意保持同一种形态，这样下游就不必去分辨两者。存储列也走同一条轴、而不是字符串那套规则——`inferColumnType` 在 `maxCount > 1` 时返回 `"json"`，否则返回 `"text"`，并且从不参考 `validate.maxLength`：后者约束的是字符串长度，而上传字段的约束是文件个数。
 
 ### 容器
 
@@ -143,7 +156,7 @@ type FieldOptionSource =
   | { kind: "remote"; request: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }; // inline RPC
 ```
 
-`FormSchema.dataSources: FormDataSource[]` 保存表单全局、可复用的数据源（`{ id, name, kind: "static", options }` 或 `{ id, name, kind: "remote", request, mapping }`），`ref` 类型的数据源会按 id 指向它们。`RemoteDataSourceRequest`（`{ resource, action, version?, params? }`）与传输方式无关——这个包本身没有 `apiClient` 依赖；宿主通过 `DataSourceResolver` 来解析它（见 [Embedding → 加载远程选项](./embedding.md#加载远程选项)）。`RemoteOptionMapping`（`labelKey` / `valueKey` / `disabledKey` / `descriptionKey`，均默认为 `"label"` / `"value"`）负责把远程返回的原始记录映射为 `{ label, value }` 键值对。
+`FormSchema.dataSources: FormDataSource[]` 保存表单全局、可复用的数据源（`{ id, name, kind: "static", options }` 或 `{ id, name, kind: "remote", request, mapping }`），`ref` 类型的数据源会按 id 指向它们。`RemoteDataSourceRequest`（`{ resource, action, version?, params? }`）与传输方式无关——这个包本身没有 `apiClient` 依赖；宿主通过 `DataSourceResolver` 来解析它（见 [Embedding → 加载远程选项](./embedding.md#加载远程选项)）。`params` 的每一项都是一个 `DynamicValue`，因此参数可以绑定到表单值上——级联下拉正是这样写出来的，子表单内的逐行级联也一样（见[绑定参数](./embedding.md#绑定参数)）。`RemoteOptionMapping`（`labelKey` / `valueKey` / `disabledKey` / `descriptionKey`，均默认为 `"label"` / `"value"`）负责把远程返回的原始记录映射为 `{ label, value }` 键值对。
 
 `FormSchema.variables: FormVariable[]`（`{ id, name, type: "string" | "number" | "boolean" | "json", defaultValue? }`）声明了暴露给[联动表达式](./linkage.md)的表单全局 `$vars`。
 
@@ -193,7 +206,7 @@ type FieldOptionSource =
 
 ## 表存储投影
 
-对于将已提交的值持久化到关系型数据库、每个带 key 字段对应一列的宿主，`toColumnDefinitions(schema): ColumnDefinition[]` 会将每个根作用域内带 key 的叶子字段（跨两种设备呈现方式去重，冲突时以 `pc` 为准）投影为一条 `{ key, columnType, maxLength?, precision? }` 记录。`columnType: ColumnDataType`（`"string" | "text" | "integer" | "decimal" | "boolean" | "date" | "datetime" | "json"`）由 `inferColumnType(field)` 根据控件类型确定性地推断得出，并优先尊重字段显式设置的 `columnType` 覆盖项——只有 `number`（整数还是小数，取决于 `precision`）和字符串家族（有长度限制的 `string` 还是不限长度的 `text`，取决于 `validate.maxLength`）足够模糊，才需要靠推断来判定。
+对于将已提交的值持久化到关系型数据库、每个带 key 字段对应一列的宿主，`toColumnDefinitions(schema): ColumnDefinition[]` 会将每个根作用域内带 key 的叶子字段（跨两种设备呈现方式去重，冲突时以 `pc` 为准）投影为一条 `{ key, columnType, maxLength?, precision? }` 记录。`columnType: ColumnDataType`（`"string" | "text" | "integer" | "decimal" | "boolean" | "date" | "datetime" | "json"`）由 `inferColumnType(field)` 根据控件类型确定性地推断得出，并优先尊重字段显式设置的 `columnType` 覆盖项——只有 `number`（整数还是小数，取决于 `precision`）、`upload`（`json` 还是 `text`，取决于 `maxCount`）以及字符串家族（有长度限制的 `string` 还是不限长度的 `text`，取决于 `validate.maxLength`）足够模糊，才各自需要一条规则。
 
 ## Approval flow editor 桥接
 

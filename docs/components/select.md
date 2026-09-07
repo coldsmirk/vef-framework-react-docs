@@ -61,8 +61,10 @@ export default function Demo() {
 
 ## Searchable
 
+Whenever you set `showSearch` over a plain option list, pass `filterOptionByLabel` with it:
+
 ```tsx
-import { Select } from '@vef-framework-react/components';
+import { filterOptionByLabel, Select } from '@vef-framework-react/components';
 
 export default function Demo() {
   return (
@@ -70,9 +72,7 @@ export default function Demo() {
       showSearch
       style={{ width: 200 }}
       placeholder="Search to select"
-      filterOption={(input, option) =>
-        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-      }
+      filterOption={filterOptionByLabel}
       options={[
         { value: '1', label: 'Beijing' },
         { value: '2', label: 'Shanghai' },
@@ -82,6 +82,14 @@ export default function Demo() {
   );
 }
 ```
+
+```ts
+function filterOptionByLabel(input: string, option?: SelectOption): boolean;
+```
+
+**antd's default `filterOption` matches the typed query against the option `value`** — the stored code — so a list of `{ label: 'Beijing', value: '1' }` filters to nothing for every word the user can actually see. `filterOptionByLabel` matches the **label** instead, case-insensitively and ignoring surrounding whitespace; a blank or all-whitespace query keeps every option. The value stays out of the comparison deliberately: it is storage, not copy, and matching it would let a query hit an option whose visible text does not contain the query at all — including numeric codes colliding with numbers the user typed for another reason. An option with no label, or a `ReactNode` label the predicate cannot read as text, does not match.
+
+The framework applies it wherever it sets `showSearch` itself — the form editor's `select` field and its editable-table column editor, the cron schedule page's job-handler pickers, and the integration console's log filters. The two options hooks below are the exception: `useDataOptionsSelect` and `useCodeSetOptionsSelect` install their own pinyin-aware predicate over the richer option shape they produce (label, description, and both pinyin forms of each), so **do not** pass `filterOptionByLabel` on top of a spread from either.
 
 ## VEF Enhancement: `useDataOptionsSelect`
 

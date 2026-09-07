@@ -61,8 +61,10 @@ export default function Demo() {
 
 ## 可搜索
 
+只要你在一份普通选项列表上开启 `showSearch`，就顺手把 `filterOptionByLabel` 一起传上：
+
 ```tsx
-import { Select } from '@vef-framework-react/components';
+import { filterOptionByLabel, Select } from '@vef-framework-react/components';
 
 export default function Demo() {
   return (
@@ -70,9 +72,7 @@ export default function Demo() {
       showSearch
       style={{ width: 200 }}
       placeholder="Search to select"
-      filterOption={(input, option) =>
-        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-      }
+      filterOption={filterOptionByLabel}
       options={[
         { value: '1', label: 'Beijing' },
         { value: '2', label: 'Shanghai' },
@@ -82,6 +82,14 @@ export default function Demo() {
   );
 }
 ```
+
+```ts
+function filterOptionByLabel(input: string, option?: SelectOption): boolean;
+```
+
+**antd 默认的 `filterOption` 是拿输入去匹配选项的 `value`**——也就是那个存储用的编码——所以一份 `{ label: 'Beijing', value: '1' }` 的列表，对用户实际看得见的每一个词都会筛成空。`filterOptionByLabel` 改为匹配 **label**，忽略大小写、忽略首尾空白；输入为空或全是空白时保留全部选项。把 value 排除在比较之外是刻意的：它是存储、不是文案，匹配它会让某次查询命中一个可见文本里压根不含该查询串的选项——包括数字编码与用户出于别的原因输入的数字撞车。没有 label 的选项，以及 label 是谓词读不出文本的 `ReactNode` 的选项，都不会匹配。
+
+框架自己开启 `showSearch` 的地方都用了它——表单编辑器的 `select` 字段及其可编辑表格列编辑器、定时任务调度页的任务处理器选择器，以及集成控制台的日志筛选。下面两个选项 hook 是例外：`useDataOptionsSelect` 与 `useCodeSetOptionsSelect` 会在它们产出的更丰富的选项形状（label、description，以及两者各自的拼音形式）之上安装自己的拼音感知谓词，所以**不要**在它们展开出来的 props 之上再传 `filterOptionByLabel`。
 
 ## VEF 增强：`useDataOptionsSelect`
 

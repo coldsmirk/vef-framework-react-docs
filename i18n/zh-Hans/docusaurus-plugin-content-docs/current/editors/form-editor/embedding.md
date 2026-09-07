@@ -97,6 +97,8 @@ registry.register(ratingFieldDefinition);
 
 `section` / `tabs` / `subform` 通过 `ContainerChromeSet` 渲染——从当前激活的注册表中解析出的六个展示型外壳组件（`Section`、`Tabs`、`Subform`、`SubformRow`、`AddButton`、`RemoveButton`）。`flex` 和 `grid` 是纯 CSS 布局，不使用任何外观组件。要在不改动字段级渲染的前提下重新设计容器样式，可以构建一个 `ContainerChromeSet`，并在传给 `FormEditor` / `FormRenderer` 之前，在你自己的注册表上调用 `registry.setContainerChrome(chrome)`。
 
+有一个属性很容易被忽略，但绝不能忽略：**`SubformChromeProps.errors`（`string[]`）必须被渲染出来。** 一个子表单为整个数组只挂载一个字段，因此它自身的错误——必填子表单的"至少一行"，以及 `table` 变体上卷起来的行内错误——没有别的落脚点；忽略它们的外观会在屏幕上不显示任何东西的情况下阻断提交。两套内置外观都把它们渲染在主体下方，用的是叶子字段所用的同一个 footer。
+
 ## FormRenderer
 
 `FormRenderer` 将一个 `FormSchema` 渲染为实时的、数据绑定的表单——这是终端用户（而非表单的设计者）实际交互的对象：
@@ -166,11 +168,65 @@ const resolver: DataSourceResolver = {
 
 不传入解析器（默认使用 `noopDataSourceResolver`）会让每个远程数据源都解析为空列表，而不是报错。如果你正在构建一个**自定义字段组件**，需要相同的解析逻辑（static / ref-to-static 同步解析，remote / ref-to-remote 带加载/错误状态与结果缓存的异步获取），可以在被同一个 `DataSourceProvider`（编辑器和渲染器已经安装好的那个）包裹的组件内部调用 `useFieldOptions(field.dataSource)`——你几乎不需要自己安装 `DataSourceProvider`。
 
+### 绑定参数
+
+`RemoteDataSourceRequest.params` 的类型是 `Record<string, DynamicValue>`——每个参数要么是 `{ kind: "literal"; value }`，要么是绑定到实时表单的 `{ kind: "expression"; source }`。级联下拉之所以能成立，靠的就是绑定参数——"上面选中的那个科室下面的病区"：
+
+```ts
+{
+  resource: "sys/ward",
+  action: "find_options",
+  params: {
+    departmentId: { kind: "expression", source: "field.deptId" },
+    active: { kind: "literal", value: true }
+  }
+}
+```
+
+运行时会在请求抵达解析器**之前**先完成表达式求值——走的是 `evaluateAssignExpression`，与联动 `assign` 取值用的是同一个接缝，因此一套表达式语言同时覆盖两边——然后交出一个只携带纯数据的 `ResolvedDataSourceRequest`（`{ resource, action, version?, params?: Record<string, unknown> }`）。解析器根本不会知道曾经存在过表达式，从而保持纯传输层的角色。`DynamicValue` 与[联动动作取值](./linkage.md#动作)共用同一份声明，所以设计器在两处提供的是同一个"固定值 / 绑定值"控件。
+
+求值结果为 `undefined` 的参数会被**省略，而不是照样发送**——比如表达式读取了表单并不携带的 key，或者压根没有求值器可用的情况。把这个 key 带着 `undefined` 值发出去，等于在线上格式里留了个后端必须特判的洞；省略它则用每种传输方式本来就理解的词汇说了同一件事。而表单真正持有的空值（`""`）是一个值、不是缺失，会被照常发送。
+
+选项缓存的 key 是**求值之后**的请求，因此绑定值发生变化会重新解析选项，无关按键则不会——而一个哪里都没有绑定参数的 schema，压根不会去订阅表单值。
+
+### 逐行的参数作用域
+
+绑定参数按**它自己所在的值作用域**求值：根级字段按整个表单求值，子表单行内的字段按该行自己的记录求值。因此两行各自选了不同科室时，会发出两个不同的请求，拿回两份不同的病区列表。
+
+编写逐行级联的写法与根级完全一致——表达式直接写本行的同级 key，因为在行内 `field` / `$form` 绑定的就是当前作用域的值（见 [Linkage → 表达式与脚本求值](./linkage.md#表达式与脚本求值)）：
+
+```ts
+{
+  type: "subform",
+  key: "lines",
+  template: [
+    { type: "textfield", key: "deptId", label: "Department" },
+    {
+      type: "select",
+      key: "wardId",
+      label: "Ward",
+      dataSource: {
+        kind: "remote",
+        request: {
+          resource: "sys/ward",
+          action: "find_options",
+          params: { departmentId: { kind: "expression", source: "field.deptId" } }
+        }
+      }
+    }
+  ]
+}
+```
+
+:::warning[行为变更]
+选项解析此前无论字段位于哪个作用域，都把绑定参数放到整个表单上求值。在子表单行内，这意味着表达式读的是一个根本不存在的根级 key，于是参数被丢弃——又因为选项缓存的 key 是**求值之后**的请求，每一行发出的都是完全相同的无过滤请求，最终塌缩到同一份共享选项列表上。逐行级联在结构上就不可能成立，而不只是偶尔出错一次。`api_call` 效果那条链路本来就是按作用域求值的；现在两条链路给出的答案一致了。
+:::
+
 ## 构建自定义字段渲染器
 
 字段定义的 `Component` 接收 `FieldComponentProps`（`field`、`value`、`onChange`、`errors`、`domId`、`disabled`、`required`、`labelPosition`），可以自由渲染任何内容，但有几个导出的基础组件可以让自定义字段在视觉上与内置字段保持一致：
 
-- **`FieldShell`** / **`Label`** 实现了大多数内置类输入字段共用的标签-控件布局（顶部/左侧/右侧标签位置、辅助文本、错误提示区)——少数字段（例如 `switch`）不经过 `FieldShell`，而是直接组合 `Label` 与字段 footer。
+- **`FieldShell`** / **`Label`** 实现了大多数内置类输入字段共用的标签-控件布局（顶部/左侧/右侧标签位置、辅助文本、错误提示区)——少数字段（例如 `switch`）不经过 `FieldShell`，而是直接组合 `Label` 与字段 footer。当你的字段渲染出的是一**组**东西、而不是单个可被 label 关联的控件时（一个选项组、一个拖拽上传区），请传 `labelledBy="group"`：`<label for>` 对包裹用的 `div` 是无效的，不传的话这个字段就完全没有可访问名称——读屏软件会念出第一个选项，却从不念出问题本身。传了之后，外壳会把主体标注成 `role="group"` 并由标签为它命名，同时把 `aria-required` / `aria-invalid` 挂到它上面。用到它的内置字段是 `radio`、`checkbox-group`、`code-editor` 与 `upload`。
 - **`useFieldRegistry()`** 和 **`useDeviceRegistries()`**（来自同一个 `DeviceProvider` / `RegistryProvider` 上下文）用于解析当前激活设备的注册表——适用于需要检查同级字段定义的自定义容器或字段。`FormEditor` 会自行安装这两个 provider；`FormRenderer` 只安装 `DeviceProvider`，因此单独挂载 `FormRenderer` 的宿主必须自行提供 `RegistryProvider` 祖先节点（见上文 [FormRenderer](#formrenderer)）。
 - **`useMobileScopeContainer()`** 返回一个供 antd-mobile 弹出式控件（`Picker`、`DatePicker`……）使用的 `getContainer` 回调。当存在包裹的手机边框元素时（编辑器自身的设计时预览），它会解析到该元素；在真实的移动端运行时则回退到 `document.body`——请像内置移动端字段那样，将其接入你自定义移动端字段的弹出层。
 

@@ -82,12 +82,36 @@ Before v2.10.0 the projection produced a wrapper object — `ProjectionResult.de
 
 | Export | Shape |
 | --- | --- |
-| `ApprovalFormField` | `{ key, kind, label, placeholder?, defaultValue?, isRequired?, options?, validation?, props?, sortOrder, columnType?, scale?, columns? }` — the bare `ApprovalFormField[]` array **is** the contract; there's no wrapper object |
+| `ApprovalFormField` | `{ key, kind, label, placeholder?, defaultValue?, isRequired?, options?, optionSource?, validation?, props?, sortOrder, columnType?, scale?, columns? }` — the bare `ApprovalFormField[]` array **is** the contract; there's no wrapper object |
 | `ApprovalFieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `ApprovalFieldOption` | `{ label: string; value: unknown }` |
 | `ApprovalValidationRule` | `{ minLength?, maxLength?, min?, max?, pattern?, message? }` — on a `table` field, `minLength`/`maxLength` bound the row count, not a string length |
+| `ApprovalFieldOptionSource` | `{ kind: ApprovalOptionSourceKind; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }` — `request` / `mapping` are form-editor's own types, re-exported unchanged |
+| `ApprovalOptionSourceKind` | `"remote"` — deliberately narrower than the designer's source union; see [Remote option sources](#remote-option-sources) |
 
-`options` is only populated for a `select` field whose source is an inline `static` list or a `ref` to a form-global `static` data source; a remote source (or a dangling `ref`) is resolved by the host at runtime, so the projection omits `options` and raises `options_not_static` — the backend then accepts any submitted value for that field. `columnType` mirrors the backend's `ColumnDataType` and is only meaningful under `table` storage mode; an explicit designer override is always honored, but a number field with no configured `precision` deliberately emits **no** `columnType` (the widget-inferred `"integer"` would make the Go runtime reject fractional values, so the backend falls back to a gate-free numeric column). A `decimal` column with no configured `precision` raises `decimal_scale_missing` (a warning — the storage layer rounds to 0 decimal places); with a positive `precision`, it is emitted as `scale`. `defaultValue` and `props` exist on the wire contract but are never emitted by the projector — they are declared so hand-built or host-enriched definitions round-trip losslessly.
+`options` is only populated for a `select` field whose source is an inline `static` list or a `ref` to a form-global `static` data source. A source whose options cannot be enumerated — a `remote` source, inline or reached through a `ref` — projects [`optionSource`](#remote-option-sources) instead; a dangling `ref` or an unknown kind projects neither. Every one of those cases still raises `options_not_static`, and the backend still accepts any submitted value for the field, because its select validation reads `options` alone. `columnType` mirrors the backend's `ColumnDataType` and is only meaningful under `table` storage mode; an explicit designer override is always honored, but a number field with no configured `precision` deliberately emits **no** `columnType` (the widget-inferred `"integer"` would make the Go runtime reject fractional values, so the backend falls back to a gate-free numeric column). A `decimal` column with no configured `precision` raises `decimal_scale_missing` (a warning — the storage layer rounds to 0 decimal places); with a positive `precision`, it is emitted as `scale`. `defaultValue` and `props` exist on the wire contract but are never emitted by the projector — they are declared so hand-built or host-enriched definitions round-trip losslessly.
+
+### Remote option sources
+
+A selection field whose options could not be enumerated projects a descriptor in `optionSource` rather than leaving the consumer with nothing:
+
+```ts
+interface ApprovalFieldOptionSource {
+  kind: "remote";
+  request?: RemoteDataSourceRequest;
+  mapping?: RemoteOptionMapping;
+}
+```
+
+Three properties are worth stating outright:
+
+- **It is post-dereference.** A `ref` is resolved before the branch is taken, so `request` / `mapping` are the ones the referenced `FormSchema.dataSources` entry carries. A consumer never chases a `dataSourceId` it has no schema to look up.
+- **`request.params` travel unevaluated.** Each parameter stays the `DynamicValue` the designer authored — `{ kind: "literal"; value }` or `{ kind: "expression"; source }` — see [bound parameters](./form-editor/embedding.md#bound-parameters). Neither the backend nor a list-rendering consumer holds the form values an expression reads, so evaluating them at projection time would be inventing an answer; carrying them verbatim lets a consumer that *does* have values evaluate them, and one that does not drop the parameter.
+- **`request` is optional only for the unfinished case.** A remote source whose request the designer left unset is emitted rather than silently degraded to a source-less field, so the Go deploy validation names it. A deployed version always carries one.
+
+The consumer this exists for is **display, not validation**. A list view rendering a stored `select` value holds an id (`"dept-7"`) and needs the label (`"Cardiology"`). With a static source the label sits right there in `options`; with a remote one the definition used to say nothing at all, so a list either showed the raw id or re-hard-coded the request the designer had already authored. `optionSource` hands over both halves — the request to call and the `labelKey` / `valueKey` mapping to read the reply with.
+
+The backend still never resolves it, and it does not make a value checked: a remote-sourced field accepts anything submitted, exactly as before.
 
 ## `validateApprovalSchema`
 
@@ -136,7 +160,7 @@ if (!result.valid) {
 | `cross_device_kind_mismatch` | error | The same field key maps to a different kind on pc vs. mobile. |
 | `cross_device_table_mismatch` | error | A subform's column set differs between pc and mobile. |
 | `decimal_scale_missing` | warning | A `decimal` column has no configured precision; storage rounds to 0 decimal places. |
-| `options_not_static` | warning | A select field's options come from a non-static source; the projection omits them and the backend accepts any submitted value. |
+| `options_not_static` | warning | A select field's options come from a non-static source; the projection omits them — emitting [`optionSource`](#remote-option-sources) when the source is remote — and the backend accepts any submitted value. |
 | `linkage_not_projected` | warning | The field has linkage rules the approval backend doesn't evaluate — a linkage-hidden field still drops its value from the submit payload, which can conflict with a static `isRequired`. |
 
 ## End-to-end example

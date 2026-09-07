@@ -203,8 +203,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `past` / `future` | `HistoryEntry[]` | `HistoryEntry = { schema: FormSchema; device: EditorDeviceMode }` |
 | `insertField`、`moveNode`、`removeNode`、`duplicateNode` | 动作 | 结构性编辑，每一个都是一个撤销检查点。 |
 | `setSpan`、`setFlex`、`setColumnWidth`、`setStackSlot` | 动作 | 布局编辑，按节点合并为单步。 |
-| `editField(args, options?: EditCoalesceOptions)`、`updateBlock(args, options?)` | 动作 | `EditCoalesceOptions = { coalesceKey?: string }` —— 共享同一个 key 的连续编辑会折叠为一个撤销步骤。 |
-| `setFieldKey` | 动作 | 清洗、去重，并重命名对旧 key 的每一处引用。 |
+| `editField(args, options?: EditCoalesceOptions)`、`updateBlock(args, options?)` | 动作 | `EditCoalesceOptions = { coalesceKey?: string }` —— 共享同一个 key 的连续编辑会折叠为一个撤销步骤。**折叠是需要显式选择的**：省略 `coalesceKey` 时，这次编辑会独占一个撤销条目**并且**结束当前这一轮折叠，于是下一次编辑同样独占一个。想把一个输入框里的一串按键折叠起来，就为正在编辑的那样东西命名（内置属性面板传的是 `field:<id>:<entryId>`）；而离散动作——一次下拉选择、一次开关、一次增删——就别传，让它们各自成为一步。 |
+| `setFieldKey` | 动作 | 清洗、去重，并重命名对旧 key 的每一处引用。去重会在该字段自身的值作用域下**跨两种设备呈现方式**进行，并且另一台设备上在相同作用域绑定同一 key 的孪生字段会在同一个撤销步骤里一并重命名——见 [Schema → 按设备划分的呈现方式](./schema.md#按设备划分的呈现方式)。 |
 | `patchSchema` | `(patch: FormSchemaPatch) => void` | `FormSchemaPatch = Partial<Pick<FormSchema, "dataSources" \| "id" \| "linkage" \| "variables">> & { gap?: GapScale }` |
 | `renameVariable`、`removeVariable`、`removeDataSource` | 动作 | 重命名/移除 + 引用清理。 |
 | `undo`、`redo`、`canUndo`、`canRedo` | 动作 | — |
@@ -223,7 +223,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 
 | 导出 | 属性 |
 | --- | --- |
-| `FieldShell` | `{ children, domId, errors?, helperText?, label, labelPosition?, required? }` —— 共享的标签/控件/辅助文本/错误提示布局。 |
+| `FieldShell` | `{ children, domId, errors?, helperText?, label, labelPosition?, required?, labelledBy? }` —— 共享的标签/控件/辅助文本/错误提示布局。`labelledBy`（默认 `"control"` \| `"group"`）决定标签以何种方式与它所命名的东西关联：`"control"` 输出 `<label for={domId}>`，这要求字段把 `domId` 放在一个可被 label 关联的元素上；`"group"` 面向渲染出一**组**而非单个控件的字段（`radio`、`checkbox-group`、`code-editor`、`upload`）——`for` 对它们的包裹层是无效的，因此标签改为携带一个 id，主体变成一个 `role="group"` 并通过 `aria-labelledby` 指回标签，同时带上 `aria-required` / `aria-invalid`。不这么做，这类字段就完全没有可访问名称：读屏软件念出第一个选项，却完全不提正在问的是什么问题。 |
 | `Label` | `{ children, htmlFor?, position?: LabelPosition, required?, title? }` |
 
 ## 数据源
@@ -232,9 +232,12 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | --- | --- |
 | `DataSourceProvider` | `(props: { children, dataSources?: FormDataSource[], resolver?: DataSourceResolver, versions?: Record<string, number> }) => ReactElement` —— 由 `FormEditor` 和 `FormRenderer` 安装。 |
 | `useFieldOptions` | `(source: FieldOptionSource \| undefined) => { options: FieldOption[]; loading: boolean; error: boolean }` |
-| `DataSourceResolver`（类型） | `{ resolve: (request: RemoteDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }` |
+| `DataSourceResolver`（类型） | `{ resolve: (request: ResolvedDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }`——解析器只会看到已求值的参数 |
 | `noopDataSourceResolver` | `resolve` 始终返回 `[]` 的 `DataSourceResolver`——即默认值。 |
-| `RemoteDataSourceRequest`（类型） | `{ resource: string; action: string; version?: string; params?: Record<string, unknown> }` |
+| `RemoteDataSourceRequest`（类型） | `{ resource: string; action: string; version?: string; params?: Record<string, DynamicValue> }`——schema 形态，携带的是绑定 |
+| `ResolvedDataSourceRequest`（类型） | `{ resource: string; action: string; version?: string; params?: Record<string, unknown> }`——运行时形态，携带的是数据；见 [Embedding → 绑定参数](./embedding.md#绑定参数) |
+| `DynamicValue`（类型） | `{ kind: "literal"; value: unknown } \| { kind: "expression"; source: string }`——与 `LinkageActionValue` 共用同一份声明 |
+| `isDynamicValue` | `(value: unknown) => value is DynamicValue`——用于收窄跨越了序列化边界的值 |
 | `RemoteOptionMapping`（类型） | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` —— 均默认为 `"label"` / `"value"`。 |
 
 ## 移动端
@@ -294,6 +297,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `DateField` | `"date"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean`（默认 `true`） |
 | `DatetimeField` | `"datetime"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean`（默认 `true`） |
 | `DateRangeField` | `"daterange"` | Keyed, Validatable | `helperText?, allowClear?: boolean`（默认 `true`） |
+| `UploadField` | `"upload"` | Keyed, Validatable | `helperText?, maxCount?: number`（默认 `1`）`, public?: boolean, accept?: string, dragger?: boolean` —— `maxCount: 1` 时值是单个存储 key，`> 1` 时是 key 数组；`public` 把对象落到 `pub/` 而不是 `priv/`，需要后端开启 `vef.storage.allow_public_uploads` |
 | `ButtonField` | `"button"` | （非键控） | `action?: "submit"\|"reset"\|"button"`（默认 `"submit"`）`, buttonType?: "primary"\|"default"\|"dashed"\|"text"\|"link"`（默认 `"primary"`）`, danger?: boolean, size?, block?: boolean, ghost?: boolean, shape?: "default"\|"round", icon?: DynamicIconName` |
 | `DividerField` | `"divider"` | （非键控） | `title?: string, titlePlacement?: "left"\|"center"\|"right"`（默认 `"center"`）`, dashed?: boolean` |
 | `AlertBlockField` | `"alert-block"` | （非键控） | `message?: string, description?: string, alertType?: "info"\|"success"\|"warning"\|"error", showIcon?: boolean`（默认 `true`）`, closable?: boolean, banner?: boolean` |
@@ -406,7 +410,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | --- | --- |
 | `Section` | `SectionChromeProps = { title?: ReactNode; variant?: "card" \| "collapse"; defaultCollapsed?: boolean; children: ReactNode }` |
 | `Tabs` | `TabsChromeProps = { items: ChromeTabItem[]; activeKey?: string; onChange?: (key: string) => void }` —— `ChromeTabItem = { key: string; label: ReactNode; children: ReactNode }` |
-| `Subform` | `SubformChromeProps = { title?: ReactNode; children: ReactNode }` |
+| `Subform` | `SubformChromeProps = { title?: ReactNode; errors?: string[]; children: ReactNode }`——自定义外观应当渲染 `errors`：一个子表单为整个数组只挂载**一个**字段，因此它自身的错误（必填子表单的"至少一行"、`table` 变体上卷起来的行内错误）没有别的落脚点，否则就会在屏幕上不显示任何东西的情况下阻断提交。两套内置外观都把它渲染在主体下方，用的是叶子字段所用的同一个 footer。 |
 | `SubformRow` | `SubformRowChromeProps = { removeControl?: ReactNode; children: ReactNode }` |
 | `AddButton` | `AddControlChromeProps = { label: ReactNode; onClick: () => void }` |
 | `RemoveButton` | `RemoveControlChromeProps = { onClick: () => void }` |

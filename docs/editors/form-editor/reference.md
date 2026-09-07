@@ -203,8 +203,8 @@ Built-in property-entry renderer components (each `FC<EntryComponentProps>`), re
 | `past` / `future` | `HistoryEntry[]` | `HistoryEntry = { schema: FormSchema; device: EditorDeviceMode }` |
 | `insertField`, `moveNode`, `removeNode`, `duplicateNode` | actions | Structural edits, each one checkpointed undo step. |
 | `setSpan`, `setFlex`, `setColumnWidth`, `setStackSlot` | actions | Layout edits, coalesced per node. |
-| `editField(args, options?: EditCoalesceOptions)`, `updateBlock(args, options?)` | actions | `EditCoalesceOptions = { coalesceKey?: string }` — consecutive edits sharing a key fold into one undo step. |
-| `setFieldKey` | action | Sanitizes, dedupes, and renames every reference to the old key. |
+| `editField(args, options?: EditCoalesceOptions)`, `updateBlock(args, options?)` | actions | `EditCoalesceOptions = { coalesceKey?: string }` — consecutive edits sharing a key fold into one undo step. **Folding is opt-in:** omit `coalesceKey` and the edit takes its own undo entry *and* ends the current run, so the next edit takes one too. Name what is being edited (the built-in property panel passes `field:<id>:<entryId>`) to fold a run of keystrokes in one input; leave it off for discrete actions — a select, a switch, an add/remove — that each deserve their own step. |
+| `setFieldKey` | action | Sanitizes, dedupes, and renames every reference to the old key. Deduplication spans **both** device presentations at the field's own value scope, and the twin bound to the same key at the same scope on the other device is renamed in the same undo step — see [Schema → Per-device presentations](./schema.md#per-device-presentations). |
 | `patchSchema` | `(patch: FormSchemaPatch) => void` | `FormSchemaPatch = Partial<Pick<FormSchema, "dataSources" \| "id" \| "linkage" \| "variables">> & { gap?: GapScale }` |
 | `renameVariable`, `removeVariable`, `removeDataSource` | actions | Rename/remove + reference cleanup. |
 | `undo`, `redo`, `canUndo`, `canRedo` | actions | — |
@@ -223,7 +223,7 @@ Built-in property-entry renderer components (each `FC<EntryComponentProps>`), re
 
 | Export | Props |
 | --- | --- |
-| `FieldShell` | `{ children, domId, errors?, helperText?, label, labelPosition?, required? }` — shared label/control/helper/error layout. |
+| `FieldShell` | `{ children, domId, errors?, helperText?, label, labelPosition?, required?, labelledBy? }` — shared label/control/helper/error layout. `labelledBy` (`"control"` default \| `"group"`) picks how the label associates with what it names: `"control"` emits `<label for={domId}>`, which needs `domId` on a labelable element; `"group"` is for a field that renders a *set* rather than one control (`radio`, `checkbox-group`, `code-editor`, `upload`) — `for` is inert against their wrapper, so the label carries an id and the body becomes a `role="group"` pointing back at it with `aria-required` / `aria-invalid`. Without it such a field has no accessible name at all: a screen reader announces the first option and nothing about the question. |
 | `Label` | `{ children, htmlFor?, position?: LabelPosition, required?, title? }` |
 
 ## Data sources
@@ -232,9 +232,12 @@ Built-in property-entry renderer components (each `FC<EntryComponentProps>`), re
 | --- | --- |
 | `DataSourceProvider` | `(props: { children, dataSources?: FormDataSource[], resolver?: DataSourceResolver, versions?: Record<string, number> }) => ReactElement` — installed by `FormEditor` and `FormRenderer`. |
 | `useFieldOptions` | `(source: FieldOptionSource \| undefined) => { options: FieldOption[]; loading: boolean; error: boolean }` |
-| `DataSourceResolver` (type) | `{ resolve: (request: RemoteDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }` |
+| `DataSourceResolver` (type) | `{ resolve: (request: ResolvedDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }` — a resolver only ever sees evaluated parameters |
 | `noopDataSourceResolver` | `DataSourceResolver` whose `resolve` always returns `[]` — the default. |
-| `RemoteDataSourceRequest` (type) | `{ resource: string; action: string; version?: string; params?: Record<string, unknown> }` |
+| `RemoteDataSourceRequest` (type) | `{ resource: string; action: string; version?: string; params?: Record<string, DynamicValue> }` — the schema shape, carrying bindings |
+| `ResolvedDataSourceRequest` (type) | `{ resource: string; action: string; version?: string; params?: Record<string, unknown> }` — the runtime shape, carrying data; see [Embedding → Bound parameters](./embedding.md#bound-parameters) |
+| `DynamicValue` (type) | `{ kind: "literal"; value: unknown } \| { kind: "expression"; source: string }` — one declaration shared with `LinkageActionValue` |
+| `isDynamicValue` | `(value: unknown) => value is DynamicValue` — narrowing guard for values that crossed a serialization boundary |
 | `RemoteOptionMapping` (type) | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` — all default to `"label"` / `"value"`. |
 
 ## Mobile
@@ -294,6 +297,7 @@ Every leaf field extends the shared base: `{ id: string; label?: string; labelPo
 | `DateField` | `"date"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean` (default `true`) |
 | `DatetimeField` | `"datetime"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean` (default `true`) |
 | `DateRangeField` | `"daterange"` | Keyed, Validatable | `helperText?, allowClear?: boolean` (default `true`) |
+| `UploadField` | `"upload"` | Keyed, Validatable | `helperText?, maxCount?: number` (default `1`)`, public?: boolean, accept?: string, dragger?: boolean` — `maxCount: 1` makes the value a single storage key, `> 1` an array of them; `public` lands objects under `pub/` instead of `priv/` and needs the backend's `vef.storage.allow_public_uploads` |
 | `ButtonField` | `"button"` | (non-keyed) | `action?: "submit"\|"reset"\|"button"` (default `"submit"`)`, buttonType?: "primary"\|"default"\|"dashed"\|"text"\|"link"` (default `"primary"`)`, danger?: boolean, size?, block?: boolean, ghost?: boolean, shape?: "default"\|"round", icon?: DynamicIconName` |
 | `DividerField` | `"divider"` | (non-keyed) | `title?: string, titlePlacement?: "left"\|"center"\|"right"` (default `"center"`)`, dashed?: boolean` |
 | `AlertBlockField` | `"alert-block"` | (non-keyed) | `message?: string, description?: string, alertType?: "info"\|"success"\|"warning"\|"error", showIcon?: boolean` (default `true`)`, closable?: boolean, banner?: boolean` |
@@ -406,7 +410,7 @@ Types: `FieldLinkage`, `FieldLinkageRule`, `FieldLinkageAction`, `FieldLinkageDe
 | --- | --- |
 | `Section` | `SectionChromeProps = { title?: ReactNode; variant?: "card" \| "collapse"; defaultCollapsed?: boolean; children: ReactNode }` |
 | `Tabs` | `TabsChromeProps = { items: ChromeTabItem[]; activeKey?: string; onChange?: (key: string) => void }` — `ChromeTabItem = { key: string; label: ReactNode; children: ReactNode }` |
-| `Subform` | `SubformChromeProps = { title?: ReactNode; children: ReactNode }` |
+| `Subform` | `SubformChromeProps = { title?: ReactNode; errors?: string[]; children: ReactNode }` — a custom chrome should render `errors`: a subform mounts **one** field for the whole array, so its own errors ("at least one row" on a required subform, a `table` variant's rolled-up row error) have no other slot and would otherwise block submission with nothing on screen. Both built-in chromes render it under the body through the same footer a leaf field uses. |
 | `SubformRow` | `SubformRowChromeProps = { removeControl?: ReactNode; children: ReactNode }` |
 | `AddButton` | `AddControlChromeProps = { label: ReactNode; onClick: () => void }` |
 | `RemoveButton` | `RemoveControlChromeProps = { onClick: () => void }` |

@@ -97,6 +97,8 @@ registry.register(ratingFieldDefinition);
 
 `section` / `tabs` / `subform` render through a `ContainerChromeSet` — six presentational shell components (`Section`, `Tabs`, `Subform`, `SubformRow`, `AddButton`, `RemoveButton`) resolved from the active registry. `flex` and `grid` are pure CSS layout and use no chrome. To restyle containers without touching field-level rendering, build a `ContainerChromeSet` and call `registry.setContainerChrome(chrome)` on your own registry before passing it to `FormEditor` / `FormRenderer`.
 
+One prop is easy to drop and must not be: **`SubformChromeProps.errors` (`string[]`) has to be rendered.** A subform mounts a single field for the whole array, so its own errors — "at least one row" on a required subform, and a `table` variant's rolled-up row error — have no other slot; a chrome that ignores them blocks submission with nothing on screen. Both built-in chromes render them beneath the body, through the same footer a leaf field uses.
+
 ## FormRenderer
 
 `FormRenderer` renders a `FormSchema` as a live, data-bound form — this is what an end user (not the form's designer) interacts with:
@@ -166,11 +168,65 @@ const resolver: DataSourceResolver = {
 
 Passing no resolver (the default, `noopDataSourceResolver`) makes every remote source resolve to an empty list rather than error. If you are building a **custom field component** that needs the same resolution logic (static / ref-to-static synchronous, remote / ref-to-remote fetched with loading/error state and result caching), call `useFieldOptions(field.dataSource)` inside a component wrapped by the same `DataSourceProvider` the editor and renderer already install — you rarely need to install `DataSourceProvider` yourself.
 
+### Bound parameters
+
+`RemoteDataSourceRequest.params` is `Record<string, DynamicValue>` — each parameter is either `{ kind: "literal"; value }` or `{ kind: "expression"; source }` bound to the live form. Binding one is what makes a cascading select work — "the wards of the department picked above":
+
+```ts
+{
+  resource: "sys/ward",
+  action: "find_options",
+  params: {
+    departmentId: { kind: "expression", source: "field.deptId" },
+    active: { kind: "literal", value: true }
+  }
+}
+```
+
+The runtime evaluates expressions **before** the request reaches the resolver — through `evaluateAssignExpression`, the same seam a linkage `assign` value uses, so one expression language covers both — and hands over a `ResolvedDataSourceRequest` (`{ resource, action, version?, params?: Record<string, unknown> }`) carrying plain data. A resolver never learns that an expression existed and stays transport-only. `DynamicValue` is one declaration shared with [linkage action values](./linkage.md#actions), so the designer offers the same "fixed value or bound value" control in both places.
+
+A parameter that evaluates to `undefined` is **omitted rather than sent** — an expression reading a key the form does not carry, or any expression at all when no evaluator resolves. Sending the key with an `undefined` value would put a hole on the wire the backend has to special-case; omitting it says the same thing in the vocabulary every transport already understands. An empty value the form really holds (`""`) is a value, not an absence, and is sent.
+
+Options are cached on the **resolved** request, so a bound value changing re-resolves the list while an unrelated keystroke does not — and a schema that binds no parameter anywhere never opens the form-values subscription in the first place.
+
+### Per-row parameter scopes
+
+A bound parameter is evaluated against **its own value scope**: the root form for a root-level field, and the row's own record for a field inside a subform row. Two rows that pick different departments therefore issue two different requests and get two different ward lists.
+
+Author a per-row cascade exactly as you would at the root — the expression names the row's sibling key, because `field` / `$form` bind the current scope's values inside a row (see [Linkage → Expression and script evaluation](./linkage.md#expression-and-script-evaluation)):
+
+```ts
+{
+  type: "subform",
+  key: "lines",
+  template: [
+    { type: "textfield", key: "deptId", label: "Department" },
+    {
+      type: "select",
+      key: "wardId",
+      label: "Ward",
+      dataSource: {
+        kind: "remote",
+        request: {
+          resource: "sys/ward",
+          action: "find_options",
+          params: { departmentId: { kind: "expression", source: "field.deptId" } }
+        }
+      }
+    }
+  ]
+}
+```
+
+:::warning[Behavior change]
+Option resolution previously evaluated bound parameters against the whole form regardless of the field's scope. Inside a subform row that meant the expression read a root key that does not exist, so the parameter dropped out — and because the option cache is keyed on the *resolved* request, every row issued the identical unfiltered request and collapsed onto one shared option list. Per-row cascading was structurally impossible rather than merely wrong once. The `api_call` effect lane already scoped itself this way; both lanes now answer identically.
+:::
+
 ## Building custom field renderers
 
 A field definition's `Component` receives `FieldComponentProps` (`field`, `value`, `onChange`, `errors`, `domId`, `disabled`, `required`, `labelPosition`) and is free to render anything, but a few exported primitives keep a custom field visually consistent with the built-ins:
 
-- **`FieldShell`** / **`Label`** implement the shared label-vs-control layout (top / left / right label placement, helper text, error band) that most built-in input-like fields use — a few (e.g. `switch`) compose `Label` and the field footer directly instead of going through `FieldShell`.
+- **`FieldShell`** / **`Label`** implement the shared label-vs-control layout (top / left / right label placement, helper text, error band) that most built-in input-like fields use — a few (e.g. `switch`) compose `Label` and the field footer directly instead of going through `FieldShell`. Pass `labelledBy="group"` when your field renders a *set* rather than one labelable control (an option group, a dropzone): `<label for>` is inert against a wrapper `div`, so without it the field has no accessible name at all — a screen reader announces the first option and never the question. The shell then labels the body as a `role="group"` and carries `aria-required` / `aria-invalid` onto it. The built-ins using it are `radio`, `checkbox-group`, `code-editor`, and `upload`.
 - **`useFieldRegistry()`** and **`useDeviceRegistries()`** (from the same `DeviceProvider` / `RegistryProvider` context) resolve the active device's registry — useful for a custom container or a field that needs to inspect sibling definitions. `FormEditor` installs both providers itself; `FormRenderer` installs only `DeviceProvider`, so a host mounting `FormRenderer` standalone must supply its own `RegistryProvider` ancestor (see [FormRenderer](#formrenderer) above).
 - **`useMobileScopeContainer()`** returns a `getContainer` callback for antd-mobile popup-based controls (`Picker`, `DatePicker`, …). It resolves to the surrounding phone-frame element when one is contained (the editor's own design-time preview), and falls back to `document.body` at real mobile runtime — wire it into a custom mobile field's popup the same way the built-in mobile fields do.
 
