@@ -13,9 +13,20 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
-## 未发布（v2.15.0 之后）
+## 未发布（v2.21.0 之后）
 
-v2.15.0 之后尚无已合并的变更。
+### 值得关注的修复
+
+- **form-editor** —— `uploadFieldDefinition` 现在从包入口导出，自定义注册表可以直接复用内置上传定义。`EditCoalesceOptions` 文档现在明确 undo 折叠是显式选择的：离散编辑省略 `coalesceKey` 即独占一步，传入稳定的细粒度 key 才会把一轮编辑折叠起来。
+
+## v2.21.0（2026-09-14）
+
+无破坏性变更。
+
+### 新特性
+
+- **core** —— `HttpClientOptions.protectedBodyEncoding` 启用强制的双向 `aes-gcm+base64` JSON body 传输。它使用浏览器 Web Crypto API，匹配 Go 框架的 nonce/ciphertext/tag wire 布局，优先于旧版 body 编码，并拒绝缺少标记或标记不匹配的 protected 响应。参见 [HTTP 与 API 客户端](./core/http-and-api.md#protected-body-transport)。
+- **starter** —— `starter.createApiClient()` 接受 `protectedBodyEncoding`，并转发给 core HTTP 客户端。
 
 ## v2.15.0 (2026-08-07)
 

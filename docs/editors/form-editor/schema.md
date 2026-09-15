@@ -91,7 +91,7 @@ paired with a `FieldDefinition` registered on a `FormFieldRegistry` (see [Embedd
 | `date` | `dateFieldDefinition` | yes | date-file | contributes a `YYYY-MM-DD` string |
 | `datetime` | `datetimeFieldDefinition` | yes | date-file | contributes a `YYYY-MM-DD HH:mm:ss` string |
 | `daterange` | `dateRangeFieldDefinition` | yes | date-file | contributes a `[start, end]` string pair |
-| `upload` | `uploadFieldDefinition` | yes | date-file | storage-backed file upload; contributes an object key (or a list of them) — see [below](#multi-value-and-upload-fields). Registered by `createDefaultRegistry()` / `registerDefaults()`, but the definition itself is not re-exported from the package index |
+| `upload` | `uploadFieldDefinition` | yes | date-file | storage-backed file upload; contributes an object key (or a list of them) — see [below](#multi-value-and-upload-fields). Registered by `createDefaultRegistry()` / `registerDefaults()` and exported from the package index |
 | `button` | `buttonDefinition` | no | action | non-keyed; `action` (html `type`, default `"submit"`) is orthogonal to `buttonType` (visual style) |
 | `divider` | `dividerDefinition` | no | presentation | section rule with an optional inline title |
 | `alert-block` | `alertBlockDefinition` | no | presentation | inline alert banner |

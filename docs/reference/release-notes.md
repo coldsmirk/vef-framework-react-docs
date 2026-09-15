@@ -13,9 +13,20 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
-## Unreleased (after v2.15.0)
+## Unreleased (after v2.21.0)
 
-No changes merged since v2.15.0 yet.
+### Fixes worth knowing
+
+- **form-editor** — `uploadFieldDefinition` is now exported from the package index, so custom registries can reuse the built-in upload definition directly. The `EditCoalesceOptions` documentation now states that undo folding is opt-in: omit `coalesceKey` for a discrete undo step, and pass a stable fine-grained key to fold a run of edits.
+
+## v2.21.0 (2026-09-14)
+
+No breaking changes.
+
+### Features
+
+- **core** — `HttpClientOptions.protectedBodyEncoding` enables mandatory bidirectional `aes-gcm+base64` JSON body transport. It uses the browser Web Crypto API, matches the Go framework's nonce/ciphertext/tag wire layout, takes precedence over legacy body encodings, and rejects unmarked or mismatched protected responses. See [HTTP and API Client](./core/http-and-api.md#protected-body-transport).
+- **starter** — `starter.createApiClient()` accepts `protectedBodyEncoding` and forwards it to the core HTTP client.
 
 ## v2.15.0 (2026-08-07)
 

@@ -12,6 +12,7 @@ description: HttpClient 与 ApiClient 的签名、选项、请求生命周期与
 - 自动注入访问令牌（`Authorization: Bearer …`）
 - 401 响应时协调式的令牌刷新（一次共享刷新，等待方可感知中止）
 - 响应信封上的业务错误码检测
+- 可选的 JSON 请求与响应 body AES-GCM 强制保护
 - 带鉴权的文件获取与浏览器下载
 - 路径参数替换
 
@@ -57,6 +58,7 @@ const httpOptions = {
 | `showWarningMessage` | `(message: string) => void` | — | 警告提示处理函数（缺省回退到 `console.warn`）；也用于业务码失败和 400/403 响应 |
 | `showErrorMessage` | `(message: string) => void` | — | 错误提示处理函数（缺省回退到 `console.error`） |
 | `defaultBodyEncoding` | `BodyEncoding` | — | 默认应用于每个请求体的传输编码。单个请求可以用 `"none"` 覆盖（即退出默认编码）；未设置时请求体原样发送 |
+| `protectedBodyEncoding` | `ProtectedBodyEncodingOptions` | — | 启用 JSON body 的强制双向 AES-GCM 保护。设置后优先于 `defaultBodyEncoding` 和单请求 `bodyEncoding`，且不能用 `"none"` 退出 |
 
 ### `BodyEncoding`
 
@@ -73,6 +75,41 @@ type BodyEncoding = "none" | "base64" | "gzip+base64";
 | `"gzip+base64"` | 先 gzip 再 base64 编码 UTF-8 JSON 请求体——线上体积更小，且仍为文本形态。运行时无法 gzip（`CompressionStream` 不可用）时回退为 `"base64"` |
 
 编码生效时，请求体会先 JSON 序列化（若非字符串），编码后以文本负载加上 `X-Body-Encoding` 请求头发送。base64 编码优先使用原生 `Uint8Array#toBase64`，不可用时回退到 `btoa`。`multipart`（`FormData`）、二进制（`Blob`）和数组缓冲区请求体永远不会被编码——仅 JSON 形态的负载会。
+
+### Protected body transport
+
+```ts
+type ProtectedBodyEncoding = "aes-gcm+base64";
+
+interface ProtectedBodyEncodingOptions {
+  encoding: ProtectedBodyEncoding;
+  key: string;
+}
+```
+
+当 Go 后端以 `aes-gcm+base64` 启用 `vef.api.body_encoding` 时，在前端配置
+`protectedBodyEncoding`。key 使用 standard base64，长度必须是 16、24 或 32
+字节。浏览器客户端使用原生 Web Crypto API，不支持 SM4。
+
+```ts
+const apiClient = createApiClient({
+  http: {
+    baseUrl: "/api",
+    protectedBodyEncoding: {
+      encoding: "aes-gcm+base64",
+      key: "standard-base64-key"
+    }
+  }
+});
+```
+
+wire body 是 standard base64，内容依次为新生成的 12 字节随机 nonce、AES-GCM
+ciphertext 以及 16 字节 tag。请求携带
+`X-Body-Encoding: aes-gcm+base64`；如果 JSON/信封响应缺少标记或标记不匹配，
+客户端会直接拒绝，而不是接受明文降级。multipart 与二进制 body 保持原生格式。
+
+这个传输层带认证且线上非明文，但不能替代 HTTPS：下发到浏览器代码的对称
+key 是可以被提取的。后端还必须通过 CORS expose `X-Body-Encoding`。
 
 ### `AuthTokens`
 

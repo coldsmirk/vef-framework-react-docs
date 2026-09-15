@@ -321,7 +321,7 @@ Every container extends the shared block base (`id`, `span?`, `flex?`, `columnWi
 
 One `FieldDefinition` constant per built-in type, registered by `createDefaultRegistry`/`createDefaultMobileRegistry` — see [Schema → Leaf fields](./schema.md#leaf-fields) and [Schema → Containers](./schema.md#containers) for the `type` / group mapping.
 
-`textfieldDefinition`, `codeEditorDefinition`, `numberFieldDefinition`, `switchFieldDefinition`, `selectFieldDefinition`, `radioFieldDefinition`, `checkboxGroupFieldDefinition`, `textareaFieldDefinition`, `dateFieldDefinition`, `datetimeFieldDefinition`, `dateRangeFieldDefinition`, `buttonDefinition`, `sectionDefinition`, `tabsDefinition`, `subformDefinition`, `flexDefinition`, `gridDefinition`, `dividerDefinition`, `alertBlockDefinition`, `paragraphDefinition`.
+`textfieldDefinition`, `codeEditorDefinition`, `numberFieldDefinition`, `switchFieldDefinition`, `selectFieldDefinition`, `radioFieldDefinition`, `checkboxGroupFieldDefinition`, `textareaFieldDefinition`, `dateFieldDefinition`, `datetimeFieldDefinition`, `dateRangeFieldDefinition`, `uploadFieldDefinition`, `buttonDefinition`, `sectionDefinition`, `tabsDefinition`, `subformDefinition`, `flexDefinition`, `gridDefinition`, `dividerDefinition`, `alertBlockDefinition`, `paragraphDefinition`.
 
 ## Schema engine functions
 

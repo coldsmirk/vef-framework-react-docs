@@ -321,7 +321,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 
 每个内置类型对应一个 `FieldDefinition` 常量，由 `createDefaultRegistry`/`createDefaultMobileRegistry` 负责注册——`type` / 分组的对应关系见 [Schema → 叶子字段](./schema.md#叶子字段) 和 [Schema → 容器](./schema.md#容器)。
 
-`textfieldDefinition`、`codeEditorDefinition`、`numberFieldDefinition`、`switchFieldDefinition`、`selectFieldDefinition`、`radioFieldDefinition`、`checkboxGroupFieldDefinition`、`textareaFieldDefinition`、`dateFieldDefinition`、`datetimeFieldDefinition`、`dateRangeFieldDefinition`、`buttonDefinition`、`sectionDefinition`、`tabsDefinition`、`subformDefinition`、`flexDefinition`、`gridDefinition`、`dividerDefinition`、`alertBlockDefinition`、`paragraphDefinition`。
+`textfieldDefinition`、`codeEditorDefinition`、`numberFieldDefinition`、`switchFieldDefinition`、`selectFieldDefinition`、`radioFieldDefinition`、`checkboxGroupFieldDefinition`、`textareaFieldDefinition`、`dateFieldDefinition`、`datetimeFieldDefinition`、`dateRangeFieldDefinition`、`uploadFieldDefinition`、`buttonDefinition`、`sectionDefinition`、`tabsDefinition`、`subformDefinition`、`flexDefinition`、`gridDefinition`、`dividerDefinition`、`alertBlockDefinition`、`paragraphDefinition`。
 
 ## Schema 引擎函数
 

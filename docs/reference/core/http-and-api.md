@@ -12,6 +12,7 @@ The low-level HTTP client built on Axios. It handles:
 - automatic access-token injection (`Authorization: Bearer …`)
 - coordinated token refresh on 401 responses (one shared refresh, abort-aware waiters)
 - business error code detection on the response envelope
+- optional mandatory AES-GCM protection for JSON request and response bodies
 - authenticated file fetching and browser downloads
 - path parameter substitution
 
@@ -57,6 +58,7 @@ const httpOptions = {
 | `showWarningMessage` | `(message: string) => void` | — | Warning message handler (falls back to `console.warn`); also used for business-code failures and 400/403 responses |
 | `showErrorMessage` | `(message: string) => void` | — | Error message handler (falls back to `console.error`) |
 | `defaultBodyEncoding` | `BodyEncoding` | — | Transport encoding applied to every request body by default. Individual requests override it (including `"none"` to opt out); absent means the body is sent verbatim |
+| `protectedBodyEncoding` | `ProtectedBodyEncodingOptions` | — | Enables mandatory bidirectional AES-GCM protection for JSON bodies. When set, it takes precedence over `defaultBodyEncoding` and per-request `bodyEncoding`, and `"none"` cannot opt out |
 
 ### `BodyEncoding`
 
@@ -73,6 +75,44 @@ How a request body is transport-encoded so a code-shaped payload (an integration
 | `"gzip+base64"` | Base64 of a gzip stream of the UTF-8 JSON body — smaller on the wire and still text-shaped. Falls back to `"base64"` when the runtime cannot gzip (`CompressionStream` unavailable) |
 
 When the encoding is applied, the body is JSON-stringified (if not already a string), encoded, and sent as a text payload with the `X-Body-Encoding` header set to the applied encoding. The base64 encoding uses the native `Uint8Array#toBase64` where available, falling back to `btoa` for older runtimes. Multipart (`FormData`), binary (`Blob`), and array-buffer bodies are never encoded — only JSON-shaped payloads are.
+
+### Protected body transport
+
+```ts
+type ProtectedBodyEncoding = "aes-gcm+base64";
+
+interface ProtectedBodyEncodingOptions {
+  encoding: ProtectedBodyEncoding;
+  key: string;
+}
+```
+
+Configure `protectedBodyEncoding` when the Go backend enables
+`vef.api.body_encoding` with `aes-gcm+base64`. The key is standard base64 and
+must contain 16, 24, or 32 bytes. The browser client uses the native Web Crypto
+API; SM4 is not supported by this client.
+
+```ts
+const apiClient = createApiClient({
+  http: {
+    baseUrl: "/api",
+    protectedBodyEncoding: {
+      encoding: "aes-gcm+base64",
+      key: "standard-base64-key"
+    }
+  }
+});
+```
+
+The wire body is standard base64 containing a fresh random 12-byte nonce, the
+AES-GCM ciphertext, and its 16-byte tag. Requests carry
+`X-Body-Encoding: aes-gcm+base64`; the client rejects an unmarked or mismatched
+JSON/envelope response rather than accepting a plaintext downgrade. Multipart
+and binary bodies keep their native formats.
+
+This transport is authenticated and non-plaintext, but it does not replace
+HTTPS: a symmetric key shipped to browser code is extractable. The backend must
+also expose `X-Body-Encoding` through CORS.
 
 ### `AuthTokens`
 

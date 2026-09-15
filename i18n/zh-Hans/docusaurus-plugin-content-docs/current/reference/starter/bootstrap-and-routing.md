@@ -25,7 +25,7 @@ function createApp(options?: { strictMode?: boolean; useRouterContext?: UseRoute
 
 ```ts
 function createApiClient(options: {
-  http: Pick<HttpClientOptions, "baseUrl" | "timeout" | "okCode" | "tokenExpiredCode" | "refreshToken">;
+  http: Pick<HttpClientOptions, "baseUrl" | "timeout" | "okCode" | "tokenExpiredCode" | "refreshToken" | "protectedBodyEncoding">;
   query?: Pick<QueryClientOptions, "gcTime" | "staleTime">;
 }): ApiClient;
 ```

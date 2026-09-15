@@ -84,16 +84,16 @@ pnpm add @vef-framework-react/cron
 {
   "dependencies": {
     "@tanstack/react-router": "^1.170.17",
-    "@vef-framework-react/components": "^2.15.0",
-    "@vef-framework-react/core": "^2.15.0",
-    "@vef-framework-react/hooks": "^2.15.0",
-    "@vef-framework-react/shared": "^2.15.0",
-    "@vef-framework-react/starter": "^2.15.0",
+    "@vef-framework-react/components": "^2.21.0",
+    "@vef-framework-react/core": "^2.21.0",
+    "@vef-framework-react/hooks": "^2.21.0",
+    "@vef-framework-react/shared": "^2.21.0",
+    "@vef-framework-react/starter": "^2.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@vef-framework-react/dev": "^2.15.0",
+    "@vef-framework-react/dev": "^2.21.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",
@@ -104,7 +104,7 @@ pnpm add @vef-framework-react/cron
 
 ## Peer 依赖要求
 
-以下内容已对照 v2.15.0 各包的 manifest 核实:
+以下内容已对照 v2.21.0 各包的 manifest 核实:
 
 - `starter` 声明的 peer 依赖为 `@tanstack/react-router >=1`、`react` / `react-dom >=19`，以及同级的 `components` / `core` / `hooks` / `shared` 包 `>=2`——上面的最小安装可以全部满足。
 - `dev` 声明的 peer 依赖为 `vite ^8.0.0`、`eslint ^10.0.0`、`stylelint ^17.0.0`、`@commitlint/cli ^21.0.0`、`husky ^9.1.7` 和 `lint-staged ^17.0.0`，这也是它们出现在 dev 依赖安装命令中的原因。

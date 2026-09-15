@@ -91,7 +91,7 @@ declare module "@vef-framework-react/form-editor" {
 | `date` | `dateFieldDefinition` | 是 | date-file | 贡献一个 `YYYY-MM-DD` 字符串 |
 | `datetime` | `datetimeFieldDefinition` | 是 | date-file | 贡献一个 `YYYY-MM-DD HH:mm:ss` 字符串 |
 | `daterange` | `dateRangeFieldDefinition` | 是 | date-file | 贡献一个 `[start, end]` 字符串二元组 |
-| `upload` | `uploadFieldDefinition` | 是 | date-file | 由存储服务支撑的文件上传；贡献一个对象 key（或一组 key）——见[下文](#多值字段与上传字段)。它由 `createDefaultRegistry()` / `registerDefaults()` 注册，但定义本身并未从包的入口再导出 |
+| `upload` | `uploadFieldDefinition` | 是 | date-file | 由存储服务支撑的文件上传；贡献一个对象 key（或一组 key）——见[下文](#多值字段与上传字段)。它由 `createDefaultRegistry()` / `registerDefaults()` 注册，并从包入口导出 |
 | `button` | `buttonDefinition` | 否 | action | 非键控；`action`（html 的 `type`，默认 `"submit"`）与 `buttonType`（视觉样式）相互独立 |
 | `divider` | `dividerDefinition` | 否 | presentation | 带可选内联标题的分节线 |
 | `alert-block` | `alertBlockDefinition` | 否 | presentation | 内联提示横幅 |
