@@ -90,17 +90,19 @@ tableRef.current?.refetch();
 
 ## API
 
+`rowKey`、`showSequenceColumn` 和 `striped` 可以通过 [`ConfigProvider.components.ProTable`](./config-provider.md#应用组件默认值) 设置应用级默认值。显式传给该表格的 prop 仍然优先。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `columns` | `TableColumn<TRow>[]` | — | 列定义 |
-| `rowKey` | `DeepKeys<TRow> \| (row) => Key` | — | 行 key 提取器 |
+| `rowKey` | `DeepKeys<TRow> \| (row) => Key` | —，可由 `ConfigProvider.components.ProTable` 覆盖 | 行 key 提取器 |
 | `queryFn` | `QueryFunction<PaginationResult<TRow>, ...>` | — | 数据获取函数 |
 | `queryParams` | `TParams` | — | 额外的查询参数 |
 | `queryEnabled` | `(params?) => boolean` | — | 是否启用查询 |
 | `isPaginated` | `boolean` | `true` | 启用/禁用分页 |
-| `showSequenceColumn` | `boolean` | `true` | 显示行号列 |
+| `showSequenceColumn` | `boolean` | `true`，可由 `ConfigProvider.components.ProTable` 覆盖 | 显示行号列 |
 | `virtual` | `boolean` | `false` | 启用虚拟滚动 |
-| `striped` | `boolean` | `false` | 渲染斑马纹行 |
+| `striped` | `boolean` | `false`，可由 `ConfigProvider.components.ProTable` 覆盖 | 渲染斑马纹行 |
 | `columnSettings` | `ColumnSettingsConfig \| false` | `{}` | 列显隐设置 |
 | `operationColumn` | `OperationColumnConfig<TRow>` | — | 每行的操作列 |
 | `rowSelection` | `RowSelectionConfig<TRow> \| true` | — | 行选择配置 |

@@ -162,6 +162,8 @@ formActionsRenderers={{
 
 ## API
 
+Crud 内部使用 `ProTable` 渲染表格，并使用 `FormModal` 渲染场景表单弹窗。通过 [`ConfigProvider.components`](./config-provider.md#应用组件默认值) 配置的白名单应用级默认值，同样会在这里生效。
+
 ### 关键属性（`Crud` 与 `CrudPage`）
 
 `Crud`（以及封装它的 `CrudPage`）在 `isPaginated` 上接受一个可辨识联合类型：当值为 `true` 或省略时，`queryFn` 必须返回 `PaginationResult<TRow>`；当值为 `false` 时，则必须返回 `TRow[]`。

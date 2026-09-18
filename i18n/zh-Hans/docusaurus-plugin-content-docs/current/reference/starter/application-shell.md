@@ -5,7 +5,7 @@ description: 内部的根应用、布局、登录及状态页组件，以及用�
 
 # 应用壳层
 
-应用壳层——根应用、布局、登录及状态页——是 `@vef-framework-react/starter` **内部**的实现。`App`、`BaseLayout`、`Layout`、`Login`、`AccessDenied`、`Error`、`NotFound`、`RouterProvider`、`ThemeConfigProvider`、`NProgress` 均未从该包导出。它们由 `createApp()`、`createRouter()` 以及[启动与路由](./bootstrap-and-routing.md)中记录的路由选项辅助函数组装而成；本页记录的是这些函数所接受的选项形状。
+应用壳层——根应用、布局、登录及状态页——是 `@vef-framework-react/starter` **内部**的实现。`App`、`BaseLayout`、`Layout`、`Login`、`AccessDenied`、`Error`、`NotFound`、`RouterProvider`、`NProgress` 均未从该包导出。它们由 `createApp()`、`createRouter()` 以及[启动与路由](./bootstrap-and-routing.md)中记录的路由选项辅助函数组装而成；本页记录的是这些函数所接受的选项形状。`ThemeConfigProvider` 是壳层级唯一的例外：它面向自定义应用壳层导出。
 
 页面级容器（`Page`、`FlexCard`）、表单弹窗（`FormModal`、`FormDrawer`）、表格抽象（`ProTable`）以及 CRUD 体系（`CrudPage`、`createCrudKit` 等）位于 `@vef-framework-react/components` 中——参见 [Components / CRUD](../../components/crud.md)。
 
@@ -23,6 +23,26 @@ description: 内部的根应用、布局、登录及状态页组件，以及用�
 | `appContext` | `AppContext` | 提供给 `AppContextProvider`（权限、码集、文件基础 URL） |
 | `router` | `Router` | 来自 `createRouter()` 的实例，提供给内部的路由 provider |
 | `appVersionNotification` | `AppVersionNotificationOptions` | 可选；用于接入 `setupAppVersionNotification` |
+| `components` | `ComponentDefaults` | 可选；白名单组件 props 的应用级默认值，转发给 components 包的 `ConfigProvider` |
+| `defaultTheme` | `DefaultTheme` | 可选；应用的初始配色方案和语义化颜色 |
+
+`DefaultTheme` 接受 `colorScheme?: ColorScheme` 和 `colors?: Partial<ThemeColors>`。框架默认从 `system` 和内置语义化颜色开始；应用默认值会替换这些起始值。用户在主题面板中的选择优先，且只有该选择会被持久化——修改应用默认值可以触达尚未自行选择的用户。
+
+## 主题 Provider
+
+`ThemeConfigProvider` 面向不使用 `createApp().render()`、而是自行组装壳层的应用导出。
+
+| Prop | 类型 | 作用 |
+| --- | --- | --- |
+| `defaultTheme` | `DefaultTheme` | 应用起始主题 |
+| `components` | `ComponentDefaults` | 应用级组件默认值 |
+| `children` | `ReactNode` | 应用内容 |
+
+该 provider 还导出：
+
+- `useEffectiveColorScheme()` —— 用户选择的配色方案，未选择时返回应用默认值。
+- `useEffectiveThemeColors()` —— 将用户选择的语义化颜色合并到应用默认值之上。
+- `DefaultTheme` 和 `ThemeConfigProviderProps` 类型。
 
 ## 布局
 

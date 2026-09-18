@@ -173,7 +173,7 @@ export default defineCommitlintConfig();
 代码生成模块根据后端的码集目录生成项目的 `CodeSetKey` 联合类型，使每一处 `useCodeSetQuery` 调用点都能对照真实键名进行检查。码集的运行时部分见[码集](../../guide/code-sets.md)。
 
 :::note 由 "dictionary" 更名而来
-在 v2.12.0 之后的这次更名之前，本模块使用 "dictionary"（字典）词汇：CLI 命令是 `vef gen:dictionary-keys`，配置块是 `dictionaryKeys`（其拉取函数为 `fetchDictionaryKeys`），默认输出是 `src/types/dictionary.gen.ts`，导出名为 `generateDictionaryKeys`、`renderDictionaryKeysFile`、`DICTIONARY_AUGMENT_TARGET`、`DictionaryKeyEntry` 和 `DictionaryKeysConfig`。完整迁移说明见[版本说明](../release-notes.md#未发布v2210-之后)。
+在 v2.12.0 之后的这次更名之前，本模块使用 "dictionary"（字典）词汇：CLI 命令是 `vef gen:dictionary-keys`，配置块是 `dictionaryKeys`（其拉取函数为 `fetchDictionaryKeys`），默认输出是 `src/types/dictionary.gen.ts`，导出名为 `generateDictionaryKeys`、`renderDictionaryKeysFile`、`DICTIONARY_AUGMENT_TARGET`、`DictionaryKeyEntry` 和 `DictionaryKeysConfig`。完整迁移说明见[版本说明](../release-notes.md#破坏性变更dictionary-全面更名为-code-set)。
 :::
 
 ### `defineCodeGenerationConfig`

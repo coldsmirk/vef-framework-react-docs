@@ -52,12 +52,14 @@ export default function CreateUserModal({ open, onClose }) {
 
 ## API
 
+`draggable` 的默认值可以通过 [`ConfigProvider.components.FormModal`](./config-provider.md#应用组件默认值) 进行应用级覆盖；显式传给该组件的 prop 仍然优先。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `open` | `boolean` | `false` | 弹窗是否可见 |
 | `title` | `ReactNode` | — | 弹窗标题 |
 | `width` | `string \| number` | — | 弹窗宽度 |
-| `draggable` | `boolean` | `true` | 弹窗是否可拖动 |
+| `draggable` | `boolean` | `true`，可由 `ConfigProvider.components.FormModal` 覆盖 | 弹窗是否可拖动 |
 | `defaultValues` | `TValues` | — | 表单初始值 |
 | `disabled` | `boolean` | `false` | 禁用表单 |
 | `formComponent` | `ElementType` | `"form"` | 内部表单容器使用的元素类型 |

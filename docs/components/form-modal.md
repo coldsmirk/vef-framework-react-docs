@@ -52,12 +52,14 @@ export default function CreateUserModal({ open, onClose }) {
 
 ## API
 
+The `draggable` default can be overridden application-wide with [`ConfigProvider.components.FormModal`](./config-provider.md#application-component-defaults); a prop passed to this component still wins.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `open` | `boolean` | `false` | Whether the modal is visible |
 | `title` | `ReactNode` | — | Modal title |
 | `width` | `string \| number` | — | Modal width |
-| `draggable` | `boolean` | `true` | Whether the modal can be dragged |
+| `draggable` | `boolean` | `true`, overridable by `ConfigProvider.components.FormModal` | Whether the modal can be dragged |
 | `defaultValues` | `TValues` | — | Initial form values |
 | `disabled` | `boolean` | `false` | Disable the form |
 | `formComponent` | `ElementType` | `"form"` | Element type for the inner form wrapper |

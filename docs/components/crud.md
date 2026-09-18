@@ -162,6 +162,8 @@ formActionsRenderers={{
 
 ## API
 
+Crud renders its table with `ProTable` and its scene form modal with `FormModal`. Their whitelisted application defaults — configured through [`ConfigProvider.components`](./config-provider.md#application-component-defaults) — apply here as well.
+
 ### Key Props (`Crud` and `CrudPage`)
 
 `Crud` (and `CrudPage`, which wraps it) accepts a discriminated union on `isPaginated`: when `true` or omitted, `queryFn` must return a `PaginationResult<TRow>`; when `false`, it must return `TRow[]`.

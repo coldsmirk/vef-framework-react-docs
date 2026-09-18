@@ -9,7 +9,7 @@ description: The app/tab/theme Zustand stores and the domain, user, and router t
 
 - `useAppStore` — authentication state, current user info, menu maps, and permission tokens; persisted (`isAuthenticated` / `custom` / `authTokens` survive reload).
 - `useTabStore` — the open-tabs list backing the multi-tab layout; persisted.
-- `useThemeStore` — color scheme, semantic theme colors, menu layout mode, and layout toggles; persisted.
+- `useThemeStore` — the user's picked color scheme and semantic colors, menu layout mode, and layout toggles; persisted. Unset color and color-scheme values follow the application's `defaultTheme`.
 
 All three are created with `createPersistedStore` (see [Store and Atom](../core/store-and-atom.md)) — their state types do not need a `name` field; the storage key comes from the persistence options instead.
 
@@ -20,6 +20,7 @@ Related types:
 - `TabState`
 - `ColorScheme` — `"system" | "light" | "dark"`
 - `ThemeColors` — `Record<SemanticColor, string>`
+- `DefaultTheme` — `{ colorScheme?: ColorScheme; colors?: Partial<ThemeColors> }`
 - `MenuLayoutMode` — `"vertical" | "horizontal" | "mixed"`
 - `ThemeState`
 

@@ -90,17 +90,19 @@ tableRef.current?.refetch();
 
 ## API
 
+`rowKey`, `showSequenceColumn`, and `striped` can be defaulted application-wide through [`ConfigProvider.components.ProTable`](./config-provider.md#application-component-defaults). A prop passed to this table still wins.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `columns` | `TableColumn<TRow>[]` | — | Column definitions |
-| `rowKey` | `DeepKeys<TRow> \| (row) => Key` | — | Row key extractor |
+| `rowKey` | `DeepKeys<TRow> \| (row) => Key` | —, overridable by `ConfigProvider.components.ProTable` | Row key extractor |
 | `queryFn` | `QueryFunction<PaginationResult<TRow>, ...>` | — | Data fetch function |
 | `queryParams` | `TParams` | — | Additional query parameters |
 | `queryEnabled` | `(params?) => boolean` | — | Whether to enable the query |
 | `isPaginated` | `boolean` | `true` | Enable/disable pagination |
-| `showSequenceColumn` | `boolean` | `true` | Show row number column |
+| `showSequenceColumn` | `boolean` | `true`, overridable by `ConfigProvider.components.ProTable` | Show row number column |
 | `virtual` | `boolean` | `false` | Enable virtual scrolling |
-| `striped` | `boolean` | `false` | Render zebra-striped rows |
+| `striped` | `boolean` | `false`, overridable by `ConfigProvider.components.ProTable` | Render zebra-striped rows |
 | `columnSettings` | `ColumnSettingsConfig \| false` | `{}` | Column visibility settings |
 | `operationColumn` | `OperationColumnConfig<TRow>` | — | Per-row action column |
 | `rowSelection` | `RowSelectionConfig<TRow> \| true` | — | Row selection config |

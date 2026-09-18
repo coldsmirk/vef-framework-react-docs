@@ -9,7 +9,7 @@ description: createApp、createApiClient、createRouter 以及路由选项辅助
 
 ```ts
 function createApp(options?: { strictMode?: boolean; useRouterContext?: UseRouterContext }): {
-  render: (props: { apiClient: ApiClient; appContext: AppContext; router: Router; appVersionNotification?: AppVersionNotificationOptions }) => void;
+  render: (props: { apiClient: ApiClient; appContext: AppContext; router: Router; appVersionNotification?: AppVersionNotificationOptions; components?: ComponentDefaults; defaultTheme?: DefaultTheme }) => void;
   unmount: () => void;
 };
 ```

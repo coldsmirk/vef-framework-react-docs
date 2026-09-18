@@ -9,7 +9,7 @@ description: app/tab/theme 三个 Zustand store，以及 @vef-framework-react/st
 
 - `useAppStore` —— 认证状态、当前用户信息、菜单映射与权限令牌；持久化（`isAuthenticated` / `custom` / `authTokens` 在刷新后保留）。
 - `useTabStore` —— 支撑多标签页布局的已打开标签列表；持久化。
-- `useThemeStore` —— 配色方案、语义主题颜色、菜单布局模式与布局开关；持久化。
+- `useThemeStore` —— 用户选择的配色方案和语义化颜色、菜单布局模式与布局开关；持久化。未设置的颜色与配色方案值跟随应用的 `defaultTheme`。
 
 三者均通过 `createPersistedStore` 创建（参见 [Store 与 Atom](../core/store-and-atom.md)）——它们的状态类型不需要 `name` 字段，存储键改由持久化选项提供。
 
@@ -20,6 +20,7 @@ description: app/tab/theme 三个 Zustand store，以及 @vef-framework-react/st
 - `TabState`
 - `ColorScheme` —— `"system" | "light" | "dark"`
 - `ThemeColors` —— `Record<SemanticColor, string>`
+- `DefaultTheme` —— `{ colorScheme?: ColorScheme; colors?: Partial<ThemeColors> }`
 - `MenuLayoutMode` —— `"vertical" | "horizontal" | "mixed"`
 - `ThemeState`
 

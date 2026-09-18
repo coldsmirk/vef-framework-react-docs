@@ -118,7 +118,7 @@ All field components are accessed via `field.*` inside a `form.AppField` render 
 
 ## Form Layout
 
-`form.Form` establishes the layout context for every field item inside it: `layout` (`'horizontal' | 'vertical'`), `labelAlign`, and `labelWidth`. The defaults are the horizontal, right-aligned layout with a `100`px label column. Individual field items can override any of these via their own `FormItemProps`:
+`form.Form` establishes the layout context for every field item inside it: `layout` (`'horizontal' | 'vertical'`), `labelAlign`, and `labelWidth`. The defaults are the horizontal, right-aligned layout with a `100`px label column. Application-wide `labelAlign` and `labelWidth` defaults can be set through [`ConfigProvider`](./config-provider.md); a prop passed to `form.Form` overrides the application default, and individual field items can override both via their own `FormItemProps`:
 
 ```tsx
 // Vertical layout for the whole form
@@ -221,8 +221,8 @@ A polymorphic layout/context provider — it renders a native `<form>` by defaul
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `layout` | `'horizontal' \| 'vertical'` | `'horizontal'` | Form item layout |
-| `labelAlign` | `'left' \| 'right'` | `'right'` | Label text alignment |
-| `labelWidth` | `number` | `100` | Label column width in pixels |
+| `labelAlign` | `'left' \| 'right'` | `'right'`, overridable by `ConfigProvider.components.Form` | Label text alignment |
+| `labelWidth` | `number` | `100`, overridable by `ConfigProvider.components.Form` | Label column width in pixels |
 | `disabled` | `boolean` | `false` | Disable every field inside (provided through context) |
 | `component` | `ElementType` | `"form"` | Element type to render; non-`form` elements skip the native submit/reset wiring |
 | *(rest)* | `ComponentPropsWithoutRef<TComponent>` | — | Any prop of the rendered element (`className`, `style`, …) |

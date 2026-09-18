@@ -14,6 +14,7 @@ VEF's global configuration provider. Wraps Ant Design's `ConfigProvider` with VE
 - Set up the global theme at the application root.
 - Enable dark mode.
 - Override semantic colors.
+- Set application-wide defaults for whitelisted component props.
 - Inject global CSS variables.
 
 ## Basic Usage
@@ -93,6 +94,45 @@ export default function MyComponent() {
 }
 ```
 
+## Application Component Defaults
+
+`components` sets application-wide defaults for a whitelisted set of component props. An explicitly passed prop always wins over the application default, and the component's own default applies only when neither is set.
+
+```tsx
+import { ConfigProvider } from '@vef-framework-react/components';
+
+export default function App() {
+  return (
+    <ConfigProvider
+      components={{
+        Form: { labelAlign: 'left', labelWidth: 120 },
+        Pagination: { showSizeChanger: false },
+        ProTable: { striped: true },
+      }}
+    >
+      <YourApp />
+    </ConfigProvider>
+  );
+}
+```
+
+Only these entries are honored; props outside the whitelist are ignored at runtime and rejected by TypeScript:
+
+| Component | Defaultable props |
+| --- | --- |
+| `Form` | `labelAlign`, `labelWidth` |
+| `FormModal` | `draggable` |
+| `Image` | `fallback` |
+| `Input` | `allowClear`, `autoComplete` |
+| `Message` | `duration`, `maxCount` |
+| `Notification` | `duration`, `maxCount` |
+| `Pagination` | `showSizeChanger` |
+| `ProTable` | `rowKey`, `showSequenceColumn`, `striped` |
+| `Select` | `showSearch` |
+| `TextArea` | `allowClear`, `autoComplete` |
+
+For the starter, pass `components` to `createApp().render()` instead of nesting another `ConfigProvider`.
+
 ## API
 
 ### ConfigProviderProps
@@ -100,6 +140,7 @@ export default function MyComponent() {
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `theme` | `ThemeConfig` | — | Theme configuration |
+| `components` | `ComponentDefaults` | — | Application-wide default props for whitelisted framework components |
 | `children` | `ReactNode` | — | Application content |
 
 ### ThemeConfig

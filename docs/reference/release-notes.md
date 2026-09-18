@@ -13,7 +13,22 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
-## Unreleased (after v2.21.0)
+## Unreleased (after v2.22.0)
+
+No unreleased changes.
+
+## v2.22.0 (2026-09-15)
+
+One breaking change: the starter theme store no longer materializes the framework defaults for color scheme and semantic colors; those fields now store only explicit user choices.
+
+### Breaking changes
+
+- **starter** — `ThemeState.colorScheme` is now optional and `ThemeState.colors` is `Partial<ThemeColors>`. The store records only the color scheme and semantic colors the user picked in the theme panel; unset values follow the application's `defaultTheme`. Applications that read those fields as always-present must handle `undefined` / missing entries. Users upgrading from an older release may already have the old framework defaults persisted as explicit choices, so changing `defaultTheme` will not override those saved values; users can reset their theme picks in the theme panel.
+
+### Features
+
+- **components** — `ConfigProvider` accepts `components` (`ComponentDefaults`) for application-wide default props. Defaults are whitelisted per component: `Form` (`labelAlign`, `labelWidth`), `FormModal` (`draggable`), `Image` (`fallback`), `Input` / `TextArea` (`allowClear`, `autoComplete`), `Message` / `Notification` (`duration`, `maxCount`), `Pagination` (`showSizeChanger`), `ProTable` (`rowKey`, `showSequenceColumn`, `striped`), and `Select` (`showSearch`). An explicitly passed prop still wins over the application default.
+- **starter** — `createApp().render()` accepts `defaultTheme` for the initial color scheme and semantic colors, and `components` for the component defaults above. The user's theme-panel picks take precedence and only those picks are persisted. `ThemeConfigProvider`, `useEffectiveColorScheme()`, `useEffectiveThemeColors()`, and the `DefaultTheme` / `ThemeConfigProviderProps` types are now exported for custom application shells.
 
 ### Fixes worth knowing
 

@@ -5,7 +5,7 @@ description: The internal root app, layout, login, and status-page components, a
 
 # Application Shell
 
-The application shell — the root app, layout, login, and status pages — is **internal** to `@vef-framework-react/starter`. None of `App`, `BaseLayout`, `Layout`, `Login`, `AccessDenied`, `Error`, `NotFound`, `RouterProvider`, `ThemeConfigProvider`, or `NProgress` is exported from the package. They are assembled by `createApp()`, `createRouter()`, and the route-option helpers documented in [Bootstrap and Routing](./bootstrap-and-routing.md); this page documents the option shapes those functions accept.
+The application shell — the root app, layout, login, and status pages — is **internal** to `@vef-framework-react/starter`. None of `App`, `BaseLayout`, `Layout`, `Login`, `AccessDenied`, `Error`, `NotFound`, `RouterProvider`, or `NProgress` is exported from the package. They are assembled by `createApp()`, `createRouter()`, and the route-option helpers documented in [Bootstrap and Routing](./bootstrap-and-routing.md); this page documents the option shapes those functions accept. `ThemeConfigProvider` is the one shell-level exception: it is exported for custom application shells.
 
 Page-level containers (`Page`, `FlexCard`), form dialogs (`FormModal`, `FormDrawer`), table abstractions (`ProTable`), and the CRUD stack (`CrudPage`, `createCrudKit`, etc.) live in `@vef-framework-react/components` — see [Components / CRUD](../../components/crud.md).
 
@@ -23,6 +23,26 @@ Page-level containers (`Page`, `FlexCard`), form dialogs (`FormModal`, `FormDraw
 | `appContext` | `AppContext` | provided to `AppContextProvider` (permissions, code sets, file base URL) |
 | `router` | `Router` | the instance from `createRouter()`, provided to the internal router provider |
 | `appVersionNotification` | `AppVersionNotificationOptions` | optional; wires `setupAppVersionNotification` |
+| `components` | `ComponentDefaults` | optional; application-wide defaults for whitelisted component props, forwarded to the components package's `ConfigProvider` |
+| `defaultTheme` | `DefaultTheme` | optional; the application's initial color scheme and semantic colors |
+
+`DefaultTheme` accepts `colorScheme?: ColorScheme` and `colors?: Partial<ThemeColors>`. The framework starts from `system` and its built-in semantic colors; the application default replaces those starting values. A choice the user makes in the theme panel wins, and only that choice is persisted — changing the application default reaches users who have not made their own pick.
+
+## Theme provider
+
+`ThemeConfigProvider` is exported for applications that assemble a custom shell instead of using `createApp().render()`.
+
+| Prop | Type | Purpose |
+| --- | --- | --- |
+| `defaultTheme` | `DefaultTheme` | application starting theme |
+| `components` | `ComponentDefaults` | application-wide component defaults |
+| `children` | `ReactNode` | application content |
+
+The provider also exports:
+
+- `useEffectiveColorScheme()` — the user's picked color scheme, otherwise the application default.
+- `useEffectiveThemeColors()` — the user's picked semantic colors merged over the application defaults.
+- `DefaultTheme` and `ThemeConfigProviderProps` types.
 
 ## Layout
 

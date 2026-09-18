@@ -118,7 +118,7 @@ export default function LoginPage() {
 
 ## 表单布局
 
-`form.Form` 为其内部的每个字段项建立布局上下文：`layout`（`'horizontal' | 'vertical'`）、`labelAlign` 与 `labelWidth`。默认是水平布局、标签右对齐、`100`px 标签列。单个字段项可以通过自身的 `FormItemProps` 覆盖其中任意一项：
+`form.Form` 为其内部的每个字段项建立布局上下文：`layout`（`'horizontal' | 'vertical'`）、`labelAlign` 与 `labelWidth`。默认是水平布局、标签右对齐、`100`px 标签列。应用可以通过 [`ConfigProvider`](./config-provider.md) 设置 `labelAlign` 和 `labelWidth` 的应用级默认值；传给 `form.Form` 的 prop 覆盖应用默认值，单个字段项再通过自身的 `FormItemProps` 覆盖两者：
 
 ```tsx
 // Vertical layout for the whole form
@@ -221,8 +221,8 @@ const form = useForm(loginFormOptions);
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `layout` | `'horizontal' \| 'vertical'` | `'horizontal'` | 表单项布局 |
-| `labelAlign` | `'left' \| 'right'` | `'right'` | 标签文字对齐方式 |
-| `labelWidth` | `number` | `100` | 标签列宽度（像素） |
+| `labelAlign` | `'left' \| 'right'` | `'right'`，可由 `ConfigProvider.components.Form` 覆盖 | 标签文字对齐方式 |
+| `labelWidth` | `number` | `100`，可由 `ConfigProvider.components.Form` 覆盖 | 标签列宽度（像素） |
 | `disabled` | `boolean` | `false` | 禁用内部所有字段（通过上下文提供） |
 | `component` | `ElementType` | `"form"` | 渲染的元素类型；非 `form` 元素会跳过原生 submit/reset 接线 |
 | *(rest)* | `ComponentPropsWithoutRef<TComponent>` | — | 所渲染元素的任意 prop（`className`、`style` 等） |

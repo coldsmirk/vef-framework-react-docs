@@ -13,7 +13,22 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
-## 未发布（v2.21.0 之后）
+## 未发布（v2.22.0 之后）
+
+暂无未发布变更。
+
+## v2.22.0（2026-09-15）
+
+包含一个破坏性变更：starter 主题 store 不再为配色方案和语义化颜色物化框架默认值；这些字段现在只存储用户的显式选择。
+
+### 破坏性变更
+
+- **starter** —— `ThemeState.colorScheme` 变为可选，`ThemeState.colors` 变为 `Partial<ThemeColors>`。store 只记录用户在主题面板中选择的配色方案和语义化颜色；未设置的值跟随应用的 `defaultTheme`。将这些字段视为始终存在的应用需要处理 `undefined` / 缺失项。从旧版本升级的用户可能已经把旧框架默认值持久化为显式选择，因此修改 `defaultTheme` 不会覆盖这些已保存值；用户可以在主题面板中重置自己的主题选择。
+
+### 新特性
+
+- **components** —— `ConfigProvider` 新增 `components`（`ComponentDefaults`），用于设置应用级默认 props。默认值按组件白名单生效：`Form`（`labelAlign`、`labelWidth`）、`FormModal`（`draggable`）、`Image`（`fallback`）、`Input` / `TextArea`（`allowClear`、`autoComplete`）、`Message` / `Notification`（`duration`、`maxCount`）、`Pagination`（`showSizeChanger`）、`ProTable`（`rowKey`、`showSequenceColumn`、`striped`）、`Select`（`showSearch`）。显式传入的 prop 仍优先于应用默认值。
+- **starter** —— `createApp().render()` 新增 `defaultTheme`，用于设置初始配色方案和语义化颜色；新增 `components`，用于设置上述组件默认值。用户在主题面板中的选择优先，并且只有这些选择会被持久化。`ThemeConfigProvider`、`useEffectiveColorScheme()`、`useEffectiveThemeColors()` 以及 `DefaultTheme` / `ThemeConfigProviderProps` 类型现在也会导出，供自定义应用壳层使用。
 
 ### 值得关注的修复
 

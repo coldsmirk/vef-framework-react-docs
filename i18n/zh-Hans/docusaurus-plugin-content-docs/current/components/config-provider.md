@@ -14,6 +14,7 @@ VEF 的全局配置提供者，在 Ant Design 的 `ConfigProvider` 基础上扩�
 - 在应用根节点设置全局主题。
 - 启用暗色模式。
 - 覆盖语义化颜色。
+- 为白名单内的组件 props 设置应用级默认值。
 - 注入全局 CSS 变量。
 
 ## 基础用法
@@ -93,6 +94,45 @@ export default function MyComponent() {
 }
 ```
 
+## 应用组件默认值
+
+`components` 用于为白名单内的组件 props 设置应用级默认值。显式传入的 prop 永远优先于应用默认值；两者都未设置时，才使用组件自身的默认值。
+
+```tsx
+import { ConfigProvider } from '@vef-framework-react/components';
+
+export default function App() {
+  return (
+    <ConfigProvider
+      components={{
+        Form: { labelAlign: 'left', labelWidth: 120 },
+        Pagination: { showSizeChanger: false },
+        ProTable: { striped: true },
+      }}
+    >
+      <YourApp />
+    </ConfigProvider>
+  );
+}
+```
+
+只有以下条目会生效；白名单之外的 props 会在运行时被忽略，并被 TypeScript 拒绝：
+
+| 组件 | 可设置默认值的 props |
+| --- | --- |
+| `Form` | `labelAlign`、`labelWidth` |
+| `FormModal` | `draggable` |
+| `Image` | `fallback` |
+| `Input` | `allowClear`、`autoComplete` |
+| `Message` | `duration`、`maxCount` |
+| `Notification` | `duration`、`maxCount` |
+| `Pagination` | `showSizeChanger` |
+| `ProTable` | `rowKey`、`showSequenceColumn`、`striped` |
+| `Select` | `showSearch` |
+| `TextArea` | `allowClear`、`autoComplete` |
+
+使用 starter 时，请把 `components` 传给 `createApp().render()`，而不是再嵌套一层 `ConfigProvider`。
+
 ## API
 
 ### ConfigProviderProps
@@ -100,6 +140,7 @@ export default function MyComponent() {
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `theme` | `ThemeConfig` | — | 主题配置 |
+| `components` | `ComponentDefaults` | — | 白名单内框架组件的应用级默认 props |
 | `children` | `ReactNode` | — | 应用内容 |
 
 ### ThemeConfig
