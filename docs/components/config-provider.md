@@ -68,21 +68,6 @@ export default function App() {
 }
 ```
 
-## Global CSS Variables
-
-```tsx
-<ConfigProvider
-  theme={{
-    globalCssVars: {
-      '--vef-sidebar-width': '240px',
-      '--vef-header-height': '64px',
-    },
-  }}
->
-  <YourApp />
-</ConfigProvider>
-```
-
 ## Detect Dark Mode
 
 ```tsx
@@ -96,7 +81,7 @@ export default function MyComponent() {
 
 ## Application Component Defaults
 
-`components` sets application-wide defaults for a whitelisted set of component props. An explicitly passed prop always wins over the application default, and the component's own default applies only when neither is set.
+`components` sets application-wide defaults for a whitelisted set of component props. An explicitly passed non-`undefined` prop wins over the application default, and the component's own default applies only when neither is set.
 
 ```tsx
 import { ConfigProvider } from '@vef-framework-react/components';
@@ -116,7 +101,7 @@ export default function App() {
 }
 ```
 
-Only these entries are honored; props outside the whitelist are ignored at runtime and rejected by TypeScript:
+Only these entries are honored. An object literal with extra props is rejected by TypeScript; a value built before it reaches the provider is still filtered at runtime:
 
 | Component | Defaultable props |
 | --- | --- |
@@ -149,8 +134,6 @@ For the starter, pass `components` to `createApp().render()` instead of nesting 
 |-------|------|---------|-------------|
 | `isDarkMode` | `boolean` | `false` | Enable dark mode |
 | `colors` | `Partial<Record<SemanticColor, PresetColor \| string>>` | — | Override semantic colors (`primary` / `success` / `warning` / `error` / …) with a preset color name or any CSS color |
-| `globalCssVars` | `Record<'--vef-${string}', string \| number>` | — | Global CSS variables (must be prefixed with `--vef-`) |
-| `globalStyle` | `CSSInterpolation` | — | Global CSS-in-JS styles |
 
 ### `useIsDarkMode()`
 
@@ -160,4 +143,3 @@ Returns `boolean` — `true` if dark mode is currently active.
 
 - Place `ConfigProvider` at the root of your application, wrapping everything.
 - Use `useIsDarkMode()` in components that need to adapt to the current theme.
-- CSS variable names must start with `--vef-` to avoid conflicts.

@@ -68,21 +68,6 @@ export default function App() {
 }
 ```
 
-## 全局 CSS 变量
-
-```tsx
-<ConfigProvider
-  theme={{
-    globalCssVars: {
-      '--vef-sidebar-width': '240px',
-      '--vef-header-height': '64px',
-    },
-  }}
->
-  <YourApp />
-</ConfigProvider>
-```
-
 ## 检测暗色模式
 
 ```tsx
@@ -96,7 +81,7 @@ export default function MyComponent() {
 
 ## 应用组件默认值
 
-`components` 用于为白名单内的组件 props 设置应用级默认值。显式传入的 prop 永远优先于应用默认值；两者都未设置时，才使用组件自身的默认值。
+`components` 用于为白名单内的组件 props 设置应用级默认值。显式传入且非 `undefined` 的 prop 优先于应用默认值；两者都未设置时，才使用组件自身的默认值。
 
 ```tsx
 import { ConfigProvider } from '@vef-framework-react/components';
@@ -116,7 +101,7 @@ export default function App() {
 }
 ```
 
-只有以下条目会生效；白名单之外的 props 会在运行时被忽略，并被 TypeScript 拒绝：
+只有以下条目会生效。包含额外 props 的对象字面量会被 TypeScript 拒绝；但在传入 provider 之前预先构造的值，仍会在运行时被过滤：
 
 | 组件 | 可设置默认值的 props |
 | --- | --- |
@@ -149,8 +134,6 @@ export default function App() {
 |-------|------|---------|-------------|
 | `isDarkMode` | `boolean` | `false` | 启用暗色模式 |
 | `colors` | `Partial<Record<SemanticColor, PresetColor \| string>>` | — | 用预设颜色名或任意 CSS 颜色覆盖语义化颜色（`primary` / `success` / `warning` / `error` / ……） |
-| `globalCssVars` | `Record<'--vef-${string}', string \| number>` | — | 全局 CSS 变量（必须以 `--vef-` 为前缀） |
-| `globalStyle` | `CSSInterpolation` | — | 全局 CSS-in-JS 样式 |
 
 ### `useIsDarkMode()`
 
@@ -160,4 +143,3 @@ export default function App() {
 
 - 将 `ConfigProvider` 放置在应用的根节点，包裹所有内容。
 - 在需要适配当前主题的组件中使用 `useIsDarkMode()`。
-- CSS 变量名必须以 `--vef-` 开头，以避免冲突。

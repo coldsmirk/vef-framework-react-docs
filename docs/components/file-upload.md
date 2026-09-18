@@ -111,7 +111,7 @@ Extends `FileUploadProps`, replacing `fileList` / `defaultFileList` / `onChange`
 
 | Prop | Type | Description |
 |------|------|-------------|
-| `value` | `StoredFileValue` | A storage object key, an array of keys, or the empty shape (`null` / `[]`) |
+| `value` | `StoredFileValue` | A storage object key, an array of keys, or the empty shape (`null` / `undefined` / `[]`) |
 | `onChange` | `(value: StoredFileValue) => void` | Emits one key when `maxCount` is `1`, otherwise an array of keys |
 
 ### UploadedFileMeta

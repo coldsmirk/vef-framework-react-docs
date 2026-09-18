@@ -26,7 +26,7 @@ description: 内部的根应用与布局壳层、已导出的登录和主题能�
 | `components` | `ComponentDefaults` | 可选；白名单组件 props 的应用级默认值，转发给 components 包的 `ConfigProvider` |
 | `defaultTheme` | `DefaultTheme` | 可选；应用的初始配色方案和语义化颜色 |
 
-`DefaultTheme` 接受 `colorScheme?: ColorScheme` 和 `colors?: Partial<ThemeColors>`。框架默认从 `system` 和内置语义化颜色开始；应用默认值会替换这些起始值。用户在主题面板中的选择优先，且只有该选择会被持久化——修改应用默认值可以触达尚未自行选择的用户。
+`DefaultTheme` 接受 `colorScheme?: ColorScheme` 和 `colors?: Partial<ThemeColors>`。框架默认从 `system` 和内置语义化颜色开始；应用颜色会合并到这些默认值之上，未指定的语义化颜色保留内置值。用户在主题面板中的选择优先，且只有该选择会被持久化——修改应用默认值可以触达尚未自行选择的用户。
 
 ## 主题 Provider
 

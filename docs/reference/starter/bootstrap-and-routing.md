@@ -101,6 +101,7 @@ Access-denied-route helper for unauthorized entry behavior (navigates back or to
 - `dispatchCustomEvent<T>(type: string, options?: CustomEventInit<T>): boolean` — dispatches a `document`-level `CustomEvent`.
 - `emitAccessDenied(): void` — signals the access-denied event that `createRouter` listens for.
 - `emitUnauthenticated(): void` — signals the unauthenticated event that `createRouter` listens for.
+- `clearIdentityState(): void` — drops the identity loaded for the previous session while leaving authentication state untouched; call it when a new session is established over an existing one, as a trust-login handoff can do.
 - `handleClientLogout(router): void` — clears auth state and redirects to the login route.
 
 ## `setupAppVersionNotification`

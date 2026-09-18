@@ -26,7 +26,7 @@ Page-level containers (`Page`, `FlexCard`), form dialogs (`FormModal`, `FormDraw
 | `components` | `ComponentDefaults` | optional; application-wide defaults for whitelisted component props, forwarded to the components package's `ConfigProvider` |
 | `defaultTheme` | `DefaultTheme` | optional; the application's initial color scheme and semantic colors |
 
-`DefaultTheme` accepts `colorScheme?: ColorScheme` and `colors?: Partial<ThemeColors>`. The framework starts from `system` and its built-in semantic colors; the application default replaces those starting values. A choice the user makes in the theme panel wins, and only that choice is persisted — changing the application default reaches users who have not made their own pick.
+`DefaultTheme` accepts `colorScheme?: ColorScheme` and `colors?: Partial<ThemeColors>`. The framework starts from `system` and its built-in semantic colors; application colors are merged over those defaults, so unspecified semantic colors keep their built-in values. A choice the user makes in the theme panel wins, and only that choice is persisted — changing the application default reaches users who have not made their own pick.
 
 ## Theme provider
 

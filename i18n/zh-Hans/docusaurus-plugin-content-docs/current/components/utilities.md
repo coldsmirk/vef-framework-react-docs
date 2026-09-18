@@ -217,7 +217,7 @@ const cardStyle = css({
 });
 ```
 
-这些变量由 [`ConfigProvider`](./config-provider.md) 输出到 `:root` 上（通过 starter 引导的应用已自动就位）。`ConfigProvider` 的 `theme.globalCssVars` 选项——一个用于*注入额外* `--vef-*` 变量的映射——和这个常量是两回事：这个常量*读取*的是内置变量。
+这些变量由 [`ConfigProvider`](./config-provider.md) 输出到 `:root` 上（通过 starter 引导的应用已自动就位）。`globalCssVars` 是这些内置变量的只读别名。
 
 ### `useThemeTokens`
 

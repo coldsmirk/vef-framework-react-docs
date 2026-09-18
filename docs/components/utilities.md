@@ -217,7 +217,7 @@ const cardStyle = css({
 });
 ```
 
-The variables are emitted onto `:root` by [`ConfigProvider`](./config-provider.md) (already in place when the app is bootstrapped through the starter). `ConfigProvider`'s `theme.globalCssVars` option — a map for *injecting additional* `--vef-*` variables — is a different thing from this constant, which *reads* the built-in ones.
+The variables are emitted onto `:root` by [`ConfigProvider`](./config-provider.md) (already in place when the app is bootstrapped through the starter). `globalCssVars` is the read-only alias for those built-in variables.
 
 ### `useThemeTokens`
 

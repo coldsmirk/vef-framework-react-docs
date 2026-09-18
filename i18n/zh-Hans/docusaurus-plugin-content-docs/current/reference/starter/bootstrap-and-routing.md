@@ -101,6 +101,7 @@ function createAccessDeniedRouteOptions(): RouteOptions;
 - `dispatchCustomEvent<T>(type: string, options?: CustomEventInit<T>): boolean` —— 派发一个 `document` 级别的 `CustomEvent`。
 - `emitAccessDenied(): void` —— 触发 `createRouter` 所监听的拒绝访问事件。
 - `emitUnauthenticated(): void` —— 触发 `createRouter` 所监听的未认证事件。
+- `clearIdentityState(): void` —— 丢弃上一会话加载的身份，但保留认证状态；在既有会话之上建立新会话时调用，例如信任登录交接可能出现的场景。
 - `handleClientLogout(router): void` —— 清除认证状态并重定向到登录路由。
 
 ## `setupAppVersionNotification`

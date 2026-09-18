@@ -111,7 +111,7 @@ export default function Demo() {
 
 | Prop | 类型 | 说明 |
 |------|------|-------------|
-| `value` | `StoredFileValue` | 一个存储对象 key、key 数组，或对应的空值形态（`null` / `[]`） |
+| `value` | `StoredFileValue` | 一个存储对象 key、key 数组，或对应的空值形态（`null` / `undefined` / `[]`） |
 | `onChange` | `(value: StoredFileValue) => void` | `maxCount` 为 `1` 时输出单个 key，否则输出 key 数组 |
 
 ### UploadedFileMeta

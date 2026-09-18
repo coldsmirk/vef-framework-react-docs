@@ -78,6 +78,8 @@ function createUserPicker(): FC<PickerProps> {
 
 `isPrincipalKind` and `PRINCIPAL_KINDS` (`["user", "role", "department"]`) are exported for hosts that need to build the picker map or a settings UI generically, without re-hardcoding the three kinds.
 
+The built-in applicant condition subjects use the same mechanism: `applicantId` resolves through the `user` picker and `applicantDepartmentId` through the `department` picker, so hosts do not need a separate id-entry field.
+
 ### Kind catalogs
 
 Each `KindDescriptor` is `{ kind, label, selection }`. `selection` decides what the designer collects for a rule:

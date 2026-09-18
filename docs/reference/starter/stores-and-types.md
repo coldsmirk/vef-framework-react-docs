@@ -58,6 +58,8 @@ Batch parameter helper:
 - `LoginParams` — `PasswordLoginParams | TrustCodeLoginParams` plus project-registered login mechanisms
 - `PasswordLoginParams` — `{ type: "password"; principal: string; credentials: string }`
 - `TrustCodeLoginParams` — `{ type: "trust_code"; principal: string; credentials: string }`; `principal` is the initiating app id
+- `UseLoginFlowOptions` — the options accepted by `useLoginFlow`
+- `SsoLoginFlow` — the state returned by `useSsoLogin`
 - `LoginChallengeAutoResolver` / `LoginChallengeAutoResolvers` — optional per-type callbacks that answer a challenge from data the page already holds
 - `UserDetails` — fallback shape (`Record<string, unknown>`) when `Register['userDetails']` is not augmented
 - `OrderSpec` — `{ column: string; direction: "asc" | "desc" }`

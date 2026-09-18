@@ -78,6 +78,8 @@ function createUserPicker(): FC<PickerProps> {
 
 `isPrincipalKind` 和 `PRINCIPAL_KINDS`（`["user", "role", "department"]`）已导出，供需要以通用方式构建选择器映射或设置界面的宿主使用，而不必把这三种类型重复硬编码一遍。
 
+内置发起人条件也使用同一机制：`applicantId` 通过 `user` picker 解析，`applicantDepartmentId` 通过 `department` picker 解析，宿主无需另做手输 id 字段。
+
 ### Kind 目录
 
 每个 `KindDescriptor` 都是 `{ kind, label, selection }`。`selection` 决定设计器为一条规则收集什么：
