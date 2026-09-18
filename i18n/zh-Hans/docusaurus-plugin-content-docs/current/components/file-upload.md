@@ -70,6 +70,20 @@ export default function Demo() {
 </form.AppField>
 ```
 
+## 存储 key 控制
+
+`StoredFileUpload` 是各表单上传字段共用的受控核心。单文件控件（`maxCount` 默认为 `1`）的值是一个存储对象 key；多文件控件的值是 key 数组。它会将已保存的 key 水合为上传列表，通过存储注册表解析原始文件名，并在清空对应值时输出 `null` 或 `[]`。
+
+```tsx
+import { StoredFileUpload } from '@vef-framework-react/components';
+
+export default function Demo() {
+  return <StoredFileUpload maxCount={3} value={['priv/2026/09/01/a.pdf']} onChange={console.log} />;
+}
+```
+
+想自己控制 antd 的 `fileList` 时使用 `FileUpload`；持久化值本身就是存储 key 时使用 `StoredFileUpload`。
+
 ## API
 
 ### FileUploadProps
@@ -90,6 +104,15 @@ export default function Demo() {
 | `onUploadError` | `(file: File, error: UploadError) => void` | — | 文件终止性失败（包括中止）时触发 |
 
 其余所有属性（`listType`、`maxCount`、`enableCrop`、`pastable`、`multiple`、`accept`、`beforeUpload` 等）参见 [`Upload`](./upload.md) 文档。
+
+### StoredFileUploadProps
+
+继承 `FileUploadProps`，并把 `fileList` / `defaultFileList` / `onChange` 替换为：
+
+| Prop | 类型 | 说明 |
+|------|------|-------------|
+| `value` | `StoredFileValue` | 一个存储对象 key、key 数组，或对应的空值形态（`null` / `[]`） |
+| `onChange` | `(value: StoredFileValue) => void` | `maxCount` 为 `1` 时输出单个 key，否则输出 key 数组 |
 
 ### UploadedFileMeta
 

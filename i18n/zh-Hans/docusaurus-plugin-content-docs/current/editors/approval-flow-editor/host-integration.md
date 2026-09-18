@@ -1,6 +1,6 @@
 ---
 title: 宿主集成
-description: 如何把主体选择器、表单字段元数据、全局变量、条件运算符和校验逻辑接入 ApprovalFlowEditor。
+description: 如何把主体选择器、kind 目录、表单字段元数据、全局变量、条件运算符和校验逻辑接入 ApprovalFlowEditor。
 ---
 
 # 宿主集成
@@ -19,6 +19,8 @@ const [definition, setDefinition] = useState<FlowDefinition>(initialValue);
 
 const plugins: EditorPlugins = {
   pickers: { user: UserPicker, role: RolePicker, department: DepartmentPicker },
+  assigneeKinds: servedKindOptions.assignees,
+  ccKinds: servedKindOptions.ccs,
   formFields: [
     { key: "amount", kind: "number", label: "Amount" },
     { key: "reason", kind: "textarea", label: "Reason" }
@@ -28,11 +30,13 @@ const plugins: EditorPlugins = {
 <ApprovalFlowEditor plugins={plugins} value={definition} onChange={setDefinition} />;
 ```
 
-`EditorPlugins` 有三个可选字段:
+`EditorPlugins` 有五个可选字段:
 
 | 字段 | 类型 | 用途 |
 | --- | --- | --- |
-| `pickers` | `Partial<Record<PrincipalKind, FC<PickerProps>>>` | 为 `user` / `role` / `department` 三类审批人和抄送收件人解析出具体的 id。某个类型未设置时会优雅降级为一段内联提示，而不是渲染选择器。 |
+| `pickers` | `Partial<Record<string, FC<PickerProps>>>` | 按规则 kind 解析具体 id。查找会回退到该 kind 的 `selection` 模式，因此内置 `user` / `role` / `department` 选择器也能服务选择同类对象的自定义 kind。 |
+| `assigneeKinds` | `ReadonlyArray<KindDescriptor<AssigneeKind>>` | `approval/flow.list_kind_options` 返回的审批人目录；省略时使用 `BUILTIN_ASSIGNEE_KINDS`。 |
+| `ccKinds` | `ReadonlyArray<KindDescriptor<CcKind>>` | 同一后端动作返回的抄送目录；省略时使用 `BUILTIN_CC_KINDS`。 |
 | `formFields` | `FormFieldDefinition[]` | 表单的顶层字段清单——供条件编辑器、字段权限表以及 `validateFlowDefinition` 的 `fieldPermissions` 交叉校验使用。保留为 `undefined` 表示"没有可用的字段清单"，与 `[]` 含义不同——见下方 [`formFields`](#formfields)。 |
 | `globalSubjects` | `FormFieldDefinition[]` | 宿主声明的变量，条件编辑器会把它们与内置的申请人属性和 `formFields` 一起提供给用户选择。 |
 
@@ -73,6 +77,17 @@ function createUserPicker(): FC<PickerProps> {
 ```
 
 `isPrincipalKind` 和 `PRINCIPAL_KINDS`（`["user", "role", "department"]`）已导出，供需要以通用方式构建选择器映射或设置界面的宿主使用，而不必把这三种类型重复硬编码一遍。
+
+### Kind 目录
+
+每个 `KindDescriptor` 都是 `{ kind, label, selection }`。`selection` 决定设计器为一条规则收集什么：
+
+- `"none"`——不收集任何输入；后端从运行时上下文解析该 kind。
+- `"user"` / `"role"` / `"department"`——通过对应 picker 收集 id。
+- `"form_field"`——收集一个字段 key。
+- `"custom"`——通过以该规则自身 kind 注册的 picker 收集 id。
+
+只要应用注册了自定义 kind，就传入后端返回的服务目录。内置目录只作为使用框架自带 resolver 的应用的回退。
 
 ### `formFields`
 
@@ -143,20 +158,20 @@ const definition = toFlowDefinition(nodes, edges); // live graph → wire (detac
 ```ts
 import { validateFlowDefinition } from "@vef-framework-react/approval-flow-editor";
 
-const errors = validateFlowDefinition(definition, formFields);
+const errors = validateFlowDefinition(definition, { formFields, assigneeKinds, ccKinds });
 // errors: FlowValidationError[] — empty means the flow is deploy-ready
 ```
 
 它与后端部署时的 `ValidateFlowDefinition` 规则逐条对应——自 v2.10.0 起也包括字段权限规则（权限取值必须在词表之内、key 必须指向真实的表单字段、CC 节点只允许 `visible` / `hidden`、`required` 权限不得与自动通过的超时配在一起）——但与后端（只返回第一个错误）不同的是，它会收集全部违规项，让宿主可以一次性把它们都展示出来。通过这个校验器的定义，也一定能通过后端的部署校验。
 
-第二个参数就是那份[三态的 `formFields` 清单](#formfields): 把传给 `plugins.formFields` 的同一份列表也传给它，这样 `fieldPermissions` 的 key 才会与真实字段清单做交叉校验。`[]` 表示"表单有零个字段"（每个权限 key 都会报错）；省略该参数表示"没有可用的字段清单"，只会跳过 key 存在性检查。
+第二个参数是 `FlowValidationContext`。其中的 `formFields` 是[三态清单](#formfields): 把传给 `plugins.formFields` 的同一份列表也传给它，这样 `fieldPermissions` 的 key 才会与真实字段清单做交叉校验。`[]` 表示"表单有零个字段"（每个权限 key 都会报错）；省略该条目表示"没有可用的字段清单"，只会跳过 key 存在性检查。传入与编辑器相同的审批人和抄送目录，自定义 kind 才会被校验，而不是被报告为未知类型。
 
 用它来在编辑器自身的发布按钮之外，为一个保存 / 部署操作设置关卡——比如禁用向导里的“下一步”控件:
 
 ```tsx
 const errors = useMemo(
-  () => validateFlowDefinition(flowDefinition, formFields),
-  [flowDefinition, formFields]
+  () => validateFlowDefinition(flowDefinition, { formFields, assigneeKinds, ccKinds }),
+  [flowDefinition, formFields, assigneeKinds, ccKinds]
 );
 
 <Button disabled={errors.length > 0} onClick={handleNext}>Next</Button>;

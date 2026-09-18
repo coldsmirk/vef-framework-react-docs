@@ -1,11 +1,11 @@
 ---
 title: 应用壳层
-description: 内部的根应用、布局、登录及状态页组件，以及用于配置它们的选项。
+description: 内部的根应用与布局壳层、已导出的登录和主题能力，以及用于配置它们的选项。
 ---
 
 # 应用壳层
 
-应用壳层——根应用、布局、登录及状态页——是 `@vef-framework-react/starter` **内部**的实现。`App`、`BaseLayout`、`Layout`、`Login`、`AccessDenied`、`Error`、`NotFound`、`RouterProvider`、`NProgress` 均未从该包导出。它们由 `createApp()`、`createRouter()` 以及[启动与路由](./bootstrap-and-routing.md)中记录的路由选项辅助函数组装而成；本页记录的是这些函数所接受的选项形状。`ThemeConfigProvider` 是壳层级唯一的例外：它面向自定义应用壳层导出。
+根应用、布局与状态页壳层是 `@vef-framework-react/starter` 的**内部**实现。`App`、`BaseLayout`、`Layout`、`AccessDenied`、`Error`、`NotFound`、`RouterProvider`、`NProgress` 均未从该包导出；它们由 `createApp()`、`createRouter()` 以及[启动与路由](./bootstrap-and-routing.md)中记录的路由选项辅助函数组装而成。登录相关能力（`Login`、`SsoLogin`、各自的 hook 以及挑战渲染器）和 `ThemeConfigProvider` 面向自定义应用壳层导出。
 
 页面级容器（`Page`、`FlexCard`）、表单弹窗（`FormModal`、`FormDrawer`）、表格抽象（`ProTable`）以及 CRUD 体系（`CrudPage`、`createCrudKit` 等）位于 `@vef-framework-react/components` 中——参见 [Components / CRUD](../../components/crud.md)。
 
@@ -73,7 +73,7 @@ description: 内部的根应用、布局、登录及状态页组件，以及用�
 
 ## 登录
 
-由 `createLoginRouteOptions(props)` 组装，它会用 `props`（类型为 `LoginProps`，专为此目的导出）渲染内部的 `Login` 组件，并处理带重定向感知的登录流程（`?redirect=` 查询参数、已认证时跳过登录页）。
+由 `createLoginRouteOptions(options)` 组装，它会用 `LoginProps` 渲染已导出的 `Login` 组件，并处理带重定向感知的登录流程（`?redirect=` 查询参数、已认证时跳过登录页）。
 
 | Prop | 类型 | 作用 |
 | --- | --- | --- |
@@ -87,9 +87,35 @@ description: 内部的根应用、布局、登录及状态页组件，以及用�
 
 `onResolveChallenge` 与 `challengeRenderers` 要么同时提供、要么都不提供：从不发出挑战的后端可以两者都省略。`LoginProps` 在类型层面强制了这一点。
 
+`LoginParams` 是一个可辨识联合。框架内置 `"password"`（`PasswordLoginParams`）与 `"trust_code"`（`TrustCodeLoginParams`）；项目通过 `Register['loginParams']` 增加登录机制。
+
+### `useLoginFlow`
+
+导出的登录状态机是 `Login` 与 `SsoLogin` 的共同基础。它负责凭据提交、challenge 循环、RSA 加密、错误归一化、认证后的 store 写入以及后续导航；自定义页面可以复用全部逻辑，只替换展示层。
+
+| 选项 | 类型 | 作用 |
+| --- | --- | --- |
+| `onLogin` | `(params: LoginParams) => Promise<LoginResult>` | 提交凭据或 trust-code handoff |
+| `onResolveChallenge?` | `(params: ResolveChallengeParams) => Promise<LoginResult>` | 应答 challenge；后端可能发出挑战时必须接入 |
+| `publicKey?` | `string` | 启用返回的 `encrypt` 辅助函数 |
+| `redirectTo?` | `string` | 认证后的目标；默认先取路由的 `redirect` 查询参数，再取首页路由 |
+| `onAuthenticated?` | `(result: LoginResult) => void \| Promise<void>` | 替换默认导航与欢迎通知；认证 store 写入始终执行 |
+| `autoResolve?` | `LoginChallengeAutoResolvers` | 用页面已有数据静默应答选定的 challenge 类型；每种类型只尝试一次，被拒绝后回退到 renderer |
+| `onError?` | `(error: unknown) => void` | 接收原始 rejection，便于上报 |
+
+返回的 `LoginFlow` 暴露 `login`、`challenge`、`resolve`、`cancel`、`pending`、`error`、`clearError`，以及可选的 `encrypt`。
+
+### 单点登录
+
+`SsoLogin` 是 trust-login 网关重定向后的默认落地页。`createSsoRouteOptions(options)` 会把它挂载到 `/sso`；`SSO_ROUTE_ID`、`SSO_ROUTE_PATH`、`SSO_APP_ID_PARAM`（`app_id`）和 `SSO_CODE_PARAM`（`code`）均已导出。
+
+`useSsoLogin(options)` 只读取一次 handoff，在消费一次性 code 前先把它从地址栏移除，再把得到的 `LoginParams` 交给共享登录流程。它的 `search` 属性是挂载时的快照，因此自定义落地页和 challenge 自动应答器在 URL 被清理后仍能读取网关参数。即使当前已有会话，交换也会执行，因为 handoff 可能指向另一个用户。
+
+`SsoLoginProps` 接受与登录流程相同的 `onLogin`、challenge、redirect、自动应答、错误和 `publicKey` 接线。`readTrustCodeHandoff(search)` 构造默认 `trust_code` 载荷；也可以覆盖 `readHandoff` 以适配不同的网关契约。
+
 ### 登录挑战
 
-挑战流水线完全位于内部 `Login` 组件之内：
+挑战流水线完全位于已导出的 `Login` 组件之内：
 
 1. `onLogin` 返回一个 `LoginResult`。当它携带的是 `challenge` + `challengeToken` 而不是 `tokens` 时，凭据表单会被替换为注册在 `challengeRenderers[challenge.type]` 下的渲染器。
 2. 渲染器调用 `resolve(response)`；Login 组件将其转发为 `onResolveChallenge({ challengeToken, type, response })`。返回的 `LoginResult` 要么完成认证（`tokens`——更新 store 并执行 `?redirect=` 导航），要么串联下一个挑战。

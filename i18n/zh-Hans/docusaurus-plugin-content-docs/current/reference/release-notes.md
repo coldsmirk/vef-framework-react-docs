@@ -43,6 +43,82 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 - **core** —— `HttpClientOptions.protectedBodyEncoding` 启用强制的双向 `aes-gcm+base64` JSON body 传输。它使用浏览器 Web Crypto API，匹配 Go 框架的 nonce/ciphertext/tag wire 布局，优先于旧版 body 编码，并拒绝缺少标记或标记不匹配的 protected 响应。参见 [HTTP 与 API 客户端](./core/http-and-api.md#protected-body-transport)。
 - **starter** —— `starter.createApiClient()` 接受 `protectedBodyEncoding`，并转发给 core HTTP 客户端。
 
+## v2.20.0（2026-09-07）
+
+无破坏性变更。
+
+### 新特性
+
+- **approval-form-bridge** —— 远程选项源会以 `optionSource`（`{ kind: "remote", request, mapping? }`）投影到审批契约；静态选项仍投影为 `options`。后端接受远程源 select 提交的任意值，由宿主在运行时校验。
+- **form-editor** —— 一次大规模正确性修复，覆盖远程 select 按标签过滤、按文件数量推断上传列、绑定数据源参数作用域、提交载荷、可选规则、办理人重置、历史/设备跟踪、key 修复、schema patching、校验透出，以及跨设备设计保持字段 key 稳定。
+
+## v2.19.0（2026-09-01）
+
+包含一个破坏性变更：form-editor 的远程数据源参数现在是与表单绑定的动态值。
+
+### 破坏性变更
+
+- **form-editor** —— `RemoteDataSourceRequest.params` 的每一项都是 `DynamicValue`。参数可以读取表单值；在子表单内还可以读取当前行的作用域。手工构造静态参数值的宿主不受影响；假设所有参数都是静态值的 resolver 必须先求值动态值再使用。
+
+### 新特性
+
+- **form-editor** —— 上传字段保存对象 key（单个文件位为空时是 `null`，多文件位为空时是 `[]`），并按 `maxCount` 推断存储列。
+- **components** —— 导出 `StoredFileUpload`。它用存储对象 key 控制 `FileUpload`，将已保存的 key 水合为上传列表、解析原始文件名，并按 `maxCount` 输出单个 key 或数组。
+
+## v2.18.0（2026-08-31）
+
+包含一个破坏性变更：审批流设计器的主办人词汇由应用注册目录驱动。
+
+### 破坏性变更
+
+- **approval-flow-editor** —— `AssigneeKind` 和 `CcKind` 变为开放的 `string` 标识符，不再是封闭联合类型。`EditorPlugins` 新增 `assigneeKinds` 和 `ccKinds`（`KindDescriptor[]`），`pickers` 也按 kind 字符串索引。请传入 `approval/flow.list_kind_options` 返回的目录；省略时编辑器回退到 `BUILTIN_ASSIGNEE_KINDS` / `BUILTIN_CC_KINDS`。Picker 查找先尝试规则自身的 kind，再尝试其 `selection` 模式，因此选择角色的自定义 kind 可以复用内置 `role` picker。
+
+### 新特性
+
+- **approval-flow-editor** —— 导出 `SelectionMode` 和 `KindDescriptor`；校验 API 改为接收包含 `formFields`、`assigneeKinds`、`ccKinds` 的 `FlowValidationContext`。
+- **approval** —— `ApprovalPlugins.pickers` 采用同样的“先 kind、后 selection”回退查找，并重新导出 `KindDescriptor` / `SelectionMode`。
+
+## v2.17.2（2026-08-26）
+
+无破坏性变更。
+
+### 新特性
+
+- **approval-flow-editor** —— 内置发起人主体（`applicantId`、`applicantDepartmentId`）的条件值改用宿主的 `user` / `department` picker，不再要求手工输入 id。
+
+## v2.17.1（2026-08-25）
+
+无破坏性变更。
+
+### 值得关注的修复
+
+- **components** —— 公共上传预览恢复图片缩略图：用对象公共源 URL 作为 `thumbUrl`，同时仍避免把它放到 antd 可导航的 `url` 上。
+
+## v2.17.0（2026-08-20）
+
+无破坏性变更。
+
+### 新特性
+
+- **starter** —— 导出 `useLoginFlow`，提供无展示层的登录状态机：凭据提交、challenge 循环、RSA 加密、错误归一化、store 更新，以及认证后的导航。
+- **starter** —— `LoginParams` 通过 `Register['loginParams']` 成为开放联合类型；框架内置 `PasswordLoginParams` 和 `TrustCodeLoginParams`。
+- **starter** —— `LoginChallengeAutoResolver` / `LoginChallengeAutoResolvers` 可以用页面已有数据自动应答选定的 challenge。每种类型只尝试一次，静默应答被拒绝时会回退到对应 renderer。
+- **starter** —— 导出单点登录落地页、路由辅助函数、常量、`useSsoLogin` 和 `readTrustCodeHandoff`。handoff 只读取一次，并在交换前从地址栏移除，同时仍可走完整 challenge 链。
+- **starter** —— `createLoginRouteOptions` 和 `createSsoRouteOptions` 既接受默认页面 props，也接受应用提供的 `component`；自定义页面通过 `useLoginFlow` / `useSsoLogin` 复用路由的 redirect 与认证守卫。
+
+### 值得关注的修复
+
+- **starter** —— 客户端退出登录会在路由守卫读取前清掉过期的菜单路径集合。
+- **core** —— 传输编码后的请求体会原样发送到网络层。
+
+## v2.16.0（2026-08-18）
+
+无破坏性变更。
+
+### 新特性
+
+- **approval-flow-editor** —— `SameApplicantAction` 新增 `"exclude"`：当发起人出现在已解析的办理人中时，只让其本人席位回避，由其余办理人决定。该动作按席位生效；`auto_pass` 和 `transfer_superior` 同样只影响发起人自己的任务。
+
 ## v2.15.0 (2026-08-07)
 
 无破坏性变更。

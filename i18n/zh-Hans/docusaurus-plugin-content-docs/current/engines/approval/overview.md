@@ -73,7 +73,7 @@ const PLUGINS: ApprovalPlugins = {
 
 `toEditorPlugins(plugins, formFields)` 把审批插件集投影成流程编辑器的 `EditorPlugins` 形态，并把部署时派生的表单字段叠加进去。因此宿主只需配置**一个**插件对象，两个编辑器都能看到它。
 
-由于选择器契约属于流程编辑器，本包重新导出了宿主实现它们所需的类型——来自 `@vef-framework-react/approval-flow-editor` 的 `EditorPlugins`、`PickerProps` 与 `PrincipalKind`——接入 provider 只需要从本包 import。
+由于选择器与 kind 目录契约属于流程编辑器，本包重新导出了宿主实现它们所需的类型——来自 `@vef-framework-react/approval-flow-editor` 的 `EditorPlugins`、`PickerProps`、`PrincipalKind`、`KindDescriptor` 与 `SelectionMode`——接入 provider 只需要从本包 import。
 
 提交时，向导针对 `useFlowApi` 运行一条链: `create`/`update` → `deploy`（一个新的草稿 `FlowVersion`，携带 `flowSchema`、不透明的 `formSchema` 和派生出的 `formFields`）→ 可选的 `publish_version`。发布会把之前已发布的版本归档；进行中的实例仍沿用它们启动时的版本。
 

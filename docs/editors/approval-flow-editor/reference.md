@@ -29,11 +29,14 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 
 | Export | Kind | Description |
 | --- | --- | --- |
-| `EditorPlugins` | type | `{ pickers?, formFields?, globalSubjects? }` — see [Host Integration](./host-integration.md#plugins-editorplugins). |
+| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects? }` — see [Host Integration](./host-integration.md#plugins-editorplugins). |
 | `PickerProps` | type | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }`. |
 | `PrincipalKind` | type | `"user" \| "role" \| "department"`. |
 | `PRINCIPAL_KINDS` | const | `readonly ["user", "role", "department"]`. |
 | `isPrincipalKind` | fn | `(kind: string) => kind is PrincipalKind`. |
+| `KindDescriptor` | type | `{ kind: string; label: string; selection: SelectionMode }`. |
+| `SelectionMode` | type | `"none" \| "user" \| "role" \| "department" \| "form_field" \| "custom"`. |
+| `BUILTIN_ASSIGNEE_KINDS` / `BUILTIN_CC_KINDS` | const | Framework fallback kind catalogs, used when a host supplies no served catalog. |
 
 ## Flow definition (wire format)
 
@@ -82,9 +85,9 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 | Export | Shape |
 | --- | --- |
 | `AssigneeDefinition` | `{ kind: AssigneeKind; ids?: string[]; formField?: string; sortOrder: number }` |
-| `AssigneeKind` | `PrincipalKind \| "self" \| "superior" \| "department_leader" \| "form_field"` |
+| `AssigneeKind` | `string` — open by design; deployable values are the kinds with a backend `approval.AssigneeResolver` |
 | `CcDefinition` | `{ kind: CcKind; ids?: string[]; formField?: string; timing?: CcTiming }` |
-| `CcKind` | `PrincipalKind \| "form_field"` |
+| `CcKind` | `string` — open by design; deployable values are the kinds with a backend `approval.CCResolver` |
 | `CcTiming` | `"always" \| "on_approve" \| "on_reject"` |
 | `FieldPermission` | `"visible" \| "editable" \| "hidden" \| "required"` |
 | `CcFieldPermission` | `"visible" \| "hidden"` — CC nodes only observe the form, so editable/required are not offered |
@@ -109,7 +112,7 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 | `PassRule` | `"all" \| "any" \| "ratio"` — `"all"` implies veto power |
 | `EmptyAssigneeAction` | `"auto_pass" \| "transfer_admin" \| "transfer_superior" \| "transfer_applicant" \| "transfer_specified"` |
 | `ExecutionType` | `"manual" \| "auto_pass" \| "auto_reject"` |
-| `SameApplicantAction` | `"auto_pass" \| "self_approve" \| "transfer_superior"` |
+| `SameApplicantAction` | `"auto_pass" \| "self_approve" \| "transfer_superior" \| "exclude"` — applied to the applicant's own seat; `exclude` recuses that seat and leaves the remaining approvers to decide |
 | `RollbackType` | `"none" \| "previous" \| "start" \| "any" \| "specified"` |
 | `RollbackDataStrategy` | `"clear" \| "keep"` |
 | `ConsecutiveApproverAction` | `"none" \| "auto_pass"` |
@@ -121,9 +124,11 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 ```ts
 function validateFlowDefinition(
   definition: FlowDefinition,
-  formFields?: FormFieldDefinition[]
+  context?: FlowValidationContext
 ): FlowValidationError[];
 ```
+
+`FlowValidationContext` is `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[] }`. Omitted kind catalogs fall back to the framework built-ins; a host with application-registered kinds must pass the catalog served by `approval/flow.list_kind_options`.
 
 `FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`. `message` is human-readable Chinese product copy matching the editor's UI language; program against `code` and the id fields.
 

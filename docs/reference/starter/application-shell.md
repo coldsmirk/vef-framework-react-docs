@@ -1,11 +1,11 @@
 ---
 title: Application Shell
-description: The internal root app, layout, login, and status-page components, and the options that configure them.
+description: The internal root app and layout shell, the exported login and theme surfaces, and the options that configure them.
 ---
 
 # Application Shell
 
-The application shell — the root app, layout, login, and status pages — is **internal** to `@vef-framework-react/starter`. None of `App`, `BaseLayout`, `Layout`, `Login`, `AccessDenied`, `Error`, `NotFound`, `RouterProvider`, or `NProgress` is exported from the package. They are assembled by `createApp()`, `createRouter()`, and the route-option helpers documented in [Bootstrap and Routing](./bootstrap-and-routing.md); this page documents the option shapes those functions accept. `ThemeConfigProvider` is the one shell-level exception: it is exported for custom application shells.
+The root application, layout, and status-page shell is **internal** to `@vef-framework-react/starter`. None of `App`, `BaseLayout`, `Layout`, `AccessDenied`, `Error`, `NotFound`, `RouterProvider`, or `NProgress` is exported from the package. They are assembled by `createApp()`, `createRouter()`, and the route-option helpers documented in [Bootstrap and Routing](./bootstrap-and-routing.md); this page documents the option shapes those functions accept. The login surface (`Login`, `SsoLogin`, their hooks, and the challenge renderer) and `ThemeConfigProvider` are exported for custom application shells.
 
 Page-level containers (`Page`, `FlexCard`), form dialogs (`FormModal`, `FormDrawer`), table abstractions (`ProTable`), and the CRUD stack (`CrudPage`, `createCrudKit`, etc.) live in `@vef-framework-react/components` — see [Components / CRUD](../../components/crud.md).
 
@@ -73,7 +73,7 @@ The internal layout shell is a two-layer composition: `Layout` (menu, user area,
 
 ## Login
 
-Assembled by `createLoginRouteOptions(props)`, which renders the internal `Login` component with `props` (type `LoginProps`, exported for this purpose) and handles the redirect-aware login flow (`?redirect=` search param, skip-if-authenticated).
+Assembled by `createLoginRouteOptions(options)`, which renders the exported `Login` component with `LoginProps` and handles the redirect-aware login flow (`?redirect=` search param, skip-if-authenticated).
 
 | Prop | Type | Purpose |
 | --- | --- | --- |
@@ -87,9 +87,35 @@ Assembled by `createLoginRouteOptions(props)`, which renders the internal `Login
 
 `onResolveChallenge` and `challengeRenderers` are both-or-neither: a backend that never issues challenges omits both. `LoginProps` enforces this at the type level.
 
+`LoginParams` is a discriminated union. The framework ships `"password"` (`PasswordLoginParams`) and `"trust_code"` (`TrustCodeLoginParams`); projects add mechanisms through `Register['loginParams']`.
+
+### `useLoginFlow`
+
+The exported login state machine underlies `Login` and `SsoLogin`. It owns credential submission, the challenge loop, RSA encryption, error normalization, the authenticated store write, and post-authentication navigation, so a custom screen can reuse all of it and replace only the presentation.
+
+| Option | Type | Purpose |
+| --- | --- | --- |
+| `onLogin` | `(params: LoginParams) => Promise<LoginResult>` | submit credentials or a trust-code handoff |
+| `onResolveChallenge?` | `(params: ResolveChallengeParams) => Promise<LoginResult>` | answer challenges; wire it whenever the backend can issue one |
+| `publicKey?` | `string` | enables the returned `encrypt` helper |
+| `redirectTo?` | `string` | post-authentication target; defaults to the route's `redirect` search parameter, then the index route |
+| `onAuthenticated?` | `(result: LoginResult) => void \| Promise<void>` | replaces the default navigation and welcome notification; the authenticated store write always runs |
+| `autoResolve?` | `LoginChallengeAutoResolvers` | silently answers selected challenge types from data the page already holds; each type is attempted once and a rejected silent answer falls back to its renderer |
+| `onError?` | `(error: unknown) => void` | receives the original rejection for reporting |
+
+The returned `LoginFlow` exposes `login`, `challenge`, `resolve`, `cancel`, `pending`, `error`, `clearError`, and optional `encrypt`.
+
+### Single sign-on
+
+`SsoLogin` is the default landing page for a trust-login gateway redirect. `createSsoRouteOptions(options)` mounts it at `/sso`; `SSO_ROUTE_ID`, `SSO_ROUTE_PATH`, `SSO_APP_ID_PARAM` (`app_id`), and `SSO_CODE_PARAM` (`code`) are exported.
+
+`useSsoLogin(options)` reads the handoff once, removes it from the address bar before spending the one-time code, and hands the resulting `LoginParams` to the shared login flow. Its `search` property is a mount-time snapshot, so custom landing pages and challenge auto-resolvers can still read gateway parameters after the URL is cleaned. The exchange runs even when another session exists, because the handoff may name a different user.
+
+`SsoLoginProps` accepts the same `onLogin`, challenge, redirect, auto-resolve, error, and `publicKey` wiring as the login flow. `readTrustCodeHandoff(search)` builds the default `trust_code` payload; `readHandoff` can be overridden for a different gateway contract.
+
 ### Login challenges
 
-The challenge pipeline lives entirely inside the internal `Login` component:
+The challenge pipeline lives entirely inside the exported `Login` component:
 
 1. `onLogin` returns a `LoginResult`. When it carries `challenge` + `challengeToken` instead of `tokens`, the credentials form is swapped for the renderer registered under `challengeRenderers[challenge.type]`.
 2. The renderer calls `resolve(response)`; the Login component forwards it as `onResolveChallenge({ challengeToken, type, response })`. The returned `LoginResult` either completes authentication (`tokens` — the store is updated and the `?redirect=` navigation runs) or chains the next challenge.

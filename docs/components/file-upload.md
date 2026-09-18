@@ -70,6 +70,20 @@ Use the `field.Upload` field component inside `<form.AppField>`, which wraps `Fi
 </form.AppField>
 ```
 
+## Storage-Key Control
+
+`StoredFileUpload` is the controlled core shared by form upload fields. Its value is one storage object key for a single-file control (`maxCount` at its default of `1`) or an array of keys for a multi-file control. It hydrates saved keys into an upload list, resolves their original filenames through the storage registry, and emits `null` or `[]` when the matching value is cleared.
+
+```tsx
+import { StoredFileUpload } from '@vef-framework-react/components';
+
+export default function Demo() {
+  return <StoredFileUpload maxCount={3} value={['priv/2026/09/01/a.pdf']} onChange={console.log} />;
+}
+```
+
+Use `FileUpload` when you want to control antd's `fileList` yourself; use `StoredFileUpload` when your persistent value is storage keys.
+
 ## API
 
 ### FileUploadProps
@@ -90,6 +104,15 @@ Extends Ant Design `UploadProps` (see [`Upload`](./upload.md)) minus `customRequ
 | `onUploadError` | `(file: File, error: UploadError) => void` | — | Fires when a file fails terminally (including aborts) |
 
 For all other props (`listType`, `maxCount`, `enableCrop`, `pastable`, `multiple`, `accept`, `beforeUpload`, …), see the [`Upload`](./upload.md) documentation.
+
+### StoredFileUploadProps
+
+Extends `FileUploadProps`, replacing `fileList` / `defaultFileList` / `onChange` with:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `value` | `StoredFileValue` | A storage object key, an array of keys, or the empty shape (`null` / `[]`) |
+| `onChange` | `(value: StoredFileValue) => void` | Emits one key when `maxCount` is `1`, otherwise an array of keys |
 
 ### UploadedFileMeta
 

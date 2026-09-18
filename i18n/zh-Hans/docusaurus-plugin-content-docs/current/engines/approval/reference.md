@@ -58,9 +58,11 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 
 | 字段 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `pickers` | `Partial<Record<PrincipalKind, FC<PickerProps>>>` | — | 为每种主体类型（`user` / `role` / `department`）解析具体 id 的选择器。由流程设计器与运行时操作对话框（转办、加签、抄送）共用。未设置的类型降级为纯 id 标签输入。 |
+| `pickers` | `Partial<Record<string, FC<PickerProps>>>` | — | 按规则 kind 解析具体 id 的选择器。查找会回退到该 kind 的 `selection` 模式，因此内置 `user` / `role` / `department` 选择器也能服务选择同类对象的自定义 kind。未设置的 kind 降级为纯 id 标签输入。 |
 | `registries` | `DeviceRegistries` | `createApprovalRegistries()` | 渲染与设计审批表单所用的表单字段注册表。默认取 [`approval-form-bridge`](../../editors/approval-form-bridge.md) 的审批 profile，它排除了后端解析器会拒绝的字段类型。 |
 | `globalSubjects` | `FormFieldDefinition[]` | — | 宿主定义的全局变量，流程设计器的条件编辑器把它们与内置的申请人属性并列提供——实例发起时由服务端从 `Instance.Globals` 解析。 |
+| `dataSourceResolver` | `DataSourceResolver` | — | 把表单的远程数据源请求解析为选项；未设置时，审批表单中的远程源渲染为空列表。 |
+| `evaluators` | `LinkageEvaluators` | 内置 JavaScript evaluator | 覆盖表单联动和绑定数据源参数中的表达式 / 脚本求值。 |
 | `renderBusinessRef` | `(businessRef: string) => ReactNode` | 纯文本 | 把实例的不透明业务引用渲染为宿主可导航的元素（指向业务记录的链接、抽屉触发器……）。 |
 
 ### `ApprovalProviderProps`
@@ -264,11 +266,12 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 
 ### `PrincipalSelect`
 
-主体（用户 / 角色 / 部门）选择字段: 当 `ApprovalProvider` 为该类型接入了宿主选择器时渲染宿主选择器，否则降级为纯 id 标签输入，让外层对话框保持可用。
+主体选择字段: 当 `ApprovalProvider` 为规则 kind 或其 selection 模式接入了宿主选择器时渲染宿主选择器，否则降级为纯 id 标签输入，让外层对话框保持可用。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `kind` | `PrincipalKind` | — | 选取哪种主体。 |
+| `kind` | `string` | — | 规则的 kind；第一层 picker 查找键。 |
+| `selection` | `SelectionMode` | — | 该 kind 选取的对象；回退 picker 查找键。 |
 | `value` | `string[]` | — | 选中的 id。 |
 | `onChange` | `(ids: string[]) => void` | — | 选择处理函数。 |
 | `disabled` | `boolean` | — | 禁用该字段。 |
@@ -499,8 +502,10 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 
 | 类型 | 结构 | 文档位置 |
 | --- | --- | --- |
-| `EditorPlugins` | `{ pickers?, formFields?, globalSubjects? }` | [审批流编辑器——宿主集成](../../editors/approval-flow-editor/host-integration.md) |
+| `EditorPlugins` | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects? }` | [审批流编辑器——宿主集成](../../editors/approval-flow-editor/host-integration.md) |
 | `PickerProps` | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }` | [审批流编辑器——参考](../../editors/approval-flow-editor/reference.md) |
 | `PrincipalKind` | `"user" \| "role" \| "department"` | [审批流编辑器——参考](../../editors/approval-flow-editor/reference.md) |
+| `KindDescriptor` | `{ kind: string; label: string; selection: SelectionMode }` | [审批流编辑器——参考](../../editors/approval-flow-editor/reference.md) |
+| `SelectionMode` | `"none" \| "user" \| "role" \| "department" \| "form_field" \| "custom"` | [审批流编辑器——参考](../../editors/approval-flow-editor/reference.md) |
 
 页面 prop 类型（`ApprovalTaskCenterPageProps`、`ApprovalMyInstancesPageProps`、`ApprovalInitiatePageProps`、`ApprovalCategoryPageProps`、`ApprovalFlowPageProps`、`ApprovalDelegationPageProps`、`ApprovalAdminPageProps`、`FlowDesignerDrawerProps`、`FlowVersionsDrawerProps`、`StartInstanceDrawerProps`）与各自组件一同导出——它们的表格见[页面](./pages.md)。

@@ -76,7 +76,17 @@ function createLayoutRouteOptions<TBeforeLoadContext = {}, TLoaderData = void>(o
 function createLoginRouteOptions(props: LoginProps): RouteOptions;
 ```
 
-登录路由辅助函数，处理带重定向感知的登录流程（`?redirect=` 查询参数，已认证时跳过登录页）。`props` 与内部 `Login` 组件渲染时使用的形状相同——参见[应用壳层](./application-shell.md#登录)。
+登录路由辅助函数，处理带重定向感知的登录流程（`?redirect=` 查询参数，已认证时跳过登录页）。`props` 与 `Login` 组件渲染时使用的形状相同——参见[应用壳层](./application-shell.md#登录)。
+
+也可以传入 `{ component }` 来替换页面，同时保留路由的 redirect 契约与已认证守卫。自定义组件自行调用 `useLoginFlow`；默认页面的 props 不能与 `component` 同时传入。
+
+## `createSsoRouteOptions`
+
+```ts
+function createSsoRouteOptions(options: SsoLoginProps | { component: () => ReactNode }): RouteOptions;
+```
+
+`/sso` 的单点登录路由辅助函数。默认渲染 `SsoLogin`；传入 `{ component }` 可换成调用 `useSsoLogin` 的自定义落地页。该路由原样透传网关查询参数，并有意不在已认证时直接跳转，因为 handoff 可能指向另一个用户。
 
 ## `createAccessDeniedRouteOptions`
 

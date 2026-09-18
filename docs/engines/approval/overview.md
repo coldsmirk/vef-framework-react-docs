@@ -73,7 +73,7 @@ The flow designer inside [`ApprovalFlowPage`](./pages.md#approvalflowpage) is a 
 
 `toEditorPlugins(plugins, formFields)` projects the approval plugin set into the flow editor's `EditorPlugins` shape, layering the deploy-derived form fields on top. So hosts configure **one** plugin object and both editors see it.
 
-Because the pickers contract belongs to the flow editor, this package re-exports the types a host needs to implement them — `EditorPlugins`, `PickerProps`, and `PrincipalKind` from `@vef-framework-react/approval-flow-editor` — so wiring the provider needs imports from this package alone.
+Because the pickers and kind-catalog contracts belong to the flow editor, this package re-exports the types a host needs to implement them — `EditorPlugins`, `PickerProps`, `PrincipalKind`, `KindDescriptor`, and `SelectionMode` from `@vef-framework-react/approval-flow-editor` — so wiring the provider needs imports from this package alone.
 
 On submit the wizard runs one chain against `useFlowApi`: `create`/`update` → `deploy` (a new draft `FlowVersion` carrying `flowSchema`, the opaque `formSchema`, and the derived `formFields`) → optional `publish_version`. Publishing archives the previously published version; running instances keep the version they started on.
 

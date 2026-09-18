@@ -13,7 +13,7 @@ description: "@vef-framework-react/starter 涵盖的内容，以及在启动、�
 2. 路由（`createRouter`、路由选项辅助函数）
 3. 应用级状态（`useAppStore`、`useTabStore`、`useThemeStore`）
 
-应用壳层本身——根应用、布局、登录及状态页（`App`、`Layout`、`Login`、`AccessDenied`、`Error`、`NotFound`、`NProgress` 及相关组件）——是**内部**实现：均未从该包导出。它完全通过上述函数进行配置；各函数所接受的选项形状参见[应用壳层](./application-shell.md)。唯一*确实*导出的壳层部件是内置的 `PasswordChangeChallenge` 登录挑战渲染器，由宿主自行注册——参见[登录挑战](./application-shell.md#登录挑战)。
+根应用与布局壳层（`App`、`BaseLayout`、`Layout`、`AccessDenied`、`Error`、`NotFound`、`RouterProvider`、`NProgress`）是**内部**实现，并通过上述函数配置；参见[应用壳层](./application-shell.md)。登录相关能力面向自定义页面导出：`Login`、`SsoLogin`、`LoginChallengeOutlet`、`useLoginFlow`、`useSsoLogin`、挑战渲染器及其类型。`ThemeConfigProvider` 也面向自定义壳层导出。
 
 页面级容器、表单弹窗、表格以及 CRUD 体系位于 `@vef-framework-react/components` 中——参见 [Components / CRUD](../../components/crud.md)。
 
@@ -31,7 +31,9 @@ description: "@vef-framework-react/starter 涵盖的内容，以及在启动、�
 - `createRootRouteOptions`
 - `createLayoutRouteOptions`
 - `createLoginRouteOptions`
+- `createSsoRouteOptions`
 - `createAccessDeniedRouteOptions`
 - `setupAppVersionNotification`
 - `PasswordChangeChallenge` / `PASSWORD_CHANGE_CHALLENGE_TYPE`
+- `Login` / `SsoLogin` / `useLoginFlow` / `useSsoLogin`
 - `useAppStore` / `useTabStore` / `useThemeStore`

@@ -54,7 +54,11 @@ Batch parameter helper:
 - `AppCustomState` — the shape of `AppState.custom`; defaults to `AnyObject`, narrowed via `Register['appCustomState']`
 - `ChallengeSpec` — `{ data?: unknown; response: unknown }`, the contract for one login challenge type
 - `ResolvedChallenges` — the challenge-type registry resolved from `Register['challenges']`, or an open `Record<string, ChallengeSpec>` when not augmented
-- `Register` — empty interface that projects augment via `declare module` to refine `UserInfo['details']`, `AppState.custom`, `UserMenuMeta`, and the login challenge registry. For the built-in `password_change` challenge, register `PasswordChangeChallengeSpec` under `PASSWORD_CHANGE_CHALLENGE_TYPE` — see [Login challenges](./application-shell.md#login-challenges)
+- `Register` — empty interface that projects augment via `declare module` to refine `UserInfo['details']`, `AppState.custom`, `UserMenuMeta`, `loginParams`, and the login challenge registry. For the built-in `password_change` challenge, register `PasswordChangeChallengeSpec` under `PASSWORD_CHANGE_CHALLENGE_TYPE` — see [Login challenges](./application-shell.md#login-challenges)
+- `LoginParams` — `PasswordLoginParams | TrustCodeLoginParams` plus project-registered login mechanisms
+- `PasswordLoginParams` — `{ type: "password"; principal: string; credentials: string }`
+- `TrustCodeLoginParams` — `{ type: "trust_code"; principal: string; credentials: string }`; `principal` is the initiating app id
+- `LoginChallengeAutoResolver` / `LoginChallengeAutoResolvers` — optional per-type callbacks that answer a challenge from data the page already holds
 - `UserDetails` — fallback shape (`Record<string, unknown>`) when `Register['userDetails']` is not augmented
 - `OrderSpec` — `{ column: string; direction: "asc" | "desc" }`
 

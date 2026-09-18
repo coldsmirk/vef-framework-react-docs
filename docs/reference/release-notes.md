@@ -43,6 +43,82 @@ No breaking changes.
 - **core** — `HttpClientOptions.protectedBodyEncoding` enables mandatory bidirectional `aes-gcm+base64` JSON body transport. It uses the browser Web Crypto API, matches the Go framework's nonce/ciphertext/tag wire layout, takes precedence over legacy body encodings, and rejects unmarked or mismatched protected responses. See [HTTP and API Client](./core/http-and-api.md#protected-body-transport).
 - **starter** — `starter.createApiClient()` accepts `protectedBodyEncoding` and forwards it to the core HTTP client.
 
+## v2.20.0 (2026-09-07)
+
+No breaking changes.
+
+### Features
+
+- **approval-form-bridge** — remote option sources project onto the approval contract as `optionSource` (`{ kind: "remote", request, mapping? }`), while static options continue to project as `options`. The backend accepts any submitted value for a remote-source select and lets the host validate it at runtime.
+- **form-editor** — a large correctness pass covers remote select filtering by label, upload-column inference by file count, bound data-source parameter scoping, submit payloads, optional rules, assign resets, history/device tracking, key repair, schema patching, validation surfacing, and stable field keys across device designs.
+
+## v2.19.0 (2026-09-01)
+
+One breaking change: form-editor remote data-source parameters are now dynamic values bound to the form.
+
+### Breaking changes
+
+- **form-editor** — `RemoteDataSourceRequest.params` entries are `DynamicValue`s. A parameter can read form values and, inside a subform, the current row's value scope. Hosts that hand-built a request with static parameter values keep working; resolvers that assumed every parameter was static must evaluate the dynamic value before use.
+
+### Features
+
+- **form-editor** — the upload field stores object keys (`null` for one empty file slot, `[]` for an empty multi-file slot) and infers its storage column from `maxCount`.
+- **components** — `StoredFileUpload` is exported. It controls `FileUpload` with storage object keys, hydrates saved keys into an upload list, resolves their original filenames, and emits one key or an array according to `maxCount`.
+
+## v2.18.0 (2026-08-31)
+
+One breaking change: the approval flow designer's principal vocabulary is driven by the application's registered catalog.
+
+### Breaking changes
+
+- **approval-flow-editor** — `AssigneeKind` and `CcKind` are open `string` identifiers rather than closed unions. `EditorPlugins` adds `assigneeKinds` and `ccKinds` (`KindDescriptor[]`), and `pickers` is keyed by kind string. Pass the catalog served by `approval/flow.list_kind_options`; when omitted, the editor falls back to `BUILTIN_ASSIGNEE_KINDS` / `BUILTIN_CC_KINDS`. A picker lookup tries the rule's kind first, then its `selection` mode, so a custom kind that selects roles can reuse the built-in `role` picker.
+
+### Features
+
+- **approval-flow-editor** — `SelectionMode` and `KindDescriptor` are exported, and the validation API takes a `FlowValidationContext` containing `formFields`, `assigneeKinds`, and `ccKinds`.
+- **approval** — `ApprovalPlugins.pickers` follows the same kind-first/selection-fallback lookup, and `KindDescriptor` / `SelectionMode` are re-exported.
+
+## v2.17.2 (2026-08-26)
+
+No breaking changes.
+
+### Features
+
+- **approval-flow-editor** — condition values for built-in applicant subjects (`applicantId`, `applicantDepartmentId`) use the host's `user` / `department` pickers instead of requiring ids to be typed manually.
+
+## v2.17.1 (2026-08-25)
+
+No breaking changes.
+
+### Fixes worth knowing
+
+- **components** — public upload previews restore image thumbnails by using the object's public source URL for `thumbUrl` while keeping it off antd's navigable `url`.
+
+## v2.17.0 (2026-08-20)
+
+No breaking changes.
+
+### Features
+
+- **starter** — `useLoginFlow` exports the presentation-free login state machine: credential submission, the challenge loop, RSA encryption, error normalization, store updates, and post-authentication navigation.
+- **starter** — `LoginParams` is an open union through `Register['loginParams']`; the framework ships `PasswordLoginParams` and `TrustCodeLoginParams`.
+- **starter** — `LoginChallengeAutoResolver` / `LoginChallengeAutoResolvers` can answer selected challenges from data the page already holds. Each type is attempted once, and a rejected silent answer falls back to its renderer.
+- **starter** — the single sign-on landing page, route helper, constants, `useSsoLogin`, and `readTrustCodeHandoff` are exported. The handoff is read once, removed from the address bar before exchange, and can still run the full challenge chain.
+- **starter** — `createLoginRouteOptions` and `createSsoRouteOptions` accept either the default page's props or an application-supplied `component`; a custom page uses `useLoginFlow` / `useSsoLogin` while keeping the route's redirect and authentication guards.
+
+### Fixes worth knowing
+
+- **starter** — client logout clears the stale menu path set before route guards can read it.
+- **core** — transport-encoded request bodies are sent to the wire verbatim.
+
+## v2.16.0 (2026-08-18)
+
+No breaking changes.
+
+### Features
+
+- **approval-flow-editor** — `SameApplicantAction` adds `"exclude"`: when the applicant appears among resolved assignees, they recuse their own seat and the remaining approvers decide. The action applies per seat; `auto_pass` and `transfer_superior` likewise affect only the applicant's task.
+
 ## v2.15.0 (2026-08-07)
 
 No breaking changes.

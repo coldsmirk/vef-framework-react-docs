@@ -13,7 +13,7 @@ It mainly covers three areas:
 2. routing (`createRouter`, the route-option helpers)
 3. app-level state (`useAppStore`, `useTabStore`, `useThemeStore`)
 
-The application shell itself — the root app, layouts, login, and status pages (`App`, `Layout`, `Login`, `AccessDenied`, `Error`, `NotFound`, `NProgress`, and friends) — is **internal**: none of it is exported from the package. It is configured entirely through the functions above; see [Application Shell](./application-shell.md) for the option shapes each one accepts. The one shell piece that *is* exported is the built-in `PasswordChangeChallenge` login-challenge renderer, which hosts register themselves — see [Login challenges](./application-shell.md#login-challenges).
+The root application and layout shell (`App`, `BaseLayout`, `Layout`, `AccessDenied`, `Error`, `NotFound`, `RouterProvider`, `NProgress`) is **internal** and configured through the helpers above; see [Application Shell](./application-shell.md). The login surface is exported for custom screens: `Login`, `SsoLogin`, `LoginChallengeOutlet`, `useLoginFlow`, `useSsoLogin`, the challenge renderer, and their types. `ThemeConfigProvider` is also exported for custom shells.
 
 Page-level containers, form dialogs, tables, and the CRUD stack live in `@vef-framework-react/components` — see [Components / CRUD](../../components/crud.md).
 
@@ -31,7 +31,9 @@ Page-level containers, form dialogs, tables, and the CRUD stack live in `@vef-fr
 - `createRootRouteOptions`
 - `createLayoutRouteOptions`
 - `createLoginRouteOptions`
+- `createSsoRouteOptions`
 - `createAccessDeniedRouteOptions`
 - `setupAppVersionNotification`
 - `PasswordChangeChallenge` / `PASSWORD_CHANGE_CHALLENGE_TYPE`
+- `Login` / `SsoLogin` / `useLoginFlow` / `useSsoLogin`
 - `useAppStore` / `useTabStore` / `useThemeStore`

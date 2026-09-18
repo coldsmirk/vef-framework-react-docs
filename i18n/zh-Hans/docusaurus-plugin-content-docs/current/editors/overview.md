@@ -32,7 +32,7 @@ flowchart LR
 
 每个包都可以独立使用: `approval-flow-editor` 只需要一个 `FormFieldDefinition[]` 数组（手写的，或以任何其他方式获取的都行），并不特别依赖这个桥接包；`form-editor` 完全不依赖任何审批相关的包。只有当宿主要构建端到端的审批流设计器时，三者才会组合成一条流水线——就像 `@vef-framework-react/approval-flow-editor` 自己的 playground 向导演示那样。
 
-若想要这套组合的"开箱即用"版本，[审批引擎](../engines/approval/overview.md)相关页面（`@vef-framework-react/approval`，v2.15.0）把这三个包全部内嵌在引擎的持久化链路之后——其流程设计器向导负责把这些编辑器串接起来，并从 `approval-flow-editor` 重导出选择器契约类型（`EditorPlugins`、`PickerProps`、`PrincipalKind`）。
+若想要这套组合的"开箱即用"版本，[审批引擎](../engines/approval/overview.md)相关页面（`@vef-framework-react/approval`，v2.15.0）把这三个包全部内嵌在引擎的持久化链路之后——其流程设计器向导负责把这些编辑器串接起来，并从 `approval-flow-editor` 重导出选择器与 kind 目录契约类型（`EditorPlugins`、`PickerProps`、`PrincipalKind`、`KindDescriptor`、`SelectionMode`）。
 
 ## 从哪里开始
 

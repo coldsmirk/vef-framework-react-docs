@@ -76,7 +76,17 @@ Layout-route helper for:
 function createLoginRouteOptions(props: LoginProps): RouteOptions;
 ```
 
-Login-route helper that handles redirect-aware login flow (`?redirect=` search param, skips the login page when already authenticated). `props` is the same shape the internal `Login` component renders with — see [Application Shell](./application-shell.md#login).
+Login-route helper that handles redirect-aware login flow (`?redirect=` search param, skips the login page when already authenticated). `props` is the same shape the `Login` component renders with — see [Application Shell](./application-shell.md#login).
+
+Alternatively, pass `{ component }` to replace the page while keeping the route's redirect contract and already-authenticated guard. The custom component calls `useLoginFlow` itself; default-page props cannot be combined with `component`.
+
+## `createSsoRouteOptions`
+
+```ts
+function createSsoRouteOptions(options: SsoLoginProps | { component: () => ReactNode }): RouteOptions;
+```
+
+Single-sign-on route helper for `/sso`. By default it renders `SsoLogin`; pass `{ component }` for a custom landing page that calls `useSsoLogin`. The route passes the gateway's query parameters through and deliberately does not bounce an already-authenticated visitor, because the handoff may name a different user.
 
 ## `createAccessDeniedRouteOptions`
 

@@ -1,6 +1,6 @@
 ---
 title: Host Integration
-description: Wiring principal pickers, form field metadata, global subjects, condition operators, and validation into ApprovalFlowEditor.
+description: Wiring principal pickers, kind catalogs, form field metadata, global subjects, condition operators, and validation into ApprovalFlowEditor.
 ---
 
 # Host Integration
@@ -19,6 +19,8 @@ const [definition, setDefinition] = useState<FlowDefinition>(initialValue);
 
 const plugins: EditorPlugins = {
   pickers: { user: UserPicker, role: RolePicker, department: DepartmentPicker },
+  assigneeKinds: servedKindOptions.assignees,
+  ccKinds: servedKindOptions.ccs,
   formFields: [
     { key: "amount", kind: "number", label: "Amount" },
     { key: "reason", kind: "textarea", label: "Reason" }
@@ -28,11 +30,13 @@ const plugins: EditorPlugins = {
 <ApprovalFlowEditor plugins={plugins} value={definition} onChange={setDefinition} />;
 ```
 
-`EditorPlugins` has three optional fields:
+`EditorPlugins` has five optional fields:
 
 | Field | Type | Purpose |
 | --- | --- | --- |
-| `pickers` | `Partial<Record<PrincipalKind, FC<PickerProps>>>` | Resolves concrete ids for `user` / `role` / `department` assignees and CC recipients. A kind left unset degrades gracefully to an inline hint instead of a picker. |
+| `pickers` | `Partial<Record<string, FC<PickerProps>>>` | Resolves concrete ids, keyed by rule kind. Lookup falls back to the kind's `selection` mode, so the built-in `user` / `role` / `department` pickers also serve custom kinds that select the same thing. |
+| `assigneeKinds` | `ReadonlyArray<KindDescriptor<AssigneeKind>>` | The assignee catalog served by `approval/flow.list_kind_options`; omitting it uses `BUILTIN_ASSIGNEE_KINDS`. |
+| `ccKinds` | `ReadonlyArray<KindDescriptor<CcKind>>` | The CC catalog served by the same backend action; omitting it uses `BUILTIN_CC_KINDS`. |
 | `formFields` | `FormFieldDefinition[]` | The form's top-level field inventory — feeds the condition editor, the field-permission table, and `validateFlowDefinition`'s `fieldPermissions` cross-check. Leaving it `undefined` means "no inventory available" and is distinct from `[]` — see [`formFields`](#formfields) below. |
 | `globalSubjects` | `FormFieldDefinition[]` | Host-declared variables the condition editor offers alongside the built-in applicant attributes and `formFields`. |
 
@@ -73,6 +77,17 @@ function createUserPicker(): FC<PickerProps> {
 ```
 
 `isPrincipalKind` and `PRINCIPAL_KINDS` (`["user", "role", "department"]`) are exported for hosts that need to build the picker map or a settings UI generically, without re-hardcoding the three kinds.
+
+### Kind catalogs
+
+Each `KindDescriptor` is `{ kind, label, selection }`. `selection` decides what the designer collects for a rule:
+
+- `"none"` — nothing; the backend resolves the kind from runtime context.
+- `"user"` / `"role"` / `"department"` — ids through the matching picker.
+- `"form_field"` — a field key.
+- `"custom"` — ids through the picker registered under the rule's own kind.
+
+Pass the application's served catalog whenever it registers custom kinds. The built-in catalogs are only the fallback for applications that use the framework's own resolvers.
 
 ### `formFields`
 
@@ -143,20 +158,20 @@ const definition = toFlowDefinition(nodes, edges); // live graph → wire (detac
 ```ts
 import { validateFlowDefinition } from "@vef-framework-react/approval-flow-editor";
 
-const errors = validateFlowDefinition(definition, formFields);
+const errors = validateFlowDefinition(definition, { formFields, assigneeKinds, ccKinds });
 // errors: FlowValidationError[] — empty means the flow is deploy-ready
 ```
 
 Mirrors the backend's deploy-time `ValidateFlowDefinition` rule-for-rule — including, since v2.10.0, the field-permission rules (permission values must be in-vocabulary, keys must name real form fields, CC nodes are restricted to `visible`/`hidden`, and a `required` permission must not pair with an auto-pass timeout) — but, unlike the backend, which returns the first error, collects every violation so a host can surface them all at once. A definition that passes this validator passes backend deploy validation.
 
-The second parameter is the [tri-state `formFields` inventory](#formfields): pass the same list handed to `plugins.formFields` so `fieldPermissions` keys are cross-checked against the real field inventory. `[]` means "the form has zero fields" (every permission key errors); omitting the argument means "no inventory available" and skips only the key-existence check.
+The second parameter is a `FlowValidationContext`. Its `formFields` entry is the [tri-state inventory](#formfields): pass the same list handed to `plugins.formFields` so `fieldPermissions` keys are cross-checked against the real field inventory. `[]` means "the form has zero fields" (every permission key errors); omitting the entry means "no inventory available" and skips only the key-existence check. Pass the same assignee and CC catalogs handed to the editor so custom kinds validate instead of being reported as unknown.
 
 Use it to gate a save/deploy action outside the editor's own publish button — for example, disabling a wizard's "next step" control:
 
 ```tsx
 const errors = useMemo(
-  () => validateFlowDefinition(flowDefinition, formFields),
-  [flowDefinition, formFields]
+  () => validateFlowDefinition(flowDefinition, { formFields, assigneeKinds, ccKinds }),
+  [flowDefinition, formFields, assigneeKinds, ccKinds]
 );
 
 <Button disabled={errors.length > 0} onClick={handleNext}>Next</Button>;

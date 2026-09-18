@@ -58,9 +58,11 @@ Host-integration points shared by every approval page and component. Wrap the ap
 
 | Field | Type | Default | Description |
 | --- | --- | --- | --- |
-| `pickers` | `Partial<Record<PrincipalKind, FC<PickerProps>>>` | — | Pickers that resolve concrete ids for each principal kind (`user` / `role` / `department`). Shared by the flow designer and the runtime action dialogs (transfer, add assignee, CC). A kind left unset degrades to a plain id-tags input. |
+| `pickers` | `Partial<Record<string, FC<PickerProps>>>` | — | Pickers that resolve concrete ids, keyed by rule kind. Lookup falls back to the kind's `selection` mode, so the built-in `user` / `role` / `department` pickers also serve custom kinds that select the same thing. A kind left unset degrades to a plain id-tags input. |
 | `registries` | `DeviceRegistries` | `createApprovalRegistries()` | Form field registries for rendering and designing approval forms. Defaults to the approval profile from [`approval-form-bridge`](../../editors/approval-form-bridge.md), which excludes the field types the backend parser rejects. |
 | `globalSubjects` | `FormFieldDefinition[]` | — | Host-defined global subjects the flow designer's condition editor offers alongside the built-in applicant attributes — resolved server-side from `Instance.Globals` at instance start. |
+| `dataSourceResolver` | `DataSourceResolver` | — | Resolves a form's remote data-source requests into options; without it remote approval-form sources render as empty lists. |
+| `evaluators` | `LinkageEvaluators` | built-in JavaScript evaluator | Overrides expression/script evaluation for form linkage and bound data-source parameters. |
 | `renderBusinessRef` | `(businessRef: string) => ReactNode` | plain text | Renders an instance's opaque business reference as a host-navigable element (a link to the business record, a drawer trigger, …). |
 
 ### `ApprovalProviderProps`
@@ -264,11 +266,12 @@ The read-only, progress-annotated map of an instance's flow: node positions come
 
 ### `PrincipalSelect`
 
-A principal (user / role / department) selection field: renders the host's picker from `ApprovalProvider` when one is wired for the kind, else degrades to a plain id-tags input so the surrounding dialog stays functional.
+A principal selection field: renders the host's picker from `ApprovalProvider` when one is wired for the rule's kind or its selection mode, else degrades to a plain id-tags input so the surrounding dialog stays functional.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `kind` | `PrincipalKind` | — | Which principal kind to pick. |
+| `kind` | `string` | — | The rule's kind; the first picker lookup key. |
+| `selection` | `SelectionMode` | — | What the kind selects; the fallback picker lookup key. |
 | `value` | `string[]` | — | Selected ids. |
 | `onChange` | `(ids: string[]) => void` | — | Selection handler. |
 | `disabled` | `boolean` | — | Disable the field. |
@@ -499,8 +502,10 @@ The picker contract hosts implement for `ApprovalPlugins.pickers`, re-exported s
 
 | Type | Shape | Documented at |
 | --- | --- | --- |
-| `EditorPlugins` | `{ pickers?, formFields?, globalSubjects? }` | [Approval Flow Editor — Host Integration](../../editors/approval-flow-editor/host-integration.md) |
+| `EditorPlugins` | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects? }` | [Approval Flow Editor — Host Integration](../../editors/approval-flow-editor/host-integration.md) |
 | `PickerProps` | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }` | [Approval Flow Editor — Reference](../../editors/approval-flow-editor/reference.md) |
 | `PrincipalKind` | `"user" \| "role" \| "department"` | [Approval Flow Editor — Reference](../../editors/approval-flow-editor/reference.md) |
+| `KindDescriptor` | `{ kind: string; label: string; selection: SelectionMode }` | [Approval Flow Editor — Reference](../../editors/approval-flow-editor/reference.md) |
+| `SelectionMode` | `"none" \| "user" \| "role" \| "department" \| "form_field" \| "custom"` | [Approval Flow Editor — Reference](../../editors/approval-flow-editor/reference.md) |
 
 Page prop types (`ApprovalTaskCenterPageProps`, `ApprovalMyInstancesPageProps`, `ApprovalInitiatePageProps`, `ApprovalCategoryPageProps`, `ApprovalFlowPageProps`, `ApprovalDelegationPageProps`, `ApprovalAdminPageProps`, `FlowDesignerDrawerProps`, `FlowVersionsDrawerProps`, `StartInstanceDrawerProps`) are exported alongside their components — see [Pages](./pages.md) for their tables.

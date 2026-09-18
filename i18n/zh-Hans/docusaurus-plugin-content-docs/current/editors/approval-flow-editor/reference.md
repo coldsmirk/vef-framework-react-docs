@@ -29,11 +29,14 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 
 | 导出 | 种类 | 说明 |
 | --- | --- | --- |
-| `EditorPlugins` | type | `{ pickers?, formFields?, globalSubjects? }`——见 [宿主集成](./host-integration.md#plugins-editorplugins)。 |
+| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects? }`——见 [宿主集成](./host-integration.md#plugins-editorplugins)。 |
 | `PickerProps` | type | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }`。 |
 | `PrincipalKind` | type | `"user" \| "role" \| "department"`。 |
 | `PRINCIPAL_KINDS` | const | `readonly ["user", "role", "department"]`。 |
 | `isPrincipalKind` | fn | `(kind: string) => kind is PrincipalKind`。 |
+| `KindDescriptor` | type | `{ kind: string; label: string; selection: SelectionMode }`。 |
+| `SelectionMode` | type | `"none" \| "user" \| "role" \| "department" \| "form_field" \| "custom"`。 |
+| `BUILTIN_ASSIGNEE_KINDS` / `BUILTIN_CC_KINDS` | const | 宿主未提供服务目录时使用的框架内置 kind 目录。 |
 
 ## 流程定义（wire 格式）
 
@@ -82,9 +85,9 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 | 导出 | 结构 |
 | --- | --- |
 | `AssigneeDefinition` | `{ kind: AssigneeKind; ids?: string[]; formField?: string; sortOrder: number }` |
-| `AssigneeKind` | `PrincipalKind \| "self" \| "superior" \| "department_leader" \| "form_field"` |
+| `AssigneeKind` | `string`——设计为开放标识符；可部署值是后端注册了 `approval.AssigneeResolver` 的 kind |
 | `CcDefinition` | `{ kind: CcKind; ids?: string[]; formField?: string; timing?: CcTiming }` |
-| `CcKind` | `PrincipalKind \| "form_field"` |
+| `CcKind` | `string`——设计为开放标识符；可部署值是后端注册了 `approval.CCResolver` 的 kind |
 | `CcTiming` | `"always" \| "on_approve" \| "on_reject"` |
 | `FieldPermission` | `"visible" \| "editable" \| "hidden" \| "required"` |
 | `CcFieldPermission` | `"visible" \| "hidden"`——CC 节点只能观察表单，因此不提供 editable / required |
@@ -109,7 +112,7 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 | `PassRule` | `"all" \| "any" \| "ratio"`——`"all"` 意味着有一票否决权 |
 | `EmptyAssigneeAction` | `"auto_pass" \| "transfer_admin" \| "transfer_superior" \| "transfer_applicant" \| "transfer_specified"` |
 | `ExecutionType` | `"manual" \| "auto_pass" \| "auto_reject"` |
-| `SameApplicantAction` | `"auto_pass" \| "self_approve" \| "transfer_superior"` |
+| `SameApplicantAction` | `"auto_pass" \| "self_approve" \| "transfer_superior" \| "exclude"`——作用于发起人自己的席位；`exclude` 让该席位回避，由其余办理人决定 |
 | `RollbackType` | `"none" \| "previous" \| "start" \| "any" \| "specified"` |
 | `RollbackDataStrategy` | `"clear" \| "keep"` |
 | `ConsecutiveApproverAction` | `"none" \| "auto_pass"` |
@@ -121,9 +124,11 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 ```ts
 function validateFlowDefinition(
   definition: FlowDefinition,
-  formFields?: FormFieldDefinition[]
+  context?: FlowValidationContext
 ): FlowValidationError[];
 ```
+
+`FlowValidationContext` 的结构是 `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[] }`。省略 kind 目录时回退到框架内置目录；注册了应用自定义 kind 的宿主必须传入 `approval/flow.list_kind_options` 返回的目录。
 
 `FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`。`message` 是与编辑器 UI 语言一致的人类可读中文产品文案；请针对 `code` 和各个 id 字段编程。
 
