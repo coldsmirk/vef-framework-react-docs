@@ -114,7 +114,7 @@ The operations console, tabbed with each tab gated by its own permission and hid
 | --- | --- | --- |
 | 脚本调试台 | The dry-run workbench (below) | shown if the caller has either dry-run code; the run button gates per direction |
 | 路由诊断 | On-demand routing diagnosis: run, then read findings grouped by kind (dangling adapter, wildcard gap, disabled system/contract, uncovered contract) | `integration.ops.diagnose_routes` |
-| 调用日志 | The invocation log list (time, system, contract, direction, result, duration, request id) with system/contract/direction/failure-kind filters; rows open a detail drawer with input/output JSON, the highlighted wire trace, and the error | `integration.log.query` |
+| 调用日志 | The invocation log list (time, system, contract, direction, result, duration, request id) with system/contract/direction/failure-kind filters; rows open a detail drawer with input/output JSON, the highlighted wire trace, the error, and a replay panel (below) | `integration.log.query`; replaying also needs `integration.log.replay` |
 | 运行统计 | Per-node aggregates since process start for each (system, contract, direction) tuple: calls, successes, failure distribution by kind, avg/max duration, last error — with a refresh button | `integration.log.query` (the `statsView` override) |
 
 The **dry-run workbench** is a request → result split (side-by-side, stacking when narrow; both halves scroll internally):
@@ -124,10 +124,17 @@ The **dry-run workbench** is a request → result split (side-by-side, stacking 
 - Outbound input: the contract input as JSON. Inbound input: a synthetic vendor request (method, path, headers, query, raw body) plus the handler's sample output (JSON).
 - Results: outbound shows the contract output and the wire-trace timeline (populated even when the run failed, so you see how far the script got); inbound shows the reply the vendor would receive and what the script dispatched — both translation directions verified at once. A failure-kind tag classifies errors; results reset the moment the system, contract, or direction changes.
 
+**Replay** re-runs a recorded invocation against the current definitions and lays the outcome beside the original — status, duration, error, input, and output side by side, then the replay's wire trace:
+
+- It needs a replay payload: an entry recorded without one (`replayable: false` — the backend keeps payloads only with `vef.integration.log.replay` on) shows a notice instead of the button.
+- An *outbound* replay re-executes with the original input and really calls the external system, so it asks for confirmation first; it writes neither statistics nor invocation logs. An *inbound* replay re-runs the inbound script on the original request, skips signature verification, and answers with the business handler's original result, so the business is never executed twice.
+- 使用临时脚本 replays with unsaved script content instead of the saved adapter; left empty, the saved script runs.
+- When the contract, system, or adapter changed after the original invocation, a warning says a different outcome may stem from that edit.
+
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `permissions` | `{ dryRun?, dryRunInbound?, diagnoseRoutes?, logQuery?, statsView? }` (all `string`) | `ops.dry_run`, `ops.dry_run_inbound`, `ops.diagnose_routes`, `log.query`, `log.query` | Override the permission codes gating each console tab. Note `statsView` defaults to the **log** query code — the stats endpoint lives on `sys/monitor`. |
+| `permissions` | `{ dryRun?, dryRunInbound?, diagnoseRoutes?, logQuery?, logReplay?, statsView? }` (all `string`) | `ops.dry_run`, `ops.dry_run_inbound`, `ops.diagnose_routes`, `log.query`, `log.replay`, `log.query` | Override the permission codes gating each console tab, and `logReplay` the replay action inside the log detail. Note `statsView` defaults to the **log** query code — the stats endpoint lives on `sys/monitor`. |
 | `title` | `ReactNode` | — | Optional page title. |
 
-- **Endpoints:** `integration/ops.dry_run`, `.dry_run_inbound`, `.diagnose_routes`; `integration/log.find_page`; `sys/monitor.get_integration_stats`; `integration/system.find_all`, `integration/contract.find_all` (directories).
+- **Endpoints:** `integration/ops.dry_run`, `.dry_run_inbound`, `.diagnose_routes`; `integration/log.find_page`, `.replay`; `sys/monitor.get_integration_stats`; `integration/system.find_all`, `integration/contract.find_all` (directories).
 - **Playground route:** `/sys/integration-console`.

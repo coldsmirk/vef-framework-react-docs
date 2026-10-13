@@ -66,4 +66,4 @@ export const Route = createFileRoute("/_layout/sys/integration-system")({
 
 ## 权限模型
 
-`INTEGRATION_PERMISSIONS` 逐字镜像后端权限码: 每个 CRUD 领域（`contract`、`system`、`adapter`、`route`、`codeMap`）标准的 `query`/`create`/`update`/`delete`，只读的 `log.query`，以及四个运维码（`ops.dry_run`、`ops.dry_run_inbound`、`ops.test_connection`、`ops.diagnose_routes`）。宿主码集目录端点复用 `codeMap.query`——该目录只为支撑映射编辑器而存在。每个页面都接受 `permissions` 覆盖；见[权限](../../guide/permissions.md)。
+`INTEGRATION_PERMISSIONS` 逐字镜像后端权限码: 每个 CRUD 领域（`contract`、`system`、`adapter`、`route`、`codeMap`）标准的 `query`/`create`/`update`/`delete`，`log.query` 与用于重新运行已记录调用的 `log.replay`，以及四个运维码（`ops.dry_run`、`ops.dry_run_inbound`、`ops.test_connection`、`ops.diagnose_routes`）。宿主码集目录端点复用 `codeMap.query`——该目录只为支撑映射编辑器而存在。每个页面都接受 `permissions` 覆盖；见[权限](../../guide/permissions.md)。

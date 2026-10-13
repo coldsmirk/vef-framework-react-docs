@@ -40,6 +40,7 @@ description: "@vef-framework-react/integration 每一个导出的详尽参考—
 | `codeMap.update` | `integration.code_map.update` | 更新码表 |
 | `codeMap.delete` | `integration.code_map.delete` | 删除码表（含批量） |
 | `log.query` | `integration.log.query` | 调用日志查询（也是控制台运行统计的默认门控） |
+| `log.replay` | `integration.log.replay` | 在日志详情中重放一次已记录的调用 |
 | `ops.dryRun` | `integration.ops.dry_run` | 出站试运行 |
 | `ops.dryRunInbound` | `integration.ops.dry_run_inbound` | 入站试运行 |
 | `ops.testConnection` | `integration.ops.test_connection` | 连接探测 |
@@ -86,11 +87,12 @@ interface CrudApi<TRow extends { id: string }, TParams, TSearch extends AnyObjec
 
 ### `useLogApi`
 
-`() => LogApi`——调用日志的只读查询函数。行携带完整捕获内容，因此详情视图直接读行数据，无需单独请求。
+`() => LogApi`——调用日志资源：分页查询，以及重放。行携带完整捕获内容，因此详情视图直接读行数据，无需单独请求。
 
 | 函数 | 类型 | 操作 |
 | --- | --- | --- |
 | `findPage` | `QueryFunction<PaginationResult<InvocationLog>, PaginatedQueryParams<LogSearch>>` | `integration/log.find_page` |
+| `replay` | `MutationFunction<ReplayResult, ReplayParams>` | `integration/log.replay`——之所以是 mutation，是因为它由命令式触发，而且出站重放的调用是真实发生的；请求体以 `gzip+base64` 发送 |
 
 ### `useOpsApi`
 
@@ -380,8 +382,11 @@ type AuthParamsSpec =
 
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
-| `HttpExchange` | `method: string`、`url: string`、`requestHeaders?: Record<string, string>`、`requestBody?: string`、`status?: number`、`responseHeaders?: Record<string, string>`、`responseBody?: string`、`durationMs: number`、`error?: string` | 适配器脚本运行期间捕获的一次 wire 交换，由调用日志与试运行追踪共用。正文与请求头值经脱敏并截断。 |
-| `InvocationLog` | 继承 `CreationAudited`，加上 `systemCode: string`、`contractCode: string`、`direction: Direction`、`failureKind?: FailureKind \| ""`、`durationMs: number`、`input?: JsonValue`、`output?: JsonValue`、`httpTrace?: HttpExchange[] \| null`、`error?: string \| null`、`requestId: string` | 一次已记录的调用: 分类、耗时，以及脱敏且限长的捕获内容。只读。成功调用的 `failureKind` 为空。 |
+| `HttpExchange` | `method: string`、`url: string`、`requestHeaders?: Record<string, string>`、`requestBody?: string`、`status?: number`、`responseHeaders?: Record<string, string>`、`responseBody?: string`、`durationMs: number`、`error?: string`、`clientAddr?: string` | 适配器脚本运行期间捕获的一次 wire 交换，由调用日志与试运行追踪共用。正文与请求头值经脱敏并截断。`clientAddr` 是调用方的网络地址——只有入站投递才带有它，报文追踪会显示出来。 |
+| `InvocationOutcome` | `failureKind?: FailureKind \| ""`、`durationMs: number`、`input?: JsonValue`、`output?: JsonValue`、`httpTrace?: HttpExchange[] \| null`、`error?: string \| null` | 一次运行（已记录的或重放的）的结果：分类、耗时，以及脱敏且限长的捕获内容。成功运行的 `failureKind` 为空。 |
+| `InvocationLog` | 继承 `CreationAudited` 与 `InvocationOutcome`，加上 `systemCode: string`、`contractCode: string`、`direction: Direction`、`requestId: string`、`replayable: boolean` | 一次已记录的调用。只读。`replayable` 表示是否保留了重放数据（`vef.integration.log.replay`），从而可以重新运行这次调用。 |
+| `ReplayParams` | `id: string`、`script?: string` | 要重新运行的日志条目；`script` 用编辑器中未保存的内容代替已保存的适配器脚本运行。 |
+| `ReplayResult` | 继承 `InvocationOutcome`，加上 `definitionChanged: boolean` | 按当前定义重新运行一次已记录调用的结果，形态与用来对比的日志条目一致。对应 Go 的 `integration.ReplayResult`。若契约、系统或适配器在原始调用之后被修改过，`definitionChanged` 为真，结果差异可能源自这些修改。 |
 | `LogSearch` | `systemCode?`、`contractCode?`（`string`）、`direction?: Direction`、`failureKind?: FailureKind`、`requestId?: string` | — |
 
 ### 运维

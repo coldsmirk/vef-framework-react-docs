@@ -131,6 +131,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `getGraph` | `QueryFunction<FlowGraphBundle, { flowId: string; tenantId?: string; versionId?: string }>` | `get_graph`——默认是最新已发布版本，或 `versionId` 指定的版本（设计器的编辑种子） |
 | `findVersions` | `QueryFunction<FlowVersionSummary[], { flowId: string; tenantId?: string }>` | `find_versions`——不含定义载荷的瘦身摘要（v2.12.0 破坏性变更 `40b6714`） |
 | `findInitiators` | `QueryFunction<FlowInitiator[], { flowId: string; tenantId?: string }>` | `find_initiators` |
+| `listKindOptions` | `QueryFunction<KindOptions, Record<string, never>>` | `list_kind_options`——应用的审批人 / 抄送人 / 发起人 kind 目录，作用于整个应用而非单个流程；流程设计器会获取一次，供发起人编辑器和流程编辑器共用（v2.18.0） |
 
 ### `useDelegationApi`
 
@@ -168,8 +169,8 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `findAvailableFlows` | `QueryFunction<PaginationResult<AvailableFlow>, PaginatedQueryParams<AvailableFlowSearch>>` | `find_available_flows` |
 | `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form`——门控规则与发起实例完全相同；携带实例将要记录的发起人以及对表单可见的全局变量 |
 | `findInitiated` | `QueryFunction<PaginationResult<InitiatedInstance>, PaginatedQueryParams<InitiatedInstanceSearch>>` | `find_initiated` |
-| `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_pending_tasks` |
-| `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_completed_tasks` |
+| `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<PendingTaskSearch>>` | `find_pending_tasks` |
+| `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<CompletedTaskSearch>>` | `find_completed_tasks` |
 | `findCCRecords` | `QueryFunction<PaginationResult<MyCCRecord>, PaginatedQueryParams<MyCCRecordSearch>>` | `find_cc_records` |
 | `getPendingCounts` | `QueryFunction<PendingCounts, { tenantId?: string }>` | `get_pending_counts` |
 | `getInstanceDetail` | `QueryFunction<MyInstanceDetail, { instanceId: string }>` | `get_instance_detail` |
@@ -366,7 +367,8 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `VersionStatus` | `"draft" \| "published" \| "archived"` | 流程版本状态。 |
 | `BindingMode` | `"standalone" \| "business"` | `standalone` 把表单数据存进审批表；`business` 回写到既有业务表。 |
 | `StorageMode` | `"json" \| "table"` | 版本级的表单数据物理存储方式。 |
-| `InitiatorKind` | `"user" \| "role" \| "department"` | 流程发起人规则的类型。 |
+| `InitiatorKind` | `string` | 流程发起人规则的类型。刻意保持开放（v2.18.0）：后端接受每一个注册了 `approval.InitiatorResolver` 的类型，因此可部署的类型以 `approval/flow.list_kind_options` 返回的为准。 |
+| `BUILTIN_INITIATOR_KINDS` | `ReadonlyArray<KindDescriptor<InitiatorKind>>`——`user`（指定用户）、`role`（指定角色）、`department`（指定部门） | 框架自带的发起人类型，在 `list_kind_options` 返回之前提供。部署方自行注册的类型只能通过服务端返回的目录进入设计器。 |
 | `BindingProjectionStatus` | `"pending" \| "processing" \| "applied" \| "failed"` | 一条业务记录投影的收敛状态。 |
 | `FieldPermission` | `"visible" \| "editable" \| "hidden" \| "required"` | 查看者级的字段交互性，与表单渲染器的词汇表一致。 |
 | `InstanceAction` | `"approve" \| "reject" \| "handle" \| "transfer" \| "rollback" \| "withdraw" \| "resubmit" \| "add_assignee" \| "remove_assignee" \| "add_cc" \| "urge"` | `my.get_instance_detail` 可能提供的自助操作，由服务端从状态机、查看者的待处理任务与节点开关派生。 |
@@ -427,6 +429,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
 | `FlowInitiator` | `id: string`、`flowId: string`、`kind: InitiatorKind`、`ids: string[]` | 一条已存储的发起人规则。 |
+| `KindOptions` | `assignees: KindDescriptor<AssigneeKind>[]`、`ccs: KindDescriptor<CcKind>[]`、`initiators: KindDescriptor<InitiatorKind>[]` | 当前运行的应用所接受的类型，由 `approval/flow.list_kind_options` 返回。每一类词汇在后端都是开放的注册表——宿主注册一个解析器即可新增一种类型——因此设计器提供的、部署时校验的，都是这份目录，而不是客户端的联合类型。 |
 | `InitiatorParams` | `kind: InitiatorKind`、`ids: string[]` | 提交形态的发起人规则。 |
 | `CreateFlowParams` | `tenantId`、`code`、`name`、`categoryId`（均为 `string`）、`icon?`、`description?`（`string`）、`labels?: Record<string, string>`、`bindingMode: BindingMode`、`businessBinding?: BusinessBindingConfig`、`adminUserIds?: string[]`、`isAllInitiationAllowed: boolean`、`instanceTitleTemplate: string`、`initiators?: InitiatorParams[]` | `approval/flow.create` 载荷。 |
 | `UpdateFlowParams` | `flowId: string` + 与 create 相同的字段，去掉 `tenantId`/`code` | 省略 `labels` 会清空已存储的集合（整体替换语义）。 |
@@ -468,7 +471,9 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `MyInstanceDetail` | `instance: MyInstanceInfo`、`formSchema?: FormSchema`、`timeline: TimelineEntry[]`、`flowGraph: InstanceFlowGraph`、`availableActions: InstanceAction[]`、`fieldPermissions?: Record<string, FieldPermission>`、`myTask?: ViewerTask` | 完整的自助详情。`fieldPermissions` 对每个顶层表单字段都已物化——按原样应用，不做默认值解析。 |
 | `AvailableFlowSearch` | `tenantId?`、`keyword?`（`string`）、`labels?: Record<string, string>` | — |
 | `InitiatedInstanceSearch` | `tenantId?: string`、`status?: InstanceStatus`、`keyword?: string` | — |
-| `MyTaskSearch` | `tenantId?: string` | 待办与已办任务查询共用。 |
+| `MyTaskSearch` | `tenantId?: string`、`keyword?: string`、`applicantId?: string`、`applicantName?: string`、`flowId?: string` | 两个任务查询共用的筛选条件；每个都是可选的，设置了的条件按 AND 组合。`keyword` 按子串匹配实例标题，`applicantId` 精确匹配申请人（即用户选择器给出的值），`applicantName` 按子串匹配申请人姓名。 |
+| `PendingTaskSearch` | 继承 `MyTaskSearch`，加上 `isTimeout?: boolean`、`createdAtFrom?: string`、`createdAtTo?: string` | `find_pending_tasks` 的搜索条件。到达时间的上下界是闭区间的 `YYYY-MM-DD HH:mm:ss` 时间戳。 |
+| `CompletedTaskSearch` | 继承 `MyTaskSearch`，加上 `status?: TaskStatus`、`instanceStatus?: InstanceStatus`、`finishedAtFrom?: string`、`finishedAtTo?: string` | `find_completed_tasks` 的搜索条件。`status` 是调用者完成该任务的方式，在已完成的状态范围内进一步收窄；完成时间的上下界是闭区间的 `YYYY-MM-DD HH:mm:ss` 时间戳。 |
 | `MyCCRecordSearch` | `tenantId?: string`、`isRead?: boolean` | — |
 
 ### 管理端投影
@@ -498,9 +503,9 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `Activity` | `action: ActivityAction`、`operator: UserInfo`、`opinion?: string`、`attachments?: string[]`、`transferTo?: UserInfo`、`target?: UserInfo`、`rollbackToNodeId?: string`、`rollbackToNodeName?: string`、`addedAssignees?: UserInfo[]`、`removedAssignees?: UserInfo[]`、`ccUsers?: UserInfo[]`、`createdAt: string` | 记录在节点上的一次旁路动作。决策本身（通过 / 办理 / 拒绝）在做出决策的参与者身上，不在这里。 |
 | `CCRecipient` | `user: UserInfo`、`readAt?: string` | 一位抄送接收人，确认后带已读回执。 |
 | `TimelineEntryKind` | `"start" \| "approval" \| "handle" \| "cc" \| "end" \| "withdraw" \| "terminate"` | 节点条目、通过 end 节点以及撤回/终止里程碑。 |
-| `TimelineEntry` | `kind: TimelineEntryKind`、`nodeId?`、`name?`（`string`）、`status?: NodeVisitStatus`、`executionType?`、`approvalMethod?`、`passRule?`、`passRatio?`（`string`）、`participants?: NodeParticipant[]`、`ccRecipients?: CCRecipient[]`、`activities?: Activity[]`、`startedAt: string`、`finishedAt?: string` | 实例实际走过路径的按时间顺序记录的一步；条目止于当前进行中的节点——不预测未到达的节点。`end` 类型表示实例通过结束节点完成。`passRatio` 是 `(0, 100]` 内的百分比，序列化为十进制字符串。 |
+| `TimelineEntry` | `kind: TimelineEntryKind`、`nodeId?`、`name?`（`string`）、`status?: NodeVisitStatus`、`executionType?`、`approvalMethod?`、`passRule?`、`passRatio?`（`string`）、`passCount?: number`、`participants?: NodeParticipant[]`、`ccRecipients?: CCRecipient[]`、`activities?: Activity[]`、`startedAt: string`、`finishedAt?: string` | 实例实际走过路径的按时间顺序记录的一步；条目止于当前进行中的节点——不预测未到达的节点。`end` 类型表示实例通过结束节点完成。`passRatio` 是 `(0, 100]` 内的百分比，序列化为十进制字符串；`passCount` 是 `fixed_count` 规则所要求的通过人数，只在该规则下出现。 |
 | `FlowGraphNode` | `id: string`、`nodeId: string`、`kind: NodeKind`、`position: { x: number; y: number }`、`data: FlowGraphNodeData` | React Flow 直接可用的节点；`kind` 选择节点渲染器。 |
-| `FlowGraphNodeData` | `name: string`、`status: NodeProgressStatus`、`executionType?`、`approvalMethod?`、`passRule?`、`passRatio?`（`string`）、`participants?: NodeParticipant[]`、`ccRecipients?: CCRecipient[]`、`activities?: Activity[]`、`startedAt?: string`、`finishedAt?: string` | 运行时载荷: 显示配置加进度，以及与时间线相同的参与者/抄送/活动形态，按经过顺序聚合该节点的所有经过。 |
+| `FlowGraphNodeData` | `name: string`、`status: NodeProgressStatus`、`executionType?`、`approvalMethod?`、`passRule?`、`passRatio?`（`string`）、`passCount?: number`、`participants?: NodeParticipant[]`、`ccRecipients?: CCRecipient[]`、`activities?: Activity[]`、`startedAt?: string`、`finishedAt?: string` | 运行时载荷: 显示配置加进度，以及与时间线相同的参与者/抄送/活动形态，按经过顺序聚合该节点的所有经过。 |
 | `FlowGraphEdge` | `id: string`、`source: string`、`target: string`、`sourceHandle?: string` | React Flow 直接可用的边。 |
 | `InstanceFlowGraph` | `nodes: FlowGraphNode[]`、`edges: FlowGraphEdge[]` | 实例流程定义的只读、带进度标注的投影。 |
 

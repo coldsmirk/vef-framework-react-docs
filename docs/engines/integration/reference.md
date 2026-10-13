@@ -40,6 +40,7 @@ Everything exported from the root of `@vef-framework-react/integration`, grouped
 | `codeMap.update` | `integration.code_map.update` | Update code map |
 | `codeMap.delete` | `integration.code_map.delete` | Delete code map(s) |
 | `log.query` | `integration.log.query` | Invocation log query (also the console's default stats gate) |
+| `log.replay` | `integration.log.replay` | Replay a recorded invocation from the log detail |
 | `ops.dryRun` | `integration.ops.dry_run` | Outbound dry run |
 | `ops.dryRunInbound` | `integration.ops.dry_run_inbound` | Inbound dry run |
 | `ops.testConnection` | `integration.ops.test_connection` | Connection probe |
@@ -86,11 +87,12 @@ Each returns a memoized `CrudApi` bound to its resource:
 
 ### `useLogApi`
 
-`() => LogApi` — read-only query functions for the invocation log. Rows carry the full captures, so the detail view reads from the row rather than a separate fetch.
+`() => LogApi` — the invocation log resource: the page query, plus replay. Rows carry the full captures, so the detail view reads from the row rather than a separate fetch.
 
 | Function | Type | Operation |
 | --- | --- | --- |
 | `findPage` | `QueryFunction<PaginationResult<InvocationLog>, PaginatedQueryParams<LogSearch>>` | `integration/log.find_page` |
+| `replay` | `MutationFunction<ReplayResult, ReplayParams>` | `integration/log.replay` — a mutation, because it is triggered imperatively and an outbound replay's calls are real; the request body is sent `gzip+base64` |
 
 ### `useOpsApi`
 
@@ -380,8 +382,11 @@ Each mirrors a Go enum verbatim; display labels and colors live with the present
 
 | Type | Fields | Notes |
 | --- | --- | --- |
-| `HttpExchange` | `method: string`, `url: string`, `requestHeaders?: Record<string, string>`, `requestBody?: string`, `status?: number`, `responseHeaders?: Record<string, string>`, `responseBody?: string`, `durationMs: number`, `error?: string` | One wire exchange captured while an adapter script ran, shared by invocation logs and the dry-run trace. Bodies and header values arrive masked and truncated. |
-| `InvocationLog` | extends `CreationAudited` + `systemCode: string`, `contractCode: string`, `direction: Direction`, `failureKind?: FailureKind \| ""`, `durationMs: number`, `input?: JsonValue`, `output?: JsonValue`, `httpTrace?: HttpExchange[] \| null`, `error?: string \| null`, `requestId: string` | One recorded invocation: classification, timing, and the masked, size-capped captures. Read-only. `failureKind` is empty for a successful invocation. |
+| `HttpExchange` | `method: string`, `url: string`, `requestHeaders?: Record<string, string>`, `requestBody?: string`, `status?: number`, `responseHeaders?: Record<string, string>`, `responseBody?: string`, `durationMs: number`, `error?: string`, `clientAddr?: string` | One wire exchange captured while an adapter script ran, shared by invocation logs and the dry-run trace. Bodies and header values arrive masked and truncated. `clientAddr` is the caller's network address — only inbound deliveries carry one, and the wire trace shows it. |
+| `InvocationOutcome` | `failureKind?: FailureKind \| ""`, `durationMs: number`, `input?: JsonValue`, `output?: JsonValue`, `httpTrace?: HttpExchange[] \| null`, `error?: string \| null` | The outcome of one run — recorded or replayed — with its classification, timing, and masked, size-capped captures. `failureKind` is empty for a successful run. |
+| `InvocationLog` | extends `CreationAudited` + `InvocationOutcome` + `systemCode: string`, `contractCode: string`, `direction: Direction`, `requestId: string`, `replayable: boolean` | One recorded invocation. Read-only. `replayable` says whether a replay payload was kept (`vef.integration.log.replay`), so the invocation can be re-run. |
+| `ReplayParams` | `id: string`, `script?: string` | The log entry to re-run; `script` runs unsaved editor content in place of the saved adapter script. |
+| `ReplayResult` | extends `InvocationOutcome` + `definitionChanged: boolean` | The outcome of re-running a recorded invocation against the current definitions, shaped like the log entry it is compared with. Mirrors the Go `integration.ReplayResult`. `definitionChanged` is set when the contract, system, or adapter was modified after the original invocation, so a different outcome may stem from that edit. |
 | `LogSearch` | `systemCode?`, `contractCode?` (`string`), `direction?: Direction`, `failureKind?: FailureKind`, `requestId?: string` | — |
 
 ### Ops

@@ -25,6 +25,7 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 - **form-editor** —— `dataSourceApis`（`DataSourceApi` / `DataSourceApiParam`）为远程选项来源提供一个针对宿主接口目录的选择器；选中后会把接口地址、映射以及声明参数的默认值复制进 schema，schema 依然是自包含的。见 [Embedding → 提供接口目录](../editors/form-editor/embedding.md#提供接口目录)。
 - **form-editor** —— `api_call` 动作编辑器现在可以设置 `version` 和请求参数，与远程选项来源共用同一个参数编辑器。导出 `normalizeOptionMapping`。
 - **approval-form-bridge** —— `validateApprovalProjection(schema)` 只返回审批契约问题，形态与 `FormEditor` 的 `validate` 一致。
+- **approval-form-bridge** —— 自 v2.20.0 起作为 `ApprovalFormField.optionSource` 形态的 `ApprovalFieldOptionSource` 与 `ApprovalOptionSourceKind` 现在按名称导出；以前只能经由字段类型取得。
 - **approval** —— `ApprovalPlugins.formGlobals`（`FormGlobalDefinition[]`）声明后端向表单暴露的宿主全局变量，`ApprovalPlugins.dataSourceApis` 声明选项接口目录。`InstanceFormPanel` 接收 `applicant` 与 `globals`，并以它们作为 `$applicant` / `$globals` 对表单求值；`StartForm` 携带 `applicant` 与 `globals`，`MyInstanceInfo` / `AdminInstanceInfo` 携带 `globals`。流程设计器的表单步骤把四个发起人属性和声明的全局变量作为系统变量提供，把 provider 的解析器、求值器与接口目录传给表单编辑器，并用 `validateApprovalProjection` 做校验；两个设计步骤都不再渲染问题横幅，底部会说明「下一步」为何被禁用。见[审批 → 表单系统变量](../engines/approval/overview.md#表单系统变量)。
 
 ### 值得关注的修复
@@ -36,6 +37,39 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 - **form-editor** —— 请求参数名在失焦或按回车时才提交，并且只有在非空且唯一时才提交。以前连续添加多个参数，或把某个参数改成另一个参数的名字，都可能丢失值。
 - **form-editor** —— `condition_group_empty` 的提示现在说明空条件组的实际效果（「全部满足」时规则始终生效，「任一满足」时永不生效），而不再声称规则不会生效。
 - **approval** —— 流程设计器的表单预览会通过 `dataSourceResolver` 解析远程选项（以前始终为空），并运行 provider 的 `evaluators`。
+
+## v2.24.1（2026-09-28）
+
+无破坏性变更。
+
+### 值得关注的修复
+
+- **approval**、**integration**、**starter** —— 在对话框里快速输入时，页面可能因 React 的 "Maximum update depth exceeded" 而崩溃。antd 的 `Modal` / `Drawer` 每次按键都会重新渲染，而每次重新渲染都会重新执行其 portal 的容器 effect，直到触发 React 的嵌套更新上限。审批运行时的操作对话框（实例详情中的和管理控制台中的）、集成的连接测试抽屉以及 starter 布局中的搜索，现在都把草稿放在外壳之下的内容里，因此一次按键只会重新渲染那部分内容。每个对话框每次打开时仍从全新的草稿开始；连接测试在切换到另一个系统时会重置输入。
+
+## v2.24.0（2026-09-28）
+
+无破坏性变更。
+
+### 新特性
+
+- **approval-flow-editor** —— 并行审批节点可以按固定人数通过：`PassRule` 新增 `"fixed_count"`，人数保存在 `ApprovalNodeData.passCount`（默认 `1`）。达到这么多审批人通过时节点即通过——参与人数不足时需全部通过——并在这个人数已不可能达到时驳回。`validateFlowDefinition` 会把不是 ≥ 1 整数的人数报告为 `pass_count_range`；没有上限，因为审批人在运行时才解析。见 [Approval Flow Editor 参考](../editors/approval-flow-editor/reference.md#枚举)。
+- **approval** —— 在 `fixed_count` 规则下，`TimelineEntry` 与 `FlowGraphNodeData` 携带 `passCount`。
+- **approval-flow-editor** —— 条件编辑器把每条规则排成不换行的一行（条件项、使用时的聚合与列、运算符、值、删除），因此同一组内各规则的列会对齐，过长的名称会被截断，而不会把行撑宽。条件项解析出来之前，运算符保持禁用。
+- **integration** —— 日志控制台可以按当前定义重放一次已记录的调用，并与原始调用对比，也可以用未保存的脚本重放。`useLogApi` 新增 `replay`（`integration/log.replay`），由 `INTEGRATION_PERMISSIONS.log.replay` 门控，`IntegrationConsolePage.permissions` 接受 `logReplay`。`InvocationLog` 新增 `replayable`，并与新的 `ReplayResult` 共用 `InvocationOutcome`；`HttpExchange` 新增入站调用方的 `clientAddr`。见[集成页面](../engines/integration/pages.md#integrationconsolepage)。
+
+### 值得关注的修复
+
+- **approval-flow-editor** —— 混合了字段规则与表达式规则的条件组，会以可视化编辑器打开，其中的表达式规则以源码形式显示和编辑；以前会被误读为一条未填写的字段规则。
+- **approval-flow-editor** —— 在条件编辑器中快速输入不再因 "Maximum update depth exceeded" 而崩溃，进行中的编辑也不会因为父组件带着新的条件列表重新渲染而丢失；每次打开编辑器时，草稿都从已存储的条件重新生成。
+
+## v2.23.0（2026-09-22）
+
+无破坏性变更。
+
+### 新特性
+
+- **core** —— `protectedBodyEncoding` 可以在纯 HTTP 下工作：存在 `crypto.subtle` 时 AES-GCM 运行在 Web Crypto 上，否则回退到 `@noble/ciphers`，两者输出的字节完全相同。浏览器只在安全上下文中提供 `crypto.subtle`，因此以前在 HTTP 页面上连客户端都无法构造。保护密钥机密性的仍然是 HTTPS。见 [HTTP 与 API 客户端](./core/http-and-api.md#protected-body-transport)。
+- **approval** —— 任务中心的两个列表都有了搜索。待办可按标题、申请人姓名与是否超时筛选，高级搜索中还可按到达时间筛选；已办可按标题、申请人姓名与处理结果筛选，高级搜索中还可按处理时间与实例的流程状态筛选。查询改为接收 `PendingTaskSearch` / `CompletedTaskSearch`，二者在 `MyTaskSearch` 的基础上扩展了 `keyword`、`applicantId`、`applicantName` 与 `flowId`。见[审批页面](../engines/approval/pages.md#approvaltaskcenterpage)。
 
 ## v2.22.0（2026-09-15）
 
@@ -92,11 +126,13 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 ### 破坏性变更
 
 - **approval-flow-editor** —— `AssigneeKind` 和 `CcKind` 变为开放的 `string` 标识符，不再是封闭联合类型。`EditorPlugins` 新增 `assigneeKinds` 和 `ccKinds`（`KindDescriptor[]`），`pickers` 也按 kind 字符串索引。请传入 `approval/flow.list_kind_options` 返回的目录；省略时编辑器回退到 `BUILTIN_ASSIGNEE_KINDS` / `BUILTIN_CC_KINDS`。Picker 查找先尝试规则自身的 kind，再尝试其 `selection` 模式，因此选择角色的自定义 kind 可以复用内置 `role` picker。
+- **approval** —— `InitiatorKind` 同样变为开放的 `string`，`ApprovalPlugins.pickers` 也按 kind 字符串索引。
 
 ### 新特性
 
 - **approval-flow-editor** —— 导出 `SelectionMode` 和 `KindDescriptor`；校验 API 改为接收包含 `formFields`、`assigneeKinds`、`ccKinds` 的 `FlowValidationContext`。
 - **approval** —— `ApprovalPlugins.pickers` 采用同样的“先 kind、后 selection”回退查找，并重新导出 `KindDescriptor` / `SelectionMode`。
+- **approval** —— `useFlowApi.listKindOptions` 获取应用的 kind 目录（`KindOptions`：`assignees`、`ccs`、`initiators`），流程设计器把它同时传给发起人编辑器与流程编辑器——`toEditorPlugins` 以第三个参数接收它。在目录加载完成之前，发起人编辑器提供的是 `BUILTIN_INITIATOR_KINDS`。
 
 ## v2.17.2（2026-08-26）
 

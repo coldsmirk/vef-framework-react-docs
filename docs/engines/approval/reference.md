@@ -131,6 +131,7 @@ All hooks memoize their function set per `ApiClient` and post to `API_PATH` with
 | `getGraph` | `QueryFunction<FlowGraphBundle, { flowId: string; tenantId?: string; versionId?: string }>` | `get_graph` — the latest published version by default, or the version named by `versionId` (the designer's edit seed) |
 | `findVersions` | `QueryFunction<FlowVersionSummary[], { flowId: string; tenantId?: string }>` | `find_versions` — slim summaries without definition payloads (v2.12.0 breaking change `40b6714`) |
 | `findInitiators` | `QueryFunction<FlowInitiator[], { flowId: string; tenantId?: string }>` | `find_initiators` |
+| `listKindOptions` | `QueryFunction<KindOptions, Record<string, never>>` | `list_kind_options` — the application's assignee / CC / initiator kind catalog, application-wide rather than per flow; the flow designer fetches it once for its initiator editor and its flow editor (v2.18.0) |
 
 ### `useDelegationApi`
 
@@ -168,8 +169,8 @@ All hooks memoize their function set per `ApiClient` and post to `API_PATH` with
 | `findAvailableFlows` | `QueryFunction<PaginationResult<AvailableFlow>, PaginatedQueryParams<AvailableFlowSearch>>` | `find_available_flows` |
 | `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form` — gated exactly like starting the instance; carries the applicant and the form-visible globals the instance would record |
 | `findInitiated` | `QueryFunction<PaginationResult<InitiatedInstance>, PaginatedQueryParams<InitiatedInstanceSearch>>` | `find_initiated` |
-| `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_pending_tasks` |
-| `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_completed_tasks` |
+| `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<PendingTaskSearch>>` | `find_pending_tasks` |
+| `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<CompletedTaskSearch>>` | `find_completed_tasks` |
 | `findCCRecords` | `QueryFunction<PaginationResult<MyCCRecord>, PaginatedQueryParams<MyCCRecordSearch>>` | `find_cc_records` |
 | `getPendingCounts` | `QueryFunction<PendingCounts, { tenantId?: string }>` | `get_pending_counts` |
 | `getInstanceDetail` | `QueryFunction<MyInstanceDetail, { instanceId: string }>` | `get_instance_detail` |
@@ -366,7 +367,8 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `VersionStatus` | `"draft" \| "published" \| "archived"` | Flow version status. |
 | `BindingMode` | `"standalone" \| "business"` | `standalone` stores form data in approval tables; `business` writes back into an existing business table. |
 | `StorageMode` | `"json" \| "table"` | Version-level physical storage of form data. |
-| `InitiatorKind` | `"user" \| "role" \| "department"` | Kind of a flow initiator rule. |
+| `InitiatorKind` | `string` | Kind of a flow initiator rule. Open by design (v2.18.0): the backend accepts every kind with a registered `approval.InitiatorResolver`, so the deployable kinds are the ones `approval/flow.list_kind_options` reports. |
+| `BUILTIN_INITIATOR_KINDS` | `ReadonlyArray<KindDescriptor<InitiatorKind>>` — `user` (指定用户), `role` (指定角色), `department` (指定部门) | The framework's own initiator kinds, offered before `list_kind_options` resolves. A deployment that registers kinds of its own reaches the designer only through the served catalog. |
 | `BindingProjectionStatus` | `"pending" \| "processing" \| "applied" \| "failed"` | Convergence of one business-record projection. |
 | `FieldPermission` | `"visible" \| "editable" \| "hidden" \| "required"` | Viewer-scoped field interactivity, matching the form renderer's vocabulary. |
 | `InstanceAction` | `"approve" \| "reject" \| "handle" \| "transfer" \| "rollback" \| "withdraw" \| "resubmit" \| "add_assignee" \| "remove_assignee" \| "add_cc" \| "urge"` | The self-service actions `my.get_instance_detail` may offer, derived server-side from the state machine, the viewer's pending task, and node toggles. |
@@ -427,6 +429,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | Type | Fields | Notes |
 | --- | --- | --- |
 | `FlowInitiator` | `id: string`, `flowId: string`, `kind: InitiatorKind`, `ids: string[]` | A stored initiator rule. |
+| `KindOptions` | `assignees: KindDescriptor<AssigneeKind>[]`, `ccs: KindDescriptor<CcKind>[]`, `initiators: KindDescriptor<InitiatorKind>[]` | The kinds the running application accepts, as served by `approval/flow.list_kind_options`. Each vocabulary is an open registry on the backend — a host adds a kind by registering a resolver — so this catalog, not a client-side union, is what the designer offers and what a deploy validates. |
 | `InitiatorParams` | `kind: InitiatorKind`, `ids: string[]` | An initiator rule as submitted. |
 | `CreateFlowParams` | `tenantId`, `code`, `name`, `categoryId` (all `string`), `icon?`, `description?` (`string`), `labels?: Record<string, string>`, `bindingMode: BindingMode`, `businessBinding?: BusinessBindingConfig`, `adminUserIds?: string[]`, `isAllInitiationAllowed: boolean`, `instanceTitleTemplate: string`, `initiators?: InitiatorParams[]` | `approval/flow.create` payload. |
 | `UpdateFlowParams` | `flowId: string` + the same fields as create minus `tenantId`/`code` | Omitted `labels` clears the stored set (full replace semantics). |
@@ -468,7 +471,9 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `MyInstanceDetail` | `instance: MyInstanceInfo`, `formSchema?: FormSchema`, `timeline: TimelineEntry[]`, `flowGraph: InstanceFlowGraph`, `availableActions: InstanceAction[]`, `fieldPermissions?: Record<string, FieldPermission>`, `myTask?: ViewerTask` | The full self-service detail. `fieldPermissions` is materialized for every top-level form field — apply verbatim, no default resolution. |
 | `AvailableFlowSearch` | `tenantId?`, `keyword?` (`string`), `labels?: Record<string, string>` | — |
 | `InitiatedInstanceSearch` | `tenantId?: string`, `status?: InstanceStatus`, `keyword?: string` | — |
-| `MyTaskSearch` | `tenantId?: string` | Shared by pending and completed task queries. |
+| `MyTaskSearch` | `tenantId?: string`, `keyword?: string`, `applicantId?: string`, `applicantName?: string`, `flowId?: string` | The filters both task queries share; every filter is optional and set filters AND together. `keyword` matches the instance title by substring, `applicantId` the applicant exactly (what a user picker yields), `applicantName` the applicant's name by substring. |
+| `PendingTaskSearch` | extends `MyTaskSearch` + `isTimeout?: boolean`, `createdAtFrom?: string`, `createdAtTo?: string` | `find_pending_tasks` search. The arrival-time bounds are inclusive `YYYY-MM-DD HH:mm:ss` timestamps. |
+| `CompletedTaskSearch` | extends `MyTaskSearch` + `status?: TaskStatus`, `instanceStatus?: InstanceStatus`, `finishedAtFrom?: string`, `finishedAtTo?: string` | `find_completed_tasks` search. `status` is how the caller finished the task, narrowing within the completed statuses; the finish-time bounds are inclusive `YYYY-MM-DD HH:mm:ss` timestamps. |
 | `MyCCRecordSearch` | `tenantId?: string`, `isRead?: boolean` | — |
 
 ### Admin projections
@@ -498,9 +503,9 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `Activity` | `action: ActivityAction`, `operator: UserInfo`, `opinion?: string`, `attachments?: string[]`, `transferTo?: UserInfo`, `target?: UserInfo`, `rollbackToNodeId?: string`, `rollbackToNodeName?: string`, `addedAssignees?: UserInfo[]`, `removedAssignees?: UserInfo[]`, `ccUsers?: UserInfo[]`, `createdAt: string` | A side action recorded at a node. Decisions themselves (approve / handle / reject) live on the participant that made them, not here. |
 | `CCRecipient` | `user: UserInfo`, `readAt?: string` | One CC recipient, with the read receipt when confirmed. |
 | `TimelineEntryKind` | `"start" \| "approval" \| "handle" \| "cc" \| "end" \| "withdraw" \| "terminate"` | Node entries plus the end node and withdraw/terminate milestones. |
-| `TimelineEntry` | `kind: TimelineEntryKind`, `nodeId?`, `name?` (`string`), `status?: NodeVisitStatus`, `executionType?`, `approvalMethod?`, `passRule?`, `passRatio?` (`string`), `participants?: NodeParticipant[]`, `ccRecipients?: CCRecipient[]`, `activities?: Activity[]`, `startedAt: string`, `finishedAt?: string` | One step of the chronological account of the path an instance actually took; entries end at the node currently in progress — unreached nodes are not predicted. The `end` kind marks reaching the end node on a passing finish. `passRatio` is a percentage in `(0, 100]` serialized as a decimal string. |
+| `TimelineEntry` | `kind: TimelineEntryKind`, `nodeId?`, `name?` (`string`), `status?: NodeVisitStatus`, `executionType?`, `approvalMethod?`, `passRule?`, `passRatio?` (`string`), `passCount?: number`, `participants?: NodeParticipant[]`, `ccRecipients?: CCRecipient[]`, `activities?: Activity[]`, `startedAt: string`, `finishedAt?: string` | One step of the chronological account of the path an instance actually took; entries end at the node currently in progress — unreached nodes are not predicted. The `end` kind marks reaching the end node on a passing finish. `passRatio` is a percentage in `(0, 100]` serialized as a decimal string; `passCount` is the approvals a `fixed_count` rule requires, present only under that rule. |
 | `FlowGraphNode` | `id: string`, `nodeId: string`, `kind: NodeKind`, `position: { x: number; y: number }`, `data: FlowGraphNodeData` | React Flow–ready node; `kind` selects the node renderer. |
-| `FlowGraphNodeData` | `name: string`, `status: NodeProgressStatus`, `executionType?`, `approvalMethod?`, `passRule?`, `passRatio?` (`string`), `participants?: NodeParticipant[]`, `ccRecipients?: CCRecipient[]`, `activities?: Activity[]`, `startedAt?: string`, `finishedAt?: string` | Runtime payload: display config plus progress and the same participant/CC/activity shapes the timeline uses, aggregated across the node's visits in traversal order. |
+| `FlowGraphNodeData` | `name: string`, `status: NodeProgressStatus`, `executionType?`, `approvalMethod?`, `passRule?`, `passRatio?` (`string`), `passCount?: number`, `participants?: NodeParticipant[]`, `ccRecipients?: CCRecipient[]`, `activities?: Activity[]`, `startedAt?: string`, `finishedAt?: string` | Runtime payload: display config plus progress and the same participant/CC/activity shapes the timeline uses, aggregated across the node's visits in traversal order. |
 | `FlowGraphEdge` | `id: string`, `source: string`, `target: string`, `sourceHandle?: string` | React Flow–ready edge. |
 | `InstanceFlowGraph` | `nodes: FlowGraphNode[]`, `edges: FlowGraphEdge[]` | The read-only, progress-annotated projection of an instance's flow definition. |
 

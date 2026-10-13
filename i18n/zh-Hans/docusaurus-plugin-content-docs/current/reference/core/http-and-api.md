@@ -89,7 +89,13 @@ interface ProtectedBodyEncodingOptions {
 
 当 Go 后端以 `aes-gcm+base64` 启用 `vef.api.body_encoding` 时，在前端配置
 `protectedBodyEncoding`。key 使用 standard base64，长度必须是 16、24 或 32
-字节。浏览器客户端使用原生 Web Crypto API，不支持 SM4。
+字节。本客户端不支持 SM4。
+
+运行时提供 `crypto.subtle` 时，客户端用原生 Web Crypto API 执行 AES-GCM；
+否则改用可移植实现（`@noble/ciphers`）（自 v2.23.0 起）。浏览器只在安全上下文
+（HTTPS、`localhost`）中提供 `crypto.subtle`，没有这个回退，以纯 HTTP 提供的
+页面连客户端都无法构造。两种实现产出的字节完全相同，nonce 的来源
+`crypto.getRandomValues` 在两种上下文中都可用。
 
 ```ts
 const apiClient = createApiClient({
@@ -109,7 +115,9 @@ ciphertext 以及 16 字节 tag。请求携带
 客户端会直接拒绝，而不是接受明文降级。multipart 与二进制 body 保持原生格式。
 
 这个传输层带认证且线上非明文，但不能替代 HTTPS：下发到浏览器代码的对称
-key 是可以被提取的。后端还必须通过 CORS expose `X-Body-Encoding`。
+key 是可以被提取的，没有 TLS 时，链路上的任何人都能从打包产物里读出它——能在
+纯 HTTP 下工作，并不等于在纯 HTTP 下安全。后端还必须通过 CORS expose
+`X-Body-Encoding`。
 
 ### `AuthTokens`
 

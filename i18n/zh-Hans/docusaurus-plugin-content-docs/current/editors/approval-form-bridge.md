@@ -86,7 +86,8 @@ interface ProjectionResult {
 | `ApprovalFieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `ApprovalFieldOption` | `{ label: string; value: unknown }` |
 | `ApprovalValidationRule` | `{ minLength?, maxLength?, min?, max?, pattern?, message? }`——在 `table` 字段上，`minLength` / `maxLength` 约束的是行数，而不是字符串长度 |
-| `ApprovalFormField["optionSource"]` | `{ kind: "remote"; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }`——`request` / `mapping` 直接复用 form-editor 自己的类型；`kind` 刻意比设计器的数据源联合类型更窄，见[远程选项来源](#远程选项来源)。这个包没有以独立的名称导出该结构（及其 `kind` 联合类型）：请通过 `NonNullable<ApprovalFormField["optionSource"]>` 取得它。 |
+| `ApprovalFieldOptionSource` | `{ kind: ApprovalOptionSourceKind; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }`——`request` / `mapping` 直接复用 form-editor 自己的类型，原样转发 |
+| `ApprovalOptionSourceKind` | `"remote"`——刻意比设计器的数据源联合类型更窄，见[远程选项来源](#远程选项来源) |
 
 `options` 只会在一个 `select` 字段的数据源是内联的 `static` 列表、或指向某个表单全局 `static` 数据源的 `ref` 时才会被填充。一个选项无法被枚举出来的数据源——`remote` 数据源，无论是内联的还是经由 `ref` 抵达的——转而投影出 [`optionSource`](#远程选项来源)；而一个悬空的 `ref` 或未知 kind 则两者都不投影。以上每一种情况仍然会抛出 `options_not_static`，后端也仍然会接受该字段提交的任意值，因为它的 select 校验只读 `options`。`columnType` 对应后端的 `ColumnDataType`，只在 `table` 存储模式下才有意义；设计器的显式覆盖值总是被尊重，但一个没有配置 `precision` 的 number 字段会刻意**不**输出 `columnType`（按控件推断出的 `"integer"` 会让 Go 运行时拒绝小数值，因此后端会回退到一个不设门槛的数值列）。一个没有配置 `precision` 的 `decimal` 列会抛出 `decimal_scale_missing`（一个 warning——存储层会四舍五入到 0 位小数）；配置了正数 `precision` 时，它会作为 `scale` 输出。`defaultValue` 和 `props` 存在于线上格式契约中，但投影器永远不会输出它们——声明它们是为了让手工构建或经宿主补充的定义能够无损往返。
 
@@ -95,9 +96,8 @@ interface ProjectionResult {
 一个选项无法被枚举出来的选择类字段，会在 `optionSource` 里投影出一份描述符，而不是把消费方晾在原地：
 
 ```ts
-// NonNullable<ApprovalFormField["optionSource"]>
-{
-  kind: "remote";
+interface ApprovalFieldOptionSource {
+  kind: ApprovalOptionSourceKind; // "remote"
   request?: RemoteDataSourceRequest;
   mapping?: RemoteOptionMapping;
 }

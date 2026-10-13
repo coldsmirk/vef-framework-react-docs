@@ -86,7 +86,8 @@ Before v2.10.0 the projection produced a wrapper object — `ProjectionResult.de
 | `ApprovalFieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `ApprovalFieldOption` | `{ label: string; value: unknown }` |
 | `ApprovalValidationRule` | `{ minLength?, maxLength?, min?, max?, pattern?, message? }` — on a `table` field, `minLength`/`maxLength` bound the row count, not a string length |
-| `ApprovalFormField["optionSource"]` | `{ kind: "remote"; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }` — `request` / `mapping` are form-editor's own types; `kind` is deliberately narrower than the designer's source union, see [Remote option sources](#remote-option-sources). The package does not export this shape (or its `kind` union) under a name of its own: reach it as `NonNullable<ApprovalFormField["optionSource"]>`. |
+| `ApprovalFieldOptionSource` | `{ kind: ApprovalOptionSourceKind; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }` — `request` / `mapping` are form-editor's own types, re-used unchanged |
+| `ApprovalOptionSourceKind` | `"remote"` — deliberately narrower than the designer's source union; see [Remote option sources](#remote-option-sources) |
 
 `options` is only populated for a `select` field whose source is an inline `static` list or a `ref` to a form-global `static` data source. A source whose options cannot be enumerated — a `remote` source, inline or reached through a `ref` — projects [`optionSource`](#remote-option-sources) instead; a dangling `ref` or an unknown kind projects neither. Every one of those cases still raises `options_not_static`, and the backend still accepts any submitted value for the field, because its select validation reads `options` alone. `columnType` mirrors the backend's `ColumnDataType` and is only meaningful under `table` storage mode; an explicit designer override is always honored, but a number field with no configured `precision` deliberately emits **no** `columnType` (the widget-inferred `"integer"` would make the Go runtime reject fractional values, so the backend falls back to a gate-free numeric column). A `decimal` column with no configured `precision` raises `decimal_scale_missing` (a warning — the storage layer rounds to 0 decimal places); with a positive `precision`, it is emitted as `scale`. `defaultValue` and `props` exist on the wire contract but are never emitted by the projector — they are declared so hand-built or host-enriched definitions round-trip losslessly.
 
@@ -95,9 +96,8 @@ Before v2.10.0 the projection produced a wrapper object — `ProjectionResult.de
 A selection field whose options could not be enumerated projects a descriptor in `optionSource` rather than leaving the consumer with nothing:
 
 ```ts
-// NonNullable<ApprovalFormField["optionSource"]>
-{
-  kind: "remote";
+interface ApprovalFieldOptionSource {
+  kind: ApprovalOptionSourceKind; // "remote"
   request?: RemoteDataSourceRequest;
   mapping?: RemoteOptionMapping;
 }

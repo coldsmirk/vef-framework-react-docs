@@ -89,8 +89,14 @@ interface ProtectedBodyEncodingOptions {
 
 Configure `protectedBodyEncoding` when the Go backend enables
 `vef.api.body_encoding` with `aes-gcm+base64`. The key is standard base64 and
-must contain 16, 24, or 32 bytes. The browser client uses the native Web Crypto
-API; SM4 is not supported by this client.
+must contain 16, 24, or 32 bytes. SM4 is not supported by this client.
+
+The client runs AES-GCM on the native Web Crypto API where the runtime exposes
+`crypto.subtle`, and on a portable implementation (`@noble/ciphers`) elsewhere
+(since v2.23.0). Browsers expose `crypto.subtle` only in secure contexts (HTTPS,
+`localhost`), so without the fallback a page served over plain HTTP could not
+even construct the client. Both produce identical bytes, and the nonce source,
+`crypto.getRandomValues`, is available in either context.
 
 ```ts
 const apiClient = createApiClient({
@@ -111,8 +117,10 @@ JSON/envelope response rather than accepting a plaintext downgrade. Multipart
 and binary bodies keep their native formats.
 
 This transport is authenticated and non-plaintext, but it does not replace
-HTTPS: a symmetric key shipped to browser code is extractable. The backend must
-also expose `X-Body-Encoding` through CORS.
+HTTPS: a symmetric key shipped to browser code is extractable, and without TLS
+anyone on the path can read it from the bundle — working over plain HTTP is not
+being secure over it. The backend must also expose `X-Body-Encoding` through
+CORS.
 
 ### `AuthTokens`
 

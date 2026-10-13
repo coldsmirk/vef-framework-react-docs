@@ -57,7 +57,7 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 | --- | --- | --- |
 | `start` | `StartNodeData` | — |
 | `end` | `EndNodeData` | — |
-| `approval` | `ApprovalNodeData` | 继承 `TaskNodeData`，加上 `approvalMethod`、`passRule`、`passRatio`、`sameApplicantAction`、`consecutiveApproverAction`、`rollbackType`、`rollbackDataStrategy`、`rollbackTargetKeys`、`isRollbackAllowed`、`isAddAssigneeAllowed`、`addAssigneeTypes`、`isRemoveAssigneeAllowed`、`isManualCcAllowed` |
+| `approval` | `ApprovalNodeData` | 继承 `TaskNodeData`，加上 `approvalMethod`、`passRule`、`passRatio`、`passCount`、`sameApplicantAction`、`consecutiveApproverAction`、`rollbackType`、`rollbackDataStrategy`、`rollbackTargetKeys`、`isRollbackAllowed`、`isAddAssigneeAllowed`、`addAssigneeTypes`、`isRemoveAssigneeAllowed`、`isManualCcAllowed` |
 | `handle` | `HandleNodeData` | `TaskNodeData` 的别名（没有审批专属字段） |
 | `condition` | `ConditionNodeData` | `branches?: ConditionBranchDefinition[]` |
 | `cc` | `CcNodeData` | `ccs?: CcDefinition[]`、`isReadConfirmRequired?: boolean`、`fieldPermissions?: Record<string, CcFieldPermission>` |
@@ -109,7 +109,7 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 | 导出 | 取值 |
 | --- | --- |
 | `ApprovalMethod` | `"sequential" \| "parallel"` |
-| `PassRule` | `"all" \| "any" \| "ratio"`——`"all"` 意味着有一票否决权 |
+| `PassRule` | `"all" \| "any" \| "ratio" \| "fixed_count"`——`"all"` 意味着有一票否决权；`"fixed_count"`（v2.24.0）在 `passCount` 位审批人通过时即通过——参与人数不足时需全部通过——并在这个人数已不可能达到时驳回 |
 | `EmptyAssigneeAction` | `"auto_pass" \| "transfer_admin" \| "transfer_superior" \| "transfer_applicant" \| "transfer_specified"` |
 | `ExecutionType` | `"manual" \| "auto_pass" \| "auto_reject"` |
 | `SameApplicantAction` | `"auto_pass" \| "self_approve" \| "transfer_superior" \| "exclude"`——作用于发起人自己的席位；`exclude` 让该席位回避，由其余办理人决定 |
@@ -185,9 +185,11 @@ function validateFlowDefinition(
 
 | 代码 | 含义 |
 | --- | --- |
-| `invalid_assignee_kind` | 某个审批人的 `kind` 不在 `AssigneeKind` 之内。 |
+| `invalid_assignee_kind` | 某个审批人的 `kind` 不在 kind 目录中——即上下文的 `assigneeKinds`，省略时为 `BUILTIN_ASSIGNEE_KINDS`。 |
+| `assignee_ids_required` | 某个审批人的类型需要选择具体对象（selection 为 `user` / `role` / `department` / `custom`），却一个都没选——它将匹配不到任何人，后端在部署时会拒绝。 |
 | `assignee_form_field_required` | 某个 `form_field` 类型的审批人没有选择字段。 |
-| `invalid_cc_kind` / `invalid_cc_timing` | 某个抄送的 `kind` / `timing` 不在其枚举范围内。 |
+| `invalid_cc_kind` / `invalid_cc_timing` | 某个抄送的 `kind` 不在 kind 目录中（`ccKinds`，省略时为 `BUILTIN_CC_KINDS`），或其 `timing` 不在枚举范围内。 |
+| `cc_ids_required` | 某个抄送人的类型需要选择具体对象（selection 为 `user` / `role` / `department` / `custom`），却一个都没选。 |
 | `cc_form_field_required` | 某个 `form_field` 类型的抄送收件人没有选择字段。 |
 | `invalid_execution_type` | `executionType` 不在 `ExecutionType` 之内。 |
 | `invalid_empty_assignee_action` | `emptyAssigneeAction` 不在其枚举范围内。 |
@@ -205,6 +207,7 @@ function validateFlowDefinition(
 | --- | --- |
 | `invalid_approval_method` / `invalid_pass_rule` | 不在各自的枚举范围内。 |
 | `pass_ratio_range` | `passRule: "ratio"` 但 `passRatio` 不在 `(0, 100]` 范围内。 |
+| `pass_count_range` | `passRule: "fixed_count"` 但 `passCount` 不是 ≥ 1 的整数。没有上限：审批人在运行时才解析，引擎会以实际参与的审批人数为上限。 |
 | `invalid_same_applicant_action` / `invalid_consecutive_approver_action` | 不在各自的枚举范围内。 |
 | `invalid_rollback_type` / `invalid_rollback_data_strategy` | 不在各自的枚举范围内。 |
 | `invalid_add_assignee_type` | 某个 `addAssigneeTypes` 项不在 `AddAssigneeType` 之内。 |

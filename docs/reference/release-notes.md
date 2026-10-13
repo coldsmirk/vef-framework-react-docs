@@ -25,6 +25,7 @@ No breaking changes. The form designer gains system variables, host diagnostics,
 - **form-editor** — `dataSourceApis` (`DataSourceApi` / `DataSourceApiParam`) gives remote option sources a picker over the host's endpoint catalog; a pick copies the endpoint, the mapping, and the declared parameters' defaults into the schema, which stays self-contained. See [Embedding → Offering an API catalog](../editors/form-editor/embedding.md#offering-an-api-catalog).
 - **form-editor** — the `api_call` action editor now sets `version` and request parameters, sharing the parameter editor of remote option sources. `normalizeOptionMapping` is exported.
 - **approval-form-bridge** — `validateApprovalProjection(schema)` returns the approval-contract issues alone, shaped for `FormEditor`'s `validate`.
+- **approval-form-bridge** — `ApprovalFieldOptionSource` and `ApprovalOptionSourceKind`, the shape of `ApprovalFormField.optionSource` since v2.20.0, are exported by name; they used to be reachable only through the field type.
 - **approval** — `ApprovalPlugins.formGlobals` (`FormGlobalDefinition[]`) declares the host globals the backend exposes to forms, and `ApprovalPlugins.dataSourceApis` the option-API catalog. `InstanceFormPanel` takes `applicant` and `globals` and evaluates the form with them as `$applicant` / `$globals`; `StartForm` carries `applicant` and `globals`, and `MyInstanceInfo` / `AdminInstanceInfo` carry `globals`. The flow designer's form step offers the four applicant attributes and the declared globals as system variables, passes the provider's resolver, evaluators, and API catalog to the form editor, and validates with `validateApprovalProjection`; neither designer step renders an issue banner any more, and the footer says why 下一步 is disabled. See [Approval → Form system variables](../engines/approval/overview.md#form-system-variables).
 
 ### Fixes worth knowing
@@ -36,6 +37,39 @@ No breaking changes. The form designer gains system variables, host diagnostics,
 - **form-editor** — request parameter names are committed on blur or Enter, and only when non-blank and unique. Adding several parameters in a row, or renaming one onto another's name, used to drop values.
 - **form-editor** — the `condition_group_empty` message now says what an empty group does (under `all` the rule always applies, under `any` never) instead of claiming the rule never applies.
 - **approval** — the flow designer's form preview resolves remote options through `dataSourceResolver` (it used to stay empty) and runs the provider's `evaluators`.
+
+## v2.24.1 (2026-09-28)
+
+No breaking changes.
+
+### Fixes worth knowing
+
+- **approval**, **integration**, **starter** — typing quickly into a dialog could crash the page with React's "Maximum update depth exceeded". The antd `Modal` / `Drawer` re-rendered on every keystroke, and each re-render re-ran its portal's container effect until React's nested-update limit tripped. The approval runtime action dialogs (on the instance detail and in the admin console), the integration connection-probe drawer, and the starter layout's search now keep their draft in the content below the shell, so a keystroke re-renders only that content. Each dialog still starts from a fresh draft every time it opens, and the connection probe resets its inputs when it targets another system.
+
+## v2.24.0 (2026-09-28)
+
+No breaking changes.
+
+### Features
+
+- **approval-flow-editor** — a parallel approval node can pass on a fixed number of approvals: `PassRule` adds `"fixed_count"`, with the count in `ApprovalNodeData.passCount` (default `1`). The node passes once that many assignees approve — every assignee when fewer take part — and rejects once the count is out of reach. `validateFlowDefinition` reports a count that is not an integer ≥ 1 as `pass_count_range`; there is no upper bound, since assignees resolve at run time. See [Approval Flow Editor reference](../editors/approval-flow-editor/reference.md#enums).
+- **approval** — `TimelineEntry` and `FlowGraphNodeData` carry `passCount` under the `fixed_count` rule.
+- **approval-flow-editor** — the condition editor lays each rule out on one non-wrapping row (subject, aggregate and column when used, operator, value, remove), so the rules of a group line their columns up and a long label truncates instead of widening the row. The operator stays disabled until the subject resolves.
+- **integration** — the log console replays a recorded invocation against the current definitions and compares it with the original, optionally with an unsaved script. `useLogApi` adds `replay` (`integration/log.replay`), `INTEGRATION_PERMISSIONS.log.replay` gates it, and `IntegrationConsolePage.permissions` accepts `logReplay`. `InvocationLog` adds `replayable` and shares `InvocationOutcome` with the new `ReplayResult`; `HttpExchange` adds the inbound caller's `clientAddr`. See [Integration pages](../engines/integration/pages.md#integrationconsolepage).
+
+### Fixes worth knowing
+
+- **approval-flow-editor** — a condition group mixing field and expression rules opens in the visual editor with each expression rule shown and edited as its source; it used to be misread as an unfilled field rule.
+- **approval-flow-editor** — fast typing in the condition editor no longer crashes with "Maximum update depth exceeded", and an in-progress edit survives the parent re-rendering with a fresh condition list; the draft is seeded from the stored conditions each time the editor opens.
+
+## v2.23.0 (2026-09-22)
+
+No breaking changes.
+
+### Features
+
+- **core** — `protectedBodyEncoding` works over plain HTTP: AES-GCM runs on Web Crypto where `crypto.subtle` exists and falls back to `@noble/ciphers` elsewhere, with byte-identical output. Browsers expose `crypto.subtle` only in secure contexts, so the client previously could not be constructed on an HTTP page. HTTPS is still what keeps the key confidential. See [HTTP and API Client](./core/http-and-api.md#protected-body-transport).
+- **approval** — the task center's two lists gain search. 待办 filters by title, applicant name, and timeout, plus arrival time under the advanced search; 已办 by title, applicant name, and how the task was finished, plus finish time and the instance's status. The queries take `PendingTaskSearch` / `CompletedTaskSearch`, which extend `MyTaskSearch` with `keyword`, `applicantId`, `applicantName`, and `flowId`. See [Approval pages](../engines/approval/pages.md#approvaltaskcenterpage).
 
 ## v2.22.0 (2026-09-15)
 
@@ -92,11 +126,13 @@ One breaking change: the approval flow designer's principal vocabulary is driven
 ### Breaking changes
 
 - **approval-flow-editor** — `AssigneeKind` and `CcKind` are open `string` identifiers rather than closed unions. `EditorPlugins` adds `assigneeKinds` and `ccKinds` (`KindDescriptor[]`), and `pickers` is keyed by kind string. Pass the catalog served by `approval/flow.list_kind_options`; when omitted, the editor falls back to `BUILTIN_ASSIGNEE_KINDS` / `BUILTIN_CC_KINDS`. A picker lookup tries the rule's kind first, then its `selection` mode, so a custom kind that selects roles can reuse the built-in `role` picker.
+- **approval** — `InitiatorKind` is an open `string` as well, and `ApprovalPlugins.pickers` is keyed by kind string.
 
 ### Features
 
 - **approval-flow-editor** — `SelectionMode` and `KindDescriptor` are exported, and the validation API takes a `FlowValidationContext` containing `formFields`, `assigneeKinds`, and `ccKinds`.
 - **approval** — `ApprovalPlugins.pickers` follows the same kind-first/selection-fallback lookup, and `KindDescriptor` / `SelectionMode` are re-exported.
+- **approval** — `useFlowApi.listKindOptions` fetches the application's kind catalog (`KindOptions`: `assignees`, `ccs`, `initiators`), and the flow designer passes it to both its initiator editor and the flow editor — `toEditorPlugins` takes it as a third argument. `BUILTIN_INITIATOR_KINDS` is what the initiator editor offers until the catalog loads.
 
 ## v2.17.2 (2026-08-26)
 

@@ -20,6 +20,8 @@ Two conventions apply across every page:
 
 The task center: a tabbed screen (待办 / 已办) of tasks awaiting the current user and tasks they already processed. The pending tab label carries a live count badge. Clicking a row (or the 处理 / 查看 operation button) opens [`InstanceDetailDrawer`](./reference.md#instancedetaildrawer) with the full instance detail and action bar; completing any action refreshes both lists and the badge.
 
+Each list has its own search (v2.23.0). 待办 filters by title, applicant name, and 是否超时 inline, and by arrival time (到达时间) under the advanced search; 已办 filters by title, applicant name, and 处理结果 (the statuses a completed task can hold: approved, rejected, handled, transferred, rolled back) inline, and by finish time (处理时间) and the instance's status (流程状态) under the advanced search. Date ranges are day-granular and inclusive. The full filter set, including the applicant-id and flow filters the page does not expose, is in [`PendingTaskSearch` / `CompletedTaskSearch`](./reference.md#self-service-my-projections).
+
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `tenantId` | `string` | — | Scope the lists to one tenant; omit for the caller's full view. |

@@ -114,7 +114,7 @@ export const Route = createFileRoute("/_layout/sys/integration-contract")({
 | --- | --- | --- |
 | 脚本调试台 | 试运行工作台（见下文） | 调用者持有任一试运行码即显示；运行按钮按方向门控 |
 | 路由诊断 | 按需的路由诊断: 运行后按类别分组阅读发现（悬空适配器、通配缺口、系统/契约已停用、契约未覆盖） | `integration.ops.diagnose_routes` |
-| 调用日志 | 调用日志列表（时间、系统、契约、方向、结果、耗时、请求 id），带系统/契约/方向/失败类别筛选；行打开详情抽屉，含输入/输出 JSON、高亮的报文追踪与错误 | `integration.log.query` |
+| 调用日志 | 调用日志列表（时间、系统、契约、方向、结果、耗时、请求 id），带系统/契约/方向/失败类别筛选；行打开详情抽屉，含输入/输出 JSON、高亮的报文追踪、错误，以及重放面板（见下文） | `integration.log.query`；重放还需要 `integration.log.replay` |
 | 运行统计 | 进程启动以来每个（系统, 契约, 方向）元组的按节点聚合: 调用数、成功数、按类别的失败分布、平均/最大耗时、最近错误——带刷新按钮 | `integration.log.query`（`statsView` 覆盖项） |
 
 **试运行工作台**是一个请求 → 结果的分栏（并排，窄时堆叠；两半各自内部滚动）:
@@ -124,10 +124,17 @@ export const Route = createFileRoute("/_layout/sys/integration-contract")({
 - 出站输入: JSON 形式的契约输入。入站输入: 一个合成的厂商请求（method、path、headers、query、原始 body）加处理器的样例输出（JSON）。
 - 结果: 出站展示契约输出与报文追踪时间线（即使运行失败也会填充，因此你能看到脚本走到了哪一步）；入站展示厂商将收到的回复与脚本 dispatch 的内容——两个转换方向一次验证。失败类别标签对错误分类；系统、契约或方向一变，结果立即重置。
 
+**重放**会按当前定义重新运行一次已记录的调用，并把结果与原始调用并排对比——状态、耗时、错误、输入与输出左右对照，下方是重放的报文追踪：
+
+- 它需要重放数据：没有保留重放数据的条目（`replayable: false`——后端只在开启 `vef.integration.log.replay` 时保留）会显示一条提示，而不是重放按钮。
+- *出站*重放以原始输入重新执行，并会真实调用外部系统，因此会先请求确认；它既不写入统计，也不写入调用日志。*入站*重放以原始请求重新执行入站脚本，跳过验签，并由业务处理器以原始结果应答，因此业务永远不会被执行两次。
+- 「使用临时脚本」用未保存的脚本内容代替已保存的适配器进行重放；留空则运行已保存的脚本。
+- 若契约、系统或适配器在原始调用之后被修改过，会提示结果差异可能源自这些修改。
+
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `permissions` | `{ dryRun?, dryRunInbound?, diagnoseRoutes?, logQuery?, statsView? }`（均为 `string`） | `ops.dry_run`、`ops.dry_run_inbound`、`ops.diagnose_routes`、`log.query`、`log.query` | 覆盖门控各控制台标签页的权限码。注意 `statsView` 默认取**日志**查询码——统计端点在 `sys/monitor` 上。 |
+| `permissions` | `{ dryRun?, dryRunInbound?, diagnoseRoutes?, logQuery?, logReplay?, statsView? }`（均为 `string`） | `ops.dry_run`、`ops.dry_run_inbound`、`ops.diagnose_routes`、`log.query`、`log.replay`、`log.query` | 覆盖门控各控制台标签页的权限码，`logReplay` 门控日志详情中的重放操作。注意 `statsView` 默认取**日志**查询码——统计端点在 `sys/monitor` 上。 |
 | `title` | `ReactNode` | — | 可选的页面标题。 |
 
-- **端点:** `integration/ops.dry_run`、`.dry_run_inbound`、`.diagnose_routes`；`integration/log.find_page`；`sys/monitor.get_integration_stats`；`integration/system.find_all`、`integration/contract.find_all`（目录）。
+- **端点:** `integration/ops.dry_run`、`.dry_run_inbound`、`.diagnose_routes`；`integration/log.find_page`、`.replay`；`sys/monitor.get_integration_stats`；`integration/system.find_all`、`integration/contract.find_all`（目录）。
 - **playground 路由:** `/sys/integration-console`。

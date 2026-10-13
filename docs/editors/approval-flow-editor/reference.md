@@ -57,7 +57,7 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 | --- | --- | --- |
 | `start` | `StartNodeData` | — |
 | `end` | `EndNodeData` | — |
-| `approval` | `ApprovalNodeData` | extends `TaskNodeData` + `approvalMethod`, `passRule`, `passRatio`, `sameApplicantAction`, `consecutiveApproverAction`, `rollbackType`, `rollbackDataStrategy`, `rollbackTargetKeys`, `isRollbackAllowed`, `isAddAssigneeAllowed`, `addAssigneeTypes`, `isRemoveAssigneeAllowed`, `isManualCcAllowed` |
+| `approval` | `ApprovalNodeData` | extends `TaskNodeData` + `approvalMethod`, `passRule`, `passRatio`, `passCount`, `sameApplicantAction`, `consecutiveApproverAction`, `rollbackType`, `rollbackDataStrategy`, `rollbackTargetKeys`, `isRollbackAllowed`, `isAddAssigneeAllowed`, `addAssigneeTypes`, `isRemoveAssigneeAllowed`, `isManualCcAllowed` |
 | `handle` | `HandleNodeData` | alias of `TaskNodeData` (no approval-specific fields) |
 | `condition` | `ConditionNodeData` | `branches?: ConditionBranchDefinition[]` |
 | `cc` | `CcNodeData` | `ccs?: CcDefinition[]`, `isReadConfirmRequired?: boolean`, `fieldPermissions?: Record<string, CcFieldPermission>` |
@@ -109,7 +109,7 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 | Export | Values |
 | --- | --- |
 | `ApprovalMethod` | `"sequential" \| "parallel"` |
-| `PassRule` | `"all" \| "any" \| "ratio"` — `"all"` implies veto power |
+| `PassRule` | `"all" \| "any" \| "ratio" \| "fixed_count"` — `"all"` implies veto power; `"fixed_count"` (v2.24.0) passes once `passCount` assignees approve — every assignee when fewer take part — and rejects once that count is out of reach |
 | `EmptyAssigneeAction` | `"auto_pass" \| "transfer_admin" \| "transfer_superior" \| "transfer_applicant" \| "transfer_specified"` |
 | `ExecutionType` | `"manual" \| "auto_pass" \| "auto_reject"` |
 | `SameApplicantAction` | `"auto_pass" \| "self_approve" \| "transfer_superior" \| "exclude"` — applied to the applicant's own seat; `exclude` recuses that seat and leaves the remaining approvers to decide |
@@ -185,9 +185,11 @@ function validateFlowDefinition(
 
 | Code | Meaning |
 | --- | --- |
-| `invalid_assignee_kind` | An assignee's `kind` outside `AssigneeKind`. |
+| `invalid_assignee_kind` | An assignee's `kind` is not in the kind catalog — the context's `assigneeKinds`, or `BUILTIN_ASSIGNEE_KINDS` when it is omitted. |
+| `assignee_ids_required` | An assignee whose kind selects ids (selection `user` / `role` / `department` / `custom`) has none selected — it would match nobody, which the backend rejects at deploy. |
 | `assignee_form_field_required` | A `form_field` assignee has no field selected. |
-| `invalid_cc_kind` / `invalid_cc_timing` | A CC's `kind` / `timing` outside its enum. |
+| `invalid_cc_kind` / `invalid_cc_timing` | A CC's `kind` is not in the kind catalog (`ccKinds`, or `BUILTIN_CC_KINDS` when omitted), or its `timing` is outside its enum. |
+| `cc_ids_required` | A CC recipient whose kind selects ids (selection `user` / `role` / `department` / `custom`) has none selected. |
 | `cc_form_field_required` | A `form_field` CC recipient has no field selected. |
 | `invalid_execution_type` | `executionType` outside `ExecutionType`. |
 | `invalid_empty_assignee_action` | `emptyAssigneeAction` outside its enum. |
@@ -205,6 +207,7 @@ function validateFlowDefinition(
 | --- | --- |
 | `invalid_approval_method` / `invalid_pass_rule` | Outside their enums. |
 | `pass_ratio_range` | `passRule: "ratio"` with `passRatio` outside `(0, 100]`. |
+| `pass_count_range` | `passRule: "fixed_count"` with a `passCount` that is not an integer ≥ 1. There is no upper bound: assignees resolve at run time, and the engine caps the count by the number of participating assignees. |
 | `invalid_same_applicant_action` / `invalid_consecutive_approver_action` | Outside their enums. |
 | `invalid_rollback_type` / `invalid_rollback_data_strategy` | Outside their enums. |
 | `invalid_add_assignee_type` | An `addAssigneeTypes` entry outside `AddAssigneeType`. |
