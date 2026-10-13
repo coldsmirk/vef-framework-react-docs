@@ -78,7 +78,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 | `onClose` | `() => void` | — | 关闭处理函数。 |
 | `onStarted` | `() => void` | — | 提交被确认后、抽屉关闭之后触发。 |
 
-它通过 `approval/my.get_start_form` 加载已发布的表单文档——服务端按与发起完全相同的规则门控，因此只要表单渲染出来，就意味着这是一个可发起的流程（启用、有权限、已发布）——用 provider 的注册表经 `InstanceFormPanel` 渲染，并把通过渲染器校验的值提交到 `approval/instance.start`。没有表单的流程直接提交。
+它通过 `approval/my.get_start_form` 加载已发布的表单文档——服务端按与发起完全相同的规则门控，因此只要表单渲染出来，就意味着这是一个可发起的流程（启用、有权限、已发布）——用 provider 的注册表经 `InstanceFormPanel` 渲染，并把通过渲染器校验的值提交到 `approval/instance.start`。发起表单还携带了实例将要记录的发起人，以及该流程向表单暴露的宿主全局变量，抽屉把它们作为表单的 `$applicant` 与 `$globals` 传下去（见[表单系统变量](./overview.md#表单系统变量)）。没有表单的流程直接提交。
 
 ## 管理页面
 
@@ -114,7 +114,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 
 #### `FlowDesignerDrawer`
 
-全屏四步设计器（流程设置 → 表单设计 → 流程设计 → 审阅提交），单独导出。每一步都把关下一步: 设置必须完整（`business` 模式下包含有效的业务绑定；除非勾选 全员可发起，否则至少要有一条发起人规则），表单必须通过 `validateApprovalSchema`，流程必须针对投影字段通过 `validateFlowDefinition`。提交把 create/update → deploy → 可选的 publish 作为一条链执行；每一步都会使流程列表失效。所有步骤面板保持挂载，编辑器状态在步骤切换间不丢失。抽屉主体每次打开都重新挂载，因此编辑器种子绝不会在会话之间泄漏。
+全屏四步设计器（流程设置 → 表单设计 → 流程设计 → 审阅提交），单独导出。每一步都把关下一步: 设置必须完整（`business` 模式下包含有效的业务绑定；除非勾选 全员可发起，否则至少要有一条发起人规则），表单必须通过 `validateApprovalSchema`，流程必须针对投影字段通过 `validateFlowDefinition`。问题本身都在各个编辑器自己的诊断里——表单编辑器的状态栏（结构问题与审批契约问题，经由 `validate={validateApprovalProjection}`）和流程编辑器的工具栏指示器——每一条都能定位到对应的字段或节点，因此两个步骤都不会在画布上方渲染横幅；「下一步」被禁用时，底部会用一行文字说明原因（请先完善流程设置中的必填项、表单存在 N 个错误…、流程存在 N 个问题…）。表单步骤还会提供[表单系统变量](./overview.md#表单系统变量)和 provider 的选项接口目录。提交把 create/update → deploy → 可选的 publish 作为一条链执行；每一步都会使流程列表失效。所有步骤面板保持挂载，编辑器状态在步骤切换间不丢失。抽屉主体每次打开都重新挂载，因此编辑器种子绝不会在会话之间泄漏。
 
 审阅步骤只统计最终会被保存的发起人规则。当勾选 全员可发起 时，保存的载荷不会携带任何发起人规则——这两种设置在服务端是互斥的。草稿仍会保留已输入的规则，因此切回受限发起时不会丢失；它们只会在提交时被丢弃。
 

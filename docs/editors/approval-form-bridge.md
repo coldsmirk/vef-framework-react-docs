@@ -1,11 +1,11 @@
 ---
 title: Approval Form Bridge
-description: Projects a form-editor FormSchema into the flow editor's field inventory and a designer-side preview of the approval backend's flat field list, with save-gate validation and an approval-profile registry.
+description: Projects a form-editor FormSchema into the flow editor's field inventory and a designer-side preview of the approval backend's flat field list, with a save gate, an in-editor validator, and an approval-profile registry.
 ---
 
 # Approval Form Bridge
 
-`@vef-framework-react/approval-form-bridge` is a pure-function projection library — it renders nothing. It sits between `form-editor` and the approval backend / `approval-flow-editor`, converting a designed `FormSchema` into the field inventory `ApprovalFlowEditor`'s `plugins.formFields` consumes, plus a designer-side preview of the flat field list the Go backend derives from the deployed schema.
+`@vef-framework-react/approval-form-bridge` is a pure-function projection library — it renders nothing. It sits between `form-editor` and the approval backend / `approval-flow-editor`, converting a designed `FormSchema` into the field inventory `ApprovalFlowEditor`'s `plugins.formFields` consumes, plus a designer-side preview of the flat field list the Go backend derives from the deployed schema. Its validators check a schema against the approval contract: [`validateApprovalSchema`](#validateapprovalschema) as the save gate, and [`validateApprovalProjection`](#validateapprovalprojection) inside the designer.
 
 ## `createApprovalRegistries`
 
@@ -86,8 +86,7 @@ Before v2.10.0 the projection produced a wrapper object — `ProjectionResult.de
 | `ApprovalFieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `ApprovalFieldOption` | `{ label: string; value: unknown }` |
 | `ApprovalValidationRule` | `{ minLength?, maxLength?, min?, max?, pattern?, message? }` — on a `table` field, `minLength`/`maxLength` bound the row count, not a string length |
-| `ApprovalFieldOptionSource` | `{ kind: ApprovalOptionSourceKind; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }` — `request` / `mapping` are form-editor's own types, re-exported unchanged |
-| `ApprovalOptionSourceKind` | `"remote"` — deliberately narrower than the designer's source union; see [Remote option sources](#remote-option-sources) |
+| `ApprovalFormField["optionSource"]` | `{ kind: "remote"; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }` — `request` / `mapping` are form-editor's own types; `kind` is deliberately narrower than the designer's source union, see [Remote option sources](#remote-option-sources). The package does not export this shape (or its `kind` union) under a name of its own: reach it as `NonNullable<ApprovalFormField["optionSource"]>`. |
 
 `options` is only populated for a `select` field whose source is an inline `static` list or a `ref` to a form-global `static` data source. A source whose options cannot be enumerated — a `remote` source, inline or reached through a `ref` — projects [`optionSource`](#remote-option-sources) instead; a dangling `ref` or an unknown kind projects neither. Every one of those cases still raises `options_not_static`, and the backend still accepts any submitted value for the field, because its select validation reads `options` alone. `columnType` mirrors the backend's `ColumnDataType` and is only meaningful under `table` storage mode; an explicit designer override is always honored, but a number field with no configured `precision` deliberately emits **no** `columnType` (the widget-inferred `"integer"` would make the Go runtime reject fractional values, so the backend falls back to a gate-free numeric column). A `decimal` column with no configured `precision` raises `decimal_scale_missing` (a warning — the storage layer rounds to 0 decimal places); with a positive `precision`, it is emitted as `scale`. `defaultValue` and `props` exist on the wire contract but are never emitted by the projector — they are declared so hand-built or host-enriched definitions round-trip losslessly.
 
@@ -96,7 +95,8 @@ Before v2.10.0 the projection produced a wrapper object — `ProjectionResult.de
 A selection field whose options could not be enumerated projects a descriptor in `optionSource` rather than leaving the consumer with nothing:
 
 ```ts
-interface ApprovalFieldOptionSource {
+// NonNullable<ApprovalFormField["optionSource"]>
+{
   kind: "remote";
   request?: RemoteDataSourceRequest;
   mapping?: RemoteOptionMapping;
@@ -105,7 +105,7 @@ interface ApprovalFieldOptionSource {
 
 Three properties are worth stating outright:
 
-- **It is post-dereference.** A `ref` is resolved before the branch is taken, so `request` / `mapping` are the ones the referenced `FormSchema.dataSources` entry carries. A consumer never chases a `dataSourceId` it has no schema to look up.
+- **It is post-dereference.** A `ref` is resolved before the branch is taken, so `request` / `mapping` are the ones the referenced `FormSchema.dataSources` entry carries. A consumer never chases a `dataSourceId` it has no schema to look up. The mapping is [normalized](./form-editor/schema.md#options-and-data-sources) on the way out — blank keys dropped, omitted entirely when nothing is left — so `mapping?.labelKey ?? "label"` is safe for a consumer to read.
 - **`request.params` travel unevaluated.** Each parameter stays the `DynamicValue` the designer authored — `{ kind: "literal"; value }` or `{ kind: "expression"; source }` — see [bound parameters](./form-editor/embedding.md#bound-parameters). Neither the backend nor a list-rendering consumer holds the form values an expression reads, so evaluating them at projection time would be inventing an answer; carrying them verbatim lets a consumer that *does* have values evaluate them, and one that does not drop the parameter.
 - **`request` is optional only for the unfinished case.** A remote source whose request the designer left unset is emitted rather than silently degraded to a source-less field, so the Go deploy validation names it. A deployed version always carries one.
 
@@ -132,7 +132,7 @@ The single save-time gate for an approval-bound form schema, run as two layers:
 1. form-editor's `validateSchema` (structural integrity + registry membership) — a nested subform, for instance, is legal in a general-purpose form but not here.
 2. `projectFormSchema`'s contract-fit check, run only if step 1 found no error — a malformed tree isn't worth running through the projector, which assumes well-typed input.
 
-Both layers' issues share the `{ path, code, severity, message }` shape, so a host renders them through one list:
+Both layers' issues share the `{ path, code, severity, message }` shape, so a host handles them through one list:
 
 ```tsx
 import { validateApprovalSchema } from "@vef-framework-react/approval-form-bridge";
@@ -145,6 +145,38 @@ if (!result.valid) {
   }
 }
 ```
+
+Use it where a schema is saved or deployed — the designer cannot enforce everything on its own (`initialSchema` is ingested without validation, for one), so this is the single choke point. While the form is being *designed*, show the same issues inside the editor instead, with `validateApprovalProjection`.
+
+## `validateApprovalProjection`
+
+```ts
+function validateApprovalProjection(schema: FormSchema): ProjectionIssue[];
+```
+
+The approval layer of the save gate alone — exactly the `issues` of `projectFormSchema` — shaped as form-editor's [`SchemaValidator`](./form-editor/embedding.md#host-diagnostics), so it plugs straight into `FormEditor`'s `validate` prop:
+
+```tsx
+import { createApprovalRegistries, validateApprovalProjection } from "@vef-framework-react/approval-form-bridge";
+import { FormEditor } from "@vef-framework-react/form-editor";
+import { useState } from "react";
+
+function ApprovalFormDesigner() {
+  const [registries] = useState(createApprovalRegistries);
+
+  return (
+    <FormEditor
+      registries={registries}
+      validate={validateApprovalProjection}
+      onSchemaChange={handleSchemaChange}
+    />
+  );
+}
+```
+
+The editor runs its own structural pass and calls `validate` only for a structurally sound schema, so between the two a designer sees every issue `validateApprovalSchema` would report — each exactly once — in the editor's status bar, and the editor's publish gate blocks on the projection's errors as it does on its own. Because a projection issue's `path` is the field-key chain (`amount`, `items.price`), clicking one in the status bar selects the field it is about. No banner above the editor is needed, so the canvas keeps its full height.
+
+The function is module-level and therefore identity-stable, as the `validate` prop requires.
 
 ## Projection issues
 
@@ -165,14 +197,19 @@ if (!result.valid) {
 
 ## End-to-end example
 
-Combining the bridge with both editors — the pattern used in `approval-flow-editor`'s own playground demo:
+Combining the bridge with both editors — the composition the approval package's [flow designer wizard](../engines/approval/pages.md#flowdesignerdrawer) is built on:
 
 ```tsx
 import type { EditorPlugins, FlowDefinition } from "@vef-framework-react/approval-flow-editor";
 import type { FormSchema } from "@vef-framework-react/form-editor";
 
 import { ApprovalFlowEditor, validateFlowDefinition } from "@vef-framework-react/approval-flow-editor";
-import { createApprovalRegistries, projectFormSchema, validateApprovalSchema } from "@vef-framework-react/approval-form-bridge";
+import {
+  createApprovalRegistries,
+  projectFormSchema,
+  validateApprovalProjection,
+  validateApprovalSchema
+} from "@vef-framework-react/approval-form-bridge";
 import { FormEditor } from "@vef-framework-react/form-editor";
 import { useMemo, useState } from "react";
 
@@ -181,12 +218,13 @@ function ApprovalDesigner() {
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null);
   const [flowDefinition, setFlowDefinition] = useState<FlowDefinition>({ nodes: [], edges: [] });
 
-  // One walk feeds the flow editor's field metadata and the review inventory.
+  // One walk feeds the flow editor's field inventory.
   const projection = useMemo(() => formSchema ? projectFormSchema(formSchema) : null, [formSchema]);
 
-  // Two-layer save gate for the form step.
-  const formGate = useMemo(
-    () => formSchema ? validateApprovalSchema(formSchema, registries) : null,
+  // The save gate. The designer already shows these issues in its own status
+  // bar (through `validate` below); this only decides whether to deploy.
+  const formValid = useMemo(
+    () => formSchema === null || validateApprovalSchema(formSchema, registries).valid,
     [formSchema, registries]
   );
 
@@ -196,19 +234,17 @@ function ApprovalDesigner() {
   );
 
   const flowErrors = useMemo(
-    () => validateFlowDefinition(flowDefinition, projection?.formFields ?? []),
+    () => validateFlowDefinition(flowDefinition, { formFields: projection?.formFields ?? [] }),
     [flowDefinition, projection]
   );
 
   return (
     <>
-      <FormEditor registries={registries} onSchemaChange={setFormSchema} />
-
-      {formGate && !formGate.valid && <IssueList issues={formGate.issues} />}
+      <FormEditor registries={registries} validate={validateApprovalProjection} onSchemaChange={setFormSchema} />
 
       <ApprovalFlowEditor plugins={plugins} value={flowDefinition} onChange={setFlowDefinition} />
 
-      <Button disabled={flowErrors.length > 0} onClick={() => deploy(formSchema, flowDefinition)}>
+      <Button disabled={!formValid || flowErrors.length > 0} onClick={() => deploy(formSchema, flowDefinition)}>
         Deploy
       </Button>
     </>

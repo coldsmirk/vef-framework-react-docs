@@ -1,11 +1,11 @@
 ---
 title: 审批表单桥接
-description: 把 form-editor 的 FormSchema 投影为流程编辑器的字段清单，以及审批后端扁平字段列表的设计器侧预览，附带保存关卡校验和一个审批专用注册表。
+description: 把 form-editor 的 FormSchema 投影为流程编辑器的字段清单，以及审批后端扁平字段列表的设计器侧预览，附带保存关卡、编辑器内校验器和一个审批专用注册表。
 ---
 
 # 审批表单桥接
 
-`@vef-framework-react/approval-form-bridge` 是一个纯函数投影库——它不渲染任何东西。它位于 `form-editor` 与审批后端 / `approval-flow-editor` 之间，把一个已设计好的 `FormSchema` 转换为 `ApprovalFlowEditor` 的 `plugins.formFields` 所消费的字段清单，外加 Go 后端将从已部署 schema 派生出的扁平字段列表的设计器侧预览。
+`@vef-framework-react/approval-form-bridge` 是一个纯函数投影库——它不渲染任何东西。它位于 `form-editor` 与审批后端 / `approval-flow-editor` 之间，把一个已设计好的 `FormSchema` 转换为 `ApprovalFlowEditor` 的 `plugins.formFields` 所消费的字段清单，外加 Go 后端将从已部署 schema 派生出的扁平字段列表的设计器侧预览。它的校验器负责对照审批契约检查 schema：[`validateApprovalSchema`](#validateapprovalschema) 作为保存关卡，[`validateApprovalProjection`](#validateapprovalprojection) 用在设计器内部。
 
 ## `createApprovalRegistries`
 
@@ -86,8 +86,7 @@ interface ProjectionResult {
 | `ApprovalFieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `ApprovalFieldOption` | `{ label: string; value: unknown }` |
 | `ApprovalValidationRule` | `{ minLength?, maxLength?, min?, max?, pattern?, message? }`——在 `table` 字段上，`minLength` / `maxLength` 约束的是行数，而不是字符串长度 |
-| `ApprovalFieldOptionSource` | `{ kind: ApprovalOptionSourceKind; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }`——`request` / `mapping` 直接复用 form-editor 自己的类型，原样转发 |
-| `ApprovalOptionSourceKind` | `"remote"`——刻意比设计器的数据源联合类型更窄，见[远程选项来源](#远程选项来源) |
+| `ApprovalFormField["optionSource"]` | `{ kind: "remote"; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }`——`request` / `mapping` 直接复用 form-editor 自己的类型；`kind` 刻意比设计器的数据源联合类型更窄，见[远程选项来源](#远程选项来源)。这个包没有以独立的名称导出该结构（及其 `kind` 联合类型）：请通过 `NonNullable<ApprovalFormField["optionSource"]>` 取得它。 |
 
 `options` 只会在一个 `select` 字段的数据源是内联的 `static` 列表、或指向某个表单全局 `static` 数据源的 `ref` 时才会被填充。一个选项无法被枚举出来的数据源——`remote` 数据源，无论是内联的还是经由 `ref` 抵达的——转而投影出 [`optionSource`](#远程选项来源)；而一个悬空的 `ref` 或未知 kind 则两者都不投影。以上每一种情况仍然会抛出 `options_not_static`，后端也仍然会接受该字段提交的任意值，因为它的 select 校验只读 `options`。`columnType` 对应后端的 `ColumnDataType`，只在 `table` 存储模式下才有意义；设计器的显式覆盖值总是被尊重，但一个没有配置 `precision` 的 number 字段会刻意**不**输出 `columnType`（按控件推断出的 `"integer"` 会让 Go 运行时拒绝小数值，因此后端会回退到一个不设门槛的数值列）。一个没有配置 `precision` 的 `decimal` 列会抛出 `decimal_scale_missing`（一个 warning——存储层会四舍五入到 0 位小数）；配置了正数 `precision` 时，它会作为 `scale` 输出。`defaultValue` 和 `props` 存在于线上格式契约中，但投影器永远不会输出它们——声明它们是为了让手工构建或经宿主补充的定义能够无损往返。
 
@@ -96,7 +95,8 @@ interface ProjectionResult {
 一个选项无法被枚举出来的选择类字段，会在 `optionSource` 里投影出一份描述符，而不是把消费方晾在原地：
 
 ```ts
-interface ApprovalFieldOptionSource {
+// NonNullable<ApprovalFormField["optionSource"]>
+{
   kind: "remote";
   request?: RemoteDataSourceRequest;
   mapping?: RemoteOptionMapping;
@@ -105,7 +105,7 @@ interface ApprovalFieldOptionSource {
 
 有三点值得明确说出来：
 
-- **它是解引用之后的结果。** `ref` 会在分支判断之前先被解引用，因此 `request` / `mapping` 就是被引用的那个 `FormSchema.dataSources` 条目所携带的那一份。消费方永远不需要拿着一个 `dataSourceId` 去追一份它根本没有的 schema。
+- **它是解引用之后的结果。** `ref` 会在分支判断之前先被解引用，因此 `request` / `mapping` 就是被引用的那个 `FormSchema.dataSources` 条目所携带的那一份。消费方永远不需要拿着一个 `dataSourceId` 去追一份它根本没有的 schema。映射在输出时会被[规范化](./form-editor/schema.md#选项与数据源)——去掉空 key，什么都不剩时整个省略——因此消费方可以放心读取 `mapping?.labelKey ?? "label"`。
 - **`request.params` 原封不动、未经求值地传递。** 每个参数仍然是设计器写下的那个 `DynamicValue`——`{ kind: "literal"; value }` 或 `{ kind: "expression"; source }`——见[绑定参数](./form-editor/embedding.md#绑定参数)。后端和列表渲染方都不持有表达式所读取的表单值，所以在投影期求值等于凭空编一个答案；原样携带则让持有表单值的消费方自己求值，不持有的那一方直接丢掉这个参数。
 - **`request` 之所以可选，只是为了还没写完的那种情况。** 设计器尚未填写 request 的远程数据源会被原样输出，而不是被悄悄降级成一个没有来源的字段，这样 Go 的部署校验才能点名它。已部署的版本总是带着 request。
 
@@ -132,7 +132,7 @@ interface ApprovalSchemaValidationResult {
 1. form-editor 的 `validateSchema`（结构完整性 + 注册表成员校验）——例如，一个嵌套子表单在通用表单场景下是合法的，但在这里不是。
 2. `projectFormSchema` 的契约适配检查，只有在第一步没有发现 error 时才会运行——一棵格式错误的树不值得再交给投影器处理，因为投影器假定输入是良类型的。
 
-两层的 issue 共享同一个 `{ path, code, severity, message }` 形态，因此宿主可以用同一个列表把它们都渲染出来:
+两层的 issue 共享同一个 `{ path, code, severity, message }` 形态，因此宿主可以用同一个列表来处理它们:
 
 ```tsx
 import { validateApprovalSchema } from "@vef-framework-react/approval-form-bridge";
@@ -145,6 +145,38 @@ if (!result.valid) {
   }
 }
 ```
+
+在保存或部署 schema 的地方使用它——设计器本身无法强制所有约束（比如 `initialSchema` 被摄入时就不做校验），所以这里是唯一的卡口。而在表单*设计过程中*，请改用 `validateApprovalProjection`，让同样的问题显示在编辑器内部。
+
+## `validateApprovalProjection`
+
+```ts
+function validateApprovalProjection(schema: FormSchema): ProjectionIssue[];
+```
+
+保存关卡中单独的审批这一层——恰好就是 `projectFormSchema` 的 `issues`——形态与 form-editor 的 [`SchemaValidator`](./form-editor/embedding.md#宿主诊断) 一致，因此可以直接接到 `FormEditor` 的 `validate` 属性上:
+
+```tsx
+import { createApprovalRegistries, validateApprovalProjection } from "@vef-framework-react/approval-form-bridge";
+import { FormEditor } from "@vef-framework-react/form-editor";
+import { useState } from "react";
+
+function ApprovalFormDesigner() {
+  const [registries] = useState(createApprovalRegistries);
+
+  return (
+    <FormEditor
+      registries={registries}
+      validate={validateApprovalProjection}
+      onSchemaChange={handleSchemaChange}
+    />
+  );
+}
+```
+
+编辑器自己会先做一遍结构校验，并且只在结构无误时才调用 `validate`，因此两者合起来，设计者能在编辑器的状态栏里看到 `validateApprovalSchema` 会报告的每一个问题——每个恰好一次——编辑器的发布关卡也会像对待自身错误一样，因投影的 error 而阻止发布。由于投影问题的 `path` 是字段 key 链（`amount`、`items.price`），在状态栏中点击它就会选中对应的字段。编辑器上方不再需要任何横幅，画布可以保持完整高度。
+
+这个函数定义在模块级，因此身份是稳定的，满足 `validate` 属性的要求。
 
 ## 投影 issue
 
@@ -165,14 +197,19 @@ if (!result.valid) {
 
 ## 端到端示例
 
-把桥接与两个编辑器组合起来——这正是 `approval-flow-editor` 自己的 playground 演示所使用的模式:
+把桥接与两个编辑器组合起来——审批包的[流程设计向导](../engines/approval/pages.md#flowdesignerdrawer)正是建立在这种组合之上:
 
 ```tsx
 import type { EditorPlugins, FlowDefinition } from "@vef-framework-react/approval-flow-editor";
 import type { FormSchema } from "@vef-framework-react/form-editor";
 
 import { ApprovalFlowEditor, validateFlowDefinition } from "@vef-framework-react/approval-flow-editor";
-import { createApprovalRegistries, projectFormSchema, validateApprovalSchema } from "@vef-framework-react/approval-form-bridge";
+import {
+  createApprovalRegistries,
+  projectFormSchema,
+  validateApprovalProjection,
+  validateApprovalSchema
+} from "@vef-framework-react/approval-form-bridge";
 import { FormEditor } from "@vef-framework-react/form-editor";
 import { useMemo, useState } from "react";
 
@@ -181,12 +218,13 @@ function ApprovalDesigner() {
   const [formSchema, setFormSchema] = useState<FormSchema | null>(null);
   const [flowDefinition, setFlowDefinition] = useState<FlowDefinition>({ nodes: [], edges: [] });
 
-  // One walk feeds the flow editor's field metadata and the review inventory.
+  // One walk feeds the flow editor's field inventory.
   const projection = useMemo(() => formSchema ? projectFormSchema(formSchema) : null, [formSchema]);
 
-  // Two-layer save gate for the form step.
-  const formGate = useMemo(
-    () => formSchema ? validateApprovalSchema(formSchema, registries) : null,
+  // The save gate. The designer already shows these issues in its own status
+  // bar (through `validate` below); this only decides whether to deploy.
+  const formValid = useMemo(
+    () => formSchema === null || validateApprovalSchema(formSchema, registries).valid,
     [formSchema, registries]
   );
 
@@ -196,19 +234,17 @@ function ApprovalDesigner() {
   );
 
   const flowErrors = useMemo(
-    () => validateFlowDefinition(flowDefinition, projection?.formFields ?? []),
+    () => validateFlowDefinition(flowDefinition, { formFields: projection?.formFields ?? [] }),
     [flowDefinition, projection]
   );
 
   return (
     <>
-      <FormEditor registries={registries} onSchemaChange={setFormSchema} />
-
-      {formGate && !formGate.valid && <IssueList issues={formGate.issues} />}
+      <FormEditor registries={registries} validate={validateApprovalProjection} onSchemaChange={setFormSchema} />
 
       <ApprovalFlowEditor plugins={plugins} value={flowDefinition} onChange={setFlowDefinition} />
 
-      <Button disabled={flowErrors.length > 0} onClick={() => deploy(formSchema, flowDefinition)}>
+      <Button disabled={!formValid || flowErrors.length > 0} onClick={() => deploy(formSchema, flowDefinition)}>
         Deploy
       </Button>
     </>
@@ -216,4 +252,4 @@ function ApprovalDesigner() {
 }
 ```
 
-关于 `plugins.formFields` 和 `validateFlowDefinition` 在流程一侧做了什么，见 [审批流编辑器: 宿主集成](./approval-flow-editor/host-integration.md)；关于 `FormSchema`、`DeviceRegistries` 和 `validateSchema`，见 [form-editor 参考](./form-editor/reference.md)。
+`plugins.formFields` 与 `validateFlowDefinition` 在流程一侧做了什么，见 [Approval Flow Editor：宿主集成](./approval-flow-editor/host-integration.md)；`FormSchema`、`DeviceRegistries` 与 `validateSchema` 见 [form-editor 参考](./form-editor/reference.md)。

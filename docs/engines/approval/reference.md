@@ -61,15 +61,17 @@ Host-integration points shared by every approval page and component. Wrap the ap
 | `pickers` | `Partial<Record<string, FC<PickerProps>>>` | — | Pickers that resolve concrete ids, keyed by rule kind. Lookup falls back to the kind's `selection` mode, so the built-in `user` / `role` / `department` pickers also serve custom kinds that select the same thing. A kind left unset degrades to a plain id-tags input. |
 | `registries` | `DeviceRegistries` | `createApprovalRegistries()` | Form field registries for rendering and designing approval forms. Defaults to the approval profile from [`approval-form-bridge`](../../editors/approval-form-bridge.md), which excludes the field types the backend parser rejects. |
 | `globalSubjects` | `FormFieldDefinition[]` | — | Host-defined global subjects the flow designer's condition editor offers alongside the built-in applicant attributes — resolved server-side from `Instance.Globals` at instance start. |
-| `dataSourceResolver` | `DataSourceResolver` | — | Resolves a form's remote data-source requests into options; without it remote approval-form sources render as empty lists. |
-| `evaluators` | `LinkageEvaluators` | built-in JavaScript evaluator | Overrides expression/script evaluation for form linkage and bound data-source parameters. |
+| `formGlobals` | `FormGlobalDefinition[]` | — | The host globals the backend exposes to approval forms (its globals resolver implementing `FormGlobalsExposer`), declared so the form designer offers them as `$globals.<key>` system variables beside the built-in `$applicant` attributes. Keep the keys in lockstep with the resolver's `FormGlobalKeys` — see [Form system variables](./overview.md#form-system-variables). |
+| `dataSourceResolver` | `DataSourceResolver` | — | Resolves a form's remote data-source requests into options, in every form render and in the form designer's preview; without it every remote source in an approval form resolves to an empty list. |
+| `dataSourceApis` | `DataSourceApi[]` | — | The host's catalog of option APIs: the form designer's remote data sources lead with a picker over it instead of a hand-typed endpoint and field mapping. A pick is stored as the request itself, so `dataSourceResolver` must serve every endpoint listed — see [Offering an API catalog](../../editors/form-editor/embedding.md#offering-an-api-catalog). |
+| `evaluators` | `LinkageEvaluators` | built-in JavaScript evaluator | Overrides expression / script evaluation for form linkage and bound data-source parameters (the built-in one has `$form` / `$vars` / `$applicant` / `$globals` in scope), and supplies `dispatchEffect` for `alert` / `api_call` / `navigate`. |
 | `renderBusinessRef` | `(businessRef: string) => ReactNode` | plain text | Renders an instance's opaque business reference as a host-navigable element (a link to the business record, a drawer trigger, …). |
 
 ### `ApprovalProviderProps`
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `plugins` | `ApprovalPlugins` | — | The plugin set to provide. |
+| `plugins` | `ApprovalPlugins` | — | The plugin set to provide. Optional: without it every point falls back to its default. |
 | `children` | `ReactNode` | — | Subtree that resolves the plugins. |
 
 ### `ApprovalProvider`
@@ -86,7 +88,11 @@ Host-integration points shared by every approval page and component. Wrap the ap
 
 ### `toEditorPlugins`
 
-`(plugins: ResolvedApprovalPlugins, formFields: FormFieldDefinition[]) => EditorPlugins` — projects the approval plugin set into the flow designer's [`EditorPlugins`](../../editors/approval-flow-editor/host-integration.md) shape (`pickers`, `globalSubjects`) and layers the deploy-derived `formFields` on top.
+`(plugins: ResolvedApprovalPlugins, formFields: FormFieldDefinition[], kindOptions?: KindOptions) => EditorPlugins` — projects the approval plugin set into the flow designer's [`EditorPlugins`](../../editors/approval-flow-editor/host-integration.md) shape (`pickers`, `globalSubjects`), layers the deploy-derived `formFields` on top, and passes the application's kind catalog (`kindOptions.assignees` / `kindOptions.ccs`, from `approval/flow.list_kind_options`) as `assigneeKinds` / `ccKinds`; while it is still loading the editor falls back to its built-in kinds.
+
+### `FormGlobalDefinition`
+
+`interface FormGlobalDefinition { key: string; label: string }` — one host global an approval form may read: `key` exactly as the host's globals resolver produces it, `label` its display name in the designer (e.g. `"聘任职称"`). The value comes from the backend, which ships only the keys its resolver names through `FormGlobalsExposer`.
 
 ## API hooks
 
@@ -160,7 +166,7 @@ All hooks memoize their function set per `ApiClient` and post to `API_PATH` with
 | Function | Type | Operation |
 | --- | --- | --- |
 | `findAvailableFlows` | `QueryFunction<PaginationResult<AvailableFlow>, PaginatedQueryParams<AvailableFlowSearch>>` | `find_available_flows` |
-| `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form` — gated exactly like starting the instance |
+| `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form` — gated exactly like starting the instance; carries the applicant and the form-visible globals the instance would record |
 | `findInitiated` | `QueryFunction<PaginationResult<InitiatedInstance>, PaginatedQueryParams<InitiatedInstanceSearch>>` | `find_initiated` |
 | `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_pending_tasks` |
 | `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_completed_tasks` |
@@ -235,13 +241,15 @@ The shared instance header: title + status tag, then the identity fields as one 
 
 ### `InstanceFormPanel`
 
-The instance form, rendered against the version-pinned schema with the viewer's field permissions clamped on: `hidden` unmounts, `visible` renders read-only, `editable`/`required` grant write strength. Field registries come from `ApprovalProvider`. Renders an empty state for flows without a form.
+The instance form, rendered against the version-pinned schema with the viewer's field permissions clamped on: `hidden` unmounts, `visible` renders read-only, `editable`/`required` grant write strength. Field registries, the data-source resolver, and the evaluators come from `ApprovalProvider`; the applicant and the form-visible globals form its evaluation context, as `$applicant` and `$globals` — never `$user`, since the form is evaluated for every participant. Renders an empty state ("该流程未配置表单") for flows without a form.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `schema` | `FormSchema` | — | The version-pinned host form-designer document. |
+| `schema` | `FormSchema` | — | The version-pinned host form-designer document; absent for flows without a form. |
 | `formData` | `FormData` | — | The instance's form data (already stripped server-side of fields this viewer may not see). |
 | `fieldPermissions` | `Record<string, FieldPermission>` | — | The server-resolved per-field interactivity clamp, applied verbatim. |
+| `applicant` | `UserInfo` | — | The form's `$applicant`: the snapshot the instance is about to record on the start form, the instance's own everywhere else. |
+| `globals` | `Record<string, unknown>` | — | The form's `$globals`: the host globals the flow exposes to its form. |
 | `disabled` | `boolean` | — | Force the whole form read-only (viewers with nothing to execute). |
 | `device` | `PresentationDevice` | `"pc"` | Presentation device profile. |
 | `apiRef` | `RefObject<FormRendererApi \| null>` | — | Imperative handle: `submit()` runs the renderer's validation + submit pipeline, `getSubmitValues()` reads the writable subset without validating (the reject path). |
@@ -447,13 +455,13 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | Type | Fields | Notes |
 | --- | --- | --- |
 | `AvailableFlow` | `flowId`, `flowCode`, `flowName` (`string`), `flowIcon?`, `description?` (`string`), `labels?: Record<string, string>`, `categoryId: string`, `categoryName: string` | A flow the current user may initiate. |
-| `StartForm` | `flowId`, `flowCode`, `flowName` (`string`), `flowIcon?`, `description?` (`string`), `versionId: string`, `version: number`, `formSchema?: FormSchema` | The pre-submission view: identity plus the published version's host form document, returned verbatim. Loading it is gated exactly like starting. |
+| `StartForm` | `flowId`, `flowCode`, `flowName` (`string`), `flowIcon?`, `description?` (`string`), `versionId: string`, `version: number`, `formSchema?: FormSchema`, `applicant: UserInfo`, `globals?: Record<string, unknown>` | The pre-submission view: identity plus the published version's host form document, returned verbatim. Loading it is gated exactly like starting. `applicant` is the snapshot the instance will record — the form's `$applicant`, resolved exactly as starting resolves it; `globals` are the host globals the flow exposes to its form, resolved for the caller (absent when it exposes none). |
 | `InitiatedInstance` | `instanceId`, `instanceNo`, `title`, `flowName` (`string`), `flowIcon?: string`, `status: InstanceStatus`, `currentNodeName?: string`, `createdAt: string`, `finishedAt?: string` | A submission of the current user. |
 | `PendingTask` | `taskId`, `instanceId`, `instanceTitle`, `instanceNo`, `flowName` (`string`), `flowIcon?: string`, `applicant: UserInfo`, `nodeName: string`, `createdAt: string`, `deadline?: string`, `isTimeout: boolean` | A task awaiting the current user. |
 | `CompletedTask` | `taskId`, `instanceId`, `instanceTitle`, `instanceNo`, `flowName` (`string`), `flowIcon?: string`, `applicant: UserInfo`, `nodeName: string`, `status: string`, `finishedAt?: string` | A task the current user already processed. |
 | `MyCCRecord` | `ccRecordId`, `instanceId`, `instanceTitle`, `instanceNo`, `flowName` (`string`), `flowIcon?: string`, `applicant: UserInfo`, `nodeName?: string`, `isRead: boolean`, `createdAt: string` | A CC notification addressed to the current user. |
 | `PendingCounts` | `pendingTaskCount: number`, `unreadCcCount: number` | Badge counts. |
-| `MyInstanceInfo` | `instanceId`, `instanceNo`, `title`, `flowId` (`string`), `flowCode: string`, `flowName` (`string`), `flowIcon?: string`, `labels?: Record<string, string>`, `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the detail. `formData` is already stripped of fields this viewer may not see; `labels` are read from the mutable flow at query time (display identity, not version-pinned). |
+| `MyInstanceInfo` | `instanceId`, `instanceNo`, `title`, `flowId` (`string`), `flowCode: string`, `flowName` (`string`), `flowIcon?: string`, `labels?: Record<string, string>`, `applicant: UserInfo`, `globals?: Record<string, unknown>`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the detail. `formData` is already stripped of fields this viewer may not see; `labels` are read from the mutable flow at query time (display identity, not version-pinned); `globals` is the form-visible part of the instance's globals snapshot — the form's `$globals` as resolved at initiation, absent when the flow exposes none. |
 | `RollbackTarget` | `nodeId: string`, `name: string` | One valid rollback destination, resolved server-side from the node's rollback config and the visit trail. |
 | `RemovableAssignee` | `taskId: string`, `assignee: UserInfo`, `status: string` | One peer task eligible for removal; `status` is the peer task's status verbatim (`pending` / `waiting`). |
 | `ViewerTask` | `taskId: string`, `nodeId: string`, `isOpinionRequired: boolean`, `addAssigneeTypes?: AddAssigneeType[]`, `rollbackTargets?: RollbackTarget[]`, `removableAssignees?: RemovableAssignee[]` | The viewer's pending task: what `process_task` should target plus the node-level action configuration — the client never re-derives engine semantics. |
@@ -469,7 +477,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | --- | --- | --- |
 | `AdminInstance` | `instanceId`, `instanceNo`, `title`, `tenantId`, `flowId`, `flowName` (`string`), `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeName?: string`, `createdAt: string`, `finishedAt?: string` | Admin list row. |
 | `AdminTask` | `taskId`, `instanceId`, `instanceTitle`, `flowName`, `nodeName` (`string`), `assignee: UserInfo`, `status: TaskStatus`, `createdAt: string`, `deadline?: string`, `finishedAt?: string` | Admin task row. |
-| `AdminInstanceInfo` | `instanceId`, `instanceNo`, `title`, `tenantId`, `flowId`, `flowCode: string`, `flowName`, `flowVersionId` (`string`), `labels?: Record<string, string>`, `applicant: UserInfo`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the admin detail. |
+| `AdminInstanceInfo` | `instanceId`, `instanceNo`, `title`, `tenantId`, `flowId`, `flowCode: string`, `flowName`, `flowVersionId` (`string`), `labels?: Record<string, string>`, `applicant: UserInfo`, `globals?: Record<string, unknown>`, `status: InstanceStatus`, `currentNodeId?`, `currentNodeName?`, `businessRef?` (`string`), `formData?: FormData`, `createdAt: string`, `finishedAt?: string` | Runtime state within the admin detail. `globals` is the form-visible part of the instance's globals snapshot, as on `MyInstanceInfo`. |
 | `AdminInstanceDetail` | `instance: AdminInstanceInfo`, `formSchema?: FormSchema`, `timeline: TimelineEntry[]`, `flowGraph: InstanceFlowGraph` | The raw audit trail stays on the paginated action-log query. |
 | `AdminActionLog` | `logId: string`, `action: ActionType`, `nodeId?`, `taskId?` (`string`), `operator: UserInfo`, `transferTo?: UserInfo`, `rollbackToNodeId?: string`, `addedAssignees?: UserInfo[]`, `removedAssignees?: UserInfo[]`, `ccUsers?: UserInfo[]`, `opinion?: string`, `attachments?: string[]`, `createdAt: string` | One audit entry. |
 | `ApprovalMetrics` | `tenantId: string`, `capturedAt: string`, `instanceCounts: Partial<Record<InstanceStatus, number>>`, `taskCounts: Partial<Record<TaskStatus, number>>`, `timeoutTaskCount: number`, `avgCompletionSeconds: number`, `pendingBindingFailures: number`, `businessProjectionCounts: Partial<Record<BindingProjectionStatus, number>>`, `pendingBusinessProjections: number` | `avgCompletionSeconds` is the average end-to-end duration in seconds over completed instances; `-1` means no completed instances yet. |

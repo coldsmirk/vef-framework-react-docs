@@ -58,7 +58,11 @@ The resolved plugin set (`ResolvedApprovalPlugins`) always contains form `regist
 | --- | --- | --- |
 | `pickers` | Flow designer (assignees, CC, initiators) and runtime dialogs (transfer, add assignee, CC) via `PrincipalSelect` | Plain id-tags input — pages stay functional |
 | `registries` | Form design step and every form render (`InstanceFormPanel`) | `createApprovalRegistries()` created once per mount |
-| `globalSubjects` | The designer's condition editor, alongside built-in applicant attributes | Only built-in subjects offered |
+| `globalSubjects` | The flow designer's condition editor, alongside built-in applicant attributes | Only built-in subjects offered |
+| `formGlobals` | The form designer's system variables, offered as `$globals.<key>` beside the built-in `$applicant` attributes | Only the applicant attributes offered |
+| `dataSourceResolver` | Every form render and the form designer's preview — resolves remote option sources | Remote sources resolve to an empty list |
+| `dataSourceApis` | The form designer's remote option sources, which lead with a picker over the catalog | Endpoints and field mappings are typed by hand |
+| `evaluators` | Every form render and the form designer's preview — expression / script evaluation and host effects | The built-in JavaScript evaluator; `alert` / `api_call` / `navigate` are no-ops at runtime |
 | `renderBusinessRef` | Instance detail headers | Business ref rendered as plain code text |
 
 `useApprovalPlugins()` is usable **without** a provider — every point then falls back to its built-in default, which is why standalone usage of the runtime components also works.
@@ -67,13 +71,46 @@ The resolved plugin set (`ResolvedApprovalPlugins`) always contains form `regist
 
 The flow designer inside [`ApprovalFlowPage`](./pages.md#approvalflowpage) is a four-step wizard (settings → form → flow → review) that embeds:
 
-- [`FormEditor`](../../editors/form-editor/overview.md) for the form step, using the provider's `registries`;
+- [`FormEditor`](../../editors/form-editor/overview.md) for the form step, wired from the provider: its `registries`, `dataSourceResolver`, `dataSourceApis`, and `evaluators`, the [form system variables](#form-system-variables) as `contextSources`, and [`validateApprovalProjection`](../../editors/approval-form-bridge.md#validateapprovalprojection) as `validate` — so approval-contract problems appear in the editor's own status bar, each one clickable to its field;
 - [`ApprovalFlowEditor`](../../editors/approval-flow-editor/overview.md) for the flow step;
 - [`approval-form-bridge`](../../editors/approval-form-bridge.md)'s `projectFormSchema` / `validateApprovalSchema` as the seam between them — the projected `FormFieldDefinition[]` feeds the flow editor's condition/permission surfaces, and both editors' validations gate the wizard's step transitions.
 
-`toEditorPlugins(plugins, formFields)` projects the approval plugin set into the flow editor's `EditorPlugins` shape, layering the deploy-derived form fields on top. So hosts configure **one** plugin object and both editors see it.
+Neither editor gets an issue banner above it, which would eat canvas height: each editor shows its own diagnostics, and the wizard only says, beside the disabled 下一步, why the step cannot advance.
+
+`toEditorPlugins(plugins, formFields, kindOptions?)` projects the approval plugin set into the flow editor's `EditorPlugins` shape, layering the deploy-derived form fields and the application's kind catalog (from `approval/flow.list_kind_options`) on top. So hosts configure **one** plugin object and both editors see it.
 
 Because the pickers and kind-catalog contracts belong to the flow editor, this package re-exports the types a host needs to implement them — `EditorPlugins`, `PickerProps`, `PrincipalKind`, `KindDescriptor`, and `SelectionMode` from `@vef-framework-react/approval-flow-editor` — so wiring the provider needs imports from this package alone.
+
+## Form system variables
+
+An approval form often has to read who started it — "show the budget field when the initiator is in Finance", "default the cost center to the initiator's department". Form rules evaluate for every participant who opens the instance, so the initiator cannot be `$user` (that is whoever is viewing); it is **`$applicant`**, and it reads the same for the initiator and every approver.
+
+The package wires this end to end:
+
+- **At runtime**, `InstanceFormPanel` renders every approval form with the instance's applicant as `$applicant` (`id`, `name`, `departmentId`, `departmentName`) and its form-visible host globals as `$globals`. The start drawer takes both from `approval/my.get_start_form`, which resolves the applicant exactly as starting the instance will, so a rule reads the same before submission as on every detail view; the self-service and admin details take them from the instance itself.
+- **In the designer**, the form step declares them as system variables: 发起人 ID / 发起人姓名 / 发起人部门 ID / 发起人部门 (`$applicant.id`, `$applicant.name`, `$applicant.departmentId`, `$applicant.departmentName`), followed by one `$globals.<key>` per entry of `ApprovalPlugins.formGlobals`. The designer lists them in the 变量 tab — with preview values to try a rule before any real initiator exists — and offers them in the condition builder and as bound parameters of remote option sources.
+
+Host globals are routing inputs first: the host's `InstanceGlobalsResolver` resolves them server-side at instance start, and `Instance.Globals` snapshots them. Shipping one to the browser, where every participant can read it, is a separate decision, so **a form sees no global by default**. To expose some, the host's Go resolver also implements `approval.FormGlobalsExposer`:
+
+```go
+// FormGlobalKeys names the globals the form of an instance of flowCode may read.
+func (r *GlobalsResolver) FormGlobalKeys(flowCode string) []string {
+	return []string{"staffCategory", "staffTitle"}
+}
+```
+
+and the frontend declares the same keys, with display names, for the designer:
+
+```tsx
+const PLUGINS: ApprovalPlugins = {
+  formGlobals: [
+    { key: "staffCategory", label: "人员类别" },
+    { key: "staffTitle", label: "聘任职称" }
+  ]
+};
+```
+
+Keep the two lists in lockstep: a key the resolver exposes but `formGlobals` does not declare still evaluates at runtime but is not offered in the designer, and a key declared but not exposed is offered yet always reads as empty. A resolver that does not implement `FormGlobalsExposer` exposes nothing and is not even called for the start form.
 
 On submit the wizard runs one chain against `useFlowApi`: `create`/`update` → `deploy` (a new draft `FlowVersion` carrying `flowSchema`, the opaque `formSchema`, and the derived `formFields`) → optional `publish_version`. Publishing archives the previously published version; running instances keep the version they started on.
 

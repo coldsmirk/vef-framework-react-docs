@@ -61,15 +61,17 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `pickers` | `Partial<Record<string, FC<PickerProps>>>` | — | 按规则 kind 解析具体 id 的选择器。查找会回退到该 kind 的 `selection` 模式，因此内置 `user` / `role` / `department` 选择器也能服务选择同类对象的自定义 kind。未设置的 kind 降级为纯 id 标签输入。 |
 | `registries` | `DeviceRegistries` | `createApprovalRegistries()` | 渲染与设计审批表单所用的表单字段注册表。默认取 [`approval-form-bridge`](../../editors/approval-form-bridge.md) 的审批 profile，它排除了后端解析器会拒绝的字段类型。 |
 | `globalSubjects` | `FormFieldDefinition[]` | — | 宿主定义的全局变量，流程设计器的条件编辑器把它们与内置的申请人属性并列提供——实例发起时由服务端从 `Instance.Globals` 解析。 |
-| `dataSourceResolver` | `DataSourceResolver` | — | 把表单的远程数据源请求解析为选项；未设置时，审批表单中的远程源渲染为空列表。 |
-| `evaluators` | `LinkageEvaluators` | 内置 JavaScript evaluator | 覆盖表单联动和绑定数据源参数中的表达式 / 脚本求值。 |
+| `formGlobals` | `FormGlobalDefinition[]` | — | 后端向审批表单暴露的宿主全局变量（其全局变量解析器实现了 `FormGlobalsExposer`），在此声明后，表单设计器会把它们作为 `$globals.<key>` 系统变量，与内置的 `$applicant` 属性并列提供。请让这些 key 与解析器的 `FormGlobalKeys` 保持一致——见[表单系统变量](./overview.md#表单系统变量)。 |
+| `dataSourceResolver` | `DataSourceResolver` | — | 在每一次表单渲染以及表单设计器的预览中，把表单的远程数据源请求解析为选项；未设置时，审批表单中的每个远程来源都解析为空列表。 |
+| `dataSourceApis` | `DataSourceApi[]` | — | 宿主的选项接口目录：表单设计器的远程数据源会以针对它的选择器打头，而不是手填接口地址与字段映射。选中的结果以请求本身的形式存储，因此 `dataSourceResolver` 必须能服务目录中列出的每一个接口——见[提供接口目录](../../editors/form-editor/embedding.md#提供接口目录)。 |
+| `evaluators` | `LinkageEvaluators` | 内置 JavaScript evaluator | 覆盖表单联动和绑定数据源参数中的表达式 / 脚本求值（内置求值器的作用域中有 `$form` / `$vars` / `$applicant` / `$globals`），并为 `alert` / `api_call` / `navigate` 提供 `dispatchEffect`。 |
 | `renderBusinessRef` | `(businessRef: string) => ReactNode` | 纯文本 | 把实例的不透明业务引用渲染为宿主可导航的元素（指向业务记录的链接、抽屉触发器……）。 |
 
 ### `ApprovalProviderProps`
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `plugins` | `ApprovalPlugins` | — | 要提供的插件集。 |
+| `plugins` | `ApprovalPlugins` | — | 要提供的插件集。可选：不传时每个集成点都回退到默认值。 |
 | `children` | `ReactNode` | — | 解析这些插件的子树。 |
 
 ### `ApprovalProvider`
@@ -86,7 +88,11 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 
 ### `toEditorPlugins`
 
-`(plugins: ResolvedApprovalPlugins, formFields: FormFieldDefinition[]) => EditorPlugins`——把审批插件集投影成流程设计器的 [`EditorPlugins`](../../editors/approval-flow-editor/host-integration.md) 形态（`pickers`、`globalSubjects`），并把部署时派生的 `formFields` 叠加进去。
+`(plugins: ResolvedApprovalPlugins, formFields: FormFieldDefinition[], kindOptions?: KindOptions) => EditorPlugins`——把审批插件集投影成流程设计器的 [`EditorPlugins`](../../editors/approval-flow-editor/host-integration.md) 形态（`pickers`、`globalSubjects`），叠加部署时派生的 `formFields`，并把应用的 kind 目录（`kindOptions.assignees` / `kindOptions.ccs`，来自 `approval/flow.list_kind_options`）作为 `assigneeKinds` / `ccKinds` 传入；在它仍在加载时，编辑器回退到自己的内置 kind。
+
+### `FormGlobalDefinition`
+
+`interface FormGlobalDefinition { key: string; label: string }`——审批表单可以读取的一个宿主全局变量：`key` 与宿主全局变量解析器产出的完全一致，`label` 是它在设计器中的显示名称（例如 `"聘任职称"`）。变量的值来自后端，后端只会下发其解析器通过 `FormGlobalsExposer` 点名的那些 key。
 
 ## API hooks
 
@@ -160,7 +166,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | 函数 | 类型 | 操作 |
 | --- | --- | --- |
 | `findAvailableFlows` | `QueryFunction<PaginationResult<AvailableFlow>, PaginatedQueryParams<AvailableFlowSearch>>` | `find_available_flows` |
-| `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form`——门控规则与发起实例完全相同 |
+| `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form`——门控规则与发起实例完全相同；携带实例将要记录的发起人以及对表单可见的全局变量 |
 | `findInitiated` | `QueryFunction<PaginationResult<InitiatedInstance>, PaginatedQueryParams<InitiatedInstanceSearch>>` | `find_initiated` |
 | `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_pending_tasks` |
 | `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<MyTaskSearch>>` | `find_completed_tasks` |
@@ -235,13 +241,15 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 
 ### `InstanceFormPanel`
 
-实例表单，针对版本锁定的 schema 渲染，并套上查看者的字段权限: `hidden` 卸载、`visible` 渲染为只读、`editable`/`required` 赋予写入强度。字段注册表来自 `ApprovalProvider`。没有表单的流程渲染空状态。
+实例表单，针对版本锁定的 schema 渲染，并套上查看者的字段权限: `hidden` 卸载、`visible` 渲染为只读、`editable`/`required` 赋予写入强度。字段注册表、数据源解析器与求值器来自 `ApprovalProvider`；发起人与对表单可见的全局变量构成它的求值上下文，分别作为 `$applicant` 与 `$globals`——永远不是 `$user`，因为表单会对每一位参与者求值。没有表单的流程渲染空状态（"该流程未配置表单"）。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `schema` | `FormSchema` | — | 版本锁定的宿主表单设计器文档。 |
+| `schema` | `FormSchema` | — | 版本锁定的宿主表单设计器文档；没有表单的流程不传。 |
 | `formData` | `FormData` | — | 实例的表单数据（服务端已剔除该查看者不可见的字段）。 |
 | `fieldPermissions` | `Record<string, FieldPermission>` | — | 服务端解析出的逐字段交互收紧，按原样应用。 |
+| `applicant` | `UserInfo` | — | 表单的 `$applicant`：在发起表单上是实例将要记录的快照，其余场景是实例自己的发起人。 |
+| `globals` | `Record<string, unknown>` | — | 表单的 `$globals`：该流程向表单暴露的宿主全局变量。 |
 | `disabled` | `boolean` | — | 强制整个表单只读（无事可做的查看者）。 |
 | `device` | `PresentationDevice` | `"pc"` | 呈现设备 profile。 |
 | `apiRef` | `RefObject<FormRendererApi \| null>` | — | 命令式句柄: `submit()` 运行渲染器的校验 + 提交管线，`getSubmitValues()` 不校验直接读取可写子集（拒绝路径用）。 |
@@ -447,13 +455,13 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
 | `AvailableFlow` | `flowId`、`flowCode`、`flowName`（`string`）、`flowIcon?`、`description?`（`string`）、`labels?: Record<string, string>`、`categoryId: string`、`categoryName: string` | 当前用户可发起的一个流程。 |
-| `StartForm` | `flowId`、`flowCode`、`flowName`（`string`）、`flowIcon?`、`description?`（`string`）、`versionId: string`、`version: number`、`formSchema?: FormSchema` | 提交前视图: 身份信息加已发布版本的宿主表单文档，原样返回。加载它的门控与发起完全相同。 |
+| `StartForm` | `flowId`、`flowCode`、`flowName`（`string`）、`flowIcon?`、`description?`（`string`）、`versionId: string`、`version: number`、`formSchema?: FormSchema`、`applicant: UserInfo`、`globals?: Record<string, unknown>` | 提交前视图: 身份信息加已发布版本的宿主表单文档，原样返回。加载它的门控与发起完全相同。`applicant` 是实例将要记录的快照——即表单的 `$applicant`，解析方式与发起时完全一致；`globals` 是该流程向表单暴露、按调用者解析出的宿主全局变量（流程没有暴露任何变量时不存在）。 |
 | `InitiatedInstance` | `instanceId`、`instanceNo`、`title`、`flowName`（`string`）、`flowIcon?: string`、`status: InstanceStatus`、`currentNodeName?: string`、`createdAt: string`、`finishedAt?: string` | 当前用户的一次提交。 |
 | `PendingTask` | `taskId`、`instanceId`、`instanceTitle`、`instanceNo`、`flowName`（`string`）、`flowIcon?: string`、`applicant: UserInfo`、`nodeName: string`、`createdAt: string`、`deadline?: string`、`isTimeout: boolean` | 一个等待当前用户处理的任务。 |
 | `CompletedTask` | `taskId`、`instanceId`、`instanceTitle`、`instanceNo`、`flowName`（`string`）、`flowIcon?: string`、`applicant: UserInfo`、`nodeName: string`、`status: string`、`finishedAt?: string` | 一个当前用户已处理的任务。 |
 | `MyCCRecord` | `ccRecordId`、`instanceId`、`instanceTitle`、`instanceNo`、`flowName`（`string`）、`flowIcon?: string`、`applicant: UserInfo`、`nodeName?: string`、`isRead: boolean`、`createdAt: string` | 一条发给当前用户的抄送通知。 |
 | `PendingCounts` | `pendingTaskCount: number`、`unreadCcCount: number` | 徽标计数。 |
-| `MyInstanceInfo` | `instanceId`、`instanceNo`、`title`、`flowId`（`string`）、`flowCode: string`、`flowName`（`string`）、`flowIcon?: string`、`labels?: Record<string, string>`、`applicant: UserInfo`、`status: InstanceStatus`、`currentNodeId?`、`currentNodeName?`、`businessRef?`（`string`）、`formData?: FormData`、`createdAt: string`、`finishedAt?: string` | 详情内的运行时状态。`formData` 已剔除该查看者不可见的字段；`labels` 查询时从可变的流程上读取（显示身份，非版本锁定）。 |
+| `MyInstanceInfo` | `instanceId`、`instanceNo`、`title`、`flowId`（`string`）、`flowCode: string`、`flowName`（`string`）、`flowIcon?: string`、`labels?: Record<string, string>`、`applicant: UserInfo`、`globals?: Record<string, unknown>`、`status: InstanceStatus`、`currentNodeId?`、`currentNodeName?`、`businessRef?`（`string`）、`formData?: FormData`、`createdAt: string`、`finishedAt?: string` | 详情内的运行时状态。`formData` 已剔除该查看者不可见的字段；`labels` 查询时从可变的流程上读取（显示身份，非版本锁定）；`globals` 是实例全局变量快照中对表单可见的部分——即发起时解析出的表单 `$globals`，流程没有暴露任何变量时不存在。 |
 | `RollbackTarget` | `nodeId: string`、`name: string` | 一个有效的回退目标，由服务端从节点的回退配置与经过轨迹解析。 |
 | `RemovableAssignee` | `taskId: string`、`assignee: UserInfo`、`status: string` | 一个可减签的同节点任务；`status` 是该任务的原样状态（`pending` / `waiting`）。 |
 | `ViewerTask` | `taskId: string`、`nodeId: string`、`isOpinionRequired: boolean`、`addAssigneeTypes?: AddAssigneeType[]`、`rollbackTargets?: RollbackTarget[]`、`removableAssignees?: RemovableAssignee[]` | 查看者的待处理任务: `process_task` 应指向的目标，加上节点级的操作配置——客户端从不重新推导引擎语义。 |
@@ -469,7 +477,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | --- | --- | --- |
 | `AdminInstance` | `instanceId`、`instanceNo`、`title`、`tenantId`、`flowId`、`flowName`（`string`）、`applicant: UserInfo`、`status: InstanceStatus`、`currentNodeName?: string`、`createdAt: string`、`finishedAt?: string` | 管理端列表行。 |
 | `AdminTask` | `taskId`、`instanceId`、`instanceTitle`、`flowName`、`nodeName`（`string`）、`assignee: UserInfo`、`status: TaskStatus`、`createdAt: string`、`deadline?: string`、`finishedAt?: string` | 管理端任务行。 |
-| `AdminInstanceInfo` | `instanceId`、`instanceNo`、`title`、`tenantId`、`flowId`、`flowCode: string`、`flowName`、`flowVersionId`（`string`）、`labels?: Record<string, string>`、`applicant: UserInfo`、`status: InstanceStatus`、`currentNodeId?`、`currentNodeName?`、`businessRef?`（`string`）、`formData?: FormData`、`createdAt: string`、`finishedAt?: string` | 管理端详情内的运行时状态。 |
+| `AdminInstanceInfo` | `instanceId`、`instanceNo`、`title`、`tenantId`、`flowId`、`flowCode: string`、`flowName`、`flowVersionId`（`string`）、`labels?: Record<string, string>`、`applicant: UserInfo`、`globals?: Record<string, unknown>`、`status: InstanceStatus`、`currentNodeId?`、`currentNodeName?`、`businessRef?`（`string`）、`formData?: FormData`、`createdAt: string`、`finishedAt?: string` | 管理端详情内的运行时状态。`globals` 是实例全局变量快照中对表单可见的部分，与 `MyInstanceInfo` 相同。 |
 | `AdminInstanceDetail` | `instance: AdminInstanceInfo`、`formSchema?: FormSchema`、`timeline: TimelineEntry[]`、`flowGraph: InstanceFlowGraph` | 原始审计轨迹留在分页的操作日志查询上。 |
 | `AdminActionLog` | `logId: string`、`action: ActionType`、`nodeId?`、`taskId?`（`string`）、`operator: UserInfo`、`transferTo?: UserInfo`、`rollbackToNodeId?: string`、`addedAssignees?: UserInfo[]`、`removedAssignees?: UserInfo[]`、`ccUsers?: UserInfo[]`、`opinion?: string`、`attachments?: string[]`、`createdAt: string` | 一条审计记录。 |
 | `ApprovalMetrics` | `tenantId: string`、`capturedAt: string`、`instanceCounts: Partial<Record<InstanceStatus, number>>`、`taskCounts: Partial<Record<TaskStatus, number>>`、`timeoutTaskCount: number`、`avgCompletionSeconds: number`、`pendingBindingFailures: number`、`businessProjectionCounts: Partial<Record<BindingProjectionStatus, number>>`、`pendingBusinessProjections: number` | `avgCompletionSeconds` 是已完成实例端到端时长的平均值（秒）；`-1` 表示尚无已完成实例。 |

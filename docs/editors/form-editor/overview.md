@@ -26,6 +26,18 @@ The engine is explicitly tuned for **forms with hundreds of fields**: the schema
 
 Both read from the same [`FormFieldRegistry`](./embedding.md#field-registries) of field types and the same [linkage engine](./linkage.md), so a custom field type or a custom linkage evaluator registered for editing is automatically available at runtime too — there is nothing to keep in sync by hand.
 
+## The designer at a glance
+
+`FormEditor` is one screen with five regions:
+
+- **Toolbar** — the brand, the PC / mobile device toggle, undo / redo, the 编辑 / 预览 / JSON view toggle, the field count, 导入 / 导出 / 清空, and — when the host passes `onPublish` — the 发布 button. 预览 renders the live form through `FormRenderer`; JSON shows the schema as editable JSON beside a live render.
+- **Palette** — the registered field types in six groups: 基础输入, 选择项, 日期 & 文件, 容器布局, 操作, 展示. Drag one onto the canvas.
+- **Canvas** — the active device's block tree, with drop zones between, beside, and inside blocks. The mobile design sits in a phone frame.
+- **Properties panel** — the selected block's settings. A field's come in four tabs — 属性, 校验, 联动, and 布局 (its sizing in whatever parent holds it: a stack slot, a flex slot, a grid span, or a table column width); a container has a single editor covering its own sizing, its type's settings (title and variant, tabs, rows, columns, spacing), and its linkage rules.
+- **Status bar and form-config drawer** — the bottom bar counts fields, variables, data sources, and linkage rules (each count opens its tab of the drawer) and, when the schema has problems, carries a diagnostics chip that lists every issue and jumps to it. The drawer holds the form-level configuration in five tabs: 大纲 (the field tree), 表单 (form id and spacing), 变量 (system variables and form variables), 数据源 (form-global option sources), and 联动 (field-rule index and form-level events).
+
+The chrome is Chinese product copy throughout; [Embedding](./embedding.md) covers sizing, the narrow-host layout, keyboard shortcuts, and composing your own shell around the same panels.
+
 ## Two device presentations
 
 A `FormSchema` carries **one shared data layer** (variables, data sources, form-scope linkage, and every field's data-binding `key`) and **two independent layouts**: `presentations.pc` and `presentations.mobile`. Each presentation is its own field tree, so a form can be laid out differently for desktop (antd) and mobile (antd-mobile) while both bind the same underlying values. `pc` is always present; `mobile` is optional — a form with no mobile design simply renders an empty state on that device. See [Schema](./schema.md#per-device-presentations) for the full shape and [`convertPresentation`](./schema.md#pc-to-mobile-conversion) for a best-effort PC-to-mobile starting point.
@@ -34,9 +46,15 @@ A `FormSchema` carries **one shared data layer** (variables, data sources, form-
 
 Nothing about the field set, the expression language, or the option-loading strategy is hard-coded into the package:
 
-- **Field types** are entries in a [`FormFieldRegistry`](./embedding.md#field-registries) — register your own alongside (or instead of) the ~20 built-ins via `defineFieldDefinition` / `defineContainerDefinition`.
+- **Field types** are entries in a [`FormFieldRegistry`](./embedding.md#field-registries) — register your own alongside (or instead of) the 21 built-ins (16 leaf fields and 5 containers) via `defineFieldDefinition` / `defineContainerDefinition`.
 - **Linkage expressions and scripts** default to plain JavaScript compiled through `new Function`, but a host can swap in a sandboxed engine or a different DSL entirely by supplying [`LinkageEvaluators`](./linkage.md#pluggable-evaluators).
 - **Selection-field options** default to inline static lists; a `remote` or `ref`-to-remote source resolves through a host-supplied [`DataSourceResolver`](./embedding.md#loading-remote-options) built on your own `apiClient` — the package itself has zero networking dependency.
+
+And the host feeds the designer what only it knows:
+
+- **System variables** — `contextSources` declares the context paths the host supplies at runtime (the initiator as `$applicant.*`, host globals as `$globals.*`, …). The designer lists them beside the form's own variables, with preview values, and offers them as condition sources — see [Linkage → Host context and system variables](./linkage.md#host-context-and-system-variables).
+- **An API catalog** — `dataSourceApis` turns a remote option source from a hand-typed endpoint and field mapping into a pick from the endpoints the host maintains — see [Embedding → Offering an API catalog](./embedding.md#offering-an-api-catalog).
+- **Its own checks** — `validate` adds the host's contract (say, field types a backend rejects) to the designer's diagnostics and publish gate — see [Embedding → Host diagnostics](./embedding.md#host-diagnostics).
 
 ## Where it fits
 

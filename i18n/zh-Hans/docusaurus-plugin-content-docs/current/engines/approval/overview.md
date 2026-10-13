@@ -58,7 +58,11 @@ const PLUGINS: ApprovalPlugins = {
 | --- | --- | --- |
 | `pickers` | 流程设计器（审批人、抄送、发起人）与运行时对话框（转办、加签、抄送），经由 `PrincipalSelect` | 纯 id 标签输入——页面仍然可用 |
 | `registries` | 表单设计步骤与每一次表单渲染（`InstanceFormPanel`） | 每次挂载创建一次的 `createApprovalRegistries()` |
-| `globalSubjects` | 设计器的条件编辑器，与内置的申请人属性并列提供 | 只提供内置变量 |
+| `globalSubjects` | 流程设计器的条件编辑器，与内置的申请人属性并列提供 | 只提供内置变量 |
+| `formGlobals` | 表单设计器的系统变量，以 `$globals.<key>` 的形式与内置的 `$applicant` 属性并列提供 | 只提供发起人属性 |
+| `dataSourceResolver` | 每一次表单渲染以及表单设计器的预览——解析远程选项来源 | 远程来源解析为空列表 |
+| `dataSourceApis` | 表单设计器的远程选项来源，以针对该目录的选择器打头 | 接口地址与字段映射需要手动填写 |
+| `evaluators` | 每一次表单渲染以及表单设计器的预览——表达式 / 脚本求值与宿主副作用 | 内置的 JavaScript 求值器；运行时 `alert` / `api_call` / `navigate` 不做任何事 |
 | `renderBusinessRef` | 实例详情头部 | 业务引用渲染为纯代码文本 |
 
 `useApprovalPlugins()` **没有** provider 也能使用——此时每个集成点都回退到内置默认值，这也是运行时组件可以独立使用的原因。
@@ -67,13 +71,46 @@ const PLUGINS: ApprovalPlugins = {
 
 [`ApprovalFlowPage`](./pages.md#approvalflowpage) 内的流程设计器是一个四步向导（流程设置 → 表单设计 → 流程设计 → 审阅提交），它内嵌了:
 
-- [`FormEditor`](../../editors/form-editor/overview.md) 承担表单步骤，使用 provider 的 `registries`；
+- [`FormEditor`](../../editors/form-editor/overview.md) 承担表单步骤，由 provider 接好：它的 `registries`、`dataSourceResolver`、`dataSourceApis` 与 `evaluators`，作为 `contextSources` 的[表单系统变量](#表单系统变量)，以及作为 `validate` 的 [`validateApprovalProjection`](../../editors/approval-form-bridge.md#validateapprovalprojection)——因此审批契约问题会出现在编辑器自己的状态栏里，每一个都可以点击定位到对应字段；
 - [`ApprovalFlowEditor`](../../editors/approval-flow-editor/overview.md) 承担流程步骤；
 - [`approval-form-bridge`](../../editors/approval-form-bridge.md) 的 `projectFormSchema` / `validateApprovalSchema` 作为两者之间的接缝——投影出的 `FormFieldDefinition[]` 喂给流程编辑器的条件/权限界面，而两个编辑器的校验共同把关向导的步骤切换。
 
-`toEditorPlugins(plugins, formFields)` 把审批插件集投影成流程编辑器的 `EditorPlugins` 形态，并把部署时派生的表单字段叠加进去。因此宿主只需配置**一个**插件对象，两个编辑器都能看到它。
+两个编辑器上方都不再放问题横幅（那会挤占画布高度）：各个编辑器展示自己的诊断，向导只在禁用的「下一步」旁边说明这一步为什么无法前进。
+
+`toEditorPlugins(plugins, formFields, kindOptions?)` 把审批插件集投影成流程编辑器的 `EditorPlugins` 形态，并把部署时派生的表单字段以及应用的 kind 目录（来自 `approval/flow.list_kind_options`）叠加进去。因此宿主只需配置**一个**插件对象，两个编辑器都能看到它。
 
 由于选择器与 kind 目录契约属于流程编辑器，本包重新导出了宿主实现它们所需的类型——来自 `@vef-framework-react/approval-flow-editor` 的 `EditorPlugins`、`PickerProps`、`PrincipalKind`、`KindDescriptor` 与 `SelectionMode`——接入 provider 只需要从本包 import。
+
+## 表单系统变量
+
+审批表单经常需要读取是谁发起的——"发起人属于财务部时显示预算字段"、"成本中心默认取发起人所在部门"。表单规则会对每一个打开该实例的参与者求值，所以发起人不能是 `$user`（那是此刻的查看者）；它是 **`$applicant`**，对发起人和每一位审批人读到的都一样。
+
+本包把这件事端到端地接好了：
+
+- **运行时**，`InstanceFormPanel` 渲染每一个审批表单时，都以实例的发起人作为 `$applicant`（`id`、`name`、`departmentId`、`departmentName`），以该流程对表单可见的宿主全局变量作为 `$globals`。发起抽屉从 `approval/my.get_start_form` 取得这两者——它解析发起人的方式与真正发起实例时完全一致，因此规则在提交之前读到的，与之后每一个详情视图读到的都相同；自助详情与管理详情则从实例本身取得它们。
+- **设计器中**，表单步骤把它们声明为系统变量：发起人 ID / 发起人姓名 / 发起人部门 ID / 发起人部门（`$applicant.id`、`$applicant.name`、`$applicant.departmentId`、`$applicant.departmentName`），其后是 `ApprovalPlugins.formGlobals` 中每一项对应的一个 `$globals.<key>`。设计器把它们列在「变量」页中——带有预览值，可以在还没有任何真实发起人时就试一试规则——并在条件构建器中、以及作为远程选项来源的绑定参数提供它们。
+
+宿主全局变量首先是路由的输入：宿主的 `InstanceGlobalsResolver` 在实例发起时于服务端解析它们，并由 `Instance.Globals` 留存快照。把其中某个变量发到浏览器——实例的每个参与者都能读到——是另一项独立的决定，因此**表单默认看不到任何全局变量**。要暴露其中一些，宿主的 Go 解析器还需实现 `approval.FormGlobalsExposer`：
+
+```go
+// FormGlobalKeys names the globals the form of an instance of flowCode may read.
+func (r *GlobalsResolver) FormGlobalKeys(flowCode string) []string {
+	return []string{"staffCategory", "staffTitle"}
+}
+```
+
+前端则为设计器声明同样的 key 及其显示名称：
+
+```tsx
+const PLUGINS: ApprovalPlugins = {
+  formGlobals: [
+    { key: "staffCategory", label: "人员类别" },
+    { key: "staffTitle", label: "聘任职称" }
+  ]
+};
+```
+
+请让两份列表保持一致：解析器暴露了、但 `formGlobals` 没有声明的 key，运行时仍会求值，但设计器里不会提供；声明了、但没有暴露的 key，设计器里会提供，读到的却永远是空。没有实现 `FormGlobalsExposer` 的解析器不暴露任何变量，发起表单时也根本不会调用它。
 
 提交时，向导针对 `useFlowApi` 运行一条链: `create`/`update` → `deploy`（一个新的草稿 `FlowVersion`，携带 `flowSchema`、不透明的 `formSchema` 和派生出的 `formFields`）→ 可选的 `publish_version`。发布会把之前已发布的版本归档；进行中的实例仍沿用它们启动时的版本。
 

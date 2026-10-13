@@ -13,9 +13,29 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
-## 未发布（v2.22.0 之后）
+## 未发布（v2.24.1 之后）
 
-暂无未发布变更。
+无破坏性变更。表单设计器新增系统变量、宿主诊断与选项接口目录，审批包把这三者都接好了。审批这一半需要配合一个 vef-framework-go 版本：它的发起表单携带 `applicant`，实例视图携带对表单可见的 `globals`；对接较旧的服务端时，`$applicant` 与 `$globals` 读到的都是空。
+
+### 新特性
+
+- **form-editor** —— `EvaluationContext` 新增 `applicant`（`$applicant`）——表单所代表的主体，在流程中即发起人，与 `$user` 不同，它对查看同一条记录的每个人都相同——以及 `globals`（`$globals`），宿主提供的只读属性。两者都可用于表达式、脚本、绑定的数据源参数和以 `$` 为根的叶子条件。见 [Linkage → 宿主上下文与系统变量](../editors/form-editor/linkage.md#宿主上下文与系统变量)。
+- **form-editor** —— `contextSources` 声明表单的**系统变量**：「变量」页会列出它们，每个都带一个设计时预览值（叠加在预览的上下文之上，从不存储），条件构建器则把它们作为「系统变量」分组提供。
+- **form-editor** —— `validate`（`SchemaValidator`，返回 `SchemaIssue[]`）把宿主自己的检查叠加在编辑器的检查之上：只在结构无误的 schema 上调用，它的问题会进入状态栏诊断与发布关卡。状态栏的提示现在点击展开，列出全部问题；点击某一条会选中它所指的节点（必要时切换设备），或打开对应的表单配置页签，宿主以字段 key 链（`lines.price`）写出的路径能定位到字段。见 [Embedding → 宿主诊断](../editors/form-editor/embedding.md#宿主诊断)。
+- **form-editor** —— `dataSourceApis`（`DataSourceApi` / `DataSourceApiParam`）为远程选项来源提供一个针对宿主接口目录的选择器；选中后会把接口地址、映射以及声明参数的默认值复制进 schema，schema 依然是自包含的。见 [Embedding → 提供接口目录](../editors/form-editor/embedding.md#提供接口目录)。
+- **form-editor** —— `api_call` 动作编辑器现在可以设置 `version` 和请求参数，与远程选项来源共用同一个参数编辑器。导出 `normalizeOptionMapping`。
+- **approval-form-bridge** —— `validateApprovalProjection(schema)` 只返回审批契约问题，形态与 `FormEditor` 的 `validate` 一致。
+- **approval** —— `ApprovalPlugins.formGlobals`（`FormGlobalDefinition[]`）声明后端向表单暴露的宿主全局变量，`ApprovalPlugins.dataSourceApis` 声明选项接口目录。`InstanceFormPanel` 接收 `applicant` 与 `globals`，并以它们作为 `$applicant` / `$globals` 对表单求值；`StartForm` 携带 `applicant` 与 `globals`，`MyInstanceInfo` / `AdminInstanceInfo` 携带 `globals`。流程设计器的表单步骤把四个发起人属性和声明的全局变量作为系统变量提供，把 provider 的解析器、求值器与接口目录传给表单编辑器，并用 `validateApprovalProjection` 做校验；两个设计步骤都不再渲染问题横幅，底部会说明「下一步」为何被禁用。见[审批 → 表单系统变量](../engines/approval/overview.md#表单系统变量)。
+
+### 值得关注的修复
+
+- **form-editor** —— 以 `$` 为根的叶子来源只读取自有属性，因此像 `$user.constructor` 这样的路径不再解析为原型成员（那会让 `notEmpty` 永远成立）。未知的根（`$applcant.x`）会被报告为新的警告 `source_scope_unknown`，而不是悄无声息地永不匹配；对 `ValidationIssueCode` 做穷尽 switch 的代码需要处理这个新成员。
+- **form-editor** —— `$form.<key>` 形式的叶子来源在依赖追踪、校验、改名与清理中，与普通的 `<key>` 完全一致。
+- **form-editor** —— `request_incomplete` 每个请求只报告一次，并写明缺少的是什么；`resource` 与 `action` 都为空时，报在请求本身的路径上。以前会在 `.resource` 和 `.action` 上各报一条文案相同的问题。
+- **form-editor** —— 远程选项映射在存储、解析或投影的每一处都会被规范化：清空的 key 回退到其默认值，而不是被存成 `""`——按 `mapping.labelKey ?? "label"` 读取的解析器会把 `""` 当真。
+- **form-editor** —— 请求参数名在失焦或按回车时才提交，并且只有在非空且唯一时才提交。以前连续添加多个参数，或把某个参数改成另一个参数的名字，都可能丢失值。
+- **form-editor** —— `condition_group_empty` 的提示现在说明空条件组的实际效果（「全部满足」时规则始终生效，「任一满足」时永不生效），而不再声称规则不会生效。
+- **approval** —— 流程设计器的表单预览会通过 `dataSourceResolver` 解析远程选项（以前始终为空），并运行 provider 的 `evaluators`。
 
 ## v2.22.0（2026-09-15）
 

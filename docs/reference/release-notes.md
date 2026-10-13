@@ -13,9 +13,29 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
-## Unreleased (after v2.22.0)
+## Unreleased (after v2.24.1)
 
-No unreleased changes.
+No breaking changes. The form designer gains system variables, host diagnostics, and an option-API catalog, and the approval package wires all three. The approval half needs a vef-framework-go version whose start form carries `applicant` and whose instance views carry the form-visible `globals`; against an older server, `$applicant` and `$globals` read as empty.
+
+### Features
+
+- **form-editor** — `EvaluationContext` gains `applicant` (`$applicant`), the subject a form is filled on behalf of — in a workflow the initiator, the same for every viewer of a record, unlike `$user` — and `globals` (`$globals`), read-only host attributes. Both are in scope for expressions, scripts, bound data-source parameters, and `$`-rooted leaf conditions. See [Linkage → Host context and system variables](../editors/form-editor/linkage.md#host-context-and-system-variables).
+- **form-editor** — `contextSources` declares the form's **system variables**: the 变量 tab lists them, each with a design-time preview value laid over the preview's context (never stored), and the condition builder offers them as a 系统变量 group.
+- **form-editor** — `validate` (`SchemaValidator`, returning `SchemaIssue[]`) layers a host's own checks over the editor's: called only for a structurally sound schema, its issues join the status-bar diagnostics and the publish gate. The status-bar chip now opens on click and lists every issue; clicking one selects the node it is about (switching device when needed) or opens its form-config tab, and a host path written as a field-key chain (`lines.price`) locates the field. See [Embedding → Host diagnostics](../editors/form-editor/embedding.md#host-diagnostics).
+- **form-editor** — `dataSourceApis` (`DataSourceApi` / `DataSourceApiParam`) gives remote option sources a picker over the host's endpoint catalog; a pick copies the endpoint, the mapping, and the declared parameters' defaults into the schema, which stays self-contained. See [Embedding → Offering an API catalog](../editors/form-editor/embedding.md#offering-an-api-catalog).
+- **form-editor** — the `api_call` action editor now sets `version` and request parameters, sharing the parameter editor of remote option sources. `normalizeOptionMapping` is exported.
+- **approval-form-bridge** — `validateApprovalProjection(schema)` returns the approval-contract issues alone, shaped for `FormEditor`'s `validate`.
+- **approval** — `ApprovalPlugins.formGlobals` (`FormGlobalDefinition[]`) declares the host globals the backend exposes to forms, and `ApprovalPlugins.dataSourceApis` the option-API catalog. `InstanceFormPanel` takes `applicant` and `globals` and evaluates the form with them as `$applicant` / `$globals`; `StartForm` carries `applicant` and `globals`, and `MyInstanceInfo` / `AdminInstanceInfo` carry `globals`. The flow designer's form step offers the four applicant attributes and the declared globals as system variables, passes the provider's resolver, evaluators, and API catalog to the form editor, and validates with `validateApprovalProjection`; neither designer step renders an issue banner any more, and the footer says why 下一步 is disabled. See [Approval → Form system variables](../engines/approval/overview.md#form-system-variables).
+
+### Fixes worth knowing
+
+- **form-editor** — a `$`-rooted leaf source reads own properties only, so a path such as `$user.constructor` no longer resolves to a prototype member (which made `notEmpty` hold forever). An unknown root (`$applcant.x`) is reported as the new warning `source_scope_unknown` instead of silently never matching; code that switches exhaustively over `ValidationIssueCode` must handle the new member.
+- **form-editor** — a `$form.<key>` leaf source is tracked, validated, renamed, and pruned exactly like the plain `<key>`.
+- **form-editor** — `request_incomplete` is reported once per request, naming what is missing, at the request's own path when both `resource` and `action` are empty. It used to be two issues with identical text at `.resource` and `.action`.
+- **form-editor** — remote option mappings are normalized wherever they are stored, resolved, or projected: a cleared key falls back to its default instead of being stored as `""`, which a resolver reading `mapping.labelKey ?? "label"` took literally.
+- **form-editor** — request parameter names are committed on blur or Enter, and only when non-blank and unique. Adding several parameters in a row, or renaming one onto another's name, used to drop values.
+- **form-editor** — the `condition_group_empty` message now says what an empty group does (under `all` the rule always applies, under `any` never) instead of claiming the rule never applies.
+- **approval** — the flow designer's form preview resolves remote options through `dataSourceResolver` (it used to stay empty) and runs the provider's `evaluators`.
 
 ## v2.22.0 (2026-09-15)
 

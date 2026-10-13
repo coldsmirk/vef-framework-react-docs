@@ -125,7 +125,7 @@ Containers are a **closed set** — `ContainerNode = SectionNode | TabsNode | Su
 
 ### Subforms
 
-A `subform` binds an `Array<Record<string, unknown>>` under its own `key`; its `template: Block[]` is the per-row field set, and — uniquely among containers — **opens a new value scope**: a template field's `key` only has to be unique among its row siblings, not against the whole form (its runtime path is `lines[i].amount`, never colliding with a root `amount`). `minRows` / `maxRows` bound the row count; `addLabel` customizes the add control's text.
+A `subform` binds an `Array<Record<string, unknown>>` under its own `key`; its `template: Block[]` is the per-row field set, and — uniquely among containers — **opens a new value scope**: a template field's `key` only has to be unique among its row siblings, not against the whole form (its runtime path is `lines[i].amount`, never colliding with a root `amount`). `minRows` (default `0`) is the number of rows the form keeps present — the runtime seeds that many blank rows and blocks removing rows below it; `maxRows` (unbounded when omitted) disables the add control at that count. `addLabel` customizes the add control's text.
 
 Two variants share this data contract and differ only in presentation:
 
@@ -156,9 +156,34 @@ type FieldOptionSource =
   | { kind: "remote"; request: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }; // inline RPC
 ```
 
-`FormSchema.dataSources: FormDataSource[]` holds form-global, reusable sources (`{ id, name, kind: "static", options }` or `{ id, name, kind: "remote", request, mapping }`) that `ref` sources point at by id. `RemoteDataSourceRequest` (`{ resource, action, version?, params? }`) is transport-agnostic — the package has no `apiClient` dependency; a host resolves it via a `DataSourceResolver` (see [Embedding → Loading remote options](./embedding.md#loading-remote-options)). Each entry of `params` is a `DynamicValue`, so a parameter can be bound to a form value — that is how a cascading select is authored, per row inside a subform included (see [Bound parameters](./embedding.md#bound-parameters)). `RemoteOptionMapping` (`labelKey` / `valueKey` / `disabledKey` / `descriptionKey`, all defaulting to `"label"` / `"value"`) maps raw remote records into `{ label, value }` pairs.
+- **`static`** — the options are inline and resolve synchronously. A selection field with no `dataSource` has an empty static list.
+- **`ref`** — points at an entry of `FormSchema.dataSources` by id. A `ref` to a static entry resolves synchronously; a `ref` to a remote entry resolves through the host's resolver and is the only kind of source a `refresh_data_source` action can re-fetch. A dangling id resolves to an empty list (the validator warns: `data_source_ref_unknown`).
+- **`remote`** — an inline request, resolved through the host's resolver.
 
-`FormSchema.variables: FormVariable[]` (`{ id, name, type: "string" | "number" | "boolean" | "json", defaultValue? }`) declares the form-global `$vars` surfaced to [linkage expressions](./linkage.md).
+`FormSchema.dataSources: FormDataSource[]` holds the form-global, reusable sources — `{ id, name, kind: "static", options }` or `{ id, name, kind: "remote", request, mapping? }` — that `ref` sources point at. The designer edits them in the 数据源 tab of the form-config drawer, and deleting one there prunes every `ref` to it and every `refresh_data_source` action naming it in the same undo step.
+
+`RemoteDataSourceRequest` (`{ resource, action, version?, params? }`) mirrors the framework's resource / action / version RPC addressing and is transport-agnostic — the package has no `apiClient` dependency; a host resolves it via a `DataSourceResolver` (see [Embedding → Loading remote options](./embedding.md#loading-remote-options)). Each entry of `params` is a `DynamicValue`, so a parameter can be bound to a form value — that is how a cascading select is authored, per row inside a subform included (see [Bound parameters](./embedding.md#bound-parameters)).
+
+`RemoteOptionMapping` (`{ labelKey?, valueKey?, disabledKey?, descriptionKey? }`, mirroring the field mapping of `@vef-framework-react/hooks`' `useDataOptionsQuery`) tells a resolver how to read `{ label, value }` out of each raw record; `labelKey` / `valueKey` default to `"label"` / `"value"`. A blank key means "use the default", but a resolver reading `mapping.labelKey ?? "label"` would take `""` literally and look every label up under a property named `""`. So mappings are normalized with the exported `normalizeOptionMapping` — whitespace-only keys dropped, the rest trimmed, `undefined` when nothing is left — wherever one is stored, resolved, or projected: the designer never stores a blank key, the runtime normalizes before calling the resolver, and the [approval projection](../approval-form-bridge.md#remote-option-sources) normalizes `optionSource.mapping`. A schema that already carries `""` keys therefore still resolves correctly.
+
+A host can also hand the designer a catalog of ready-made endpoints (`DataSourceApi[]`) so a designer picks "Department list" instead of typing a resource and a mapping. The catalog is design-time only: a pick is stored as an ordinary request and mapping, so a schema never references the catalog — see [Embedding → Offering an API catalog](./embedding.md#offering-an-api-catalog).
+
+## Form variables
+
+`FormSchema.variables: FormVariable[]` declares the form-global variables that expressions and `$vars`-rooted conditions read as `$vars.<name>`:
+
+```ts
+interface FormVariable {
+  id: string;
+  name: string; // letters, digits, underscore; no leading digit
+  type: "string" | "number" | "boolean" | "json";
+  defaultValue?: unknown;
+}
+```
+
+The renderer seeds `$vars` from each variable's `defaultValue`, lays the host's `evaluationContext.variables` over the seed, and lets `set_variable` actions write it; the seed is re-applied only when its content changes, so a host re-render never clobbers a `set_variable` write. Names must be unique and identifier-shaped — `$vars.1total` would not even parse — which the validator enforces (`variables_invalid`). Renaming a variable in the designer's 变量 tab rewrites every `set_variable` action that targets it; expression sources are opaque text and are not rewritten. Deleting a variable removes only the declaration: a `set_variable` to an undeclared name is still valid, since `$vars` accepts any name at runtime.
+
+Variables are the form's own, and writable. Values the host supplies — the viewer, the initiator, tenant settings — belong in the [evaluation context](./linkage.md#host-context-and-system-variables) instead, which the designer lists as read-only **system variables** beside the form's own.
 
 ## Layout and sizing
 
@@ -202,7 +227,19 @@ Read/query the tree with `walkNodes` / `walkFields` (depth-first visitors receiv
 
 ## Validating an imported schema
 
-`FormEditor`'s own mutators always produce a well-formed tree. `validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` is the boundary guard for schema that did **not** come from the editor — a pasted import, an API payload. It checks the data envelope, per-presentation id/key uniqueness and key grammar, span ranges, [stack-slot shapes](#layout-and-sizing) (v2.10.0), known field types (against the registries you pass in), option-source shapes, and delegates to `validateLinkageSchema` (see [Linkage → Validation](./linkage.md#validation)) once the structural pass is clean. A result is `valid` (and carries the narrowed `schema`) as long as it has no *error*-severity issue — *warning*-severity issues (dangling references, empty condition groups) are legitimate mid-authoring state and round-trip through export → import.
+`FormEditor`'s own mutators always produce a well-formed tree. `validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` is the boundary guard for schema that did **not** come from the editor — a pasted import, an API payload. It checks, in order:
+
+- **The envelope** — a non-empty `id`, `version: 2`, well-formed `variables` (unique non-empty ids, unique identifier-shaped names, a known `type`) and `dataSources` (unique non-empty ids, a string `name`, a valid `static` option list or `remote` request and mapping).
+- **Each presentation**, against that device's registry — `pc` always, `mobile` when present, each with its own id and key namespace: every block a plain object with a unique id and a known `type`; keyed types carry a key and non-keyed types and layout containers do not; keys match `^\w+$` and are unique within their value scope; display texts (`label`, `placeholder`, `helperText`, `title`, `text`, `message`) are strings; `span`, `flex`, `columnWidth`, [`stack`](#layout-and-sizing), container `gap` / `columns` / `variant` / `minRows` / `maxRows` are in range; a `table` subform's template holds keyed leaves only (`subform_table_column`, a warning); `validate` rules are consistent (`min` ≤ `max`, `minLength` ≤ `maxLength`, a compilable `pattern`); and option sources are well-formed, with `ref` ids resolved against `dataSources` and each remote request checked for a `resource` and an `action`.
+- **Linkage** — once a presentation's structural pass found no error, `validateLinkageSchema` runs over it (see [Linkage → Validation](./linkage.md#validation)); the form-scope linkage is checked with the `pc` tree.
+
+A result is `valid` (and carries the narrowed `schema`) as long as it has no *error*-severity issue — *warning*-severity issues (dangling references, an unfinished remote request, an empty condition group) are legitimate mid-authoring state and round-trip through export → import. Every code is listed in the [Reference](./reference.md#validation-issue-codes).
+
+Where validation runs, and where it does not:
+
+- The designer's **导入** dialog and its editable **JSON** view share one apply pipeline: errors block and are listed inline, warnings apply with a summary toast. Neither runs the host's `validate`; that runs in the editor's diagnostics and publish gate (see [Embedding → Host diagnostics](./embedding.md#host-diagnostics)).
+- The designer's **status bar** and **publish** gate run it live over the current schema.
+- **`initialSchema`, `FormEditorApi.setSchema`, and `FormRenderer` do not validate.** A schema from an untrusted source should pass `validateSchema` first — the renderer degrades rather than crashes on most malformed linkage, but it assumes a well-formed tree.
 
 ## Table-storage projection
 

@@ -25,7 +25,7 @@ Extends `FormEditorProviderProps` (below) plus:
 | Prop | Type | Notes |
 | --- | --- | --- |
 | `brand` | `ToolbarBrand` (`{ name?, tag?, icon? }`) | Toolbar brand mark; defaults to the framework's own name/glyph. |
-| `onPublish` | `(schema: FormSchema) => void` | Runs a validation pass first (errors block, warnings ask for confirmation); publish button is not rendered when omitted. |
+| `onPublish` | `(schema: FormSchema) => void` | Runs the editor's validation plus the host's `validate` first (errors block, warnings ask for confirmation); the publish button is not rendered when omitted. |
 | `publishText` | `string` | Defaults to `"发布"`. Ignored when `onPublish` is omitted. |
 | `publishLoading` | `boolean` | Loading state on the publish button. Ignored when `onPublish` is omitted. |
 
@@ -33,14 +33,16 @@ Extends `FormEditorProviderProps` (below) plus:
 
 | Prop | Type | Notes |
 | --- | --- | --- |
-| `initialSchema` | `FormSchema` | Read once, on mount. |
+| `initialSchema` | `FormSchema` | Read once, on mount. Not validated — see [Schema → Validating an imported schema](./schema.md#validating-an-imported-schema). |
 | `registries` | `Partial<DeviceRegistries>` | Per-device registry override; an omitted device falls back to `registry`, then the built-in defaults. Read once, on mount. |
-| `registry` | `FormFieldRegistry` | Shorthand for one registry shared by both devices. Read once, on mount. |
-| `evaluators` | `LinkageEvaluators` | Forwarded to the live preview — see [Linkage](./linkage.md#pluggable-evaluators). |
-| `dataSourceResolver` | `DataSourceResolver` | Forwarded to the live preview — see [Embedding](./embedding.md#loading-remote-options). |
-| `evaluationContext` | `EvaluationContext` | Forwarded to the live preview — see [Linkage](./linkage.md#host-context). |
-| `contextSources` | `LinkageContextSource[]` | Design-time pick list for the condition builder — see [Linkage](./linkage.md#host-context). |
-| `onSchemaChange` | `(schema: FormSchema) => void` | Fires on every committed edit. |
+| `registry` | `FormFieldRegistry` | Shorthand for one registry shared by both devices (container chrome included). Read once, on mount. |
+| `evaluators` | `LinkageEvaluators` | Forwarded to the live preview and JSON view — see [Linkage](./linkage.md#pluggable-evaluators). Without a `dispatchEffect`, the preview shows `alert` / `navigate` / `api_call` as toasts. |
+| `dataSourceResolver` | `DataSourceResolver` | Forwarded to the live preview and JSON view — see [Embedding](./embedding.md#loading-remote-options). |
+| `dataSourceApis` | `DataSourceApi[]` | The host's option-API catalog; remote option sources lead with a picker over it. Design-time only — see [Embedding → Offering an API catalog](./embedding.md#offering-an-api-catalog). |
+| `evaluationContext` | `EvaluationContext` | Forwarded to the live preview and JSON view, with the 变量 tab's preview values laid over it — see [Linkage](./linkage.md#host-context-and-system-variables). |
+| `contextSources` | `LinkageContextSource[]` | The form's system variables: listed in the 变量 tab with preview values and offered by the condition builder — see [Linkage](./linkage.md#system-variables-in-the-designer). Design-time only. |
+| `validate` | `SchemaValidator` | The host's own checks, called only for a schema free of structural errors; its issues join the status-bar diagnostics and the publish gate. Pass a stable function — see [Embedding → Host diagnostics](./embedding.md#host-diagnostics). |
+| `onSchemaChange` | `(schema: FormSchema) => void` | Fires whenever the document changes — edits, undo / redo, import, clear, `setSchema` — but not for the initial schema. |
 | `apiRef` | `Ref<FormEditorApi>` | See below. |
 | `children` | `ReactNode` | — |
 
@@ -49,7 +51,7 @@ Extends `FormEditorProviderProps` (below) plus:
 | Member | Signature |
 | --- | --- |
 | `getSchema` | `() => FormSchema` |
-| `setSchema` | `(schema: FormSchema) => void` — import semantics; resets the undo timeline |
+| `setSchema` | `(schema: FormSchema) => void` — import semantics: resets the undo timeline and the selection; does not validate |
 | `undo` / `redo` | `() => void` |
 | `canUndo` / `canRedo` | `() => boolean` |
 | `selectNode` | `(nodeId: string \| null) => void` |
@@ -73,15 +75,15 @@ Extends `FormEditorProviderProps` (below) plus:
 
 | Prop | Type | Notes |
 | --- | --- | --- |
-| `schema` | `FormSchema` | Required. |
-| `device` | `PresentationDevice` (`"pc" \| "mobile"`) | Default `"pc"`. |
-| `defaultValues` | `Record<string, unknown>` | — |
-| `disabled` | `boolean` | — |
+| `schema` | `FormSchema` | Required. Not validated. |
+| `device` | `PresentationDevice` (`"pc" \| "mobile"`) | Default `"pc"`. An undesigned device renders an empty state. |
+| `defaultValues` | `Record<string, unknown>` | Seeds the root-scope keyed fields — see [Embedding → Default values](./embedding.md#default-values). |
+| `disabled` | `boolean` | Renders the whole form read-only; a disabled form skips submit validation. |
 | `fieldPermissions` | `Record<string, FieldPermission>` | Server-resolved clamp — see [Linkage](./linkage.md#field-permission-clamp). |
 | `evaluators` | `LinkageEvaluators` | See [Linkage](./linkage.md#pluggable-evaluators). |
-| `dataSourceResolver` | `DataSourceResolver` | See [Embedding](./embedding.md#loading-remote-options). |
-| `evaluationContext` | `EvaluationContext` | See [Linkage](./linkage.md#host-context). |
-| `onSubmit` | `(values: Record<string, unknown>) => void \| Promise<void>` | Runs after schema-driven validation passes. |
+| `dataSourceResolver` | `DataSourceResolver` | See [Embedding](./embedding.md#loading-remote-options). Default `noopDataSourceResolver`. |
+| `evaluationContext` | `EvaluationContext` | See [Linkage](./linkage.md#host-context-and-system-variables). Read slot by slot; `variables` re-seeds `$vars` only on a content change. |
+| `onSubmit` | `(values: Record<string, unknown>) => void \| Promise<void>` | Receives the filtered payload after validation and `beforeSubmit` — see [Embedding → Submission](./embedding.md#submission). |
 | `apiRef` | `Ref<FormRendererApi>` | See below. |
 | `containOverlays` | `boolean` | Default `false`. Mobile-only; pins overlay pickers to the renderer's own box. |
 
@@ -199,9 +201,14 @@ Built-in property-entry renderer components (each `FC<EntryComponentProps>`), re
 | `selectedId` | `string \| null` | — |
 | `viewMode` | `EditorViewMode` (`"edit" \| "preview" \| "json"`) | — |
 | `device` | `EditorDeviceMode` (= `PresentationDevice`) | — |
-| `formConfigOpen` / `formConfigTab` | `boolean` / `FormConfigTabId` | `FormConfigTabId = "outline" \| "form" \| "variables" \| "dataSources" \| "linkage"` |
-| `past` / `future` | `HistoryEntry[]` | `HistoryEntry = { schema: FormSchema; device: EditorDeviceMode }` |
-| `insertField`, `moveNode`, `removeNode`, `duplicateNode` | actions | Structural edits, each one checkpointed undo step. |
+| `formConfigOpen` / `formConfigTab` | `boolean` / `FormConfigTabId` | `FormConfigTabId = "outline" \| "form" \| "variables" \| "dataSources" \| "linkage"` — the drawer's 大纲 / 表单 / 变量 / 数据源 / 联动 tabs |
+| `past` / `future` | `HistoryEntry[]` | `HistoryEntry = { schema: FormSchema; device: EditorDeviceMode }`; at most 100 entries, global across devices |
+| `setSchema` | `(schema: FormSchema) => void` | Replace the document; resets the history and the selection. |
+| `clearSchema` | `() => void` | Reset to an empty schema as an ordinary undoable edit. |
+| `selectNode`, `setViewMode`, `setDevice` | actions | View state — never checkpointed. |
+| `setFormConfigOpen`, `setFormConfigTab` | actions | Open / collapse the form-config drawer, or switch it to a tab (opening it); no-ops outside edit mode. |
+| `initMobile` | `(layer: PresentationLayer) => void` | Seed the mobile presentation (blank or converted) and switch to it; one undo removes it again. |
+| `insertField`, `moveNode`, `removeNode`, `removeTab`, `duplicateNode` | actions | Structural edits, each one checkpointed undo step. `removeNode` / `removeTab` prune the linkage rules referencing the keys that die with the removed subtree in the same step. |
 | `setSpan`, `setFlex`, `setColumnWidth`, `setStackSlot` | actions | Layout edits, coalesced per node. |
 | `editField(args, options?: EditCoalesceOptions)`, `updateBlock(args, options?)` | actions | `EditCoalesceOptions = { coalesceKey?: string }` — consecutive edits sharing a key fold into one undo step. **Folding is opt-in:** omit `coalesceKey` and the edit takes its own undo entry *and* ends the current run, so the next edit takes one too. Name what is being edited (the built-in property panel passes `field:<id>:<entryId>`) to fold a run of keystrokes in one input; leave it off for discrete actions — a select, a switch, an add/remove — that each deserve their own step. |
 | `setFieldKey` | action | Sanitizes, dedupes, and renames every reference to the old key. Deduplication spans **both** device presentations at the field's own value scope, and the twin bound to the same key at the same scope on the other device is renamed in the same undo step — see [Schema → Per-device presentations](./schema.md#per-device-presentations). |
@@ -223,22 +230,25 @@ Built-in property-entry renderer components (each `FC<EntryComponentProps>`), re
 
 | Export | Props |
 | --- | --- |
-| `FieldShell` | `{ children, domId, errors?, helperText?, label, labelPosition?, required?, labelledBy? }` — shared label/control/helper/error layout. `labelledBy` (`"control"` default \| `"group"`) picks how the label associates with what it names: `"control"` emits `<label for={domId}>`, which needs `domId` on a labelable element; `"group"` is for a field that renders a *set* rather than one control (`radio`, `checkbox-group`, `code-editor`, `upload`) — `for` is inert against their wrapper, so the label carries an id and the body becomes a `role="group"` pointing back at it with `aria-required` / `aria-invalid`. Without it such a field has no accessible name at all: a screen reader announces the first option and nothing about the question. |
-| `Label` | `{ children, htmlFor?, position?: LabelPosition, required?, title? }` |
+| `FieldShell` | `FieldShellProps`: `{ children, domId, errors?, helperText?, label, labelPosition?, required?, labelledBy? }` — shared label/control/helper/error layout. `labelledBy` (`"control"` default \| `"group"`) picks how the label associates with what it names: `"control"` emits `<label for={domId}>`, which needs `domId` on a labelable element; `"group"` is for a field that renders a *set* rather than one control (`radio`, `checkbox-group`, `code-editor`, `upload`) — `for` is inert against their wrapper, so the label carries an id and the body becomes a `role="group"` pointing back at it with `aria-required` / `aria-invalid`. Without it such a field has no accessible name at all: a screen reader announces the first option and nothing about the question. |
+| `Label` | `LabelProps`: `{ children, htmlFor?, id?, position?: LabelPosition, required?, title?, "aria-hidden"? }` — `id` lets a `role="group"` body point back at the label (used instead of `htmlFor`); `title` is the native tooltip a truncated side label shows; `aria-hidden` hides a label whose control already carries the same `aria-label` |
 
 ## Data sources
 
 | Export | Signature |
 | --- | --- |
-| `DataSourceProvider` | `(props: { children, dataSources?: FormDataSource[], resolver?: DataSourceResolver, versions?: Record<string, number> }) => ReactElement` — installed by `FormEditor` and `FormRenderer`. |
-| `useFieldOptions` | `(source: FieldOptionSource \| undefined) => { options: FieldOption[]; loading: boolean; error: boolean }` |
-| `DataSourceResolver` (type) | `{ resolve: (request: ResolvedDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }` — a resolver only ever sees evaluated parameters |
+| `DataSourceProvider` | `(props: { children, dataSources?: FormDataSource[], resolver?: DataSourceResolver, versions?: Record<string, number> }) => ReactElement` — installed by `FormEditor` and `FormRenderer`; owns the option cache for its lifetime. |
+| `useFieldOptions` | `(source: FieldOptionSource \| undefined) => { options: FieldOption[]; loading: boolean; error: boolean }` — `error` is set after a rejected resolve, which keeps the previous options |
+| `DataSourceResolver` (type) | `{ resolve: (request: ResolvedDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }` — a resolver only ever sees evaluated parameters and a normalized mapping |
 | `noopDataSourceResolver` | `DataSourceResolver` whose `resolve` always returns `[]` — the default. |
 | `RemoteDataSourceRequest` (type) | `{ resource: string; action: string; version?: string; params?: Record<string, DynamicValue> }` — the schema shape, carrying bindings |
 | `ResolvedDataSourceRequest` (type) | `{ resource: string; action: string; version?: string; params?: Record<string, unknown> }` — the runtime shape, carrying data; see [Embedding → Bound parameters](./embedding.md#bound-parameters) |
 | `DynamicValue` (type) | `{ kind: "literal"; value: unknown } \| { kind: "expression"; source: string }` — one declaration shared with `LinkageActionValue` |
 | `isDynamicValue` | `(value: unknown) => value is DynamicValue` — narrowing guard for values that crossed a serialization boundary |
-| `RemoteOptionMapping` (type) | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` — all default to `"label"` / `"value"`. |
+| `RemoteOptionMapping` (type) | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` — `labelKey` / `valueKey` default to `"label"` / `"value"` |
+| `normalizeOptionMapping` | `(mapping: RemoteOptionMapping \| undefined) => RemoteOptionMapping \| undefined` — drops blank and whitespace-only keys, trims the rest, returns `undefined` when nothing is left; see [Schema → Options and data sources](./schema.md#options-and-data-sources) |
+| `DataSourceApi` (type) | `{ label: string; description?: string; group?: string; resource: string; action: string; version?: string; mapping?: RemoteOptionMapping; params?: DataSourceApiParam[] }` — one entry of the designer's API catalog; see [Embedding → Offering an API catalog](./embedding.md#offering-an-api-catalog) |
+| `DataSourceApiParam` (type) | `{ name: string; label?: string; description?: string; required?: boolean; defaultValue?: DynamicValue }` — a parameter an API declares |
 
 ## Mobile
 
@@ -278,7 +288,7 @@ See [Schema](./schema.md) for the narrative model. Top-level and supporting type
 | `FieldOption` | `{ label: string; value: string \| number }` |
 | `FieldOptionSource` | `StaticOptionSource \| RefOptionSource \| RemoteOptionSource` (`kind: "static" \| "ref" \| "remote"`) |
 | `FormDataSource` | `StaticDataSource \| RemoteDataSource` (each `{ id, name, kind, ... }`) |
-| `FormVariable` | `{ id, name, type: "string" \| "number" \| "boolean" \| "json", defaultValue? }` |
+| `FormVariable` | `{ id, name, type: "string" \| "number" \| "boolean" \| "json", defaultValue? }` — `name` is identifier-shaped (`^[A-Za-z_]\w*$`) and unique; see [Schema → Form variables](./schema.md#form-variables) |
 
 ## Leaf field interfaces
 
@@ -291,8 +301,8 @@ Every leaf field extends the shared base: `{ id: string; label?: string; labelPo
 | `NumberField` | `"number"` | Keyed, Validatable | `placeholder?, helperText?, min?: number, max?: number, step?: number, size?, prefix?: string, suffix?: string, precision?: number, controls?: boolean` (default shown) |
 | `SwitchField` | `"switch"` | Keyed (not Validatable) | `helperText?, onText?: string, offText?: string, size?: "default"\|"small"` |
 | `SelectField` | `"select"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean, size?, showSearch?: boolean, dataSource?: FieldOptionSource` |
-| `RadioField` | `"radio"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, optionType?: "default"\|"button", buttonStyle?: "outline"\|"solid", direction?: "horizontal"\|"vertical"` |
-| `CheckboxGroupField` | `"checkbox-group"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, direction?: "horizontal"\|"vertical"` |
+| `RadioField` | `"radio"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, optionType?: "default"\|"button", buttonStyle?: "outline"\|"solid", direction?: "horizontal"\|"vertical"` (default `"vertical"`, applied explicitly on both devices, whose native defaults differ) |
+| `CheckboxGroupField` | `"checkbox-group"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, direction?: "horizontal"\|"vertical"` (default `"vertical"`) |
 | `TextareaField` | `"textarea"` | Keyed, Validatable | `placeholder?, helperText?, rows?: number, autoSize?: boolean, maxLength?: number, showCount?: boolean, size?, allowClear?: boolean` |
 | `DateField` | `"date"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean` (default `true`) |
 | `DatetimeField` | `"datetime"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean` (default `true`) |
@@ -302,6 +312,8 @@ Every leaf field extends the shared base: `{ id: string; label?: string; labelPo
 | `DividerField` | `"divider"` | (non-keyed) | `title?: string, titlePlacement?: "left"\|"center"\|"right"` (default `"center"`)`, dashed?: boolean` |
 | `AlertBlockField` | `"alert-block"` | (non-keyed) | `message?: string, description?: string, alertType?: "info"\|"success"\|"warning"\|"error", showIcon?: boolean` (default `true`)`, closable?: boolean, banner?: boolean` |
 | `ParagraphField` | `"paragraph"` | (non-keyed) | `text?: string, textType?: "secondary"\|"success"\|"warning"\|"danger", strong?: boolean, italic?: boolean` |
+
+Some props have no antd-mobile counterpart, so the mobile renderers ignore them: `size` on `textfield` / `number` / `select` / `textarea` / `switch`, `showSearch` on `select`, `optionType` / `buttonStyle` on `radio`, `controls` on `number`, `allowClear` on `textarea`, `ghost` on `button`, `dashed` on `divider`, and `banner` on `alert-block`. A mobile `button` is full-width unless `block` is stored as `false`.
 
 ## Container node interfaces
 
@@ -384,23 +396,114 @@ See [Linkage](./linkage.md) for the full model. Exported surface:
 | `EFFECT_ACTION_TYPES` | `readonly EffectActionType[]` (`set_field, set_variable, refresh_data_source, alert, api_call, navigate, submit, reset`) |
 | `LINKAGE_ACTION_TYPES` | `readonly LinkageActionType[]` — the union of the two above |
 | `KEYED_ONLY_ACTIONS` | `ReadonlySet<LinkageActionType>` (`require, optional, assign`) |
-| `FIELD_TRIGGER_KINDS` / `FORM_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]` — legal triggers per rule scope |
+| `FIELD_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]` (`condition, change, focus, blur, click`) — legal on a field / container rule |
+| `FORM_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]` (`condition, load, beforeSubmit, afterSubmit`) — legal on a form-scope rule |
 | `FIELD_EVENT_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]` (`change, focus, blur, click`) |
-| `LINKAGE_OPERATORS` | `readonly LinkageOperator[]` (`eq, ne, gt, lt, gte, lte, contains, empty, notEmpty`) |
+| `LINKAGE_OPERATORS` | `readonly LinkageOperator[]` (`eq, ne, gt, lt, gte, lte, contains, empty, notEmpty`) — semantics in [Linkage → Operators](./linkage.md#operators) |
 | `ALERT_LEVELS` | `readonly LinkageAlertLevel[]` (`info, success, warning, error`) |
 
-Types: `FieldLinkage`, `FieldLinkageRule`, `FieldLinkageAction`, `FieldLinkageDefaults`, `LinkageTrigger`, `LinkageTriggerKind`, `LinkageCondition` (`LinkageConditionLeaf | LinkageConditionGroup | LinkageConditionExpression`), `LinkageOperator`, `StateAction`, `StateActionType`, `EffectAction`, `EffectActionType`, `LinkageActionType`, `LinkageActionValue`, `LinkageAlertLevel`, `ConditionRetrigger` (`"edge" | "always"`), `LinkageScriptResult`, `LinkageEvaluators`, `EvaluationContext`, `LinkageContextSource`, `EffectDispatchContext`, `FieldPermission` (`"hidden" | "visible" | "editable" | "required"`).
+Context and dispatch shapes:
+
+| Type | Shape |
+| --- | --- |
+| `EvaluationContext` | `{ variables?, user?, node?, applicant?, globals? }`, each `Record<string, unknown>` — bound as `$vars` / `$user` / `$node` / `$applicant` / `$globals`; see [Linkage → Host context and system variables](./linkage.md#host-context-and-system-variables) |
+| `LinkageContextSource` | `{ key: string; label: string }` — a system variable: `key` is the full scope path (`"$applicant.departmentId"`), stored verbatim as a leaf's `sourceKey` |
+| `EffectDispatchContext` | `{ values: Record<string, unknown>; resolveValue: (value: LinkageActionValue) => unknown; resolveRequest: (request: RemoteDataSourceRequest) => ResolvedDataSourceRequest }` — scoped to the firing rule's value scope |
+| `LinkageScriptResult` | `{ hidden?: boolean; disabled?: boolean; required?: boolean; value?: unknown }` — a `script` action's partial state patch |
+
+Other types: `FieldLinkage`, `FieldLinkageRule`, `FieldLinkageAction`, `FieldLinkageDefaults`, `LinkageTrigger`, `LinkageTriggerKind`, `LinkageCondition` (`LinkageConditionLeaf | LinkageConditionGroup | LinkageConditionExpression`), `LinkageOperator`, `StateAction`, `StateActionType`, `EffectAction`, `EffectActionType`, `LinkageActionType`, `LinkageActionValue`, `LinkageAlertLevel`, `ConditionRetrigger` (`"edge" | "always"`), `LinkageEvaluators`, `FieldPermission` (`"hidden" | "visible" | "editable" | "required"`).
 
 ## Validation
 
 | Export | Signature |
 | --- | --- |
 | `formatIssueMessage` | `(code: ValidationIssueCode, params?) => string` — every issue message flows through this |
-| `ValidationIssue` (type) | `{ path: string; code: ValidationIssueCode; severity: ValidationSeverity; message: string; ruleId?: string }` |
-| `ValidationIssueCode` (type) | Closed union of several dozen stable machine-readable codes (schema envelope, block tree, layout, linkage, …) |
+| `SchemaIssue` (type) | `{ path: string; code: string; severity: ValidationSeverity; message: string }` — any diagnostic the editor shows, its own or a host's |
+| `ValidationIssue` (type) | `SchemaIssue & { code: ValidationIssueCode; ruleId?: string }` — the editor's own; `ruleId` names the rule a rule-scoped linkage issue belongs to |
+| `SchemaValidator` (type) | `(schema: FormSchema) => readonly SchemaIssue[]` — the `validate` prop; see [Embedding → Host diagnostics](./embedding.md#host-diagnostics) |
+| `ValidationIssueCode` (type) | Closed union of the codes below |
 | `ValidationSeverity` (type) | `"error" \| "warning"` |
 
-`message` is pre-rendered Chinese product copy; program against `code` and `path`, which are stable across locales.
+`message` is pre-rendered Chinese product copy; program against `code` and `path`, which are stable across locales. An issue's `path` is either a presentation path (`presentations.pc.children[0].key`), a node path (`node[Field_1].linkage.rules[0]`), a form-level path (`variables[1].name`, `dataSources[0].request`, `schema.linkage.rules[0]`), or `linkage` for a dependency cycle.
+
+### Validation issue codes
+
+*Error* means the schema is structurally broken and fails validation; *warning* marks legitimate mid-authoring state (incomplete or dangling configuration) that round-trips through export → import.
+
+| Code | Severity | Raised when |
+| --- | --- | --- |
+| `schema_not_object` | error | The candidate is not a plain object. |
+| `id_required` | error | The schema, a node, a tab, or a rule lacks a non-empty string `id`. |
+| `duplicate_id` | error | A node or tab id repeats within one presentation. |
+| `version_unsupported` | error | `version` is not `2`. |
+| `presentation_not_object` | error | `presentations`, or one device's layer, is not an object. |
+| `variables_invalid` | error | `variables` is not an array of declarations with unique non-empty ids, unique identifier-shaped names, and a known `type`. |
+| `data_sources_invalid` | error | `dataSources` is not an array of entries with unique non-empty ids, a string `name`, and a valid `static` / `remote` payload and mapping. |
+| `block_not_object` | error | A block is not a plain object. |
+| `children_not_array` | error | A body — `children`, `tabs`, `template`, or a condition group's `children` — is not an array. |
+| `tabs_empty` | error | A `tabs` container has no tab. |
+| `tab_malformed` | error | A tab is not an object, or its `label` is not a string. |
+| `type_required` | error | A block has no non-empty `type`. |
+| `unknown_field_type` | error | The `type` is not registered on that device's registry. |
+| `key_required` | error | A keyed field type, or a subform, has no key. |
+| `stray_key` | error | A non-keyed field type carries a key. |
+| `stray_key_on_container` | error | A layout container (`section` / `tabs` / `flex` / `grid`) carries a key. |
+| `duplicate_key` | error | A key repeats within one value scope. |
+| `key_invalid_charset` | error | A key holds anything other than letters, digits, and underscores. |
+| `span_invalid` | error | `span` is not an integer in `1..24`. |
+| `flex_invalid` | error | A malformed `flex` slot, or a flex container's `direction` / `justify` / `align` / `wrap` out of range. |
+| `column_width_invalid` | error | `columnWidth` is not a positive number. |
+| `stack_invalid` | error | A malformed `stack` slot. |
+| `gap_invalid` | error | A stack container's `gap` is not a `GapScale`, or a flex / grid `gap` / `rowGap` is not a non-negative integer. |
+| `columns_invalid` | error | A grid's `columns` is not an integer in `1..24`. |
+| `variant_invalid` | error | A section's `variant` is not `"card"` / `"collapse"`. |
+| `subform_variant_invalid` | error | A subform's `variant` is not `"stack"` / `"table"`. |
+| `title_invalid` | error | A section's `title` is not a string. |
+| `display_text_invalid` | error | `label` / `placeholder` / `helperText` / `title` / `text` / `message` is not a string. |
+| `rows_bound_invalid` | error | `minRows` / `maxRows` is not a non-negative integer, or `minRows` exceeds `maxRows`. |
+| `subform_table_column` | warning | A `table` subform's template holds a container or a non-keyed block; the renderer skips it. |
+| `validate_malformed` | error | `validate` is not an object. |
+| `validate_range_invalid` | error | `minLength` exceeds `maxLength`, or `min` exceeds `max`. |
+| `pattern_invalid` | error | `pattern` is not a compilable regular expression. |
+| `data_source_invalid` | error | A field's `dataSource` is malformed — an unknown `kind`, a malformed option list, or a malformed mapping. |
+| `data_source_ref_unknown` | warning | A `ref` names no declared data source. |
+| `request_malformed` | error | A request is not an object, or its `resource` / `action` is not a string. |
+| `request_incomplete` | warning | A request's `resource` and/or `action` is empty. Reported once per request, naming what is missing — at the request when both are, at the empty one otherwise. |
+| `linkage_malformed` | error | `linkage`, or its `defaults`, is not an object. |
+| `rules_not_array` | error | `rules` is not an array. |
+| `rule_malformed` | error | A rule is not an object. |
+| `trigger_malformed` | error | A trigger is not an object with a string `kind`. |
+| `trigger_kind_invalid` | error | The trigger kind is not legal at the rule's scope. |
+| `trigger_requires_keyed_leaf` | error | A `change` trigger on anything but a keyed leaf field. |
+| `condition_malformed` | error | A condition is not an object, or a leaf's `sourceKey` / an expression's `source` is not a string. |
+| `condition_kind_invalid` | error | A condition's `kind` is not `leaf` / `group` / `expression`. |
+| `logic_invalid` | error | A group's `logic` is not `"all"` / `"any"`. |
+| `condition_group_empty` | warning | A group has no children: under `all` the rule always applies, under `any` it never does. |
+| `operator_invalid` | error | A leaf's `operator` is not one of `LINKAGE_OPERATORS`. |
+| `source_key_empty` | warning | A leaf has no source selected. |
+| `source_key_unresolved` | warning | A leaf's form key (plain or `$form.`) names no keyed node in the rule's value scope. |
+| `source_scope_unknown` | warning | A leaf's `$` root is none of `$form` / `$vars` / `$user` / `$node` / `$applicant` / `$globals`. |
+| `source_empty` | warning | An expression condition, an expression value, or a script is empty. |
+| `actions_not_array` | error | `actions` is not an array. |
+| `actions_empty` | warning | A rule has no actions. |
+| `action_malformed` | error | An action is not an object, or its `targetKey` / `variable` / `dataSourceId` / `source` is not a string. |
+| `action_unknown_type` | error | An action `type` is not one of `LINKAGE_ACTION_TYPES`. |
+| `state_action_on_edge_trigger` | error | A state action under an edge trigger. |
+| `state_action_on_form_scope` | error | A state action in a form-scope rule. |
+| `action_requires_keyed_leaf` | error | `require` / `optional` / `assign` on anything but a keyed leaf field. |
+| `defaults_requires_keyed_leaf` | error | `defaults.required` on anything but a keyed leaf field. |
+| `defaults_on_form_scope` | error | A `defaults` block on the form-scope linkage. |
+| `default_hidden_unreachable` | warning | A block is hidden by default and none of its own condition rules shows it. |
+| `target_key_empty` | warning | A `set_field` has no target selected. |
+| `target_key_unresolved` | warning | A `set_field` target names no keyed node in the rule's value scope. |
+| `variable_empty` | warning | A `set_variable` has no variable name. |
+| `data_source_id_empty` | warning | A `refresh_data_source` action, or a `ref` option source, has no data source selected. |
+| `value_malformed` | error | An action value is not a `literal` / `expression` shape. |
+| `alert_level_invalid` | error | An `alert`'s `level` is not one of `ALERT_LEVELS`. |
+| `retrigger_invalid` | error | `retrigger` is not `"edge"` / `"always"`. |
+| `retrigger_ignored` | warning | `retrigger` on an effect under an edge trigger, where it has no effect. |
+| `self_reference` | error | A value-writing rule's condition reads the very field the rule writes. |
+| `cycle_detected` | error | Value-writing rules form a dependency loop; the message names it. |
 
 ## Chrome
 

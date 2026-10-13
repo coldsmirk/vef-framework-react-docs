@@ -78,7 +78,7 @@ Exported standalone so a business page can launch an approval about one of its o
 | `onClose` | `() => void` | — | Close handler. |
 | `onStarted` | `() => void` | — | Fired with the submission acknowledged, after the drawer closes. |
 
-It loads the published form document through `approval/my.get_start_form` — gated server-side exactly like starting, so a rendered form implies a startable flow (active, permitted, published) — renders it via `InstanceFormPanel` with the provider's registries, and submits `approval/instance.start` with the renderer-validated values. Flows without a form submit directly.
+It loads the published form document through `approval/my.get_start_form` — gated server-side exactly like starting, so a rendered form implies a startable flow (active, permitted, published) — renders it via `InstanceFormPanel` with the provider's registries, and submits `approval/instance.start` with the renderer-validated values. The start form also carries the applicant the instance will record and the host globals the flow exposes to its form, which the drawer passes on as the form's `$applicant` and `$globals` (see [Form system variables](./overview.md#form-system-variables)). Flows without a form submit directly.
 
 ## Management pages
 
@@ -114,7 +114,7 @@ Full-page flow management: the paginated flow list with keyword / category / act
 
 #### `FlowDesignerDrawer`
 
-The full-screen, four-step designer (流程设置 → 表单设计 → 流程设计 → 审阅提交), exported standalone. Each step gates the next: settings must be complete (including a valid business binding in `business` mode and at least one initiator rule unless 全员可发起), the form must pass `validateApprovalSchema`, the flow must pass `validateFlowDefinition` against the projected fields. Submission runs create/update → deploy → optional publish as one chain; every step invalidates the flow list. All step panes stay mounted so editor state survives step switches. The body remounts per opening, so editor seeds never leak between sessions.
+The full-screen, four-step designer (流程设置 → 表单设计 → 流程设计 → 审阅提交), exported standalone. Each step gates the next: settings must be complete (including a valid business binding in `business` mode and at least one initiator rule unless 全员可发起), the form must pass `validateApprovalSchema`, the flow must pass `validateFlowDefinition` against the projected fields. The issues themselves live in each editor's own diagnostics — the form editor's status bar (structural and approval-contract issues, through `validate={validateApprovalProjection}`) and the flow editor's toolbar indicator — where each one locates its field or node, so neither step renders a banner over its canvas; while 下一步 is disabled, the footer says why in one line (请先完善流程设置中的必填项, 表单存在 N 个错误…, 流程存在 N 个问题…). The form step also offers the [form system variables](./overview.md#form-system-variables) and the provider's option-API catalog. Submission runs create/update → deploy → optional publish as one chain; every step invalidates the flow list. All step panes stay mounted so editor state survives step switches. The body remounts per opening, so editor seeds never leak between sessions.
 
 The review step counts only the initiator rules that will actually be saved. When 全员可发起 is enabled, the saved payload carries no initiator rules — the two settings are mutually exclusive on the server. The draft still keeps any typed rules so toggling the switch back preserves them, but they are dropped on the way out.
 

@@ -25,7 +25,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | 属性 | 类型 | 说明 |
 | --- | --- | --- |
 | `brand` | `ToolbarBrand`（`{ name?, tag?, icon? }`） | 工具栏品牌标识；默认使用框架自身的名称/图标。 |
-| `onPublish` | `(schema: FormSchema) => void` | 先执行一次校验（error 会阻止发布，warning 会请求确认）；省略时不渲染发布按钮。 |
+| `onPublish` | `(schema: FormSchema) => void` | 先运行编辑器自身的校验以及宿主的 `validate`（error 会阻止发布，warning 会请求确认）；省略时不渲染发布按钮。 |
 | `publishText` | `string` | 默认为 `"发布"`。当省略 `onPublish` 时被忽略。 |
 | `publishLoading` | `boolean` | 发布按钮的加载状态。当省略 `onPublish` 时被忽略。 |
 
@@ -33,14 +33,16 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 
 | 属性 | 类型 | 说明 |
 | --- | --- | --- |
-| `initialSchema` | `FormSchema` | 仅在挂载时读取一次。 |
+| `initialSchema` | `FormSchema` | 仅在挂载时读取一次。不做校验——见 [Schema → 校验导入的 schema](./schema.md#校验导入的-schema)。 |
 | `registries` | `Partial<DeviceRegistries>` | 按设备划分的注册表覆盖项；省略的设备会回退到 `registry`，再回退到内置默认值。仅在挂载时读取一次。 |
-| `registry` | `FormFieldRegistry` | 两种设备共用一份注册表的简写形式。仅在挂载时读取一次。 |
-| `evaluators` | `LinkageEvaluators` | 转发给实时预览——见 [Linkage](./linkage.md#可插拔求值器)。 |
-| `dataSourceResolver` | `DataSourceResolver` | 转发给实时预览——见 [Embedding](./embedding.md#加载远程选项)。 |
-| `evaluationContext` | `EvaluationContext` | 转发给实时预览——见 [Linkage](./linkage.md#宿主上下文)。 |
-| `contextSources` | `LinkageContextSource[]` | 条件构建器的设计时选择列表——见 [Linkage](./linkage.md#宿主上下文)。 |
-| `onSchemaChange` | `(schema: FormSchema) => void` | 每次已提交的编辑都会触发。 |
+| `registry` | `FormFieldRegistry` | 两种设备共用一份注册表（包括容器外观）的简写形式。仅在挂载时读取一次。 |
+| `evaluators` | `LinkageEvaluators` | 转发给实时预览与 JSON 视图——见 [Linkage](./linkage.md#可插拔求值器)。没有 `dispatchEffect` 时，预览会把 `alert` / `navigate` / `api_call` 显示为提示消息。 |
+| `dataSourceResolver` | `DataSourceResolver` | 转发给实时预览与 JSON 视图——见 [Embedding](./embedding.md#加载远程选项)。 |
+| `dataSourceApis` | `DataSourceApi[]` | 宿主的选项接口目录；远程选项来源会以针对它的选择器打头。仅在设计时使用——见 [Embedding → 提供接口目录](./embedding.md#提供接口目录)。 |
+| `evaluationContext` | `EvaluationContext` | 转发给实时预览与 JSON 视图，并叠加「变量」页中的预览值——见 [Linkage](./linkage.md#宿主上下文与系统变量)。 |
+| `contextSources` | `LinkageContextSource[]` | 表单的系统变量：在「变量」页中连同预览值一起列出，并由条件构建器作为来源提供——见 [Linkage](./linkage.md#设计器中的系统变量)。仅在设计时使用。 |
+| `validate` | `SchemaValidator` | 宿主自己的检查，只在 schema 没有结构性 error 时调用；它的问题会进入状态栏诊断与发布关卡。请传入稳定的函数——见 [Embedding → 宿主诊断](./embedding.md#宿主诊断)。 |
+| `onSchemaChange` | `(schema: FormSchema) => void` | 文档发生任何变化时触发——编辑、撤销 / 重做、导入、清空、`setSchema`——但初始 schema 不会触发。 |
 | `apiRef` | `Ref<FormEditorApi>` | 见下文。 |
 | `children` | `ReactNode` | — |
 
@@ -49,7 +51,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | 成员 | 签名 |
 | --- | --- |
 | `getSchema` | `() => FormSchema` |
-| `setSchema` | `(schema: FormSchema) => void` —— 导入语义；会重置撤销时间线 |
+| `setSchema` | `(schema: FormSchema) => void` —— 导入语义：重置撤销时间线与当前选中；不做校验 |
 | `undo` / `redo` | `() => void` |
 | `canUndo` / `canRedo` | `() => boolean` |
 | `selectNode` | `(nodeId: string \| null) => void` |
@@ -73,15 +75,15 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 
 | 属性 | 类型 | 说明 |
 | --- | --- | --- |
-| `schema` | `FormSchema` | 必填。 |
-| `device` | `PresentationDevice`（`"pc" \| "mobile"`） | 默认 `"pc"`。 |
-| `defaultValues` | `Record<string, unknown>` | — |
-| `disabled` | `boolean` | — |
+| `schema` | `FormSchema` | 必填。不做校验。 |
+| `device` | `PresentationDevice`（`"pc" \| "mobile"`） | 默认 `"pc"`。未设计的设备渲染空状态。 |
+| `defaultValues` | `Record<string, unknown>` | 为根作用域的带 key 字段播种——见 [Embedding → 默认值](./embedding.md#默认值)。 |
+| `disabled` | `boolean` | 把整个表单渲染为只读；禁用的表单不做提交校验。 |
 | `fieldPermissions` | `Record<string, FieldPermission>` | 服务端解析的钳制——见 [Linkage](./linkage.md#字段权限钳制)。 |
 | `evaluators` | `LinkageEvaluators` | 见 [Linkage](./linkage.md#可插拔求值器)。 |
-| `dataSourceResolver` | `DataSourceResolver` | 见 [Embedding](./embedding.md#加载远程选项)。 |
-| `evaluationContext` | `EvaluationContext` | 见 [Linkage](./linkage.md#宿主上下文)。 |
-| `onSubmit` | `(values: Record<string, unknown>) => void \| Promise<void>` | 在 schema 驱动的校验通过后运行。 |
+| `dataSourceResolver` | `DataSourceResolver` | 见 [Embedding](./embedding.md#加载远程选项)。默认 `noopDataSourceResolver`。 |
+| `evaluationContext` | `EvaluationContext` | 见 [Linkage](./linkage.md#宿主上下文与系统变量)。按插槽逐个读取；`variables` 只在内容变化时重新播种 `$vars`。 |
+| `onSubmit` | `(values: Record<string, unknown>) => void \| Promise<void>` | 在校验与 `beforeSubmit` 之后收到过滤后的载荷——见 [Embedding → 提交](./embedding.md#提交)。 |
 | `apiRef` | `Ref<FormRendererApi>` | 见下文。 |
 | `containOverlays` | `boolean` | 默认 `false`。仅限移动端；将浮层选择器固定在渲染器自身的盒子内。 |
 
@@ -199,9 +201,14 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `selectedId` | `string \| null` | — |
 | `viewMode` | `EditorViewMode`（`"edit" \| "preview" \| "json"`） | — |
 | `device` | `EditorDeviceMode`（= `PresentationDevice`） | — |
-| `formConfigOpen` / `formConfigTab` | `boolean` / `FormConfigTabId` | `FormConfigTabId = "outline" \| "form" \| "variables" \| "dataSources" \| "linkage"` |
-| `past` / `future` | `HistoryEntry[]` | `HistoryEntry = { schema: FormSchema; device: EditorDeviceMode }` |
-| `insertField`、`moveNode`、`removeNode`、`duplicateNode` | 动作 | 结构性编辑，每一个都是一个撤销检查点。 |
+| `formConfigOpen` / `formConfigTab` | `boolean` / `FormConfigTabId` | `FormConfigTabId = "outline" \| "form" \| "variables" \| "dataSources" \| "linkage"`——即抽屉的「大纲 / 表单 / 变量 / 数据源 / 联动」页签 |
+| `past` / `future` | `HistoryEntry[]` | `HistoryEntry = { schema: FormSchema; device: EditorDeviceMode }`；最多 100 条，跨设备全局共享 |
+| `setSchema` | `(schema: FormSchema) => void` | 替换整个文档；重置历史与当前选中。 |
+| `clearSchema` | `() => void` | 以一次普通的、可撤销的编辑把文档重置为空 schema。 |
+| `selectNode`、`setViewMode`、`setDevice` | 动作 | 视图状态——从不记入撤销历史。 |
+| `setFormConfigOpen`、`setFormConfigTab` | 动作 | 打开 / 收起表单配置抽屉，或把它切换到某个页签（同时打开）；非编辑模式下不做任何事。 |
+| `initMobile` | `(layer: PresentationLayer) => void` | 播种移动端呈现方式（空白或转换而来）并切换过去；撤销一次即可移除。 |
+| `insertField`、`moveNode`、`removeNode`、`removeTab`、`duplicateNode` | 动作 | 结构性编辑，每一个都是一个撤销检查点。`removeNode` / `removeTab` 会在同一步中清理引用了随被删子树一起消失的 key 的联动规则。 |
 | `setSpan`、`setFlex`、`setColumnWidth`、`setStackSlot` | 动作 | 布局编辑，按节点合并为单步。 |
 | `editField(args, options?: EditCoalesceOptions)`、`updateBlock(args, options?)` | 动作 | `EditCoalesceOptions = { coalesceKey?: string }` —— 共享同一个 key 的连续编辑会折叠为一个撤销步骤。**折叠是需要显式选择的**：省略 `coalesceKey` 时，这次编辑会独占一个撤销条目**并且**结束当前这一轮折叠，于是下一次编辑同样独占一个。想把一个输入框里的一串按键折叠起来，就为正在编辑的那样东西命名（内置属性面板传的是 `field:<id>:<entryId>`）；而离散动作——一次下拉选择、一次开关、一次增删——就别传，让它们各自成为一步。 |
 | `setFieldKey` | 动作 | 清洗、去重，并重命名对旧 key 的每一处引用。去重会在该字段自身的值作用域下**跨两种设备呈现方式**进行，并且另一台设备上在相同作用域绑定同一 key 的孪生字段会在同一个撤销步骤里一并重命名——见 [Schema → 按设备划分的呈现方式](./schema.md#按设备划分的呈现方式)。 |
@@ -223,22 +230,25 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 
 | 导出 | 属性 |
 | --- | --- |
-| `FieldShell` | `{ children, domId, errors?, helperText?, label, labelPosition?, required?, labelledBy? }` —— 共享的标签/控件/辅助文本/错误提示布局。`labelledBy`（默认 `"control"` \| `"group"`）决定标签以何种方式与它所命名的东西关联：`"control"` 输出 `<label for={domId}>`，这要求字段把 `domId` 放在一个可被 label 关联的元素上；`"group"` 面向渲染出一**组**而非单个控件的字段（`radio`、`checkbox-group`、`code-editor`、`upload`）——`for` 对它们的包裹层是无效的，因此标签改为携带一个 id，主体变成一个 `role="group"` 并通过 `aria-labelledby` 指回标签，同时带上 `aria-required` / `aria-invalid`。不这么做，这类字段就完全没有可访问名称：读屏软件念出第一个选项，却完全不提正在问的是什么问题。 |
-| `Label` | `{ children, htmlFor?, position?: LabelPosition, required?, title? }` |
+| `FieldShell` | `FieldShellProps`：`{ children, domId, errors?, helperText?, label, labelPosition?, required?, labelledBy? }` —— 共享的标签/控件/辅助文本/错误提示布局。`labelledBy`（默认 `"control"` \| `"group"`）决定标签以何种方式与它所命名的东西关联：`"control"` 输出 `<label for={domId}>`，这要求字段把 `domId` 放在一个可被 label 关联的元素上；`"group"` 面向渲染出一**组**而非单个控件的字段（`radio`、`checkbox-group`、`code-editor`、`upload`）——`for` 对它们的包裹层是无效的，因此标签改为携带一个 id，主体变成一个 `role="group"` 并通过 `aria-labelledby` 指回标签，同时带上 `aria-required` / `aria-invalid`。不这么做，这类字段就完全没有可访问名称：读屏软件念出第一个选项，却完全不提正在问的是什么问题。 |
+| `Label` | `LabelProps`：`{ children, htmlFor?, id?, position?: LabelPosition, required?, title?, "aria-hidden"? }` —— `id` 让 `role="group"` 的主体能够指回该标签（用来代替 `htmlFor`）；`title` 是被截断的侧边标签所显示的原生提示；`aria-hidden` 用于隐藏一个其控件已带有相同 `aria-label` 的标签 |
 
 ## 数据源
 
 | 导出 | 签名 |
 | --- | --- |
-| `DataSourceProvider` | `(props: { children, dataSources?: FormDataSource[], resolver?: DataSourceResolver, versions?: Record<string, number> }) => ReactElement` —— 由 `FormEditor` 和 `FormRenderer` 安装。 |
-| `useFieldOptions` | `(source: FieldOptionSource \| undefined) => { options: FieldOption[]; loading: boolean; error: boolean }` |
-| `DataSourceResolver`（类型） | `{ resolve: (request: ResolvedDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }`——解析器只会看到已求值的参数 |
+| `DataSourceProvider` | `(props: { children, dataSources?: FormDataSource[], resolver?: DataSourceResolver, versions?: Record<string, number> }) => ReactElement` —— 由 `FormEditor` 和 `FormRenderer` 安装；在其生命周期内持有选项缓存。 |
+| `useFieldOptions` | `(source: FieldOptionSource \| undefined) => { options: FieldOption[]; loading: boolean; error: boolean }` —— 解析被 reject 后 `error` 为真，同时保留之前的选项 |
+| `DataSourceResolver`（类型） | `{ resolve: (request: ResolvedDataSourceRequest, mapping?: RemoteOptionMapping) => Promise<FieldOption[]> }`——解析器只会看到已求值的参数与规范化后的映射 |
 | `noopDataSourceResolver` | `resolve` 始终返回 `[]` 的 `DataSourceResolver`——即默认值。 |
 | `RemoteDataSourceRequest`（类型） | `{ resource: string; action: string; version?: string; params?: Record<string, DynamicValue> }`——schema 形态，携带的是绑定 |
 | `ResolvedDataSourceRequest`（类型） | `{ resource: string; action: string; version?: string; params?: Record<string, unknown> }`——运行时形态，携带的是数据；见 [Embedding → 绑定参数](./embedding.md#绑定参数) |
 | `DynamicValue`（类型） | `{ kind: "literal"; value: unknown } \| { kind: "expression"; source: string }`——与 `LinkageActionValue` 共用同一份声明 |
 | `isDynamicValue` | `(value: unknown) => value is DynamicValue`——用于收窄跨越了序列化边界的值 |
-| `RemoteOptionMapping`（类型） | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` —— 均默认为 `"label"` / `"value"`。 |
+| `RemoteOptionMapping`（类型） | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` —— `labelKey` / `valueKey` 默认为 `"label"` / `"value"` |
+| `normalizeOptionMapping` | `(mapping: RemoteOptionMapping \| undefined) => RemoteOptionMapping \| undefined` —— 去掉空白与只含空白的 key，其余去除首尾空白，什么都不剩时返回 `undefined`；见 [Schema → 选项与数据源](./schema.md#选项与数据源) |
+| `DataSourceApi`（类型） | `{ label: string; description?: string; group?: string; resource: string; action: string; version?: string; mapping?: RemoteOptionMapping; params?: DataSourceApiParam[] }` —— 设计器接口目录中的一个条目；见 [Embedding → 提供接口目录](./embedding.md#提供接口目录) |
+| `DataSourceApiParam`（类型） | `{ name: string; label?: string; description?: string; required?: boolean; defaultValue?: DynamicValue }` —— 接口声明的一个参数 |
 
 ## 移动端
 
@@ -278,7 +288,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `FieldOption` | `{ label: string; value: string \| number }` |
 | `FieldOptionSource` | `StaticOptionSource \| RefOptionSource \| RemoteOptionSource`（`kind: "static" \| "ref" \| "remote"`） |
 | `FormDataSource` | `StaticDataSource \| RemoteDataSource`（各自为 `{ id, name, kind, ... }`） |
-| `FormVariable` | `{ id, name, type: "string" \| "number" \| "boolean" \| "json", defaultValue? }` |
+| `FormVariable` | `{ id, name, type: "string" \| "number" \| "boolean" \| "json", defaultValue? }` —— `name` 为标识符形态（`^[A-Za-z_]\w*$`）且唯一；见 [Schema → 表单变量](./schema.md#表单变量) |
 
 ## 叶子字段接口
 
@@ -291,8 +301,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `NumberField` | `"number"` | Keyed, Validatable | `placeholder?, helperText?, min?: number, max?: number, step?: number, size?, prefix?: string, suffix?: string, precision?: number, controls?: boolean`（默认显示） |
 | `SwitchField` | `"switch"` | Keyed（非 Validatable） | `helperText?, onText?: string, offText?: string, size?: "default"\|"small"` |
 | `SelectField` | `"select"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean, size?, showSearch?: boolean, dataSource?: FieldOptionSource` |
-| `RadioField` | `"radio"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, optionType?: "default"\|"button", buttonStyle?: "outline"\|"solid", direction?: "horizontal"\|"vertical"` |
-| `CheckboxGroupField` | `"checkbox-group"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, direction?: "horizontal"\|"vertical"` |
+| `RadioField` | `"radio"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, optionType?: "default"\|"button", buttonStyle?: "outline"\|"solid", direction?: "horizontal"\|"vertical"`（默认 `"vertical"`，两种设备都显式应用，因为它们各自的原生默认值不同） |
+| `CheckboxGroupField` | `"checkbox-group"` | Keyed, Validatable | `helperText?, dataSource?: FieldOptionSource, direction?: "horizontal"\|"vertical"`（默认 `"vertical"`） |
 | `TextareaField` | `"textarea"` | Keyed, Validatable | `placeholder?, helperText?, rows?: number, autoSize?: boolean, maxLength?: number, showCount?: boolean, size?, allowClear?: boolean` |
 | `DateField` | `"date"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean`（默认 `true`） |
 | `DatetimeField` | `"datetime"` | Keyed, Validatable | `placeholder?, helperText?, allowClear?: boolean`（默认 `true`） |
@@ -302,6 +312,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `DividerField` | `"divider"` | （非键控） | `title?: string, titlePlacement?: "left"\|"center"\|"right"`（默认 `"center"`）`, dashed?: boolean` |
 | `AlertBlockField` | `"alert-block"` | （非键控） | `message?: string, description?: string, alertType?: "info"\|"success"\|"warning"\|"error", showIcon?: boolean`（默认 `true`）`, closable?: boolean, banner?: boolean` |
 | `ParagraphField` | `"paragraph"` | （非键控） | `text?: string, textType?: "secondary"\|"success"\|"warning"\|"danger", strong?: boolean, italic?: boolean` |
+
+有些属性在 antd-mobile 中没有对应物，移动端渲染器会忽略它们：`textfield` / `number` / `select` / `textarea` / `switch` 的 `size`、`select` 的 `showSearch`、`radio` 的 `optionType` / `buttonStyle`、`number` 的 `controls`、`textarea` 的 `allowClear`、`button` 的 `ghost`、`divider` 的 `dashed`，以及 `alert-block` 的 `banner`。移动端的 `button` 默认占满整行，除非 `block` 显式存为 `false`。
 
 ## 容器节点接口
 
@@ -384,23 +396,114 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `EFFECT_ACTION_TYPES` | `readonly EffectActionType[]`（`set_field, set_variable, refresh_data_source, alert, api_call, navigate, submit, reset`） |
 | `LINKAGE_ACTION_TYPES` | `readonly LinkageActionType[]` —— 上面两者的并集 |
 | `KEYED_ONLY_ACTIONS` | `ReadonlySet<LinkageActionType>`（`require, optional, assign`） |
-| `FIELD_TRIGGER_KINDS` / `FORM_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]` —— 各规则作用域下的合法触发条件 |
+| `FIELD_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]`（`condition, change, focus, blur, click`）—— 字段 / 容器规则的合法触发条件 |
+| `FORM_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]`（`condition, load, beforeSubmit, afterSubmit`）—— 表单级规则的合法触发条件 |
 | `FIELD_EVENT_TRIGGER_KINDS` | `readonly LinkageTriggerKind[]`（`change, focus, blur, click`） |
-| `LINKAGE_OPERATORS` | `readonly LinkageOperator[]`（`eq, ne, gt, lt, gte, lte, contains, empty, notEmpty`） |
+| `LINKAGE_OPERATORS` | `readonly LinkageOperator[]`（`eq, ne, gt, lt, gte, lte, contains, empty, notEmpty`）—— 语义见 [Linkage → 运算符](./linkage.md#运算符) |
 | `ALERT_LEVELS` | `readonly LinkageAlertLevel[]`（`info, success, warning, error`） |
 
-类型：`FieldLinkage`、`FieldLinkageRule`、`FieldLinkageAction`、`FieldLinkageDefaults`、`LinkageTrigger`、`LinkageTriggerKind`、`LinkageCondition`（`LinkageConditionLeaf | LinkageConditionGroup | LinkageConditionExpression`）、`LinkageOperator`、`StateAction`、`StateActionType`、`EffectAction`、`EffectActionType`、`LinkageActionType`、`LinkageActionValue`、`LinkageAlertLevel`、`ConditionRetrigger`（`"edge" | "always"`）、`LinkageScriptResult`、`LinkageEvaluators`、`EvaluationContext`、`LinkageContextSource`、`EffectDispatchContext`、`FieldPermission`（`"hidden" | "visible" | "editable" | "required"`）。
+上下文与分发相关的结构：
+
+| 类型 | 结构 |
+| --- | --- |
+| `EvaluationContext` | `{ variables?, user?, node?, applicant?, globals? }`，每项都是 `Record<string, unknown>`——分别绑定为 `$vars` / `$user` / `$node` / `$applicant` / `$globals`；见 [Linkage → 宿主上下文与系统变量](./linkage.md#宿主上下文与系统变量) |
+| `LinkageContextSource` | `{ key: string; label: string }` —— 一个系统变量：`key` 是完整的作用域路径（`"$applicant.departmentId"`），原样存为叶子条件的 `sourceKey` |
+| `EffectDispatchContext` | `{ values: Record<string, unknown>; resolveValue: (value: LinkageActionValue) => unknown; resolveRequest: (request: RemoteDataSourceRequest) => ResolvedDataSourceRequest }` —— 作用域限定在触发规则所处的值作用域 |
+| `LinkageScriptResult` | `{ hidden?: boolean; disabled?: boolean; required?: boolean; value?: unknown }` —— `script` 动作返回的部分状态补丁 |
+
+其他类型：`FieldLinkage`、`FieldLinkageRule`、`FieldLinkageAction`、`FieldLinkageDefaults`、`LinkageTrigger`、`LinkageTriggerKind`、`LinkageCondition`（`LinkageConditionLeaf | LinkageConditionGroup | LinkageConditionExpression`）、`LinkageOperator`、`StateAction`、`StateActionType`、`EffectAction`、`EffectActionType`、`LinkageActionType`、`LinkageActionValue`、`LinkageAlertLevel`、`ConditionRetrigger`（`"edge" | "always"`）、`LinkageEvaluators`、`FieldPermission`（`"hidden" | "visible" | "editable" | "required"`）。
 
 ## 校验
 
 | 导出 | 签名 |
 | --- | --- |
 | `formatIssueMessage` | `(code: ValidationIssueCode, params?) => string` —— 每一条问题消息都通过它产出 |
-| `ValidationIssue`（类型） | `{ path: string; code: ValidationIssueCode; severity: ValidationSeverity; message: string; ruleId?: string }` |
-| `ValidationIssueCode`（类型） | 由数十个稳定、机器可读的代码组成的封闭联合类型（schema 信封、节点树、布局、联动……） |
+| `SchemaIssue`（类型） | `{ path: string; code: string; severity: ValidationSeverity; message: string }` —— 编辑器展示的任何诊断，无论是它自己的还是宿主的 |
+| `ValidationIssue`（类型） | `SchemaIssue & { code: ValidationIssueCode; ruleId?: string }` —— 编辑器自己的问题；`ruleId` 指明规则级联动问题所属的规则 |
+| `SchemaValidator`（类型） | `(schema: FormSchema) => readonly SchemaIssue[]` —— 即 `validate` 属性；见 [Embedding → 宿主诊断](./embedding.md#宿主诊断) |
+| `ValidationIssueCode`（类型） | 由下表各问题码组成的封闭联合类型 |
 | `ValidationSeverity`（类型） | `"error" \| "warning"` |
 
-`message` 是预先渲染好的中文产品文案；请针对 `code` 和 `path` 编程，它们不随语言环境变化，是稳定的。
+`message` 是预先渲染好的中文产品文案；请针对 `code` 和 `path` 编程，它们不随语言环境变化，是稳定的。问题的 `path` 有以下几种形式：呈现路径（`presentations.pc.children[0].key`）、节点路径（`node[Field_1].linkage.rules[0]`）、表单级路径（`variables[1].name`、`dataSources[0].request`、`schema.linkage.rules[0]`），以及表示依赖环的 `linkage`。
+
+### 校验问题码
+
+*error* 表示 schema 在结构上已损坏、校验不通过；*warning* 标记的是编写过程中的合法中间状态（未完成或悬空的配置），会在导出→导入的往返中保留下来。
+
+| 问题码 | 级别 | 触发条件 |
+| --- | --- | --- |
+| `schema_not_object` | error | 待校验对象不是普通对象。 |
+| `id_required` | error | schema、节点、标签页或规则缺少非空字符串 `id`。 |
+| `duplicate_id` | error | 节点或标签页的 id 在同一呈现方式内重复。 |
+| `version_unsupported` | error | `version` 不是 `2`。 |
+| `presentation_not_object` | error | `presentations` 或某个设备的呈现层不是对象。 |
+| `variables_invalid` | error | `variables` 不是"id 唯一非空、name 唯一且为标识符形态、`type` 合法"的声明数组。 |
+| `data_sources_invalid` | error | `dataSources` 不是"id 唯一非空、`name` 为字符串、`static` / `remote` 载荷与映射合法"的条目数组。 |
+| `block_not_object` | error | 节点不是普通对象。 |
+| `children_not_array` | error | 某个主体——`children`、`tabs`、`template` 或条件组的 `children`——不是数组。 |
+| `tabs_empty` | error | `tabs` 容器没有任何标签页。 |
+| `tab_malformed` | error | 标签页不是对象，或其 `label` 不是字符串。 |
+| `type_required` | error | 节点缺少非空的 `type`。 |
+| `unknown_field_type` | error | 该 `type` 未在对应设备的注册表中注册。 |
+| `key_required` | error | 带 key 的字段类型或子表单没有 key。 |
+| `stray_key` | error | 非 key 字段类型带了 key。 |
+| `stray_key_on_container` | error | 布局容器（`section` / `tabs` / `flex` / `grid`）带了 key。 |
+| `duplicate_key` | error | key 在同一值作用域内重复。 |
+| `key_invalid_charset` | error | key 中含有字母、数字、下划线以外的字符。 |
+| `span_invalid` | error | `span` 不是 `1..24` 之间的整数。 |
+| `flex_invalid` | error | `flex` 插槽格式错误，或 flex 容器的 `direction` / `justify` / `align` / `wrap` 取值非法。 |
+| `column_width_invalid` | error | `columnWidth` 不是正数。 |
+| `stack_invalid` | error | `stack` 插槽格式错误。 |
+| `gap_invalid` | error | 堆叠容器的 `gap` 不是 `GapScale` 档位，或 flex / grid 的 `gap` / `rowGap` 不是非负整数。 |
+| `columns_invalid` | error | 栅格的 `columns` 不是 `1..24` 之间的整数。 |
+| `variant_invalid` | error | 区块的 `variant` 不是 `"card"` / `"collapse"`。 |
+| `subform_variant_invalid` | error | 子表单的 `variant` 不是 `"stack"` / `"table"`。 |
+| `title_invalid` | error | 区块的 `title` 不是字符串。 |
+| `display_text_invalid` | error | `label` / `placeholder` / `helperText` / `title` / `text` / `message` 不是字符串。 |
+| `rows_bound_invalid` | error | `minRows` / `maxRows` 不是非负整数，或 `minRows` 大于 `maxRows`。 |
+| `subform_table_column` | warning | `table` 子表单的模板中含有容器或非 key 节点；渲染器会跳过它。 |
+| `validate_malformed` | error | `validate` 不是对象。 |
+| `validate_range_invalid` | error | `minLength` 大于 `maxLength`，或 `min` 大于 `max`。 |
+| `pattern_invalid` | error | `pattern` 不是可编译的正则表达式。 |
+| `data_source_invalid` | error | 字段的 `dataSource` 格式错误——`kind` 未知、选项列表或映射格式错误。 |
+| `data_source_ref_unknown` | warning | `ref` 指向的数据源未声明。 |
+| `request_malformed` | error | 请求不是对象，或其 `resource` / `action` 不是字符串。 |
+| `request_incomplete` | warning | 请求的 `resource` 和 / 或 `action` 为空。每个请求只报告一次，并写明缺少的是什么——两者都缺时报在请求本身的路径上，否则报在为空的那一项上。 |
+| `linkage_malformed` | error | `linkage` 或其 `defaults` 不是对象。 |
+| `rules_not_array` | error | `rules` 不是数组。 |
+| `rule_malformed` | error | 规则不是对象。 |
+| `trigger_malformed` | error | 触发条件不是带字符串 `kind` 的对象。 |
+| `trigger_kind_invalid` | error | 该触发条件类型在规则所处的作用域中不合法。 |
+| `trigger_requires_keyed_leaf` | error | `change` 触发条件挂在了带 key 叶子字段以外的节点上。 |
+| `condition_malformed` | error | 条件不是对象，或叶子的 `sourceKey` / 表达式的 `source` 不是字符串。 |
+| `condition_kind_invalid` | error | 条件的 `kind` 不是 `leaf` / `group` / `expression`。 |
+| `logic_invalid` | error | 条件组的 `logic` 不是 `"all"` / `"any"`。 |
+| `condition_group_empty` | warning | 条件组没有子条件：`all` 时规则始终生效，`any` 时永不生效。 |
+| `operator_invalid` | error | 叶子的 `operator` 不在 `LINKAGE_OPERATORS` 中。 |
+| `source_key_empty` | warning | 叶子尚未选择来源。 |
+| `source_key_unresolved` | warning | 叶子的表单 key（普通写法或 `$form.`）在规则的值作用域中找不到对应的带 key 节点。 |
+| `source_scope_unknown` | warning | 叶子的 `$` 根不是 `$form` / `$vars` / `$user` / `$node` / `$applicant` / `$globals` 之一。 |
+| `source_empty` | warning | 表达式条件、表达式取值或脚本为空。 |
+| `actions_not_array` | error | `actions` 不是数组。 |
+| `actions_empty` | warning | 规则没有任何动作。 |
+| `action_malformed` | error | 动作不是对象，或其 `targetKey` / `variable` / `dataSourceId` / `source` 不是字符串。 |
+| `action_unknown_type` | error | 动作 `type` 不在 `LINKAGE_ACTION_TYPES` 中。 |
+| `state_action_on_edge_trigger` | error | 状态动作挂在边沿触发条件下。 |
+| `state_action_on_form_scope` | error | 状态动作出现在表单级规则中。 |
+| `action_requires_keyed_leaf` | error | `require` / `optional` / `assign` 挂在带 key 叶子字段以外的节点上。 |
+| `defaults_requires_keyed_leaf` | error | `defaults.required` 挂在带 key 叶子字段以外的节点上。 |
+| `defaults_on_form_scope` | error | 表单级联动带有 `defaults` 块。 |
+| `default_hidden_unreachable` | warning | 节点默认隐藏，而它自己的条件规则中没有任何一条会显示它。 |
+| `target_key_empty` | warning | `set_field` 尚未选择目标。 |
+| `target_key_unresolved` | warning | `set_field` 的目标在规则的值作用域中找不到对应的带 key 节点。 |
+| `variable_empty` | warning | `set_variable` 没有填写变量名。 |
+| `data_source_id_empty` | warning | `refresh_data_source` 动作或 `ref` 选项来源尚未选择数据源。 |
+| `value_malformed` | error | 动作取值不是 `literal` / `expression` 形态。 |
+| `alert_level_invalid` | error | `alert` 的 `level` 不在 `ALERT_LEVELS` 中。 |
+| `retrigger_invalid` | error | `retrigger` 不是 `"edge"` / `"always"`。 |
+| `retrigger_ignored` | warning | 边沿触发条件下的副作用设置了 `retrigger`，而它在这里不起作用。 |
+| `self_reference` | error | 写值型规则的条件读取的恰好是该规则写入的字段。 |
+| `cycle_detected` | error | 写值型规则构成依赖环；消息中会写明环路。 |
 
 ## 外观（Chrome）
 

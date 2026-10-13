@@ -125,7 +125,7 @@ declare module "@vef-framework-react/form-editor" {
 
 ### 子表单
 
-`subform` 在自己的 `key` 下绑定一个 `Array<Record<string, unknown>>`；其 `template: Block[]` 是逐行字段集合，并且——在所有容器中独一无二地——**开启一个新的值作用域**：模板字段的 `key` 只需要在同一行的兄弟节点之间唯一，不需要在整个表单范围内唯一（它的运行时路径是 `lines[i].amount`，永远不会与根节点的 `amount`冲突）。`minRows` / `maxRows` 限定行数；`addLabel` 定制"添加"控件的文案。
+`subform` 在自己的 `key` 下绑定一个 `Array<Record<string, unknown>>`；其 `template: Block[]` 是逐行字段集合，并且——在所有容器中独一无二地——**开启一个新的值作用域**：模板字段的 `key` 只需要在同一行的兄弟节点之间唯一，不需要在整个表单范围内唯一（它的运行时路径是 `lines[i].amount`，永远不会与根节点的 `amount`冲突）。`minRows`（默认 `0`）是表单始终保留的行数——运行时会预先放入这么多空白行，并阻止删到少于它；`maxRows`（省略时不限）在行数达到它时禁用"添加"控件。`addLabel` 定制"添加"控件的文案。
 
 有两种变体共享这套数据契约，仅在展示方式上有所不同：
 
@@ -156,9 +156,34 @@ type FieldOptionSource =
   | { kind: "remote"; request: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }; // inline RPC
 ```
 
-`FormSchema.dataSources: FormDataSource[]` 保存表单全局、可复用的数据源（`{ id, name, kind: "static", options }` 或 `{ id, name, kind: "remote", request, mapping }`），`ref` 类型的数据源会按 id 指向它们。`RemoteDataSourceRequest`（`{ resource, action, version?, params? }`）与传输方式无关——这个包本身没有 `apiClient` 依赖；宿主通过 `DataSourceResolver` 来解析它（见 [Embedding → 加载远程选项](./embedding.md#加载远程选项)）。`params` 的每一项都是一个 `DynamicValue`，因此参数可以绑定到表单值上——级联下拉正是这样写出来的，子表单内的逐行级联也一样（见[绑定参数](./embedding.md#绑定参数)）。`RemoteOptionMapping`（`labelKey` / `valueKey` / `disabledKey` / `descriptionKey`，均默认为 `"label"` / `"value"`）负责把远程返回的原始记录映射为 `{ label, value }` 键值对。
+- **`static`**——选项是内联的，同步解析。没有 `dataSource` 的选择类字段相当于一个空的静态列表。
+- **`ref`**——按 id 指向 `FormSchema.dataSources` 中的一个条目。指向静态条目的 `ref` 同步解析；指向远程条目的 `ref` 通过宿主的解析器解析，并且是 `refresh_data_source` 动作唯一能够重新获取的来源类型。悬空的 id 解析为空列表（校验器会给出警告：`data_source_ref_unknown`）。
+- **`remote`**——一个内联请求，通过宿主的解析器解析。
 
-`FormSchema.variables: FormVariable[]`（`{ id, name, type: "string" | "number" | "boolean" | "json", defaultValue? }`）声明了暴露给[联动表达式](./linkage.md)的表单全局 `$vars`。
+`FormSchema.dataSources: FormDataSource[]` 保存表单全局、可复用的数据源——`{ id, name, kind: "static", options }` 或 `{ id, name, kind: "remote", request, mapping? }`——供 `ref` 来源指向。设计器在表单配置抽屉的「数据源」页编辑它们；在那里删除一个数据源时，会在同一个撤销步骤中清理所有指向它的 `ref` 以及所有引用它的 `refresh_data_source` 动作。
+
+`RemoteDataSourceRequest`（`{ resource, action, version?, params? }`）与框架的 resource / action / version RPC 寻址方式一致，并且与传输方式无关——这个包本身没有 `apiClient` 依赖；宿主通过 `DataSourceResolver` 来解析它（见 [Embedding → 加载远程选项](./embedding.md#加载远程选项)）。`params` 的每一项都是一个 `DynamicValue`，因此参数可以绑定到表单值上——级联下拉正是这样写出来的，子表单内的逐行级联也一样（见[绑定参数](./embedding.md#绑定参数)）。
+
+`RemoteOptionMapping`（`{ labelKey?, valueKey?, disabledKey?, descriptionKey? }`，与 `@vef-framework-react/hooks` 中 `useDataOptionsQuery` 的字段映射一致）告诉解析器如何从每条原始记录中读出 `{ label, value }`；`labelKey` / `valueKey` 默认为 `"label"` / `"value"`。空 key 的意思是"使用默认值"，但一个按 `mapping.labelKey ?? "label"` 读取的解析器会把 `""` 当真，去一个名为 `""` 的属性上找每个标签。因此，凡是存储、解析或投影映射的地方，都会用导出的 `normalizeOptionMapping` 对它做规范化——去掉只含空白的 key，其余 key 去除首尾空白，什么都不剩时返回 `undefined`：设计器从不存储空 key，运行时在调用解析器前先做规范化，[审批投影](../approval-form-bridge.md#远程选项来源)也会规范化 `optionSource.mapping`。因此，已经带有 `""` key 的旧 schema 仍能正确解析。
+
+宿主还可以把一份现成的接口目录（`DataSourceApi[]`）交给设计器，让设计者直接挑选"部门列表"，而不必手填 resource 和映射。接口目录只在设计时使用：选中的结果以普通的请求和映射形式存储，因此 schema 从不引用目录本身——见 [Embedding → 提供接口目录](./embedding.md#提供接口目录)。
+
+## 表单变量
+
+`FormSchema.variables: FormVariable[]` 声明表单全局变量，表达式和以 `$vars` 为根的条件以 `$vars.<name>` 读取它们：
+
+```ts
+interface FormVariable {
+  id: string;
+  name: string; // letters, digits, underscore; no leading digit
+  type: "string" | "number" | "boolean" | "json";
+  defaultValue?: unknown;
+}
+```
+
+渲染器用每个变量的 `defaultValue` 播种 `$vars`，再叠加宿主的 `evaluationContext.variables`，并允许 `set_variable` 动作写入；只有当播种内容真正变化时才会重新播种，因此宿主重新渲染永远不会冲掉 `set_variable` 写入的值。变量名必须唯一且是标识符形态——`$vars.1total` 根本无法解析——校验器会强制这一点（`variables_invalid`）。在设计器的「变量」页给变量改名时，会改写所有以它为目标的 `set_variable` 动作；表达式源码是不透明的文本，不会被改写。删除变量只会移除声明本身：指向未声明名称的 `set_variable` 依然有效，因为运行时的 `$vars` 接受任意名称。
+
+变量属于表单自己，并且可写。宿主提供的值——查看者、发起人、租户配置——应当放进[求值上下文](./linkage.md#宿主上下文与系统变量)，设计器会把它们作为只读的**系统变量**列在表单自身的变量旁边。
 
 ## 布局与尺寸
 
@@ -202,7 +227,19 @@ type FieldOptionSource =
 
 ## 校验导入的 schema
 
-`FormEditor` 自身的修改器始终产出结构良好的树。`validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` 是针对**非**来自编辑器的 schema（粘贴导入、API 载荷）的边界守卫。它会检查数据信封、每个呈现层内 id/key 的唯一性与 key 的语法规则、span 取值范围、[stack 插槽形态](#布局与尺寸)（v2.10.0）、已知字段类型（对照你传入的注册表）、选项数据源的结构，并在结构性检查通过后委托给 `validateLinkageSchema`（见 [Linkage → 校验](./linkage.md#校验)）。只要没有*error*级别的问题，结果就是 `valid`（并携带收窄后的 `schema`）——*warning*级别的问题（悬空引用、空条件组）属于编写过程中的合法中间状态，会在导出→导入的往返过程中保留下来。
+`FormEditor` 自身的修改器始终产出结构良好的树。`validateSchema(candidate: unknown, registries: DeviceRegistries): ValidateSchemaResult` 是针对**非**来自编辑器的 schema（粘贴导入、API 载荷）的边界守卫。它依次检查：
+
+- **信封**——非空的 `id`、`version: 2`、格式正确的 `variables`（id 唯一且非空、name 唯一且为标识符形态、`type` 合法）与 `dataSources`（id 唯一且非空、`name` 为字符串、`static` 选项列表或 `remote` 请求与映射格式正确）。
+- **每个呈现方式**，对照该设备的注册表——`pc` 总是检查，`mobile` 存在时检查，二者各自拥有独立的 id 与 key 命名空间：每个节点都是带唯一 id 和已知 `type` 的普通对象；带 key 的类型必须有 key，非 key 类型和布局容器不能有；key 匹配 `^\w+$` 并在所处值作用域内唯一；展示文本（`label`、`placeholder`、`helperText`、`title`、`text`、`message`）为字符串；`span`、`flex`、`columnWidth`、[`stack`](#布局与尺寸)、容器的 `gap` / `columns` / `variant` / `minRows` / `maxRows` 取值合法；`table` 子表单的模板只含带 key 的叶子字段（`subform_table_column`，警告）；`validate` 规则自洽（`min` ≤ `max`、`minLength` ≤ `maxLength`、`pattern` 可编译）；选项来源格式正确，`ref` 的 id 对照 `dataSources` 解析，每个远程请求都检查是否填写了 `resource` 和 `action`。
+- **联动**——某个呈现方式的结构检查没有发现 error 后，对它运行 `validateLinkageSchema`（见 [Linkage → 校验](./linkage.md#校验)）；表单级联动随 `pc` 树一起检查。
+
+只要没有 *error* 级别的问题，结果就是 `valid`（并携带收窄后的 `schema`）——*warning* 级别的问题（悬空引用、未填写完整的远程请求、空条件组）属于编写过程中的合法中间状态，会在导出→导入的往返过程中保留下来。所有问题码见 [Reference](./reference.md#校验问题码)。
+
+校验在哪里运行、又在哪里不运行：
+
+- 设计器的**导入**对话框与可编辑的 **JSON** 视图共用同一条应用流程：error 会阻止应用并内联列出，warning 则照常应用并给出一条汇总提示。两者都不运行宿主的 `validate`；那是在编辑器的诊断与发布关卡中运行的（见 [Embedding → 宿主诊断](./embedding.md#宿主诊断)）。
+- 设计器的**状态栏**与**发布**关卡会针对当前 schema 实时运行它。
+- **`initialSchema`、`FormEditorApi.setSchema` 与 `FormRenderer` 都不做校验。** 来自不可信来源的 schema 应先通过 `validateSchema`——渲染器面对大多数格式错误的联动时会降级而不是崩溃，但它假定树本身是结构良好的。
 
 ## 表存储投影
 
