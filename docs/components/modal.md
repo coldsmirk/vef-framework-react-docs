@@ -131,6 +131,8 @@ VEF adds a `draggable` prop (`@default false`) that lets the user reposition the
 
 ## API
 
+The props type is exported as `ModalProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `open` | `boolean` | `false` | Whether the modal is visible |

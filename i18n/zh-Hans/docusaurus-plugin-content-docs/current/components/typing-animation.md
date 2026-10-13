@@ -37,6 +37,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `TypingAnimationProps` 导出。
+
 `TypingAnimation` 继承所有 `motion.div` 属性，并新增：
 
 | Prop | Type | Default | 说明 |

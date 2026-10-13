@@ -63,6 +63,8 @@ export default function Demo() {
 
 ### `useDataOptionsTreeSelect` 选项
 
+类型为 `UseDataOptionsTreeSelectOptions`。
+
 | 选项 | 类型 | 默认值 | 说明 |
 |--------|------|---------|-------------|
 | `queryOptions` | `UseQueryOptions<TQueryFnData[], TData[], TParams>` | 必填 | TanStack Query 选项（`queryKey`、`queryFn` 及 `useQuery` 的其余选项） |

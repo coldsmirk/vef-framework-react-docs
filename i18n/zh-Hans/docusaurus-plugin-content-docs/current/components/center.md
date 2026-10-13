@@ -46,6 +46,8 @@ export default function LoadingState() {
 
 ## API
 
+props 类型以 `CenterProps` 导出。
+
 `Center` 继承了除 `vertical`、`gap`、`justify` 和 `align`（已预设为居中）之外的所有 `Flex` 属性，并新增：
 
 | Prop | Type | Default | 说明 |

@@ -66,6 +66,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `PermissionGateProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `requiredPermissions` | `string \| string[]` | — | 待校验的权限令牌 |

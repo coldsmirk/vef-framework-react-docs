@@ -59,7 +59,9 @@ description: app/tab/theme 三个 Zustand store，以及 @vef-framework-react/st
 - `PasswordLoginParams` —— `{ type: "password"; principal: string; credentials: string }`
 - `TrustCodeLoginParams` —— `{ type: "trust_code"; principal: string; credentials: string }`；`principal` 是发起方应用 id
 - `UseLoginFlowOptions` —— `useLoginFlow` 接受的选项
-- `SsoLoginFlow` —— `useSsoLogin` 返回的状态
+- `SsoLoginFlow` —— `useSsoLogin` 返回的状态；`UseSsoLoginOptions` —— 它接受的选项；`SsoHandoffSearch` —— handoff 的查询参数（`Record<string, unknown>`）——参见[单点登录](./application-shell.md#单点登录)
+- `LoginChallengeOutletProps` —— `LoginChallengeOutlet` 的 props
+- `LoginRouteOptions` / `SsoRouteOptions` / `RouterOptions` —— `createLoginRouteOptions`、`createSsoRouteOptions` 与 `createRouter` 的选项——参见[启动与路由](./bootstrap-and-routing.md)
 - `LoginChallengeAutoResolver` / `LoginChallengeAutoResolvers` —— 可选的按类型回调，用页面已有数据应答挑战
 - `UserDetails` —— 当 `Register['userDetails']` 未被增补时的兜底形状（`Record<string, unknown>`）
 - `OrderSpec` —— `{ column: string; direction: "asc" | "desc" }`

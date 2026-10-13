@@ -49,6 +49,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `CodeHighlighterProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `children` | `string` | required | 要高亮的代码字符串 |

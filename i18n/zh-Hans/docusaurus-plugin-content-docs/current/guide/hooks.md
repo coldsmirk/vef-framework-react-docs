@@ -45,7 +45,7 @@ const genderOptions = data?.gender ?? [];
 
 :::info
 
-`useCodeSetQuery` 是 `useDictionaryQuery` 更名后的新名称（尚未发布，位于 v2.12.0 之后）。完整的旧名到新名对照表见 [码集](./code-sets.md)。
+`useCodeSetQuery` 是 `useDictionaryQuery` 更名后的新名称（于 v2.13.0 更名）。完整的旧名到新名对照表见 [码集](./code-sets.md)。
 
 :::
 

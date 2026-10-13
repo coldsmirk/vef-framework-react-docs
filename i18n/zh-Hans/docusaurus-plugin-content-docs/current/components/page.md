@@ -72,6 +72,8 @@ export default function UserPage() {
 
 ## API
 
+props 类型以 `PageProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `className` | `string` | — | 页面容器的类名 |

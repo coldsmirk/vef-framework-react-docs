@@ -84,16 +84,16 @@ pnpm add @vef-framework-react/cron
 {
   "dependencies": {
     "@tanstack/react-router": "^1.170.17",
-    "@vef-framework-react/components": "^2.22.0",
-    "@vef-framework-react/core": "^2.22.0",
-    "@vef-framework-react/hooks": "^2.22.0",
-    "@vef-framework-react/shared": "^2.22.0",
-    "@vef-framework-react/starter": "^2.22.0",
+    "@vef-framework-react/components": "^2.25.0",
+    "@vef-framework-react/core": "^2.25.0",
+    "@vef-framework-react/hooks": "^2.25.0",
+    "@vef-framework-react/shared": "^2.25.0",
+    "@vef-framework-react/starter": "^2.25.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@vef-framework-react/dev": "^2.22.0",
+    "@vef-framework-react/dev": "^2.25.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3",

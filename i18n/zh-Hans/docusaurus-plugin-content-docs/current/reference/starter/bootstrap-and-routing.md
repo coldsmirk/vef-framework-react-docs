@@ -35,11 +35,13 @@ function createApiClient(options: {
 ## `createRouter`
 
 ```ts
-function createRouter<TRouteTree>(options: {
+interface RouterOptions<TRouteTree> {
   history: "hash" | "browser";
   routeTree: TRouteTree;
   context: RouterContext;
-}): Router;
+}
+
+function createRouter<TRouteTree>(options: RouterOptions<TRouteTree>): Router;
 ```
 
 创建 VEF 定制版的 TanStack Router 实例。同时接入路由进度事件（`nProgressEventEmitter`）、默认的 pending/error/not-found 组件，以及事件驱动的未认证/拒绝访问处理（在 `emitUnauthenticated` / `emitAccessDenied` 时执行导航）。
@@ -73,20 +75,28 @@ function createLayoutRouteOptions<TBeforeLoadContext = {}, TLoaderData = void>(o
 ## `createLoginRouteOptions`
 
 ```ts
-function createLoginRouteOptions(props: LoginProps): RouteOptions;
+type LoginRouteOptions =
+  | (LoginProps & { component?: never })                                   // 框架自带的页面
+  | (Partial<Record<keyof LoginProps, never>> & { component: () => ReactNode }); // 应用自己的页面
+
+function createLoginRouteOptions(options: LoginRouteOptions): RouteOptions;
 ```
 
-登录路由辅助函数，处理带重定向感知的登录流程（`?redirect=` 查询参数，已认证时跳过登录页）。`props` 与 `Login` 组件渲染时使用的形状相同——参见[应用壳层](./application-shell.md#登录)。
+登录路由辅助函数，处理带重定向感知的登录流程（`?redirect=` 查询参数，已认证时跳过登录页）。要么传入 `Login` 组件渲染时使用的 props——参见[应用壳层](./application-shell.md#登录)——要么传入 `{ component }` 来替换页面，同时保留路由的 redirect 契约与已认证守卫。自定义组件自行调用 `useLoginFlow`。
 
-也可以传入 `{ component }` 来替换页面，同时保留路由的 redirect 契约与已认证守卫。自定义组件自行调用 `useLoginFlow`；默认页面的 props 不能与 `component` 同时传入。
+两种成员在类型上互斥：自定义页面那一种显式禁止了 `LoginProps` 的每一个 key，因为多余属性检查只能拦住内联的对象字面量，拦不住预先构造好的值——那时多出来的 props 会被悄无声息地丢掉。
 
 ## `createSsoRouteOptions`
 
 ```ts
-function createSsoRouteOptions(options: SsoLoginProps | { component: () => ReactNode }): RouteOptions;
+type SsoRouteOptions =
+  | (SsoLoginProps & { component?: never })
+  | (Partial<Record<keyof SsoLoginProps, never>> & { component: () => ReactNode });
+
+function createSsoRouteOptions(options: SsoRouteOptions): RouteOptions;
 ```
 
-`/sso` 的单点登录路由辅助函数。默认渲染 `SsoLogin`；传入 `{ component }` 可换成调用 `useSsoLogin` 的自定义落地页。该路由原样透传网关查询参数，并有意不在已认证时直接跳转，因为 handoff 可能指向另一个用户。
+`/sso` 的单点登录路由辅助函数。默认渲染 `SsoLogin`；传入 `{ component }` 可换成调用 `useSsoLogin` 的自定义落地页。该路由原样透传网关查询参数，并有意不在已认证时直接跳转，因为 handoff 可能指向另一个用户。两种成员在类型上互斥，与登录路由相同。
 
 ## `createAccessDeniedRouteOptions`
 

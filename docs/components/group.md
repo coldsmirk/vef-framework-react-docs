@@ -46,6 +46,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `GroupProps`.
+
 `Group` extends all `Flex` props except `vertical`, `orientation` (fixed to horizontal), and `gap` (redefined below), plus:
 
 | Prop | Type | Default | Description |

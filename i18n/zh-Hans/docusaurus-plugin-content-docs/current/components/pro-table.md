@@ -90,6 +90,8 @@ tableRef.current?.refetch();
 
 ## API
 
+props 类型以 `ProTableProps` 导出。
+
 `rowKey`、`showSequenceColumn` 和 `striped` 可以通过 [`ConfigProvider.components.ProTable`](./config-provider.md#应用组件默认值) 设置应用级默认值。显式传给该表格的 prop 仍然优先。
 
 | Prop | Type | Default | 说明 |
@@ -103,7 +105,7 @@ tableRef.current?.refetch();
 | `showSequenceColumn` | `boolean` | `true`，可由 `ConfigProvider.components.ProTable` 覆盖 | 显示行号列 |
 | `virtual` | `boolean` | `false` | 启用虚拟滚动 |
 | `striped` | `boolean` | `false`，可由 `ConfigProvider.components.ProTable` 覆盖 | 渲染斑马纹行 |
-| `columnSettings` | `ColumnSettingsConfig \| false` | `{}` | 列显隐设置 |
+| `columnSettings` | `ColumnSettingsProp`（`ColumnSettingsConfig \| false`） | `{}` | 列显隐设置 |
 | `operationColumn` | `OperationColumnConfig<TRow>` | — | 每行的操作列 |
 | `rowSelection` | `RowSelectionConfig<TRow> \| true` | — | 行选择配置 |
 | `selectedRowKeys` | `Key[]` | — | 受控的已选行 key |
@@ -158,14 +160,62 @@ interface ColumnSettingsConfig {
 
 ### `ProTableSubscriber`
 
-从组件外部订阅表格的加载事件：
+在表格自己渲染的内容里——它的 `header`、`title`、`summary`、`footer` 或某个单元格——读取表格自身的状态：已加载的行、分页、排序、`refetch`。它必须渲染在表格内部，因为这些状态就存放在那里；要在表格外部跟踪加载过程，请使用上文 ref 的 `onLoading` / `onLoaded`。
 
 ```tsx
-import { ProTableSubscriber } from '@vef-framework-react/components';
+import { Button, ProTable, ProTableSubscriber } from '@vef-framework-react/components';
 
-<ProTableSubscriber
-  tableRef={tableRef}
-  onLoading={() => setLoading(true)}
-  onLoaded={() => setLoading(false)}
+<ProTable<User, UserSearchParams>
+  columns={columns}
+  rowKey="id"
+  queryFn={findUserPage}
+  footer={(
+    <ProTableSubscriber selector={state => [state.data.length, state.refetch] as const}>
+      {([count, refetch]) => <Button onClick={refetch}>{`已加载 ${count} 条，刷新`}</Button>}
+    </ProTableSubscriber>
+  )}
 />
 ```
+
+| Prop | 类型 | 说明 |
+|------|------|-------------|
+| `selector` | `(state: ProTableState & { data: readonly TRow[] }) => TSelected` | 选出用于渲染的状态切片，按浅比较判断变化，因此只有这一切片变化时才会重新渲染。省略时 `children` 拿到完整状态 |
+| `children` | `ReactNode \| ((selected: TSelected) => ReactNode)` | 以选出的切片渲染 |
+
+props 类型以 `ProTableSubscriberProps` 导出。
+
+### `OperationButtonGroup`
+
+一个居中的 [`Group`](./group.md)，用于操作单元格中的按钮，同样以 `selector` / `children` 的方式读取 `ProTableState`（props 类型为 `OperationButtonGroupProps`）——适用于需要表格状态的行操作，例如操作完成后刷新：
+
+```tsx
+operationColumn={{
+  width: 160,
+  render: row => (
+    <OperationButtonGroup selector={state => state.refetch}>
+      {refetch => (
+        <OperationButton onClick={async () => { await disableUser(row.id); refetch(); }}>
+          停用
+        </OperationButton>
+      )}
+    </OperationButtonGroup>
+  )
+}}
+```
+
+[`Crud`](./crud.md) 页面则使用 `createCrudKit()` 返回的 `OperationButtonGroup`，它从 CRUD store 中选取状态。
+
+### `ProTableState`
+
+`selector` 能读取的内容：
+
+| 字段 | 说明 |
+|-------|-------------|
+| `paginationParams` / `setPaginationParams` | 当前分页参数及其设置函数 |
+| `sort` / `setSort` | 当前的 `OrderSpec[]` 及其设置函数 |
+| `refetch` | 以当前查询参数、分页与排序重新请求 |
+| `columnSettings` / `originalColumnSettings` | 每列的显隐、顺序、宽度与固定方向——以及重置时恢复到的状态 |
+| `setColumnVisible` / `setColumnFixed` / `setColumnWidth` / `reorderColumns` / `setColumnSettings` / `resetColumnSettings` / `initColumnSettings` | 列设置面板使用的各项列设置操作 |
+| `eventEmitter` | 表格内部的事件总线 |
+
+`ProTableSubscriber` 另外提供 `data`，即当前已加载的行。

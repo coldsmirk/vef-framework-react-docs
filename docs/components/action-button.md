@@ -82,6 +82,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `ActionButtonProps`.
+
 `ActionButton` extends all [`Button`](./button) props except `loading` and `onClick`, plus:
 
 | Prop | Type | Default | Description |

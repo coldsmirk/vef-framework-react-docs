@@ -41,6 +41,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `KeyboardProps`.
+
 `Keyboard` extends all native `<kbd>` element props, plus:
 
 | Prop | Type | Default | Description |

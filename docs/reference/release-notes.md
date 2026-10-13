@@ -13,9 +13,9 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
-## Unreleased (after v2.24.1)
+## v2.25.0 (2026-10-13)
 
-No breaking changes. The form designer gains system variables, host diagnostics, and an option-API catalog, and the approval package wires all three. The approval half needs a vef-framework-go version whose start form carries `applicant` and whose instance views carry the form-visible `globals`; against an older server, `$applicant` and `$globals` read as empty.
+No breaking changes. The form designer gains system variables, host diagnostics, and an option-API catalog, and the approval package wires all three. The approval half needs vef-framework-go v0.57.0 or later, whose start form carries `applicant` and whose instance views carry the form-visible `globals`; against an older server, `$applicant` and `$globals` read as empty.
 
 ### Features
 
@@ -24,6 +24,11 @@ No breaking changes. The form designer gains system variables, host diagnostics,
 - **form-editor** — `validate` (`SchemaValidator`, returning `SchemaIssue[]`) layers a host's own checks over the editor's: called only for a structurally sound schema, its issues join the status-bar diagnostics and the publish gate. The status-bar chip now opens on click and lists every issue; clicking one selects the node it is about (switching device when needed) or opens its form-config tab, and a host path written as a field-key chain (`lines.price`) locates the field. See [Embedding → Host diagnostics](../editors/form-editor/embedding.md#host-diagnostics).
 - **form-editor** — `dataSourceApis` (`DataSourceApi` / `DataSourceApiParam`) gives remote option sources a picker over the host's endpoint catalog; a pick copies the endpoint, the mapping, and the declared parameters' defaults into the schema, which stays self-contained. See [Embedding → Offering an API catalog](../editors/form-editor/embedding.md#offering-an-api-catalog).
 - **form-editor** — the `api_call` action editor now sets `version` and request parameters, sharing the parameter editor of remote option sources. `normalizeOptionMapping` is exported.
+- **form-editor** — the canvas's selection toolbar is a slim tab standing on the selection ring. It reaches only the bottom edge of the block above, where the old floating bar covered that block's control and caught the clicks aimed at it — including on its delete button.
+- **form-editor** — the remote request editors (a custom option source, a form data source, an `api_call` action) label every input — 资源 / 动作 / 版本, then 显示字段 / 取值字段 / 禁用字段 / 描述字段 under 字段映射 — and group the parameters under 请求参数; a placeholder used to be the only label, gone once the field held a value. In a narrow panel the version moves to its own line instead of clipping the action name.
+- **form-editor** — the diagnostics list says where each issue is in the designer's words — the field's label, `数据源「…」`, `变量「…」`, `表单联动` — keeping the raw path as the location's tooltip. The publish confirmation lists its warnings the same way.
+- **form-editor** — the properties overlay of the narrow-host layout widens from 320px to 360px, so paired controls (a condition's source and operator, the option-source switch) no longer clip; the condition source picker's dropdown is wider than its half-row select; and the 变量 tab lists the form's own variables before the system variables.
+- **components** — `dynamicIconNames`, the set of names `DynamicIcon` renders, is exported from the package entry; the docs already told hosts to validate stored icon names against it, but only the module declared it. `CarouselProps`, `MonthPickerProps`, and `WeekPickerProps` are forwarded too — the one antd re-export and the two picker variants whose props types the entry left out.
 - **approval-form-bridge** — `validateApprovalProjection(schema)` returns the approval-contract issues alone, shaped for `FormEditor`'s `validate`.
 - **approval-form-bridge** — `ApprovalFieldOptionSource` and `ApprovalOptionSourceKind`, the shape of `ApprovalFormField.optionSource` since v2.20.0, are exported by name; they used to be reachable only through the field type.
 - **approval** — `ApprovalPlugins.formGlobals` (`FormGlobalDefinition[]`) declares the host globals the backend exposes to forms, and `ApprovalPlugins.dataSourceApis` the option-API catalog. `InstanceFormPanel` takes `applicant` and `globals` and evaluates the form with them as `$applicant` / `$globals`; `StartForm` carries `applicant` and `globals`, and `MyInstanceInfo` / `AdminInstanceInfo` carry `globals`. The flow designer's form step offers the four applicant attributes and the declared globals as system variables, passes the provider's resolver, evaluators, and API catalog to the form editor, and validates with `validateApprovalProjection`; neither designer step renders an issue banner any more, and the footer says why 下一步 is disabled. See [Approval → Form system variables](../engines/approval/overview.md#form-system-variables).
@@ -37,6 +42,7 @@ No breaking changes. The form designer gains system variables, host diagnostics,
 - **form-editor** — request parameter names are committed on blur or Enter, and only when non-blank and unique. Adding several parameters in a row, or renaming one onto another's name, used to drop values.
 - **form-editor** — the `condition_group_empty` message now says what an empty group does (under `all` the rule always applies, under `any` never) instead of claiming the rule never applies.
 - **approval** — the flow designer's form preview resolves remote options through `dataSourceResolver` (it used to stay empty) and runs the provider's `evaluators`.
+- **components** — `Loader` no longer passes antd's deprecated `size="default"` to `Spin`, which logged a deprecation warning wherever it rendered (route loading included); it renders at `"medium"`.
 
 ## v2.24.1 (2026-09-28)
 

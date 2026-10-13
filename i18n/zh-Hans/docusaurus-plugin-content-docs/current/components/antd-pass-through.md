@@ -67,3 +67,29 @@ import { Affix, Card, Tabs, Tag } from '@vef-framework-react/components';
 | `Tour` | 对界面元素的引导浏览。 | [Tour](https://ant.design/components/tour/) |
 | `Transfer` | 在两个列表之间移动条目。 | [Transfer](https://ant.design/components/transfer/) |
 | `Watermark` | 为容器添加水印。 | [Watermark](https://ant.design/components/watermark/) |
+
+## 类型
+
+上表中的每个组件都会以 antd 自己的名称重新导出其 props 类型——`AffixProps`、`AnchorProps`、`AutoCompleteProps`、`BadgeProps`、`BreadcrumbProps`、`CalendarProps`、`CardProps`、`CarouselProps`、`CascaderProps`、`CheckboxProps`、`ColProps`、`CollapseProps`、`ColorPickerProps`、`DatePickerProps`、`DescriptionsProps`、`DividerProps`、`DrawerProps`、`DropdownProps`、`EmptyProps`、`FlexProps`、`FloatButtonProps`、`ImageProps`、`InputNumberProps`、`ListProps`、`MentionsProps`、`MenuProps`、`PaginationProps`、`PopconfirmProps`、`PopoverProps`、`ProgressProps`、`QRCodeProps`、`RadioProps`、`RateProps`、`ResultProps`、`RowProps`、`SegmentedProps`、`SkeletonProps`、`SliderProps`、`SpaceProps`、`SpinProps`、`SplitterProps`、`StatisticProps`、`StepsProps`、`SwitchProps`、`TabsProps`、`TagProps`、`TimePickerProps`、`TimelineProps`、`TooltipProps`、`TourProps`、`TransferProps`、`WatermarkProps`——其组成部分也是如此：`AvatarGroupProps`、`BadgeRibbonProps`、`CardGridProps` / `CardMetaProps`、`CheckableTagProps`、`CheckboxGroupProps`、`RadioGroupProps`、`DropdownButtonProps`、`ListItemProps` / `ListItemMetaProps`、`SkeletonButtonProps` / `SkeletonImageProps` / `SkeletonInputProps` / `SkeletonNodeProps` / `SkeletonParagraphProps` / `SkeletonTitleProps`、`SliderSingleProps` / `SliderRangeProps`、`StatisticTimerProps`、`TimeRangePickerProps`，以及 `DateRangePickerProps` / `MonthPickerProps` / `WeekPickerProps`（`DatePicker.RangePicker` / `.MonthPicker` / `.WeekPicker`）。拥有独立页面的组件同样如此——`InputProps` 以及 `PasswordProps` / `SearchProps` / `TextAreaProps` / `OTPProps`，Typography 各部分的 `TitleProps` / `ParagraphProps` / `TextProps` / `LinkProps`，`AlertProps`、`AvatarProps`、`CompactProps`。
+
+各种配置形态都有具名别名，宿主无需到 antd 的内部模块里去找：
+
+| 类型 | 含义 |
+|------|------------|
+| `AnchorLinkItem` | `Anchor` 的一个 `items` 条目 |
+| `AutoCompleteOption` | `AutoComplete` 的一个 `options` 条目 |
+| `BreadcrumbItem` | `Breadcrumb` 的一个 `items` 条目；`BreadcrumbItemType` / `BreadcrumbSeparatorType` 是它的两种形态 |
+| `CarouselDotPlacement` / `CarouselEffect` / `CarouselRef` | `Carousel` 的指示点位置、切换效果与 ref |
+| `CascaderOption` | `Cascader` 的一个 `options` 条目 |
+| `CheckboxOption<T>` / `RadioOption<T>` | `Checkbox.Group` / `Radio.Group` 的一个 `options` 条目 |
+| `CollapseItem` | `Collapse` 的一个 `items` 条目 |
+| `DescriptionsItem` | `Descriptions` 的一个 `items` 条目 |
+| `DropdownMenuProps` / `DropdownMenuItem` | `Dropdown` 的 `menu` prop 及其中的一个 `items` 条目；`DropdownButtonType` 是 `Dropdown.Button` 的 `type` |
+| `InputRef` / `TooltipRef` | `Input` 与 `Tooltip` 的 ref |
+| `ListGridType` | `List` 的 `grid` prop |
+| `MentionsOption` | `Mentions` 的一个 `options` 条目 |
+| `MenuItemType` / `SubMenuType` / `MenuItemGroupType` / `MenuDividerType` | `Menu` 的 `items` 条目的四种形态 |
+| `SegmentedOption<T>` | `Segmented` 的一个 `options` 条目 |
+| `TimelineItem` | `Timeline` 的一个 `items` 条目 |
+| `TourStep` | `Tour` 的一个 `steps` 条目 |
+| `TransferItem` | `Transfer` 的一条 `dataSource` 记录 |

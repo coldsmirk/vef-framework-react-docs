@@ -77,6 +77,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `ScrollAreaProps`, and the `scrollbars` union as `ScrollAreaScrollbars`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `scrollbars` | `'both' \| 'vertical' \| 'horizontal'` | `'both'` | Which scrollbar axes to render |

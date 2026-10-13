@@ -54,6 +54,8 @@ export default function EditUserDrawer({ open, onClose }) {
 
 ## API
 
+props 类型以 `FormDrawerProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `open` | `boolean` | `false` | 抽屉是否可见 |
@@ -73,6 +75,6 @@ export default function EditUserDrawer({ open, onClose }) {
 | `onReset` | `(defaultValues?) => void` | — | 表单重置时调用 |
 | `onClose` | `() => void` | — | 抽屉关闭时调用 |
 | `renderActions` | `(formApi, defaults: { submitButton, resetButton }) => ReactNode` | — | 自定义底部操作区；`defaults` 携带默认的提交/重置按钮，可与自定义按钮一起复用；返回 `null` 可隐藏底部 |
-| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | 提交按钮自定义配置（仅在未提供 `renderActions` 时生效） |
-| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | 重置按钮自定义配置；设为 `false` 可隐藏（仅在未提供 `renderActions` 时生效） |
+| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | 提交按钮自定义配置——作用于默认底栏；提供 `renderActions` 时也作用于 `defaults.submitButton` |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | 重置按钮自定义配置；设为 `false` 可隐藏——作用于默认底栏；提供 `renderActions` 时也作用于 `defaults.resetButton`（设为 `false` 时它为空） |
 | `children` | `ReactNode \| (formApi) => ReactNode` | — | 表单内容 |

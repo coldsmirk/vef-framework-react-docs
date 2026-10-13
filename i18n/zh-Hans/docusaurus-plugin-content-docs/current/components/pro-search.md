@@ -90,6 +90,8 @@ function AdvancedSearch() {
 
 ## API
 
+props 类型以 `ProSearchProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `className` | `string` | — | CSS 类名 |

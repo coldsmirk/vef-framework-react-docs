@@ -29,6 +29,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `FlipTextProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `children` | `ReactNode` | required | 文本内容 |

@@ -246,6 +246,8 @@ Crud 内部使用 `ProTable` 渲染表格，并使用 `FormModal` 渲染场景�
 | `CrudProps<TRow, TSearchValues, TSceneFormValues, TParams>` | `Crud` 的属性（在 `isPaginated` 上的可辨识联合类型） |
 | `CrudPageProps<TRow, TSearchValues, TSceneFormValues, TParams>` | `CrudPage` 的属性（`CrudProps` + `Page` 的布局属性） |
 | `CrudKit<TRow, TSearchValues, TSceneFormValues>` | `createCrudKit()` 的返回类型 |
+| `CrudActionButtonGroupProps<TSearchValues, TSceneFormValues, TSelected>` | kit 中 `ActionButtonGroup` 的 props：基于 `CrudState` 的 `selector`，以及 render-prop 形式的 `children` |
+| `CrudOperationButtonGroupProps<TSearchValues, TSceneFormValues, TSelected>` | kit 中 `OperationButtonGroup` 的 props，形态相同 |
 
 ## 最佳实践
 

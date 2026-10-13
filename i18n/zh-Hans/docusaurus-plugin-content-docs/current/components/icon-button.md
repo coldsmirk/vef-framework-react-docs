@@ -84,6 +84,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `IconButtonProps` 导出。
+
 `IconButton` 继承了 `Button` 的属性（`icon`、`iconPosition`、`type`、`htmlType`、`autoInsertSpace`、`color`、`variant`、`ghost`、`danger` 和 `block` 除外），并新增以下属性：
 
 | Prop | Type | Default | 说明 |

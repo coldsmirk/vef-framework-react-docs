@@ -27,6 +27,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `SparklesTextProps` 导出。
+
 `SparklesText` 继承所有 `div` 元素属性，并新增：
 
 | Prop | Type | Default | 说明 |

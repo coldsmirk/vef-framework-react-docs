@@ -296,7 +296,7 @@ interface LinkageContextSource {
 
 Declared sources appear in two places:
 
-- **The 变量 tab** of the form-config drawer gains a 系统变量 section above the form's own variables: each row shows the label, the copyable path, and a **preview value** input. Without declared sources the tab is the plain form-variable list.
+- **The 变量 tab** of the form-config drawer gains a 系统变量 section below the form's own variables (the order the condition builder lists form fields and system variables in, and the footer's variable count counts the form's own): each row shows the label with its copyable path beneath it, and a **preview value** input. Without declared sources the tab is the plain form-variable list.
 - **The visual condition builder** offers them as a 系统变量 group beside the form's fields, so a leaf condition on the initiator is picked, not typed.
 
 A preview value exists so a rule about the initiator can be tried before any real initiator exists. It is typed as text and read the way the designer means it — `500` becomes a number, `true` a boolean, `{"a":1}` an object, and anything that is not JSON (`dept-01`) stays text. Preview values are laid over the host's `evaluationContext` in the designer's preview (and its JSON split view) only; they are never written into the schema, they are not part of the undo history, and only values for currently declared sources apply, so a source the host stops declaring cannot keep steering the preview.

@@ -49,6 +49,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `CodeHighlighterProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `children` | `string` | required | Code string to highlight |

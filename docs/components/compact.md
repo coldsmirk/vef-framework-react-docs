@@ -26,6 +26,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `CompactProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | Size of child components (`'middle'` is a deprecated alias for `'medium'`) |

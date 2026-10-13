@@ -46,6 +46,8 @@ export default function LoadingState() {
 
 ## API
 
+The props type is exported as `CenterProps`.
+
 `Center` extends all `Flex` props except `vertical`, `gap`, `justify`, and `align` (which are preset to center), plus:
 
 | Prop | Type | Default | Description |

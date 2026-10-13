@@ -66,6 +66,8 @@ Use the render prop to conditionally disable (rather than hide) elements.
 
 ## API
 
+The props type is exported as `PermissionGateProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `requiredPermissions` | `string \| string[]` | — | Permission token(s) to check |

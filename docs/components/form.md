@@ -95,6 +95,8 @@ All field components are accessed via `field.*` inside a `form.AppField` render 
 
 > There is no separate `field.Switch` key. For a switch-style boolean input, use `field.Bool` (its `variant` prop defaults to `"switch"`).
 
+Each field component's props type is exported as `<Name>FieldProps` — `AutoCompleteFieldProps`, `BoolFieldProps`, `CascaderFieldProps`, `CheckboxFieldProps`, `CheckboxGroupFieldProps`, `CodeEditorFieldProps`, `ColorPickerFieldProps`, `DatePickerFieldProps`, `DateRangePickerFieldProps`, `IconPickerFieldProps`, `InputFieldProps`, `InputNumberFieldProps`, `MentionsFieldProps`, `RadioFieldProps`, `RateFieldProps`, `SelectFieldProps`, `SliderFieldProps`, `TextAreaFieldProps`, `TimePickerFieldProps`, `TimeRangePickerFieldProps`, `TransferFieldProps`, `TreeSelectFieldProps`, `UploadFieldProps`: the control's own props without the value binding the form owns, plus the field's own options. The component takes it together with `FormItemProps` (below). The date and time fields (`field.DatePicker`, `field.DateRangePicker`, `field.TimePicker`, `field.TimeRangePicker`) store the picker's formatted value — a string, or a `[start, end]` pair for a range — and parse a stored string back for display; set `valueAsObject` to store Dayjs instances instead.
+
 ## Validation
 
 ```tsx
@@ -246,6 +248,20 @@ A [`Button`](./button.md) with `htmlType="reset"`, disabled while the form `isSu
 | `onReset` | `() => void` | — | Click handler; only needed outside a native `<form>` (e.g. wire it to `form.reset`) |
 | `children` | `ReactNode` | `'重置'` | Button label |
 | *(rest)* | `ButtonProps` except `htmlType` / `onClick` / `onClickCapture` | — | Any other Button prop |
+
+### `FormActions`, `DefaultSubmitButton`, `DefaultResetButton`
+
+The submit and reset pair, pre-wired to the nearest form through `useFormContext`: submit calls `form.handleSubmit`, reset calls `form.reset()` and then `onReset`. [`FormModal`](./form-modal.md) and [`FormDrawer`](./form-drawer.md) render `FormActions` as their default footer and hand the two halves to `renderActions` as `defaults`; use them directly in a custom footer that renders inside the form.
+
+| Prop (`FormActionsProps`) | Type | Default | Description |
+|------|------|---------|-------------|
+| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | `{ children: '提交', icon: <check icon> }` | Submit button props |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | `{ children: '重置' }` | Reset button props; `false` hides the button |
+| `onReset` | `() => void` | — | Called after the form resets |
+
+`DefaultSubmitButton` takes `submitButtonProps`, and `DefaultResetButton` takes `resetButtonProps` and `onReset`.
+
+`formComponents` is the `{ Form, SubmitButton, ResetButton }` map behind `form.Form`, `form.SubmitButton`, and `form.ResetButton`.
 
 ### `useFormContext<TFormData>()`
 

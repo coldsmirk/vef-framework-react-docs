@@ -118,6 +118,8 @@ export default function Demo() {
 
 ### `useDataOptionsSelect` Options
 
+Typed `UseDataOptionsSelectOptions`.
+
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `queryOptions` | `UseQueryOptions<TQueryFnData[], TData[], TParams>` | required | TanStack Query options (`queryKey`, `queryFn`, and the rest of `useQuery`'s options) |

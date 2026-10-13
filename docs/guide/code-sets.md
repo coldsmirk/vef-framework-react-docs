@@ -9,9 +9,9 @@ Code sets are one of the highest-frequency capabilities in business applications
 
 :::warning[Migration: "data dictionary" is now "code set"]
 
-The framework renamed the whole "dictionary" vocabulary to "code set". This rename is **unreleased** (it lives on the main branch after v2.12.0); this page describes the new names. If you are on v2.12.0 or earlier, the old names below still apply.
+The framework renamed the whole "dictionary" vocabulary to "code set" in **v2.13.0**; this page describes the new names. If you are on v2.12.0 or earlier, the old names below still apply.
 
-| Old name (≤ v2.12.0) | New name (HEAD) |
+| Old name (≤ v2.12.0) | New name (≥ v2.13.0) |
 | --- | --- |
 | `dictionaryQueryFn` (AppContext) | `codeSetQueryFn` |
 | `useDictionaryQuery` | `useCodeSetQuery` |

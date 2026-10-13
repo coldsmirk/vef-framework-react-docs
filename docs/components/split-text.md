@@ -44,6 +44,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `SplitTextProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `text` | `string` | required | Text content to animate |

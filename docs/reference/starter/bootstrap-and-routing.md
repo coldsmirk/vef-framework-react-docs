@@ -35,11 +35,13 @@ Extends `core.createApiClient()` with token storage (backed by `useAppStore`), u
 ## `createRouter`
 
 ```ts
-function createRouter<TRouteTree>(options: {
+interface RouterOptions<TRouteTree> {
   history: "hash" | "browser";
   routeTree: TRouteTree;
   context: RouterContext;
-}): Router;
+}
+
+function createRouter<TRouteTree>(options: RouterOptions<TRouteTree>): Router;
 ```
 
 Creates the VEF-flavored TanStack Router instance. It also wires route-progress events (`nProgressEventEmitter`), fallback pending/error/not-found components, and event-driven unauthenticated / access-denied handling (navigates on `emitUnauthenticated` / `emitAccessDenied`).
@@ -73,20 +75,28 @@ Layout-route helper for:
 ## `createLoginRouteOptions`
 
 ```ts
-function createLoginRouteOptions(props: LoginProps): RouteOptions;
+type LoginRouteOptions =
+  | (LoginProps & { component?: never })                                   // the framework's page
+  | (Partial<Record<keyof LoginProps, never>> & { component: () => ReactNode }); // the application's own page
+
+function createLoginRouteOptions(options: LoginRouteOptions): RouteOptions;
 ```
 
-Login-route helper that handles redirect-aware login flow (`?redirect=` search param, skips the login page when already authenticated). `props` is the same shape the `Login` component renders with — see [Application Shell](./application-shell.md#login).
+Login-route helper that handles redirect-aware login flow (`?redirect=` search param, skips the login page when already authenticated). Either pass the props the `Login` component renders with — see [Application Shell](./application-shell.md#login) — or `{ component }` to replace the page while keeping the route's redirect contract and already-authenticated guard. The custom component calls `useLoginFlow` itself.
 
-Alternatively, pass `{ component }` to replace the page while keeping the route's redirect contract and already-authenticated guard. The custom component calls `useLoginFlow` itself; default-page props cannot be combined with `component`.
+The two members are exclusive by type: the custom-page member forbids every `LoginProps` key explicitly, because excess-property checking catches an inline object literal but not a pre-built value, where surplus props would be dropped in silence.
 
 ## `createSsoRouteOptions`
 
 ```ts
-function createSsoRouteOptions(options: SsoLoginProps | { component: () => ReactNode }): RouteOptions;
+type SsoRouteOptions =
+  | (SsoLoginProps & { component?: never })
+  | (Partial<Record<keyof SsoLoginProps, never>> & { component: () => ReactNode });
+
+function createSsoRouteOptions(options: SsoRouteOptions): RouteOptions;
 ```
 
-Single-sign-on route helper for `/sso`. By default it renders `SsoLogin`; pass `{ component }` for a custom landing page that calls `useSsoLogin`. The route passes the gateway's query parameters through and deliberately does not bounce an already-authenticated visitor, because the handoff may name a different user.
+Single-sign-on route helper for `/sso`. By default it renders `SsoLogin`; pass `{ component }` for a custom landing page that calls `useSsoLogin`. The route passes the gateway's query parameters through and deliberately does not bounce an already-authenticated visitor, because the handoff may name a different user. The two members are exclusive by type, as on the login route.
 
 ## `createAccessDeniedRouteOptions`
 

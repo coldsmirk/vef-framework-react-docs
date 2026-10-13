@@ -53,7 +53,7 @@ When the app is in dark mode (via [`ConfigProvider`](./config-provider.md)), a b
 
 ## Using `useChart` Hook
 
-For imperative access to the ECharts instance:
+For imperative access to the ECharts instance — `onReady` receives it, typed `ChartInstance` (ECharts' own `ECharts` type):
 
 ```tsx
 import { useChart } from '@vef-framework-react/components';

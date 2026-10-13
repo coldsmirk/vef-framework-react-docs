@@ -109,19 +109,49 @@ description: 内部的根应用与布局壳层、已导出的登录和主题能�
 
 `SsoLogin` 是 trust-login 网关重定向后的默认落地页。`createSsoRouteOptions(options)` 会把它挂载到 `/sso`；`SSO_ROUTE_ID`、`SSO_ROUTE_PATH`、`SSO_APP_ID_PARAM`（`app_id`）和 `SSO_CODE_PARAM`（`code`）均已导出。
 
-`useSsoLogin(options)` 只读取一次 handoff，在消费一次性 code 前先把它从地址栏移除，再把得到的 `LoginParams` 交给共享登录流程。它的 `search` 属性是挂载时的快照，因此自定义落地页和 challenge 自动应答器在 URL 被清理后仍能读取网关参数。即使当前已有会话，交换也会执行，因为 handoff 可能指向另一个用户。
+`useSsoLogin(options)` 只读取一次 handoff，在消费一次性 code 前先把它从地址栏移除，再把得到的 `LoginParams` 交给共享登录流程。即使当前已有会话，交换也会执行，因为 handoff 可能指向另一个用户。它的选项（`UseSsoLoginOptions`）就是登录流程的选项，外加 `readHandoff`：
 
-`SsoLoginProps` 接受与登录流程相同的 `onLogin`、challenge、redirect、自动应答、错误和 `publicKey` 接线。`readTrustCodeHandoff(search)` 构造默认 `trust_code` 载荷；也可以覆盖 `readHandoff` 以适配不同的网关契约。
+| 选项 | 类型 | 作用 |
+| --- | --- | --- |
+| `onLogin` | `(params: LoginParams) => Promise<LoginResult>` | 用 handoff 换取会话——就是普通的登录调用，因为单点登录是一种凭据类型，而不是单独的接口 |
+| `onResolveChallenge?` | `(params: ResolveChallengeParams) => Promise<LoginResult>` | 应答挑战；handoff 与密码登录走的是同一条挑战链 |
+| `publicKey?` | `string` | 加密挑战收集的内容——否则经由 handoff 遇到的 `password_change` 会以明文提交新密码 |
+| `readHandoff?` | `(search: SsoHandoffSearch) => LoginParams \| undefined` | 用 handoff 的查询参数构造交换请求；返回 `undefined` 时直接报告链接无效，不调用服务端。默认为 `readTrustCodeHandoff` |
+| `redirectTo?` | `string` | 认证后的跳转目标；默认取 `redirect` 查询参数，其次为首页路由 |
+| `onAuthenticated?` | `(result: LoginResult) => void \| Promise<void>` | 替换内置的认证后处理 |
+| `autoResolve?` | `LoginChallengeAutoResolvers` | 用 handoff 自身携带的参数自动应答选定的挑战——典型场景是源系统已经选好的部门 |
+| `onError?` | `(error: unknown) => void` | 接收 `error` 背后的原始异常 |
+
+`SsoHandoffSearch` 即 `Record<string, unknown>`——网关留下的原始查询参数，读取方在使用某个值之前需要自行收窄类型。`readTrustCodeHandoff(search)` 用 `app_id` 与 `code` 构造默认的 `trust_code` 载荷。
+
+返回的 `SsoLoginFlow` 是一个 `LoginFlow`，另外还有：
+
+- `status`——`"exchanging"`（交换开始前的那一帧也算在内，因此落地页不会渲染出空白）、`"challenge"` 或 `"failed"`。`"failed"` 是终态：链接无效、交换被拒绝，或 handoff 已被消费却既没有产生会话也没有待处理的挑战（用户取消了挑战），都无法在页面上重试，因为一次性 code 已经用掉了。
+- `search`——handoff 的查询参数，在挂载时快照。自定义落地页和挑战自动应答器从这里读取：清理 URL 会清空路由器的实时 search。
+
+`SsoLoginProps` 接受同样的选项，只是挑战接线与 `Login` 一样必须成对出现：`onResolveChallenge` 与 `challengeRenderers` 要么同时提供，要么都不提供。
 
 ### 登录挑战
 
-挑战流水线完全位于已导出的 `Login` 组件之内：
+挑战流水线由 `useLoginFlow` 与 `LoginChallengeOutlet`（见下文）组成。`Login` 与 `SsoLogin` 都由这两者组合而成，自定义登录页面也使用同一对，因此每个入口的行为都一致：
 
-1. `onLogin` 返回一个 `LoginResult`。当它携带的是 `challenge` + `challengeToken` 而不是 `tokens` 时，凭据表单会被替换为注册在 `challengeRenderers[challenge.type]` 下的渲染器。
-2. 渲染器调用 `resolve(response)`；Login 组件将其转发为 `onResolveChallenge({ challengeToken, type, response })`。返回的 `LoginResult` 要么完成认证（`tokens`——更新 store 并执行 `?redirect=` 导航），要么串联下一个挑战。
+1. `onLogin` 返回一个 `LoginResult`。当它携带的是 `challenge` + `challengeToken` 而不是 `tokens` 时，流程会持有该挑战，outlet 渲染注册在 `challenge.type` 下的渲染器（`Login` 会用它替换凭据表单）。
+2. 渲染器调用 `resolve(response)`；流程将其转发为 `onResolveChallenge({ challengeToken, type, response })`。返回的 `LoginResult` 要么完成认证（`tokens`——更新 store 并执行 `?redirect=` 导航），要么串联下一个挑战。
 3. `resolve` 被拒绝时，挑战会留在屏幕上，错误信息通过渲染器的 `error` prop 暴露（`BusinessError` 的消息原样展示；其它错误回退为通用提示）。错误会在下一次 `resolve` 时以及取消时自动清除。
 4. `cancel()` 丢弃持有的挑战令牌并返回凭据表单——用户必须重新登录。
 5. 未注册渲染器的挑战类型会显示内置的"不支持的挑战"提示，并附带返回登录的按钮。
+
+#### `LoginChallengeOutlet`
+
+所有入口共用的渲染器查找（props 类型：`LoginChallengeOutletProps`）。流程没有持有挑战时它什么都不渲染，因此可以无条件地放在组件树里。
+
+| Prop | 类型 | 作用 |
+| --- | --- | --- |
+| `flow` | `LoginFlow` | 要呈现其待处理挑战的流程——来自 `useLoginFlow` 或 `useSsoLogin` |
+| `renderers?` | `LoginChallengeRenderers` | 后端可能下发的每种挑战类型各一个渲染器 |
+| `fallback?` | `(challenge: LoginChallenge) => ReactNode` | 呈现没有注册渲染器的类型；默认为上述"不支持的挑战"提示 |
+
+每个渲染器都以按挑战类型设置 key 的元素挂载，而不是当作函数调用：像"选择部门后再强制修改密码"这样的挑战链会在渲染器之间切换，直接调用会让它们的 hooks 共用同一个 hook 列表。
 
 每个渲染器都是一个 `LoginChallengeRenderer`——一个接收 `LoginChallengeRendererProps` 的普通渲染函数（由 `K` 参数化，`K` 是该渲染器所绑定的挑战类型）：
 

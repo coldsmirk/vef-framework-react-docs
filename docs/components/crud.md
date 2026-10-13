@@ -246,6 +246,8 @@ Crud renders its table with `ProTable` and its scene form modal with `FormModal`
 | `CrudProps<TRow, TSearchValues, TSceneFormValues, TParams>` | `Crud` props (discriminated union on `isPaginated`) |
 | `CrudPageProps<TRow, TSearchValues, TSceneFormValues, TParams>` | `CrudPage` props (`CrudProps` + `Page` layout props) |
 | `CrudKit<TRow, TSearchValues, TSceneFormValues>` | Return type of `createCrudKit()` |
+| `CrudActionButtonGroupProps<TSearchValues, TSceneFormValues, TSelected>` | Props of the kit's `ActionButtonGroup`: `selector` over `CrudState`, render-prop `children` |
+| `CrudOperationButtonGroupProps<TSearchValues, TSceneFormValues, TSelected>` | Props of the kit's `OperationButtonGroup`; same shape |
 
 ## Best Practices
 

@@ -29,6 +29,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `FlipTextProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `children` | `ReactNode` | required | Text content |

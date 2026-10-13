@@ -59,6 +59,8 @@ export default function Page({ isLoading }: { isLoading: boolean }) {
 
 ## API
 
+The props type is exported as `LoaderProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | `'default'` | Spinner size |

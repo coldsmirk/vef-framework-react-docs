@@ -54,6 +54,8 @@ export default function EditUserDrawer({ open, onClose }) {
 
 ## API
 
+The props type is exported as `FormDrawerProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `open` | `boolean` | `false` | Whether the drawer is visible |
@@ -73,6 +75,6 @@ export default function EditUserDrawer({ open, onClose }) {
 | `onReset` | `(defaultValues?) => void` | — | Called on form reset |
 | `onClose` | `() => void` | — | Called when drawer closes |
 | `renderActions` | `(formApi, defaults: { submitButton, resetButton }) => ReactNode` | — | Custom footer actions; `defaults` carries the default submit/reset buttons to reuse alongside custom ones; return `null` to hide footer |
-| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Submit button customization (only used when `renderActions` is not provided) |
-| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` to hide (only used when `renderActions` is not provided) |
+| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Submit button customization — applied to the default footer, and to `defaults.submitButton` when `renderActions` is provided |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` hides it — applied to the default footer, and to `defaults.resetButton` when `renderActions` is provided (which `false` leaves empty) |
 | `children` | `ReactNode \| (formApi) => ReactNode` | — | Form content |

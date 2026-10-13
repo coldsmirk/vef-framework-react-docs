@@ -95,6 +95,8 @@ export default function LoginPage() {
 
 > 不存在单独的 `field.Switch`。如需开关样式的布尔值输入，请使用 `field.Bool`（其 `variant` 属性默认值为 `"switch"`）。
 
+每个字段组件的 props 类型都以 `<Name>FieldProps` 导出——`AutoCompleteFieldProps`、`BoolFieldProps`、`CascaderFieldProps`、`CheckboxFieldProps`、`CheckboxGroupFieldProps`、`CodeEditorFieldProps`、`ColorPickerFieldProps`、`DatePickerFieldProps`、`DateRangePickerFieldProps`、`IconPickerFieldProps`、`InputFieldProps`、`InputNumberFieldProps`、`MentionsFieldProps`、`RadioFieldProps`、`RateFieldProps`、`SelectFieldProps`、`SliderFieldProps`、`TextAreaFieldProps`、`TimePickerFieldProps`、`TimeRangePickerFieldProps`、`TransferFieldProps`、`TreeSelectFieldProps`、`UploadFieldProps`：即控件自身的 props 去掉由表单接管的值绑定，再加上该字段自己的选项。组件同时接受它与 `FormItemProps`（见下文）。日期与时间字段（`field.DatePicker`、`field.DateRangePicker`、`field.TimePicker`、`field.TimeRangePicker`）存储的是选择器格式化后的值——一个字符串，范围选择时为 `[start, end]` 字符串对——显示时再把存储的字符串解析回来；设置 `valueAsObject` 则改为存储 Dayjs 实例。
+
 ## 校验
 
 ```tsx
@@ -246,6 +248,20 @@ const form = useForm(loginFormOptions);
 | `onReset` | `() => void` | — | 点击处理函数；仅在原生 `<form>` 之外需要（例如接到 `form.reset`） |
 | `children` | `ReactNode` | `'重置'` | 按钮文案 |
 | *(rest)* | `ButtonProps` except `htmlType` / `onClick` / `onClickCapture` | — | 其他任意 Button prop |
+
+### `FormActions`、`DefaultSubmitButton`、`DefaultResetButton`
+
+通过 `useFormContext` 预先接到最近表单上的提交与重置按钮：提交调用 `form.handleSubmit`，重置调用 `form.reset()` 后再调用 `onReset`。[`FormModal`](./form-modal.md) 与 [`FormDrawer`](./form-drawer.md) 以 `FormActions` 作为默认底栏，并把这两个按钮作为 `defaults` 交给 `renderActions`；在表单内部渲染的自定义底栏也可以直接使用它们。
+
+| Prop（`FormActionsProps`） | 类型 | 默认值 | 说明 |
+|------|------|---------|-------------|
+| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | `{ children: '提交', icon: <勾选图标> }` | 提交按钮的 props |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | `{ children: '重置' }` | 重置按钮的 props；设为 `false` 隐藏该按钮 |
+| `onReset` | `() => void` | — | 表单重置之后调用 |
+
+`DefaultSubmitButton` 接收 `submitButtonProps`，`DefaultResetButton` 接收 `resetButtonProps` 与 `onReset`。
+
+`formComponents` 即 `{ Form, SubmitButton, ResetButton }`，是 `form.Form`、`form.SubmitButton` 与 `form.ResetButton` 背后的组件映射。
 
 ### `useFormContext<TFormData>()`
 

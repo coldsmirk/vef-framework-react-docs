@@ -109,19 +109,49 @@ The returned `LoginFlow` exposes `login`, `challenge`, `resolve`, `cancel`, `pen
 
 `SsoLogin` is the default landing page for a trust-login gateway redirect. `createSsoRouteOptions(options)` mounts it at `/sso`; `SSO_ROUTE_ID`, `SSO_ROUTE_PATH`, `SSO_APP_ID_PARAM` (`app_id`), and `SSO_CODE_PARAM` (`code`) are exported.
 
-`useSsoLogin(options)` reads the handoff once, removes it from the address bar before spending the one-time code, and hands the resulting `LoginParams` to the shared login flow. Its `search` property is a mount-time snapshot, so custom landing pages and challenge auto-resolvers can still read gateway parameters after the URL is cleaned. The exchange runs even when another session exists, because the handoff may name a different user.
+`useSsoLogin(options)` reads the handoff once, removes it from the address bar before spending the one-time code, and hands the resulting `LoginParams` to the shared login flow. The exchange runs even when another session exists, because the handoff may name a different user. Its options (`UseSsoLoginOptions`) are the login flow's, plus `readHandoff`:
 
-`SsoLoginProps` accepts the same `onLogin`, challenge, redirect, auto-resolve, error, and `publicKey` wiring as the login flow. `readTrustCodeHandoff(search)` builds the default `trust_code` payload; `readHandoff` can be overridden for a different gateway contract.
+| Option | Type | Purpose |
+| --- | --- | --- |
+| `onLogin` | `(params: LoginParams) => Promise<LoginResult>` | exchanges the handoff for a session — the ordinary login call, since single sign-on is a credential type rather than a separate endpoint |
+| `onResolveChallenge?` | `(params: ResolveChallengeParams) => Promise<LoginResult>` | answers challenges; a handoff runs the same challenge chain a password login does |
+| `publicKey?` | `string` | encrypts what a challenge collects — a `password_change` reached through a handoff would otherwise submit the new password in clear text |
+| `readHandoff?` | `(search: SsoHandoffSearch) => LoginParams \| undefined` | builds the exchange request from the handoff's query parameters; returning `undefined` reports the link as invalid without calling the server. Defaults to `readTrustCodeHandoff` |
+| `redirectTo?` | `string` | post-authentication target; defaults to the `redirect` search parameter, then the index route |
+| `onAuthenticated?` | `(result: LoginResult) => void \| Promise<void>` | replaces the built-in post-authentication effect |
+| `autoResolve?` | `LoginChallengeAutoResolvers` | answers selected challenges from the handoff's own parameters — typically a department the originating system already picked |
+| `onError?` | `(error: unknown) => void` | receives the original rejection behind `error` |
+
+`SsoHandoffSearch` is `Record<string, unknown>` — the query parameters exactly as the gateway left them, so a reader narrows a value before using it. `readTrustCodeHandoff(search)` builds the default `trust_code` payload from `app_id` and `code`.
+
+The returned `SsoLoginFlow` is a `LoginFlow` plus:
+
+- `status` — `"exchanging"` (which also covers the frame before the exchange starts, so a landing page never renders empty), `"challenge"`, or `"failed"`. `"failed"` is terminal: an invalid link, a rejected exchange, or a spent handoff that produced neither a session nor a pending challenge (the user cancelled the challenge) cannot be retried from the page, because the one-time code is gone.
+- `search` — the handoff's query parameters, snapshotted at mount. A custom landing page and a challenge auto-resolver read them from here: clearing the URL empties the router's live search.
+
+`SsoLoginProps` takes the same options, except that the challenge wiring is both-or-neither, as on `Login`: `onResolveChallenge` together with `challengeRenderers`, or neither.
 
 ### Login challenges
 
-The challenge pipeline lives entirely inside the exported `Login` component:
+The challenge pipeline is `useLoginFlow` plus `LoginChallengeOutlet` (below). `Login` and `SsoLogin` compose the two, and a custom login screen uses the same pair, so every entry point behaves alike:
 
-1. `onLogin` returns a `LoginResult`. When it carries `challenge` + `challengeToken` instead of `tokens`, the credentials form is swapped for the renderer registered under `challengeRenderers[challenge.type]`.
-2. The renderer calls `resolve(response)`; the Login component forwards it as `onResolveChallenge({ challengeToken, type, response })`. The returned `LoginResult` either completes authentication (`tokens` — the store is updated and the `?redirect=` navigation runs) or chains the next challenge.
+1. `onLogin` returns a `LoginResult`. When it carries `challenge` + `challengeToken` instead of `tokens`, the flow holds the challenge and the outlet renders the renderer registered under `challenge.type` (`Login` swaps its credentials form for it).
+2. The renderer calls `resolve(response)`; the flow forwards it as `onResolveChallenge({ challengeToken, type, response })`. The returned `LoginResult` either completes authentication (`tokens` — the store is updated and the `?redirect=` navigation runs) or chains the next challenge.
 3. A rejected `resolve` keeps the challenge on screen and surfaces the error message through the renderer's `error` prop (a `BusinessError` message verbatim; anything else falls back to a generic prompt). The error clears automatically on the next `resolve` and on cancel.
 4. `cancel()` discards the held challenge token and returns to the credentials form — the user must log in again.
 5. A challenge type with no registered renderer shows a built-in "unsupported challenge" notice with a back-to-login button.
+
+#### `LoginChallengeOutlet`
+
+The renderer lookup every entry point shares (props: `LoginChallengeOutletProps`). It renders nothing while the flow holds no challenge, so it can sit unconditionally in a tree.
+
+| Prop | Type | Purpose |
+| --- | --- | --- |
+| `flow` | `LoginFlow` | the flow whose pending challenge is presented — from `useLoginFlow` or `useSsoLogin` |
+| `renderers?` | `LoginChallengeRenderers` | one renderer per challenge type the backend may issue |
+| `fallback?` | `(challenge: LoginChallenge) => ReactNode` | presents a type no renderer is registered for; defaults to the "unsupported challenge" notice |
+
+Each renderer is mounted as an element keyed by its challenge type, never called as a function: a chain such as department selection followed by a forced password change moves between renderers, and calling them would run their hooks in one shared hook list.
 
 Each renderer is a `LoginChallengeRenderer` — a plain render function receiving `LoginChallengeRendererProps` (parameterised by `K`, the challenge type the renderer is bound to):
 

@@ -26,6 +26,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `CompactProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `size` | `'large' \| 'medium' \| 'small'` | `'medium'` | 子组件的尺寸（`'middle'` 是 `'medium'` 的废弃别名） |

@@ -82,6 +82,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `OperationButtonProps` 导出。
+
 `OperationButton` 继承了 [`ActionButton`](./action-button.md) 的属性（移除了 `size`、`variant`、`type`、`danger`），并叠加了 [`PermissionGate`](./permission-gate.md) 的权限属性：
 
 | Prop | Type | Default | 说明 |

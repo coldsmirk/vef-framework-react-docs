@@ -27,6 +27,8 @@ export default function AppLogo() {
 
 ## API
 
+props 类型以 `LogoIconProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `primaryColor` | `string` | 调色板 blue-500 颜色 | Logo 的主色；次要笔画使用由同一调色板推导出的 400 色阶 |

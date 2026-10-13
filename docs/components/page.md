@@ -72,6 +72,8 @@ export default function UserPage() {
 
 ## API
 
+The props type is exported as `PageProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `className` | `string` | — | Class name for the page container |

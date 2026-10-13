@@ -58,6 +58,8 @@ export default function SideMenu() {
 
 ## API
 
+props 类型以 `DynamicIconProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `name` | `DynamicIconName` | required | Lucide 图标名称（kebab-case 格式） |

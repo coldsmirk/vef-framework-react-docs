@@ -141,6 +141,8 @@ export default function Demo() {
 
 `renderEditor` 的 `field` 参数与 `createField` 所用的字段组件字典相同（`field.Input`、`field.Select` 等）；`context` 携带 `{ row, index, rowKey }`。
 
+两个插槽的类型以 `RenderView<TRow>` 与 `RenderEditor<TRow>` 导出，`createEditableColumn` 的 `options` 类型以 `EditableColumnOptions<TRow>` 导出。
+
 ### EditableOperationColumnConfig
 
 | 字段 | 类型 | 说明 |

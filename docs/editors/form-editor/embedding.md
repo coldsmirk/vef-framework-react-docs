@@ -52,7 +52,7 @@ The built-in toolbar, palette, properties panel, and drawers ship with Chinese U
 The editor measures **its own width**, not the viewport, since a host shell may already take horizontal space:
 
 - At 1220px or wider it is **docked**: the 296px palette and the 400px properties panel sit beside the canvas, and the toolbar shows every action.
-- Below that it switches to the **drawer** layout: the properties panel detaches into a full-height overlay, the palette collapses to an icon rail, and the toolbar folds 导入 / 导出 / 清空 into a 更多 menu, drops the labels of its view toggles, and hides the field count.
+- Below that it switches to the **drawer** layout: the properties panel detaches into a 360px full-height overlay, the palette collapses to an icon rail, and the toolbar folds 导入 / 导出 / 清空 into a 更多 menu, drops the labels of its view toggles, and hides the field count.
 
 Keyboard shortcuts listen on the editor's own root, so two mounted editors never act on each other's keystrokes and the host page keeps its own key handling. They are ignored while focus is in an input, a textarea, a select, or a content-editable element, and all of them are off in preview mode:
 
@@ -113,7 +113,7 @@ interface SchemaIssue {
 ```
 
 - It is called only for a schema free of structural **errors**, and receives that schema — so it may assume a well-formed tree. It returns the host's issues only; the structural ones are the editor's. Its `code` lives in the host's own namespace.
-- Its issues join the editor's in the **status bar** at the bottom of the canvas. The chip there reads "N 项问题" when any issue is an error and "N 项提示" for warnings only, and stays hidden while the schema is clean. Clicking it opens the whole list — each row the message, then its path — and clicking a row takes the designer to it: it selects the node (switching device when needed; the canvas scrolls it into view) or opens the form-config tab it belongs to.
+- Its issues join the editor's in the **status bar** at the bottom of the canvas. The chip there reads "N 项问题" when any issue is an error and "N 项提示" for warnings only, and stays hidden while the schema is clean. Clicking it opens the whole list — each row the message, then where it is in the designer's own words (the field's label, `移动端 · 备注` for a mobile-layout field, `数据源「部门」`, `变量「quota」`, `表单联动`; the raw path when there are none, and as the location's tooltip always) — and clicking a row takes the designer to it: it selects the node (switching device when needed; the canvas scrolls it into view) or opens the form-config tab it belongs to.
 - They join the **publish gate** too: a host error blocks publishing exactly like a structural one, and a host warning is listed in the confirmation.
 - Validation runs at transition priority on a deferred copy of the schema, so typing never waits for it. Pass a **stable function** — module scope or `useCallback`; a new identity re-runs validation.
 

@@ -27,6 +27,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `SparklesTextProps`.
+
 `SparklesText` extends all `div` element props, plus:
 
 | Prop | Type | Default | Description |

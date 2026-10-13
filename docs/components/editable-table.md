@@ -141,6 +141,8 @@ Built via `createEditableColumn<TRow>(dataIndex, options)` — a type-safe facto
 
 `renderEditor`'s `field` argument is the same field-component dictionary used by `createField` (`field.Input`, `field.Select`, …); `context` carries `{ row, index, rowKey }`.
 
+The slot types are exported as `RenderView<TRow>` and `RenderEditor<TRow>`, and `createEditableColumn`'s `options` as `EditableColumnOptions<TRow>`.
+
 ### EditableOperationColumnConfig
 
 | Field | Type | Description |

@@ -27,6 +27,8 @@ export default function AppLogo() {
 
 ## API
 
+The props type is exported as `LogoIconProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `primaryColor` | `string` | the blue-500 palette color | Primary color of the logo; the secondary strokes use the 400 shade derived from the same palette |

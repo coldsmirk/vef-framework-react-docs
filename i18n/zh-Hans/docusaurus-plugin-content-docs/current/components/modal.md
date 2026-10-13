@@ -131,6 +131,8 @@ VEF 新增了 `draggable` 属性（`@default false`），开启后用户可以�
 
 ## API
 
+props 类型以 `ModalProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `open` | `boolean` | `false` | 对话框是否可见 |

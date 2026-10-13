@@ -58,6 +58,8 @@ export default function SideMenu() {
 
 ## API
 
+The props type is exported as `DynamicIconProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `name` | `DynamicIconName` | required | Lucide icon name (kebab-case) |

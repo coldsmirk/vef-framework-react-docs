@@ -74,6 +74,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `BoolProps`, and the variant union as `BoolVariant` (`"radio" | "radio-button" | "switch" | "checkbox"`).
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `value` | `boolean` | — | Controlled value |

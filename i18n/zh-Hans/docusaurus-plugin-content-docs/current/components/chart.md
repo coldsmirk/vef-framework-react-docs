@@ -53,7 +53,7 @@ export default function Demo() {
 
 ## 使用 `useChart` Hook
 
-用于以命令式方式访问 ECharts 实例：
+用于以命令式方式访问 ECharts 实例——`onReady` 会收到它，类型为 `ChartInstance`（即 ECharts 自身的 `ECharts` 类型）：
 
 ```tsx
 import { useChart } from '@vef-framework-react/components';

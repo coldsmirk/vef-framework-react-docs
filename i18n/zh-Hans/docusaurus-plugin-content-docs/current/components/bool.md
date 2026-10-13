@@ -74,6 +74,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `BoolProps` 导出，变体联合类型以 `BoolVariant`（`"radio" | "radio-button" | "switch" | "checkbox"`）导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `value` | `boolean` | — | 受控值 |

@@ -9,9 +9,9 @@ description: 后端驱动的选项数据如何通过 codeSetQueryFn 流入表单
 
 :::warning[迁移提示："数据字典"已更名为"码集"]
 
-框架已将整套 "dictionary"（字典）词汇更名为 "code set"（码集）。这次更名**尚未发布**（位于 v2.12.0 之后的 main 分支）；本页描述的是新名称。如果你仍在使用 v2.12.0 或更早版本，下表中的旧名称依然适用。
+框架已在 **v2.13.0** 将整套 "dictionary"（字典）词汇更名为 "code set"（码集）；本页描述的是新名称。如果你仍在使用 v2.12.0 或更早版本，下表中的旧名称依然适用。
 
-| 旧名称（≤ v2.12.0） | 新名称（HEAD） |
+| 旧名称（≤ v2.12.0） | 新名称（≥ v2.13.0） |
 | --- | --- |
 | `dictionaryQueryFn`（AppContext） | `codeSetQueryFn` |
 | `useDictionaryQuery` | `useCodeSetQuery` |

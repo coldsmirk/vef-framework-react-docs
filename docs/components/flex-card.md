@@ -34,4 +34,6 @@ export default function UserPage() {
 
 ## API
 
+The props type is exported as `FlexCardProps`.
+
 `FlexCard` accepts all `CardProps` from Ant Design. See [Ant Design Card](https://ant.design/components/card/).

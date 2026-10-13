@@ -46,6 +46,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `GroupProps` 导出。
+
 `Group` 继承了除 `vertical`、`orientation`（已固定为横向）和 `gap`（在下方重新定义）之外的所有 `Flex` 属性，并新增：
 
 | Prop | Type | Default | 说明 |

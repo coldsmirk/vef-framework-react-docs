@@ -41,6 +41,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `KeyboardProps` 导出。
+
 `Keyboard` 继承所有原生 `<kbd>` 元素的属性，另有：
 
 | Prop | Type | Default | 说明 |

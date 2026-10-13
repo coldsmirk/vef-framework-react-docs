@@ -52,6 +52,8 @@ export default function CreateUserModal({ open, onClose }) {
 
 ## API
 
+The props type is exported as `FormModalProps`.
+
 The `draggable` default can be overridden application-wide with [`ConfigProvider.components.FormModal`](./config-provider.md#application-component-defaults); a prop passed to this component still wins.
 
 | Prop | Type | Default | Description |
@@ -72,8 +74,8 @@ The `draggable` default can be overridden application-wide with [`ConfigProvider
 | `onReset` | `(defaultValues?) => void` | — | Called on form reset |
 | `onClose` | `() => void` | — | Called when modal closes |
 | `renderActions` | `(formApi, defaults: { submitButton, resetButton }) => ReactNode` | — | Custom footer actions; `defaults` carries the default submit/reset buttons to reuse alongside custom ones; return `null` to hide footer |
-| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Submit button customization (only used when `renderActions` is not provided) |
-| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` to hide (only used when `renderActions` is not provided) |
+| `submitButtonProps` | `Except<SubmitButtonProps, 'onSubmit' \| 'disabled' \| 'loading'>` | — | Submit button customization — applied to the default footer, and to `defaults.submitButton` when `renderActions` is provided |
+| `resetButtonProps` | `Except<ResetButtonProps, 'onReset' \| 'disabled' \| 'loading'> \| false` | — | Reset button customization; `false` hides it — applied to the default footer, and to `defaults.resetButton` when `renderActions` is provided (which `false` leaves empty) |
 | `children` | `ReactNode \| (formApi) => ReactNode` | — | Form content |
 
 ```tsx

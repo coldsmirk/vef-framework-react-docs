@@ -84,6 +84,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `IconButtonProps`.
+
 `IconButton` extends `Button` props except `icon`, `iconPosition`, `type`, `htmlType`, `autoInsertSpace`, `color`, `variant`, `ghost`, `danger`, and `block`. Plus:
 
 | Prop | Type | Default | Description |

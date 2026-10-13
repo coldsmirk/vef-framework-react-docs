@@ -77,6 +77,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `ScrollAreaProps` 导出，`scrollbars` 的联合类型以 `ScrollAreaScrollbars` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `scrollbars` | `'both' \| 'vertical' \| 'horizontal'` | `'both'` | 渲染哪些方向的滚动条 |

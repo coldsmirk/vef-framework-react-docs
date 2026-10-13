@@ -45,7 +45,7 @@ Notes:
 
 :::info
 
-`useCodeSetQuery` is the post-rename name of `useDictionaryQuery` (unreleased, after v2.12.0). The full old-name-to-new-name table lives in [Code Sets](./code-sets.md).
+`useCodeSetQuery` is the post-rename name of `useDictionaryQuery` (renamed in v2.13.0). The full old-name-to-new-name table lives in [Code Sets](./code-sets.md).
 
 :::
 

@@ -47,6 +47,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `StackProps`.
+
 `Stack` extends all `Flex` props except `vertical`, `orientation` (which are fixed to vertical), and `gap` (redefined below), plus:
 
 | Prop | Type | Default | Description |

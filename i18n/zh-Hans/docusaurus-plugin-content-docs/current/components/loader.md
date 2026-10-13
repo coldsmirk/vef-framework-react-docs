@@ -59,6 +59,8 @@ export default function Page({ isLoading }: { isLoading: boolean }) {
 
 ## API
 
+props 类型以 `LoaderProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `size` | `'small' \| 'medium' \| 'default' \| 'large' \| number` | `'default'` | 加载图标尺寸 |

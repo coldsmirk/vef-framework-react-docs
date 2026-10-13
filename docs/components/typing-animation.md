@@ -37,6 +37,8 @@ export default function Demo() {
 
 ## API
 
+The props type is exported as `TypingAnimationProps`.
+
 `TypingAnimation` extends all `motion.div` props, plus:
 
 | Prop | Type | Default | Description |

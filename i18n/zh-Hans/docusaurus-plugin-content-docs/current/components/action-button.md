@@ -82,6 +82,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `ActionButtonProps` 导出。
+
 `ActionButton` 继承了 [`Button`](./button) 的全部属性（`loading` 和 `onClick` 除外），并新增以下属性：
 
 | Prop | Type | Default | 说明 |

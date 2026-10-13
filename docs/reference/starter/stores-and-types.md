@@ -59,7 +59,9 @@ Batch parameter helper:
 - `PasswordLoginParams` — `{ type: "password"; principal: string; credentials: string }`
 - `TrustCodeLoginParams` — `{ type: "trust_code"; principal: string; credentials: string }`; `principal` is the initiating app id
 - `UseLoginFlowOptions` — the options accepted by `useLoginFlow`
-- `SsoLoginFlow` — the state returned by `useSsoLogin`
+- `SsoLoginFlow` — the state returned by `useSsoLogin`; `UseSsoLoginOptions` — the options it accepts; `SsoHandoffSearch` — the handoff's query parameters (`Record<string, unknown>`) — see [Single sign-on](./application-shell.md#single-sign-on)
+- `LoginChallengeOutletProps` — the props of `LoginChallengeOutlet`
+- `LoginRouteOptions` / `SsoRouteOptions` / `RouterOptions` — the options of `createLoginRouteOptions`, `createSsoRouteOptions`, and `createRouter` — see [Bootstrap and Routing](./bootstrap-and-routing.md)
 - `LoginChallengeAutoResolver` / `LoginChallengeAutoResolvers` — optional per-type callbacks that answer a challenge from data the page already holds
 - `UserDetails` — fallback shape (`Record<string, unknown>`) when `Register['userDetails']` is not augmented
 - `OrderSpec` — `{ column: string; direction: "asc" | "desc" }`

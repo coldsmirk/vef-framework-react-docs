@@ -82,6 +82,8 @@ If the user lacks `user:edit` permission, the button is not rendered at all.
 
 ## API
 
+The props type is exported as `OperationButtonProps`.
+
 `OperationButton` extends [`ActionButton`](./action-button.md) props (except `size`, `variant`, `type`, and `danger`, which are removed) plus the permission props of [`PermissionGate`](./permission-gate.md):
 
 | Prop | Type | Default | Description |

@@ -90,6 +90,8 @@ function AdvancedSearch() {
 
 ## API
 
+The props type is exported as `ProSearchProps`.
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `className` | `string` | — | CSS class name |

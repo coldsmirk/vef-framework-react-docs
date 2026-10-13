@@ -13,9 +13,9 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
-## 未发布（v2.24.1 之后）
+## v2.25.0（2026-10-13）
 
-无破坏性变更。表单设计器新增系统变量、宿主诊断与选项接口目录，审批包把这三者都接好了。审批这一半需要配合一个 vef-framework-go 版本：它的发起表单携带 `applicant`，实例视图携带对表单可见的 `globals`；对接较旧的服务端时，`$applicant` 与 `$globals` 读到的都是空。
+无破坏性变更。表单设计器新增系统变量、宿主诊断与选项接口目录，审批包把这三者都接好了。审批这一半需要 vef-framework-go v0.57.0 或更高版本：它的发起表单携带 `applicant`，实例视图携带对表单可见的 `globals`；对接较旧的服务端时，`$applicant` 与 `$globals` 读到的都是空。
 
 ### 新特性
 
@@ -24,6 +24,11 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 - **form-editor** —— `validate`（`SchemaValidator`，返回 `SchemaIssue[]`）把宿主自己的检查叠加在编辑器的检查之上：只在结构无误的 schema 上调用，它的问题会进入状态栏诊断与发布关卡。状态栏的提示现在点击展开，列出全部问题；点击某一条会选中它所指的节点（必要时切换设备），或打开对应的表单配置页签，宿主以字段 key 链（`lines.price`）写出的路径能定位到字段。见 [Embedding → 宿主诊断](../editors/form-editor/embedding.md#宿主诊断)。
 - **form-editor** —— `dataSourceApis`（`DataSourceApi` / `DataSourceApiParam`）为远程选项来源提供一个针对宿主接口目录的选择器；选中后会把接口地址、映射以及声明参数的默认值复制进 schema，schema 依然是自包含的。见 [Embedding → 提供接口目录](../editors/form-editor/embedding.md#提供接口目录)。
 - **form-editor** —— `api_call` 动作编辑器现在可以设置 `version` 和请求参数，与远程选项来源共用同一个参数编辑器。导出 `normalizeOptionMapping`。
+- **form-editor** —— 画布上的选中工具条改为立在选中框上的一枚细窄标签。它最多只碰到上方区块的底边；以前悬浮的工具条会盖住上方区块的控件，并截走点向那里的点击——包括落在它的删除按钮上的点击。
+- **form-editor** —— 远程请求编辑器（自定义选项来源、表单数据源、`api_call` 动作）为每个输入框加上了标签——资源 / 动作 / 版本，以及「字段映射」下的显示字段 / 取值字段 / 禁用字段 / 描述字段——并把参数归入「请求参数」分组；以前占位符是唯一的标签，字段一旦有值就看不到了。在较窄的面板里，版本会换到单独一行，而不是把动作名挤得被截断。
+- **form-editor** —— 诊断列表用设计者自己的叫法写明每个问题在哪里——字段的标签、`数据源「…」`、`变量「…」`、`表单联动`——原始路径保留为位置的悬浮提示。发布确认中的提示列表也采用同样的写法。
+- **form-editor** —— 窄宿主布局下的属性浮层由 320px 加宽到 360px，成对的控件（条件的来源与操作符、选项来源切换）不再被截断；条件来源选择器的下拉框比它所在的半行下拉框更宽；「变量」页先列表单自身的变量，再列系统变量。
+- **components** —— 包入口现在导出 `dynamicIconNames`，即 `DynamicIcon` 能渲染的图标名集合；文档早就建议宿主用它校验存储的图标名，但此前只有模块内部声明了它。`CarouselProps`、`MonthPickerProps` 与 `WeekPickerProps` 也一并转发——它们是此前入口遗漏了 props 类型的那个 antd 组件和两个选择器变体。
 - **approval-form-bridge** —— `validateApprovalProjection(schema)` 只返回审批契约问题，形态与 `FormEditor` 的 `validate` 一致。
 - **approval-form-bridge** —— 自 v2.20.0 起作为 `ApprovalFormField.optionSource` 形态的 `ApprovalFieldOptionSource` 与 `ApprovalOptionSourceKind` 现在按名称导出；以前只能经由字段类型取得。
 - **approval** —— `ApprovalPlugins.formGlobals`（`FormGlobalDefinition[]`）声明后端向表单暴露的宿主全局变量，`ApprovalPlugins.dataSourceApis` 声明选项接口目录。`InstanceFormPanel` 接收 `applicant` 与 `globals`，并以它们作为 `$applicant` / `$globals` 对表单求值；`StartForm` 携带 `applicant` 与 `globals`，`MyInstanceInfo` / `AdminInstanceInfo` 携带 `globals`。流程设计器的表单步骤把四个发起人属性和声明的全局变量作为系统变量提供，把 provider 的解析器、求值器与接口目录传给表单编辑器，并用 `validateApprovalProjection` 做校验；两个设计步骤都不再渲染问题横幅，底部会说明「下一步」为何被禁用。见[审批 → 表单系统变量](../engines/approval/overview.md#表单系统变量)。
@@ -37,6 +42,7 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 - **form-editor** —— 请求参数名在失焦或按回车时才提交，并且只有在非空且唯一时才提交。以前连续添加多个参数，或把某个参数改成另一个参数的名字，都可能丢失值。
 - **form-editor** —— `condition_group_empty` 的提示现在说明空条件组的实际效果（「全部满足」时规则始终生效，「任一满足」时永不生效），而不再声称规则不会生效。
 - **approval** —— 流程设计器的表单预览会通过 `dataSourceResolver` 解析远程选项（以前始终为空），并运行 provider 的 `evaluators`。
+- **components** —— `Loader` 不再向 `Spin` 传入 antd 已弃用的 `size="default"`——它在每一处渲染（包括路由加载）都会打出一条弃用警告；现在以 `"medium"` 渲染。
 
 ## v2.24.1（2026-09-28）
 

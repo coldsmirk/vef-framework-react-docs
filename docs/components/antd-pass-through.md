@@ -67,3 +67,29 @@ import { Affix, Card, Tabs, Tag } from '@vef-framework-react/components';
 | `Tour` | A guided tour of UI elements. | [Tour](https://ant.design/components/tour/) |
 | `Transfer` | Move items between two lists. | [Transfer](https://ant.design/components/transfer/) |
 | `Watermark` | Add a watermark to a container. | [Watermark](https://ant.design/components/watermark/) |
+
+## Types
+
+Every component above re-exports its props type under antd's own name — `AffixProps`, `AnchorProps`, `AutoCompleteProps`, `BadgeProps`, `BreadcrumbProps`, `CalendarProps`, `CardProps`, `CarouselProps`, `CascaderProps`, `CheckboxProps`, `ColProps`, `CollapseProps`, `ColorPickerProps`, `DatePickerProps`, `DescriptionsProps`, `DividerProps`, `DrawerProps`, `DropdownProps`, `EmptyProps`, `FlexProps`, `FloatButtonProps`, `ImageProps`, `InputNumberProps`, `ListProps`, `MentionsProps`, `MenuProps`, `PaginationProps`, `PopconfirmProps`, `PopoverProps`, `ProgressProps`, `QRCodeProps`, `RadioProps`, `RateProps`, `ResultProps`, `RowProps`, `SegmentedProps`, `SkeletonProps`, `SliderProps`, `SpaceProps`, `SpinProps`, `SplitterProps`, `StatisticProps`, `StepsProps`, `SwitchProps`, `TabsProps`, `TagProps`, `TimePickerProps`, `TimelineProps`, `TooltipProps`, `TourProps`, `TransferProps`, `WatermarkProps` — and so do the parts it is built from: `AvatarGroupProps`, `BadgeRibbonProps`, `CardGridProps` / `CardMetaProps`, `CheckableTagProps`, `CheckboxGroupProps`, `RadioGroupProps`, `DropdownButtonProps`, `ListItemProps` / `ListItemMetaProps`, `SkeletonButtonProps` / `SkeletonImageProps` / `SkeletonInputProps` / `SkeletonNodeProps` / `SkeletonParagraphProps` / `SkeletonTitleProps`, `SliderSingleProps` / `SliderRangeProps`, `StatisticTimerProps`, `TimeRangePickerProps`, and `DateRangePickerProps` / `MonthPickerProps` / `WeekPickerProps` (`DatePicker.RangePicker` / `.MonthPicker` / `.WeekPicker`). The same holds for the components with their own pages — `InputProps` with `PasswordProps` / `SearchProps` / `TextAreaProps` / `OTPProps`, the Typography parts' `TitleProps` / `ParagraphProps` / `TextProps` / `LinkProps`, `AlertProps`, `AvatarProps`, `CompactProps`.
+
+The configuration shapes have named aliases, so a host does not have to dig them out of antd's internals:
+
+| Type | What it is |
+|------|------------|
+| `AnchorLinkItem` | An `Anchor` `items` entry |
+| `AutoCompleteOption` | An `AutoComplete` `options` entry |
+| `BreadcrumbItem` | A `Breadcrumb` `items` entry; `BreadcrumbItemType` / `BreadcrumbSeparatorType` are its two kinds |
+| `CarouselDotPlacement` / `CarouselEffect` / `CarouselRef` | `Carousel`'s dot placement, transition effect, and ref |
+| `CascaderOption` | A `Cascader` `options` entry |
+| `CheckboxOption<T>` / `RadioOption<T>` | A `Checkbox.Group` / `Radio.Group` `options` entry |
+| `CollapseItem` | A `Collapse` `items` entry |
+| `DescriptionsItem` | A `Descriptions` `items` entry |
+| `DropdownMenuProps` / `DropdownMenuItem` | `Dropdown`'s `menu` prop and one of its `items`; `DropdownButtonType` is `Dropdown.Button`'s `type` |
+| `InputRef` / `TooltipRef` | The refs of `Input` and `Tooltip` |
+| `ListGridType` | `List`'s `grid` prop |
+| `MentionsOption` | A `Mentions` `options` entry |
+| `MenuItemType` / `SubMenuType` / `MenuItemGroupType` / `MenuDividerType` | The four kinds of `Menu` `items` entry |
+| `SegmentedOption<T>` | A `Segmented` `options` entry |
+| `TimelineItem` | A `Timeline` `items` entry |
+| `TourStep` | A `Tour` `steps` entry |
+| `TransferItem` | A `Transfer` `dataSource` record |

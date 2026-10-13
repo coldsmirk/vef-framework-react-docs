@@ -44,6 +44,8 @@ export default function Demo() {
 
 ## API
 
+props 类型以 `SplitTextProps` 导出。
+
 | Prop | Type | Default | 说明 |
 |------|------|---------|-------------|
 | `text` | `string` | required | 要执行动画的文本内容 |
