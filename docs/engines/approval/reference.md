@@ -349,7 +349,6 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `UserInfo` | `{ id: string; name: string; departmentId?: string; departmentName?: string }` | A person snapshot captured at action time — the single person shape every approval projection uses. Department fields present only when the host's `UserInfoResolver` fills them. |
 | `FormDataValue` | `string \| number \| boolean \| null \| FormDataValue[] \| { [key: string]: FormDataValue }` | Form data as submitted/stored. |
 | `FormData` | `Record<string, FormDataValue>` | The runtime form-data map of an instance. |
-| `SHARED_TENANT_ID` | `"0"` | The reserved tenant of shared flows and categories (the Go `approval.SharedTenantID`): a shared flow is offered to every tenant beside its own flows, and each instance runs in the tenant that started it. Shared definitions are managed like any other — pass it as the `tenantId` of `ApprovalFlowPage` / `ApprovalCategoryPage`. |
 
 ### Enums and unions
 
@@ -380,7 +379,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | --- | --- | --- |
 | `FlowCategory` | extends `FullAudited` + `tenantId: string`, `code: string`, `name: string`, `icon?: string \| null`, `parentId?: string \| null`, `sortOrder: number`, `isActive: boolean`, `remark?: string \| null`, `children?: FlowCategory[]` | Categories form a tree via `parentId`; `find_tree` returns nested `children`. |
 | `CategoryParams` | `id?: string`, `tenantId: string`, `code: string`, `name: string`, `icon?: string \| null`, `parentId?: string \| null`, `sortOrder: number`, `isActive: boolean`, `remark?: string \| null` | Create/update payload. |
-| `CategorySearch` | `name?: string`, `isActive?: boolean`, `tenantId?: string`, `includeShared?: boolean` | Tree search, sent as the request's `meta`. `tenantId` narrows the tree to one tenant (`SHARED_TENANT_ID` for the shared categories) and every tenant's is read without it; `includeShared` adds the shared categories to the named tenant's. |
+| `CategorySearch` | `name?: string`, `isActive?: boolean`, `tenantId?: string` | Tree search, sent as the request's `meta`. `tenantId` narrows the tree to one tenant; every tenant's is read without it. |
 
 ### Delegation
 
@@ -408,8 +407,9 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `tenantId` | `string` | Owning tenant. |
-| `categoryId` | `string` | Owning category. |
+| `tenantId` | `string` | Owning tenant, which manages the flow; never changes. |
+| `isShared` | `boolean` | Offered to every tenant beside its own flows: any tenant starts it like one of its own, and a flow of that tenant with the same code takes its place there. A shared flow routes no task or CC to specific people. Fixed at creation. |
+| `categoryId` | `string` | Owning category — a shared flow's too is one of its owner's. |
 | `code` | `string` | Stable flow code (start requests address flows by code). |
 | `name` | `string` | Display name. |
 | `icon` | `string \| null?` | Icon name. |
@@ -432,12 +432,12 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `FlowInitiator` | `id: string`, `flowId: string`, `kind: InitiatorKind`, `ids: string[]` | A stored initiator rule. |
 | `KindOptions` | `assignees: KindDescriptor<AssigneeKind>[]`, `ccs: KindDescriptor<CcKind>[]`, `initiators: KindDescriptor<InitiatorKind>[]` | The kinds the running application accepts, as served by `approval/flow.list_kind_options`. Each vocabulary is an open registry on the backend — a host adds a kind by registering a resolver — so this catalog, not a client-side union, is what the designer offers and what a deploy validates. |
 | `InitiatorParams` | `kind: InitiatorKind`, `ids: string[]` | An initiator rule as submitted. |
-| `CreateFlowParams` | `tenantId`, `code`, `name`, `categoryId` (all `string`), `icon?`, `description?` (`string`), `labels?: Record<string, string>`, `bindingMode: BindingMode`, `businessBinding?: BusinessBindingConfig`, `adminUserIds?: string[]`, `isAllInitiationAllowed: boolean`, `instanceTitleTemplate: string`, `initiators?: InitiatorParams[]` | `approval/flow.create` payload. |
-| `UpdateFlowParams` | `flowId: string` + the same fields as create minus `tenantId`/`code` | Omitted `labels` clears the stored set (full replace semantics). |
+| `CreateFlowParams` | `tenantId`, `code`, `name`, `categoryId` (all `string`), `isShared?: boolean`, `icon?`, `description?` (`string`), `labels?: Record<string, string>`, `bindingMode: BindingMode`, `businessBinding?: BusinessBindingConfig`, `adminUserIds?: string[]`, `isAllInitiationAllowed: boolean`, `instanceTitleTemplate: string`, `initiators?: InitiatorParams[]` | `approval/flow.create` payload. `isShared` shares the flow with every tenant; its code must then be unique among every tenant's shared flows (`40026`). |
+| `UpdateFlowParams` | `flowId: string` + the same fields as create minus `tenantId`/`isShared`/`code` | Omitted `labels` clears the stored set (full replace semantics). |
 | `DeployFlowParams` | `flowId: string`, `description?: string`, `storageMode?: StorageMode`, `flowDefinition: FlowDefinition`, `formSchema?: FormSchema` | Creates a new draft version. `formSchema` is host-owned, passed through opaque and optional (flows without forms exist). |
 | `PublishVersionParams` | `versionId: string` | `publish_version` payload. |
 | `ToggleFlowActiveParams` | `flowId: string`, `isActive: boolean` | `toggle_active` payload. |
-| `FlowSearch` | `tenantId?`, `categoryId?`, `keyword?` (`string`), `isActive?: boolean`, `labels?: Record<string, string>` | `tenantId` narrows the list to one tenant (`SHARED_TENANT_ID` for the shared flows); every tenant's flows are listed without it. Label filters are equality predicates, AND-combined across pairs. |
+| `FlowSearch` | `tenantId?`, `categoryId?`, `keyword?` (`string`), `includeShared?`, `isActive?: boolean`, `labels?: Record<string, string>` | `tenantId` narrows the list to the flows one tenant owns, its shared ones included; every tenant's flows are listed without it. `includeShared` adds the other tenants' shared flows whose code `tenantId` has not taken — the flows a start by code finds there, for a picker of a tenant's usable flows. Label filters are equality predicates, AND-combined across pairs. |
 | `FlowGraphBundle` | `flow: Flow \| null`, `version: FlowVersion \| null` | `get_graph` result: the flow record and the resolved version (carrying `flowSchema`/`formSchema`). |
 
 ### Instance action params

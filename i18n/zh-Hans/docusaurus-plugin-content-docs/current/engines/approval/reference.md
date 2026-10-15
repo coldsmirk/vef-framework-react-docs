@@ -349,7 +349,6 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `UserInfo` | `{ id: string; name: string; departmentId?: string; departmentName?: string }` | 操作发生时捕获的人员快照——所有审批投影共用的唯一人员形态。仅当宿主的 `UserInfoResolver` 填充时才有部门字段。 |
 | `FormDataValue` | `string \| number \| boolean \| null \| FormDataValue[] \| { [key: string]: FormDataValue }` | 提交/存储形态的表单数据。 |
 | `FormData` | `Record<string, FormDataValue>` | 实例的运行时表单数据映射。 |
-| `SHARED_TENANT_ID` | `"0"` | 全局流程与全局分类的保留租户（对应 Go 的 `approval.SharedTenantID`）：全局流程对所有租户开放，与租户自己的流程并列，每个实例运行在发起它的租户中。全局定义的管理方式与其他定义相同——把它作为 `ApprovalFlowPage` / `ApprovalCategoryPage` 的 `tenantId` 传入即可。 |
 
 ### 枚举与联合类型
 
@@ -380,7 +379,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | --- | --- | --- |
 | `FlowCategory` | 继承 `FullAudited`，加上 `tenantId: string`、`code: string`、`name: string`、`icon?: string \| null`、`parentId?: string \| null`、`sortOrder: number`、`isActive: boolean`、`remark?: string \| null`、`children?: FlowCategory[]` | 分类经 `parentId` 构成一棵树；`find_tree` 返回嵌套的 `children`。 |
 | `CategoryParams` | `id?: string`、`tenantId: string`、`code: string`、`name: string`、`icon?: string \| null`、`parentId?: string \| null`、`sortOrder: number`、`isActive: boolean`、`remark?: string \| null` | 创建/更新载荷。 |
-| `CategorySearch` | `name?: string`、`isActive?: boolean`、`tenantId?: string`、`includeShared?: boolean` | 树查询条件，作为请求的 `meta` 发送。`tenantId` 把树限定到一个租户（`SHARED_TENANT_ID` 表示全局分类），不传则读取所有租户的分类；`includeShared` 在所指定租户的分类之外再加上全局分类。 |
+| `CategorySearch` | `name?: string`、`isActive?: boolean`、`tenantId?: string` | 树查询条件，作为请求的 `meta` 发送。`tenantId` 把树限定到一个租户，不传则读取所有租户的分类。 |
 
 ### 委托
 
@@ -408,8 +407,9 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `tenantId` | `string` | 所属租户。 |
-| `categoryId` | `string` | 所属分类。 |
+| `tenantId` | `string` | 所属租户，由它管理该流程；不会改变。 |
+| `isShared` | `boolean` | 在本租户之外开放给所有租户：任何租户都能像发起自己的流程一样发起它，该租户自己的同编码流程会在本租户内取代它。全局流程不能把审批或抄送派给具体的人。创建时确定。 |
+| `categoryId` | `string` | 所属分类——全局流程也挂在所属租户的分类下。 |
 | `code` | `string` | 稳定的流程编码（发起请求按编码寻址流程）。 |
 | `name` | `string` | 显示名称。 |
 | `icon` | `string \| null?` | 图标名。 |
@@ -432,12 +432,12 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `FlowInitiator` | `id: string`、`flowId: string`、`kind: InitiatorKind`、`ids: string[]` | 一条已存储的发起人规则。 |
 | `KindOptions` | `assignees: KindDescriptor<AssigneeKind>[]`、`ccs: KindDescriptor<CcKind>[]`、`initiators: KindDescriptor<InitiatorKind>[]` | 当前运行的应用所接受的类型，由 `approval/flow.list_kind_options` 返回。每一类词汇在后端都是开放的注册表——宿主注册一个解析器即可新增一种类型——因此设计器提供的、部署时校验的，都是这份目录，而不是客户端的联合类型。 |
 | `InitiatorParams` | `kind: InitiatorKind`、`ids: string[]` | 提交形态的发起人规则。 |
-| `CreateFlowParams` | `tenantId`、`code`、`name`、`categoryId`（均为 `string`）、`icon?`、`description?`（`string`）、`labels?: Record<string, string>`、`bindingMode: BindingMode`、`businessBinding?: BusinessBindingConfig`、`adminUserIds?: string[]`、`isAllInitiationAllowed: boolean`、`instanceTitleTemplate: string`、`initiators?: InitiatorParams[]` | `approval/flow.create` 载荷。 |
-| `UpdateFlowParams` | `flowId: string` + 与 create 相同的字段，去掉 `tenantId`/`code` | 省略 `labels` 会清空已存储的集合（整体替换语义）。 |
+| `CreateFlowParams` | `tenantId`、`code`、`name`、`categoryId`（均为 `string`）、`isShared?: boolean`、`icon?`、`description?`（`string`）、`labels?: Record<string, string>`、`bindingMode: BindingMode`、`businessBinding?: BusinessBindingConfig`、`adminUserIds?: string[]`、`isAllInitiationAllowed: boolean`、`instanceTitleTemplate: string`、`initiators?: InitiatorParams[]` | `approval/flow.create` 载荷。`isShared` 把流程开放给所有租户，此时其编码须在所有租户的全局流程中唯一（`40026`）。 |
+| `UpdateFlowParams` | `flowId: string` + 与 create 相同的字段，去掉 `tenantId`/`isShared`/`code` | 省略 `labels` 会清空已存储的集合（整体替换语义）。 |
 | `DeployFlowParams` | `flowId: string`、`description?: string`、`storageMode?: StorageMode`、`flowDefinition: FlowDefinition`、`formSchema?: FormSchema` | 创建一个新的草稿版本。`formSchema` 归宿主所有，不透明地透传且可选（存在没有表单的流程）。 |
 | `PublishVersionParams` | `versionId: string` | `publish_version` 载荷。 |
 | `ToggleFlowActiveParams` | `flowId: string`、`isActive: boolean` | `toggle_active` 载荷。 |
-| `FlowSearch` | `tenantId?`、`categoryId?`、`keyword?`（`string`）、`isActive?: boolean`、`labels?: Record<string, string>` | `tenantId` 把列表限定到一个租户（`SHARED_TENANT_ID` 表示全局流程），不传则列出所有租户的流程。标签筛选是等值谓词，多对之间以 AND 组合。 |
+| `FlowSearch` | `tenantId?`、`categoryId?`、`keyword?`（`string`）、`includeShared?`、`isActive?: boolean`、`labels?: Record<string, string>` | `tenantId` 把列表限定到该租户拥有的流程（包括它的全局流程），不传则列出所有租户的流程。`includeShared` 再加上其他租户的、编码未被 `tenantId` 自有流程占用的全局流程——即在该租户按编码发起能找到的流程，供"本租户可用流程"选择器使用。标签筛选是等值谓词，多对之间以 AND 组合。 |
 | `FlowGraphBundle` | `flow: Flow \| null`、`version: FlowVersion \| null` | `get_graph` 结果: 流程记录与解析出的版本（携带 `flowSchema`/`formSchema`）。 |
 
 ### 实例操作参数

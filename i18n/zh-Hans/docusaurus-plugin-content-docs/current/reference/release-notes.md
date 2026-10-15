@@ -13,6 +13,30 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
+## v2.28.0（2026-10-15）
+
+全局流程改为由所属租户共享出来的流程，而不再是保留租户下的流程。approval 包有破坏性变更，需要 vef-framework-go v0.62.0 或更高版本。
+
+### 破坏性变更
+
+- **approval** — 移除 `SHARED_TENANT_ID`：不再有保留的全局租户，也不再有全局分类。全局流程属于一个真实租户，由它管理并挂在它自己的分类下，通过 `Flow.isShared` 开放给其他所有租户。在所属租户下用 `CreateFlowParams.isShared` 创建，创建后不可修改；其编码须在所有租户的全局流程中唯一（后端错误码 `40026`）。页面上，全局流程在所属租户下管理——流程设计器的基础信息步骤为新流程提供「全局流程」开关：
+
+  ```ts
+  // 之前
+  await flowApi.create({ tenantId: SHARED_TENANT_ID, categoryId: sharedCategoryId, ...rest });
+
+  // 之后
+  await flowApi.create({ tenantId: ownerTenantId, isShared: true, categoryId: ownerCategoryId, ...rest });
+  ```
+
+  已存在租户 `"0"` 下的记录不再开放给其他租户：请在真实租户下重新创建，或把它们迁到真实租户并设置 `is_shared`。
+- **approval** — 移除 `CategorySearch.includeShared`，`ApprovalDelegationPage` 的分类范围只提供其 `tenantId` 的分类。
+
+### 新特性
+
+- **approval** — `FlowSearch.includeShared` 在 `tenantId` 的流程之外，再加上其他租户的、编码未被该租户占用的全局流程——即在该租户按编码发起能找到的流程，供"本租户可用流程"选择器使用。不传时，`tenantId` 列出该租户拥有的流程，包括它的全局流程。见[参考](../engines/approval/reference.md)。
+- **approval** — `ApprovalFlowPage` 在列表中给全局流程打「全局」标签，设计器根据 `flow.isShared`（创建时为「全局流程」开关）确定共享模式，流程创建后该开关不可修改。
+
 ## v2.27.0（2026-10-14）
 
 审批包有破坏性变更，需要 vef-framework-go v0.61.0 或更高版本：自助接口不再携带租户，流程与分类定义跨租户管理，由权限把关，而不再按调用者自己的租户限制。

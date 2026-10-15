@@ -91,7 +91,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<CategoryPermissionCodes>` | `APPROVAL_PERMISSIONS.category` | 覆盖页面用于门控其 CRUD 操作的权限码。 |
-| `tenantId` | `string` | `"default"` | 页面所管理的租户：树中显示该租户的分类，新分类也创建在它下面。分类跨租户管理，由权限把关；传 `SHARED_TENANT_ID` 管理全局分类。 |
+| `tenantId` | `string` | `"default"` | 页面所管理的租户：树中显示该租户的分类，新分类也创建在它下面。分类跨租户管理，由权限把关。 |
 | `columnStorageKey` | `string` | `"approval.category"` | 列设置面板的存储键。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在表格上方。 |
 
@@ -106,7 +106,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<FlowPermissionCodes>` | `APPROVAL_PERMISSIONS.flow` | 覆盖页面用于门控其操作的权限码。 |
-| `tenantId` | `string` | `"default"` | 页面所管理的租户：列表显示该租户的流程，新流程也创建在它下面。流程跨租户管理，由权限把关；传 `SHARED_TENANT_ID` 管理全局流程。 |
+| `tenantId` | `string` | `"default"` | 页面所管理的租户：列表显示该租户拥有的流程，包括它的全局流程（带「全局」标签），新流程也创建在它下面——打开设计器里的「全局流程」开关即开放给所有租户。流程跨租户管理，由权限把关。 |
 | `columnStorageKey` | `string` | `"approval.flow"` | 列设置面板的存储键。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在表格上方。 |
 
@@ -147,7 +147,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<DelegationPermissionCodes>` | `APPROVAL_PERMISSIONS.delegation` | 覆盖页面用于门控其 CRUD 操作的权限码。 |
-| `tenantId` | `string` | — | 分类范围选择器提供哪个租户的分类（另加全局分类）；省略则提供所有租户的分类。 |
+| `tenantId` | `string` | — | 分类范围选择器提供哪个租户的分类；省略则提供所有租户的分类。 |
 | `columnStorageKey` | `string` | `"approval.delegation"` | 列设置面板的存储键。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在表格上方。 |
 

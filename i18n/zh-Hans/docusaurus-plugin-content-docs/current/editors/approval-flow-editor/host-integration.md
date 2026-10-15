@@ -39,7 +39,7 @@ const plugins: EditorPlugins = {
 | `ccKinds` | `ReadonlyArray<KindDescriptor<CcKind>>` | 同一后端动作返回的抄送目录；省略时使用 `BUILTIN_CC_KINDS`。 |
 | `formFields` | `FormFieldDefinition[]` | 表单的顶层字段清单——供条件编辑器、字段权限表以及 `validateFlowDefinition` 的 `fieldPermissions` 交叉校验使用。保留为 `undefined` 表示"没有可用的字段清单"，与 `[]` 含义不同——见下方 [`formFields`](#formfields)。 |
 | `globalSubjects` | `FormFieldDefinition[]` | 宿主声明的变量，条件编辑器会把它们与内置的申请人属性和 `formFields` 一起提供给用户选择。 |
-| `shared` | `boolean` | 正在编辑的是全局流程——不属于任何租户、由每个租户运行（即后端的 `approval.SharedTenantID`）。编辑器会禁用 `selection` 选取用户、角色或部门的审批人 / 抄送 kind，以及把任务转交节点管理员或指定人员的无审批人 / 超时处理方式；它们仍会列出，已加载的定义照样显示为其标签，并由 `validateFlowDefinition({ shared: true })` 标出（v2.26.0）。 |
+| `shared` | `boolean` | 正在编辑的是全局流程——归属一个租户、由每个租户运行（即后端的 `Flow.IsShared`）。编辑器会禁用 `selection` 选取用户、角色或部门的审批人 / 抄送 kind，以及把任务转交节点管理员或指定人员的无审批人 / 超时处理方式；它们仍会列出，已加载的定义照样显示为其标签，并由 `validateFlowDefinition({ shared: true })` 标出（v2.26.0）。 |
 
 ### 选择器
 

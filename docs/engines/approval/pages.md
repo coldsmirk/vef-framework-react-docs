@@ -91,7 +91,7 @@ Full-page flow-category management: the category tree (`find_tree`, non-paginate
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<CategoryPermissionCodes>` | `APPROVAL_PERMISSIONS.category` | Override the permission codes the page gates its CRUD actions on. |
-| `tenantId` | `string` | `"default"` | The tenant whose categories the page manages: the tree shows them and new categories are created under it. Categories are managed across tenants, gated by the permissions; pass `SHARED_TENANT_ID` to manage the shared ones. |
+| `tenantId` | `string` | `"default"` | The tenant whose categories the page manages: the tree shows them and new categories are created under it. Categories are managed across tenants, gated by the permissions. |
 | `columnStorageKey` | `string` | `"approval.category"` | Storage key for the column-settings panel. |
 | `title` | `ReactNode` | — | Optional page title rendered above the table. |
 
@@ -106,7 +106,7 @@ Full-page flow management: the paginated flow list with keyword / category / act
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<FlowPermissionCodes>` | `APPROVAL_PERMISSIONS.flow` | Override the permission codes the page gates its actions on. |
-| `tenantId` | `string` | `"default"` | The tenant whose flows the page manages: the list shows them and new flows are created under it. Flows are managed across tenants, gated by the permissions; pass `SHARED_TENANT_ID` to manage the shared ones. |
+| `tenantId` | `string` | `"default"` | The tenant whose flows the page manages: the list shows the flows it owns, its shared ones included (tagged 全局), and new flows are created under it — shared with every tenant when the designer's 全局流程 switch is on. Flows are managed across tenants, gated by the permissions. |
 | `columnStorageKey` | `string` | `"approval.flow"` | Storage key for the column-settings panel. |
 | `title` | `ReactNode` | — | Optional page title rendered above the table. |
 
@@ -147,7 +147,7 @@ Full-page delegation management: during a delegation's active window, tasks assi
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<DelegationPermissionCodes>` | `APPROVAL_PERMISSIONS.delegation` | Override the permission codes the page gates its CRUD actions on. |
-| `tenantId` | `string` | — | The tenant whose categories the category scope offers, beside the shared ones; omit to offer every tenant's. |
+| `tenantId` | `string` | — | The tenant whose categories the category scope offers; omit to offer every tenant's. |
 | `columnStorageKey` | `string` | `"approval.delegation"` | Storage key for the column-settings panel. |
 | `title` | `ReactNode` | — | Optional page title rendered above the table. |
 

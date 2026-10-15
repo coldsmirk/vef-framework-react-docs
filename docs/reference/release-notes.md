@@ -13,6 +13,30 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
+## v2.28.0 (2026-10-15)
+
+A shared flow is now a flow its owner shares rather than a flow of a reserved tenant. Breaking changes in the approval package, which needs vef-framework-go v0.62.0 or later.
+
+### Breaking changes
+
+- **approval** — `SHARED_TENANT_ID` is removed: there is no reserved shared tenant and no shared category any more. A shared flow belongs to a real tenant, which manages it and keeps it under one of its own categories, and is offered to every other tenant through `Flow.isShared`. Create one under its owner with `CreateFlowParams.isShared`, fixed at creation; its code must be unique among every tenant's shared flows (backend code `40026`). In the pages, manage shared flows from their owner's tenant — the flow designer's basic step has a 全局流程 switch for a new flow:
+
+  ```ts
+  // Before
+  await flowApi.create({ tenantId: SHARED_TENANT_ID, categoryId: sharedCategoryId, ...rest });
+
+  // After
+  await flowApi.create({ tenantId: ownerTenantId, isShared: true, categoryId: ownerCategoryId, ...rest });
+  ```
+
+  Rows already stored under tenant `"0"` are no longer offered to other tenants: re-create them under a real tenant, or move them to one and set `is_shared`.
+- **approval** — `CategorySearch.includeShared` is removed, and `ApprovalDelegationPage`'s category scope offers only the categories of its `tenantId`.
+
+### Features
+
+- **approval** — `FlowSearch.includeShared` adds to `tenantId`'s flows the other tenants' shared flows whose code it has not taken — the flows a start by code finds in that tenant, which is what a picker of a tenant's usable flows needs. Without it, `tenantId` lists the flows the tenant owns, its shared ones included. See [Reference](../engines/approval/reference.md).
+- **approval** — `ApprovalFlowPage` tags shared flows 全局 in its list, and its designer derives shared mode from `flow.isShared` (the 全局流程 switch while creating), disabled once the flow exists.
+
 ## v2.27.0 (2026-10-14)
 
 Breaking changes in the approval package, which needs vef-framework-go v0.61.0 or later: self-service calls carry no tenant, and flow and category definitions are managed across tenants, gated by permission rather than by the caller's own tenant.

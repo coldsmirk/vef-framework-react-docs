@@ -39,7 +39,7 @@ const plugins: EditorPlugins = {
 | `ccKinds` | `ReadonlyArray<KindDescriptor<CcKind>>` | The CC catalog served by the same backend action; omitting it uses `BUILTIN_CC_KINDS`. |
 | `formFields` | `FormFieldDefinition[]` | The form's top-level field inventory — feeds the condition editor, the field-permission table, and `validateFlowDefinition`'s `fieldPermissions` cross-check. Leaving it `undefined` means "no inventory available" and is distinct from `[]` — see [`formFields`](#formfields) below. |
 | `globalSubjects` | `FormFieldDefinition[]` | Host-declared variables the condition editor offers alongside the built-in applicant attributes and `formFields`. |
-| `shared` | `boolean` | The flow is shared — owned by no tenant and run by every tenant (the backend's `approval.SharedTenantID`). The editor disables the assignee / CC kinds whose `selection` picks users, roles or departments and the empty-assignee / timeout actions handing a task to node admins or named fallback users; they stay listed, so a loaded definition still reads as its labels, and `validateFlowDefinition({ shared: true })` flags them (v2.26.0). |
+| `shared` | `boolean` | The flow is shared — owned by one tenant and run by every tenant (the backend's `Flow.IsShared`). The editor disables the assignee / CC kinds whose `selection` picks users, roles or departments and the empty-assignee / timeout actions handing a task to node admins or named fallback users; they stay listed, so a loaded definition still reads as its labels, and `validateFlowDefinition({ shared: true })` flags them (v2.26.0). |
 
 ### Pickers
 
