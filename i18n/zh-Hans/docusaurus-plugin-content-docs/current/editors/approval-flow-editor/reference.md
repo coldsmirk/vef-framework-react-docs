@@ -29,7 +29,7 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 
 | 导出 | 种类 | 说明 |
 | --- | --- | --- |
-| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects? }`——见 [宿主集成](./host-integration.md#plugins-editorplugins)。 |
+| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects?, shared? }`——见 [宿主集成](./host-integration.md#plugins-editorplugins)。 |
 | `PickerProps` | type | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }`。 |
 | `PrincipalKind` | type | `"user" \| "role" \| "department"`。 |
 | `PRINCIPAL_KINDS` | const | `readonly ["user", "role", "department"]`。 |
@@ -128,7 +128,7 @@ function validateFlowDefinition(
 ): FlowValidationError[];
 ```
 
-`FlowValidationContext` 的结构是 `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[] }`。省略 kind 目录时回退到框架内置目录；注册了应用自定义 kind 的宿主必须传入 `approval/flow.list_kind_options` 返回的目录。
+`FlowValidationContext` 的结构是 `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[]; shared?: boolean }`。省略 kind 目录时回退到框架内置目录；注册了应用自定义 kind 的宿主必须传入 `approval/flow.list_kind_options` 返回的目录。`shared`（v2.26.0）加上后端对全局流程的部署规则——即下文的 `shared_*` 代码。
 
 `FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`。`message` 是与编辑器 UI 语言一致的人类可读中文产品文案；请针对 `code` 和各个 id 字段编程。
 
@@ -196,6 +196,7 @@ function validateFlowDefinition(
 | `invalid_timeout_action` | `timeoutAction` 不在 `TimeoutAction` 之内。 |
 | `fallback_users_required` | `emptyAssigneeAction: "transfer_specified"` 但没有 `fallbackUserIds`。 |
 | `admin_users_required` | `emptyAssigneeAction: "transfer_admin"` 但没有 `adminUserIds`。 |
+| `timeout_admin_users_required` | 设置了时限（`timeoutHours` > 0）的节点 `timeoutAction` 为 `"transfer_admin"`，但没有 `adminUserIds`（v2.26.0）。没有时限的节点永远不会超时，因此不检查它的超时处理方式。 |
 | `invalid_field_permission` | 某个 `fieldPermissions` 值不在 `FieldPermission` 之内。 |
 | `field_permission_key_unknown` | 某个 `fieldPermissions` key 不存在于传入的 `formFields` 中。当 `formFields` 省略（`undefined`）时跳过——没有可供比对的清单。 |
 | `cc_field_permission_not_allowed` | 某个 CC 节点的 `fieldPermissions` 值不在 `visible` / `hidden` 之内。 |
@@ -222,6 +223,16 @@ function validateFlowDefinition(
 | --- | --- |
 | `handle_execution_auto_reject` | 某个 handle 节点的 `executionType` 是 `"auto_reject"`（不支持）。 |
 | `handle_timeout_auto_reject` | 某个 handle 节点的 `timeoutAction` 是 `"auto_reject"`（不支持）。 |
+
+**全局流程**（仅在 `shared: true` 时，v2.26.0）——对应后端的 `ValidateSharedFlowNodes`：全局流程在每个租户中运行，因此不能把任何工作派给某一个租户的人。规则判断的是处理方式，而不是残留的管理员或指定人员列表——只要没有处理方式指向它，这份列表就不会把任务交给任何人。
+
+| 代码 | 含义 |
+| --- | --- |
+| `shared_assignee_names_people` | 某个审批人的 kind 选取用户、角色或部门（其 `selection` 是 `PrincipalKind`）。 |
+| `shared_cc_names_people` | 某个抄送人的 kind 选取用户、角色或部门——无论在任务节点还是抄送节点上。 |
+| `shared_fallback_users` | `emptyAssigneeAction: "transfer_specified"`。 |
+| `shared_node_admins` | `emptyAssigneeAction: "transfer_admin"`。 |
+| `shared_timeout_to_admins` | 设置了时限的节点 `timeoutAction` 为 `"transfer_admin"`。 |
 
 ## 序列化
 

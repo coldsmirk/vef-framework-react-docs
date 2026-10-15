@@ -128,9 +128,9 @@ All hooks memoize their function set per `ApiClient` and post to `API_PATH` with
 | `deploy` | `MutationFunction<FlowVersion, DeployFlowParams>` | `deploy` — returns the new draft `FlowVersion` |
 | `publishVersion` | `MutationFunction<unknown, PublishVersionParams>` | `publish_version` |
 | `toggleActive` | `MutationFunction<unknown, ToggleFlowActiveParams>` | `toggle_active` |
-| `getGraph` | `QueryFunction<FlowGraphBundle, { flowId: string; tenantId?: string; versionId?: string }>` | `get_graph` — the latest published version by default, or the version named by `versionId` (the designer's edit seed) |
-| `findVersions` | `QueryFunction<FlowVersionSummary[], { flowId: string; tenantId?: string }>` | `find_versions` — slim summaries without definition payloads (v2.12.0 breaking change `40b6714`) |
-| `findInitiators` | `QueryFunction<FlowInitiator[], { flowId: string; tenantId?: string }>` | `find_initiators` |
+| `getGraph` | `QueryFunction<FlowGraphBundle, { flowId: string; versionId?: string }>` | `get_graph` — the latest published version by default, or the version named by `versionId` (the designer's edit seed) |
+| `findVersions` | `QueryFunction<FlowVersionSummary[], { flowId: string }>` | `find_versions` — slim summaries without definition payloads (v2.12.0 breaking change `40b6714`) |
+| `findInitiators` | `QueryFunction<FlowInitiator[], { flowId: string }>` | `find_initiators` |
 | `listKindOptions` | `QueryFunction<KindOptions, Record<string, never>>` | `list_kind_options` — the application's assignee / CC / initiator kind catalog, application-wide rather than per flow; the flow designer fetches it once for its initiator editor and its flow editor (v2.18.0) |
 
 ### `useDelegationApi`
@@ -167,12 +167,12 @@ All hooks memoize their function set per `ApiClient` and post to `API_PATH` with
 | Function | Type | Operation |
 | --- | --- | --- |
 | `findAvailableFlows` | `QueryFunction<PaginationResult<AvailableFlow>, PaginatedQueryParams<AvailableFlowSearch>>` | `find_available_flows` |
-| `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form` — gated exactly like starting the instance; carries the applicant and the form-visible globals the instance would record |
+| `getStartForm` | `QueryFunction<StartForm, { flowCode: string }>` | `get_start_form` — gated exactly like starting the instance, in the tenant the caller acts in; carries the applicant and the form-visible globals the instance would record |
 | `findInitiated` | `QueryFunction<PaginationResult<InitiatedInstance>, PaginatedQueryParams<InitiatedInstanceSearch>>` | `find_initiated` |
 | `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<PendingTaskSearch>>` | `find_pending_tasks` |
 | `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<CompletedTaskSearch>>` | `find_completed_tasks` |
 | `findCCRecords` | `QueryFunction<PaginationResult<MyCCRecord>, PaginatedQueryParams<MyCCRecordSearch>>` | `find_cc_records` |
-| `getPendingCounts` | `QueryFunction<PendingCounts, { tenantId?: string }>` | `get_pending_counts` |
+| `getPendingCounts` | `QueryFunction<PendingCounts, Record<string, never>>` | `get_pending_counts` |
 | `getInstanceDetail` | `QueryFunction<MyInstanceDetail, { instanceId: string }>` | `get_instance_detail` |
 
 ### `useAdminApprovalApi`
@@ -349,6 +349,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `UserInfo` | `{ id: string; name: string; departmentId?: string; departmentName?: string }` | A person snapshot captured at action time — the single person shape every approval projection uses. Department fields present only when the host's `UserInfoResolver` fills them. |
 | `FormDataValue` | `string \| number \| boolean \| null \| FormDataValue[] \| { [key: string]: FormDataValue }` | Form data as submitted/stored. |
 | `FormData` | `Record<string, FormDataValue>` | The runtime form-data map of an instance. |
+| `SHARED_TENANT_ID` | `"0"` | The reserved tenant of shared flows and categories (the Go `approval.SharedTenantID`): a shared flow is offered to every tenant beside its own flows, and each instance runs in the tenant that started it. Shared definitions are managed like any other — pass it as the `tenantId` of `ApprovalFlowPage` / `ApprovalCategoryPage`. |
 
 ### Enums and unions
 
@@ -379,7 +380,7 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | --- | --- | --- |
 | `FlowCategory` | extends `FullAudited` + `tenantId: string`, `code: string`, `name: string`, `icon?: string \| null`, `parentId?: string \| null`, `sortOrder: number`, `isActive: boolean`, `remark?: string \| null`, `children?: FlowCategory[]` | Categories form a tree via `parentId`; `find_tree` returns nested `children`. |
 | `CategoryParams` | `id?: string`, `tenantId: string`, `code: string`, `name: string`, `icon?: string \| null`, `parentId?: string \| null`, `sortOrder: number`, `isActive: boolean`, `remark?: string \| null` | Create/update payload. |
-| `CategorySearch` | `name?: string`, `isActive?: boolean` | Tree search. |
+| `CategorySearch` | `name?: string`, `isActive?: boolean`, `tenantId?: string`, `includeShared?: boolean` | Tree search, sent as the request's `meta`. `tenantId` narrows the tree to one tenant (`SHARED_TENANT_ID` for the shared categories) and every tenant's is read without it; `includeShared` adds the shared categories to the named tenant's. |
 
 ### Delegation
 
@@ -436,14 +437,14 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `DeployFlowParams` | `flowId: string`, `description?: string`, `storageMode?: StorageMode`, `flowDefinition: FlowDefinition`, `formSchema?: FormSchema` | Creates a new draft version. `formSchema` is host-owned, passed through opaque and optional (flows without forms exist). |
 | `PublishVersionParams` | `versionId: string` | `publish_version` payload. |
 | `ToggleFlowActiveParams` | `flowId: string`, `isActive: boolean` | `toggle_active` payload. |
-| `FlowSearch` | `tenantId?`, `categoryId?`, `keyword?` (`string`), `isActive?: boolean`, `labels?: Record<string, string>` | Label filters are equality predicates, AND-combined across pairs. |
+| `FlowSearch` | `tenantId?`, `categoryId?`, `keyword?` (`string`), `isActive?: boolean`, `labels?: Record<string, string>` | `tenantId` narrows the list to one tenant (`SHARED_TENANT_ID` for the shared flows); every tenant's flows are listed without it. Label filters are equality predicates, AND-combined across pairs. |
 | `FlowGraphBundle` | `flow: Flow \| null`, `version: FlowVersion \| null` | `get_graph` result: the flow record and the resolved version (carrying `flowSchema`/`formSchema`). |
 
 ### Instance action params
 
 | Type | Fields | Notes |
 | --- | --- | --- |
-| `StartInstanceParams` | `tenantId: string`, `flowCode: string`, `businessRef?: string`, `formData?: Record<string, unknown>` | `formData` is validated server-side against the version's derived field list. `businessRef` is required by convention for business-bound flows unless the host's `BusinessRefProvider` derives one. |
+| `StartInstanceParams` | `flowCode: string`, `businessRef?: string`, `formData?: Record<string, unknown>` | The instance runs in the tenant the caller acts in, from its own flow with the code or else the shared one. `formData` is validated server-side against the version's derived field list. `businessRef` is required by convention for business-bound flows unless the host's `BusinessRefProvider` derives one. |
 | `ProcessTaskParams` | `taskId: string`, `action: ProcessTaskAction`, `opinion?: string`, `formData?: Record<string, unknown>`, `attachments?: string[]`, `transferToId?: string`, `targetNodeId?: string` | `transferToId` required for `transfer`; `targetNodeId` (a flow-node id) required for `rollback`. |
 | `WithdrawInstanceParams` | `instanceId: string`, `reason?: string` | — |
 | `ResubmitInstanceParams` | `instanceId: string`, `formData?: Record<string, unknown>` | — |
@@ -469,12 +470,12 @@ All wire types mirror the Go contracts. Timestamps are backend-formatted strings
 | `RemovableAssignee` | `taskId: string`, `assignee: UserInfo`, `status: string` | One peer task eligible for removal; `status` is the peer task's status verbatim (`pending` / `waiting`). |
 | `ViewerTask` | `taskId: string`, `nodeId: string`, `isOpinionRequired: boolean`, `addAssigneeTypes?: AddAssigneeType[]`, `rollbackTargets?: RollbackTarget[]`, `removableAssignees?: RemovableAssignee[]` | The viewer's pending task: what `process_task` should target plus the node-level action configuration — the client never re-derives engine semantics. |
 | `MyInstanceDetail` | `instance: MyInstanceInfo`, `formSchema?: FormSchema`, `timeline: TimelineEntry[]`, `flowGraph: InstanceFlowGraph`, `availableActions: InstanceAction[]`, `fieldPermissions?: Record<string, FieldPermission>`, `myTask?: ViewerTask` | The full self-service detail. `fieldPermissions` is materialized for every top-level form field — apply verbatim, no default resolution. |
-| `AvailableFlowSearch` | `tenantId?`, `keyword?` (`string`), `labels?: Record<string, string>` | — |
-| `InitiatedInstanceSearch` | `tenantId?: string`, `status?: InstanceStatus`, `keyword?: string` | — |
-| `MyTaskSearch` | `tenantId?: string`, `keyword?: string`, `applicantId?: string`, `applicantName?: string`, `flowId?: string` | The filters both task queries share; every filter is optional and set filters AND together. `keyword` matches the instance title by substring, `applicantId` the applicant exactly (what a user picker yields), `applicantName` the applicant's name by substring. |
+| `AvailableFlowSearch` | `keyword?: string`, `labels?: Record<string, string>` | — |
+| `InitiatedInstanceSearch` | `status?: InstanceStatus`, `keyword?: string` | — |
+| `MyTaskSearch` | `keyword?: string`, `applicantId?: string`, `applicantName?: string`, `flowId?: string` | The filters both task queries share; every filter is optional and set filters AND together. `keyword` matches the instance title by substring, `applicantId` the applicant exactly (what a user picker yields), `applicantName` the applicant's name by substring. |
 | `PendingTaskSearch` | extends `MyTaskSearch` + `isTimeout?: boolean`, `createdAtFrom?: string`, `createdAtTo?: string` | `find_pending_tasks` search. The arrival-time bounds are inclusive `YYYY-MM-DD HH:mm:ss` timestamps. |
 | `CompletedTaskSearch` | extends `MyTaskSearch` + `status?: TaskStatus`, `instanceStatus?: InstanceStatus`, `finishedAtFrom?: string`, `finishedAtTo?: string` | `find_completed_tasks` search. `status` is how the caller finished the task, narrowing within the completed statuses; the finish-time bounds are inclusive `YYYY-MM-DD HH:mm:ss` timestamps. |
-| `MyCCRecordSearch` | `tenantId?: string`, `isRead?: boolean` | — |
+| `MyCCRecordSearch` | `isRead?: boolean` | — |
 
 ### Admin projections
 
@@ -515,7 +516,7 @@ The picker contract hosts implement for `ApprovalPlugins.pickers`, re-exported s
 
 | Type | Shape | Documented at |
 | --- | --- | --- |
-| `EditorPlugins` | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects? }` | [Approval Flow Editor — Host Integration](../../editors/approval-flow-editor/host-integration.md) |
+| `EditorPlugins` | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects?, shared? }` | [Approval Flow Editor — Host Integration](../../editors/approval-flow-editor/host-integration.md) |
 | `PickerProps` | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }` | [Approval Flow Editor — Reference](../../editors/approval-flow-editor/reference.md) |
 | `PrincipalKind` | `"user" \| "role" \| "department"` | [Approval Flow Editor — Reference](../../editors/approval-flow-editor/reference.md) |
 | `KindDescriptor` | `{ kind: string; label: string; selection: SelectionMode }` | [Approval Flow Editor — Reference](../../editors/approval-flow-editor/reference.md) |

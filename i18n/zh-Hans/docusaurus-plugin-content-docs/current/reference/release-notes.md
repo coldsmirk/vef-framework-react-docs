@@ -13,6 +13,48 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
+## v2.27.0（2026-10-14）
+
+审批包有破坏性变更，需要 vef-framework-go v0.61.0 或更高版本：自助接口不再携带租户，流程与分类定义跨租户管理，由权限把关，而不再按调用者自己的租户限制。
+
+### 破坏性变更
+
+- **approval** —— 自助接口不再携带租户。`ApprovalInitiatePage`、`StartInstanceDrawer`、`ApprovalTaskCenterPage` 与 `ApprovalMyInstancesPage` 去掉了 `tenantId` 属性；`StartInstanceParams`、`AvailableFlowSearch`、`InitiatedInstanceSearch`、`MyTaskSearch` 与 `MyCCRecordSearch` 去掉了 `tenantId`；`getStartForm` 只接收 `{ flowCode }`，`getPendingCounts` 不再接收参数。发起在调用者当前所在的租户中进行——使用该租户自己的同编码流程，没有则使用全局流程；待办中心与我的申请列表展示当前用户在所有租户中的事项；查看所有人事项的跨租户视图属于 `ApprovalAdminPage`。在传过该属性的地方去掉它即可：
+
+  ```tsx
+  // 升级前
+  <ApprovalInitiatePage tenantId={currentTenantId} />
+  <StartInstanceDrawer flowCode={code} tenantId={currentTenantId} onClose={close} />
+
+  // 升级后
+  <ApprovalInitiatePage />
+  <StartInstanceDrawer flowCode={code} onClose={close} />
+  ```
+
+- **approval** —— `ApprovalFlowPage` 与 `ApprovalCategoryPage` 的 `tenantId` 是页面所管理的租户：现在除了作为新建记录的租户，还会过滤列表。后端不再把定义的租户与调用者的租户比对：`approval/flow` 与 `approval/category` 只由各自的权限把关，持有这些权限的人可以管理任意租户的定义（包括 `SHARED_TENANT_ID`）；请求不指定租户时，`find_flows` / `find_tree` 列出所有租户的定义（`FlowSearch.tenantId`、`CategorySearch.tenantId`）。请据此分配流程与分类权限。`getGraph`、`findVersions` 与 `findInitiators` 不再接收 `tenantId`：它们按 id 定位流程。
+
+### 新特性
+
+- **approval** —— `ApprovalDelegationPage` 接收 `tenantId`：分类范围在全局分类之外提供哪个租户的分类；省略时提供所有租户的分类。见 [页面](../engines/approval/pages.md)。
+
+## v2.26.0（2026-10-13）
+
+全局流程，需要 vef-framework-go v0.59.0 或更高版本。审批相关包有一项破坏性变更，另外修复了 approval、cron 与 integration 中 CRUD 列表的过滤条件。
+
+### 破坏性变更
+
+- **approval-flow-editor** —— `FlowValidationCode` 新增 `timeout_admin_users_required` 和下文的五个 `shared_*` 代码；对它做穷尽 switch 的代码需要处理这些新成员。`ApprovalInitiatePage` 的 `tenantId` 不再默认为 `"default"`，`StartInstanceParams.tenantId` / `StartInstanceDrawer` 的 `tenantId` 变为可选：租户由服务端决定（v2.27.0 随后彻底移除了它们）。
+
+### 新特性
+
+- **approval** —— 全局流程。`SHARED_TENANT_ID`（`"0"`，即 Go 的 `approval.SharedTenantID`）标记一个不属于任何租户、提供给每个租户的流程或分类，与各租户自己的流程并列；租户中同编码的流程会在该租户内取代它，每个实例都在发起它的租户中运行并归属该租户。把它作为 `ApprovalFlowPage` / `ApprovalCategoryPage` 的 `tenantId` 传入即可管理全局定义。分类从不跨租户，因此流程设计器的分类选择器读取流程自己的租户，分类表单的上级选择器读取该分类的租户，而委托的分类范围选择器通过 `includeShared` 加入全局分类；`CategorySearch` 新增 `tenantId` 与 `includeShared`。见 [参考](../engines/approval/reference.md)。
+- **approval-flow-editor** —— `EditorPlugins.shared` 让编辑器进入全局模式：`selection` 选取用户、角色或部门的审批人 / 抄送 kind，以及把任务转交节点管理员或指定人员的无审批人 / 超时处理方式都会被禁用——仍会列出，已加载的定义照样显示为其标签。`validateFlowDefinition` 的 `shared` 上下文选项对应后端的部署规则，产生 `shared_assignee_names_people`、`shared_cc_names_people`、`shared_fallback_users`、`shared_node_admins` 与 `shared_timeout_to_admins`。审批流程设计器根据流程的租户同时设置这两者。见 [宿主集成](../editors/approval-flow-editor/host-integration.md)。
+
+### 值得关注的修复
+
+- **approval**、**cron**、**integration** —— CRUD 读取（`find_page`、`find_all`、`find_tree`）把过滤条件放在请求的 `meta` 中、与分页并列发送，这正是后端解码它们的位置。以前它们作为 `params` 发送，被后端丢弃，因此分类树、委托列表、cron 的任务与运行记录列表以及 integration 各列表的过滤条件都不起作用。
+- **approval-flow-editor** —— 超时处理方式为 `transfer_admin` 的审批或办理节点会显示「节点管理员」选择器；以前只有无审批人处理方式为 `transfer_admin` 时才显示，尽管两者读取的都是 `adminUserIds`。对于设置了时限、超时转交管理员却没有指定任何管理员的节点，`validateFlowDefinition` 会报告 `timeout_admin_users_required`。
+
 ## v2.25.0（2026-10-13）
 
 无破坏性变更。表单设计器新增系统变量、宿主诊断与选项接口目录，审批包把这三者都接好了。审批这一半需要 vef-framework-go v0.57.0 或更高版本：它的发起表单携带 `applicant`，实例视图携带对表单可见的 `globals`；对接较旧的服务端时，`$applicant` 与 `$globals` 读到的都是空。

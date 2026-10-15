@@ -128,9 +128,9 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `deploy` | `MutationFunction<FlowVersion, DeployFlowParams>` | `deploy`——返回新的草稿 `FlowVersion` |
 | `publishVersion` | `MutationFunction<unknown, PublishVersionParams>` | `publish_version` |
 | `toggleActive` | `MutationFunction<unknown, ToggleFlowActiveParams>` | `toggle_active` |
-| `getGraph` | `QueryFunction<FlowGraphBundle, { flowId: string; tenantId?: string; versionId?: string }>` | `get_graph`——默认是最新已发布版本，或 `versionId` 指定的版本（设计器的编辑种子） |
-| `findVersions` | `QueryFunction<FlowVersionSummary[], { flowId: string; tenantId?: string }>` | `find_versions`——不含定义载荷的瘦身摘要（v2.12.0 破坏性变更 `40b6714`） |
-| `findInitiators` | `QueryFunction<FlowInitiator[], { flowId: string; tenantId?: string }>` | `find_initiators` |
+| `getGraph` | `QueryFunction<FlowGraphBundle, { flowId: string; versionId?: string }>` | `get_graph`——默认是最新已发布版本，或 `versionId` 指定的版本（设计器的编辑种子） |
+| `findVersions` | `QueryFunction<FlowVersionSummary[], { flowId: string }>` | `find_versions`——不含定义载荷的瘦身摘要（v2.12.0 破坏性变更 `40b6714`） |
+| `findInitiators` | `QueryFunction<FlowInitiator[], { flowId: string }>` | `find_initiators` |
 | `listKindOptions` | `QueryFunction<KindOptions, Record<string, never>>` | `list_kind_options`——应用的审批人 / 抄送人 / 发起人 kind 目录，作用于整个应用而非单个流程；流程设计器会获取一次，供发起人编辑器和流程编辑器共用（v2.18.0） |
 
 ### `useDelegationApi`
@@ -167,12 +167,12 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | 函数 | 类型 | 操作 |
 | --- | --- | --- |
 | `findAvailableFlows` | `QueryFunction<PaginationResult<AvailableFlow>, PaginatedQueryParams<AvailableFlowSearch>>` | `find_available_flows` |
-| `getStartForm` | `QueryFunction<StartForm, { tenantId: string; flowCode: string }>` | `get_start_form`——门控规则与发起实例完全相同；携带实例将要记录的发起人以及对表单可见的全局变量 |
+| `getStartForm` | `QueryFunction<StartForm, { flowCode: string }>` | `get_start_form`——在调用者所在租户中，门控规则与发起实例完全相同；携带实例将要记录的发起人以及对表单可见的全局变量 |
 | `findInitiated` | `QueryFunction<PaginationResult<InitiatedInstance>, PaginatedQueryParams<InitiatedInstanceSearch>>` | `find_initiated` |
 | `findPendingTasks` | `QueryFunction<PaginationResult<PendingTask>, PaginatedQueryParams<PendingTaskSearch>>` | `find_pending_tasks` |
 | `findCompletedTasks` | `QueryFunction<PaginationResult<CompletedTask>, PaginatedQueryParams<CompletedTaskSearch>>` | `find_completed_tasks` |
 | `findCCRecords` | `QueryFunction<PaginationResult<MyCCRecord>, PaginatedQueryParams<MyCCRecordSearch>>` | `find_cc_records` |
-| `getPendingCounts` | `QueryFunction<PendingCounts, { tenantId?: string }>` | `get_pending_counts` |
+| `getPendingCounts` | `QueryFunction<PendingCounts, Record<string, never>>` | `get_pending_counts` |
 | `getInstanceDetail` | `QueryFunction<MyInstanceDetail, { instanceId: string }>` | `get_instance_detail` |
 
 ### `useAdminApprovalApi`
@@ -349,6 +349,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `UserInfo` | `{ id: string; name: string; departmentId?: string; departmentName?: string }` | 操作发生时捕获的人员快照——所有审批投影共用的唯一人员形态。仅当宿主的 `UserInfoResolver` 填充时才有部门字段。 |
 | `FormDataValue` | `string \| number \| boolean \| null \| FormDataValue[] \| { [key: string]: FormDataValue }` | 提交/存储形态的表单数据。 |
 | `FormData` | `Record<string, FormDataValue>` | 实例的运行时表单数据映射。 |
+| `SHARED_TENANT_ID` | `"0"` | 全局流程与全局分类的保留租户（对应 Go 的 `approval.SharedTenantID`）：全局流程对所有租户开放，与租户自己的流程并列，每个实例运行在发起它的租户中。全局定义的管理方式与其他定义相同——把它作为 `ApprovalFlowPage` / `ApprovalCategoryPage` 的 `tenantId` 传入即可。 |
 
 ### 枚举与联合类型
 
@@ -379,7 +380,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | --- | --- | --- |
 | `FlowCategory` | 继承 `FullAudited`，加上 `tenantId: string`、`code: string`、`name: string`、`icon?: string \| null`、`parentId?: string \| null`、`sortOrder: number`、`isActive: boolean`、`remark?: string \| null`、`children?: FlowCategory[]` | 分类经 `parentId` 构成一棵树；`find_tree` 返回嵌套的 `children`。 |
 | `CategoryParams` | `id?: string`、`tenantId: string`、`code: string`、`name: string`、`icon?: string \| null`、`parentId?: string \| null`、`sortOrder: number`、`isActive: boolean`、`remark?: string \| null` | 创建/更新载荷。 |
-| `CategorySearch` | `name?: string`、`isActive?: boolean` | 树查询条件。 |
+| `CategorySearch` | `name?: string`、`isActive?: boolean`、`tenantId?: string`、`includeShared?: boolean` | 树查询条件，作为请求的 `meta` 发送。`tenantId` 把树限定到一个租户（`SHARED_TENANT_ID` 表示全局分类），不传则读取所有租户的分类；`includeShared` 在所指定租户的分类之外再加上全局分类。 |
 
 ### 委托
 
@@ -436,14 +437,14 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `DeployFlowParams` | `flowId: string`、`description?: string`、`storageMode?: StorageMode`、`flowDefinition: FlowDefinition`、`formSchema?: FormSchema` | 创建一个新的草稿版本。`formSchema` 归宿主所有，不透明地透传且可选（存在没有表单的流程）。 |
 | `PublishVersionParams` | `versionId: string` | `publish_version` 载荷。 |
 | `ToggleFlowActiveParams` | `flowId: string`、`isActive: boolean` | `toggle_active` 载荷。 |
-| `FlowSearch` | `tenantId?`、`categoryId?`、`keyword?`（`string`）、`isActive?: boolean`、`labels?: Record<string, string>` | 标签筛选是等值谓词，多对之间以 AND 组合。 |
+| `FlowSearch` | `tenantId?`、`categoryId?`、`keyword?`（`string`）、`isActive?: boolean`、`labels?: Record<string, string>` | `tenantId` 把列表限定到一个租户（`SHARED_TENANT_ID` 表示全局流程），不传则列出所有租户的流程。标签筛选是等值谓词，多对之间以 AND 组合。 |
 | `FlowGraphBundle` | `flow: Flow \| null`、`version: FlowVersion \| null` | `get_graph` 结果: 流程记录与解析出的版本（携带 `flowSchema`/`formSchema`）。 |
 
 ### 实例操作参数
 
 | 类型 | 字段 | 说明 |
 | --- | --- | --- |
-| `StartInstanceParams` | `tenantId: string`、`flowCode: string`、`businessRef?: string`、`formData?: Record<string, unknown>` | `formData` 在服务端按版本派生的字段清单校验。业务绑定流程按约定要求 `businessRef`，除非宿主的 `BusinessRefProvider` 能派生一个。 |
+| `StartInstanceParams` | `flowCode: string`、`businessRef?: string`、`formData?: Record<string, unknown>` | 实例运行在调用者所在的租户中，先取该租户自己的同编码流程，没有再取全局流程。`formData` 在服务端按版本派生的字段清单校验。业务绑定流程按约定要求 `businessRef`，除非宿主的 `BusinessRefProvider` 能派生一个。 |
 | `ProcessTaskParams` | `taskId: string`、`action: ProcessTaskAction`、`opinion?: string`、`formData?: Record<string, unknown>`、`attachments?: string[]`、`transferToId?: string`、`targetNodeId?: string` | `transfer` 要求 `transferToId`；`rollback` 要求 `targetNodeId`（流程节点 id）。 |
 | `WithdrawInstanceParams` | `instanceId: string`、`reason?: string` | — |
 | `ResubmitInstanceParams` | `instanceId: string`、`formData?: Record<string, unknown>` | — |
@@ -469,12 +470,12 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `RemovableAssignee` | `taskId: string`、`assignee: UserInfo`、`status: string` | 一个可减签的同节点任务；`status` 是该任务的原样状态（`pending` / `waiting`）。 |
 | `ViewerTask` | `taskId: string`、`nodeId: string`、`isOpinionRequired: boolean`、`addAssigneeTypes?: AddAssigneeType[]`、`rollbackTargets?: RollbackTarget[]`、`removableAssignees?: RemovableAssignee[]` | 查看者的待处理任务: `process_task` 应指向的目标，加上节点级的操作配置——客户端从不重新推导引擎语义。 |
 | `MyInstanceDetail` | `instance: MyInstanceInfo`、`formSchema?: FormSchema`、`timeline: TimelineEntry[]`、`flowGraph: InstanceFlowGraph`、`availableActions: InstanceAction[]`、`fieldPermissions?: Record<string, FieldPermission>`、`myTask?: ViewerTask` | 完整的自助详情。`fieldPermissions` 对每个顶层表单字段都已物化——按原样应用，不做默认值解析。 |
-| `AvailableFlowSearch` | `tenantId?`、`keyword?`（`string`）、`labels?: Record<string, string>` | — |
-| `InitiatedInstanceSearch` | `tenantId?: string`、`status?: InstanceStatus`、`keyword?: string` | — |
-| `MyTaskSearch` | `tenantId?: string`、`keyword?: string`、`applicantId?: string`、`applicantName?: string`、`flowId?: string` | 两个任务查询共用的筛选条件；每个都是可选的，设置了的条件按 AND 组合。`keyword` 按子串匹配实例标题，`applicantId` 精确匹配申请人（即用户选择器给出的值），`applicantName` 按子串匹配申请人姓名。 |
+| `AvailableFlowSearch` | `keyword?: string`、`labels?: Record<string, string>` | — |
+| `InitiatedInstanceSearch` | `status?: InstanceStatus`、`keyword?: string` | — |
+| `MyTaskSearch` | `keyword?: string`、`applicantId?: string`、`applicantName?: string`、`flowId?: string` | 两个任务查询共用的筛选条件；每个都是可选的，设置了的条件按 AND 组合。`keyword` 按子串匹配实例标题，`applicantId` 精确匹配申请人（即用户选择器给出的值），`applicantName` 按子串匹配申请人姓名。 |
 | `PendingTaskSearch` | 继承 `MyTaskSearch`，加上 `isTimeout?: boolean`、`createdAtFrom?: string`、`createdAtTo?: string` | `find_pending_tasks` 的搜索条件。到达时间的上下界是闭区间的 `YYYY-MM-DD HH:mm:ss` 时间戳。 |
 | `CompletedTaskSearch` | 继承 `MyTaskSearch`，加上 `status?: TaskStatus`、`instanceStatus?: InstanceStatus`、`finishedAtFrom?: string`、`finishedAtTo?: string` | `find_completed_tasks` 的搜索条件。`status` 是调用者完成该任务的方式，在已完成的状态范围内进一步收窄；完成时间的上下界是闭区间的 `YYYY-MM-DD HH:mm:ss` 时间戳。 |
-| `MyCCRecordSearch` | `tenantId?: string`、`isRead?: boolean` | — |
+| `MyCCRecordSearch` | `isRead?: boolean` | — |
 
 ### 管理端投影
 
@@ -515,7 +516,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 
 | 类型 | 结构 | 文档位置 |
 | --- | --- | --- |
-| `EditorPlugins` | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects? }` | [审批流编辑器——宿主集成](../../editors/approval-flow-editor/host-integration.md) |
+| `EditorPlugins` | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects?, shared? }` | [审批流编辑器——宿主集成](../../editors/approval-flow-editor/host-integration.md) |
 | `PickerProps` | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }` | [审批流编辑器——参考](../../editors/approval-flow-editor/reference.md) |
 | `PrincipalKind` | `"user" \| "role" \| "department"` | [审批流编辑器——参考](../../editors/approval-flow-editor/reference.md) |
 | `KindDescriptor` | `{ kind: string; label: string; selection: SelectionMode }` | [审批流编辑器——参考](../../editors/approval-flow-editor/reference.md) |

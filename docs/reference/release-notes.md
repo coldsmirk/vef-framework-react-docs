@@ -13,6 +13,48 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
+## v2.27.0 (2026-10-14)
+
+Breaking changes in the approval package, which needs vef-framework-go v0.61.0 or later: self-service calls carry no tenant, and flow and category definitions are managed across tenants, gated by permission rather than by the caller's own tenant.
+
+### Breaking changes
+
+- **approval** — self-service calls carry no tenant. `ApprovalInitiatePage`, `StartInstanceDrawer`, `ApprovalTaskCenterPage` and `ApprovalMyInstancesPage` drop their `tenantId` prop; `StartInstanceParams`, `AvailableFlowSearch`, `InitiatedInstanceSearch`, `MyTaskSearch` and `MyCCRecordSearch` drop `tenantId`; `getStartForm` takes `{ flowCode }` and `getPendingCounts` takes no parameters. A start runs in the tenant the caller acts in — from that tenant's own flow with the code, else the shared one — and the task center and my-instances lists show the current user's own work in every tenant; a cross-tenant view of everyone's work is `ApprovalAdminPage`'s. Drop the prop where you passed it:
+
+  ```tsx
+  // Before
+  <ApprovalInitiatePage tenantId={currentTenantId} />
+  <StartInstanceDrawer flowCode={code} tenantId={currentTenantId} onClose={close} />
+
+  // After
+  <ApprovalInitiatePage />
+  <StartInstanceDrawer flowCode={code} onClose={close} />
+  ```
+
+- **approval** — the `tenantId` of `ApprovalFlowPage` and `ApprovalCategoryPage` is the tenant the page manages: it now filters the list as well as stamping what the page creates. The backend no longer checks a definition's tenant against the caller's: `approval/flow` and `approval/category` are gated by their permissions alone, so whoever holds them may manage any tenant's definitions, `SHARED_TENANT_ID` included, and `find_flows` / `find_tree` list every tenant's when the request names none (`FlowSearch.tenantId`, `CategorySearch.tenantId`). Grant the flow and category permissions accordingly. `getGraph`, `findVersions` and `findInitiators` no longer take `tenantId`: they address the flow by id.
+
+### Features
+
+- **approval** — `ApprovalDelegationPage` takes `tenantId`, the tenant whose categories its category scope offers beside the shared ones; omitted, every tenant's are offered. See [Pages](../engines/approval/pages.md).
+
+## v2.26.0 (2026-10-13)
+
+Shared flows, which need vef-framework-go v0.59.0 or later. One breaking change in the approval packages, plus a fix to the filters of CRUD lists in approval, cron and integration.
+
+### Breaking changes
+
+- **approval-flow-editor** — `FlowValidationCode` gains `timeout_admin_users_required` and the five `shared_*` codes below; code that switches exhaustively over it must handle them. `ApprovalInitiatePage`'s `tenantId` no longer defaults to `"default"`, and `StartInstanceParams.tenantId` / `StartInstanceDrawer`'s `tenantId` became optional: the server picks the tenant (v2.27.0 then removes them).
+
+### Features
+
+- **approval** — shared flows. `SHARED_TENANT_ID` (`"0"`, the Go `approval.SharedTenantID`) marks a flow or category owned by no tenant and offered to every tenant beside its own flows; a tenant flow with the same code takes its place within that tenant, and each instance runs in, and belongs to, the tenant that started it. Pass it as the `tenantId` of `ApprovalFlowPage` / `ApprovalCategoryPage` to manage the shared definitions. Categories never span tenants, so the flow designer's category picker reads the flow's own tenant and the category form's parent picker its category's, while the delegation scope picker adds the shared categories with `includeShared`; `CategorySearch` gains `tenantId` and `includeShared`. See [Reference](../engines/approval/reference.md).
+- **approval-flow-editor** — `EditorPlugins.shared` puts the editor in shared mode: the assignee / CC kinds whose `selection` picks users, roles or departments, and the empty-assignee / timeout actions handing a task to node admins or named fallback users, are disabled — still listed, so a loaded definition reads as its labels. `validateFlowDefinition`'s `shared` context option mirrors the backend's deploy rule with `shared_assignee_names_people`, `shared_cc_names_people`, `shared_fallback_users`, `shared_node_admins` and `shared_timeout_to_admins`. The approval flow designer sets both from the flow's tenant. See [Host Integration](../editors/approval-flow-editor/host-integration.md).
+
+### Fixes worth knowing
+
+- **approval**, **cron**, **integration** — CRUD reads (`find_page`, `find_all`, `find_tree`) send their filters in the request's `meta`, beside the pagination, where the backend decodes them. They used to travel as `params`, which the backend drops, so the filters of the category tree, the delegation list, the cron schedule and run lists and the integration lists had no effect.
+- **approval-flow-editor** — an approval or handle node whose timeout action is `transfer_admin` shows the 节点管理员 picker; it used to appear only for the empty-assignee `transfer_admin` action, though both read `adminUserIds`. `validateFlowDefinition` reports `timeout_admin_users_required` for a node with a deadline that escalates to admins without naming any.
+
 ## v2.25.0 (2026-10-13)
 
 No breaking changes. The form designer gains system variables, host diagnostics, and an option-API catalog, and the approval package wires all three. The approval half needs vef-framework-go v0.57.0 or later, whose start form carries `applicant` and whose instance views carry the form-visible `globals`; against an older server, `$applicant` and `$globals` read as empty.

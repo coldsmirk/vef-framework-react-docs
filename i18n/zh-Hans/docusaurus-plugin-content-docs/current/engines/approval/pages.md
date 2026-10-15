@@ -24,8 +24,9 @@ description: "@vef-framework-react/approval 导出的每一个页面组件——
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `tenantId` | `string` | — | 将列表限定到一个租户；省略则为调用者的完整视图。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在列表上方。 |
+
+列表不带租户参数：显示当前用户自己在所有租户中的任务。查看所有人任务的跨租户视图由[管理控制台](#approvaladminpage)提供。
 
 - **权限:** 无（自助）。
 - **端点:** `approval/my.find_pending_tasks`、`approval/my.find_completed_tasks`、`approval/my.get_pending_counts`；详情抽屉另有 `approval/my.get_instance_detail` 与[实例运行时操作](./reference.md#useinstanceapi)。
@@ -46,8 +47,9 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `tenantId` | `string` | — | 将列表限定到一个租户；省略则为调用者的完整视图。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在列表上方。 |
+
+与任务中心一样，列表显示当前用户自己在所有租户中的申请和抄送。
 
 - **权限:** 无（自助）。
 - **端点:** `approval/my.find_initiated`、`approval/my.find_cc_records`、`approval/my.get_pending_counts`、`approval/instance.mark_cc_read`，以及详情抽屉的端点。
@@ -55,11 +57,10 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 
 ### `ApprovalInitiatePage`
 
-发起门户: 当前用户可发起的每一个流程，按分类分组渲染为可点击卡片（保持服务端顺序），支持关键字搜索与按流程标签筛选。点击卡片打开 `StartInstanceDrawer`。超过 48 个流程时出现分页。
+发起门户: 当前用户可发起的每一个流程——用户所在租户的流程加上全局流程——按分类分组渲染为可点击卡片（保持服务端顺序），支持关键字搜索与按流程标签筛选。点击卡片打开 `StartInstanceDrawer`。超过 48 个流程时出现分页。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `tenantId` | `string` | `"default"` | 提供哪个租户的流程。 |
 | `labels` | `Record<string, string>` | — | 固定的标签预筛选（如 `{ mobile: "" }` 表示只提供可在移动端发起的流程）。与用户自己的标签筛选叠加。 |
 | `title` | `string` | `"发起审批"` | 页面标题。 |
 | `onStarted` | `() => void` | — | 实例提交后触发。 |
@@ -74,8 +75,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `flowCode` | `string \| null` | — | 要发起的流程；`null` 保持抽屉关闭。 |
-| `tenantId` | `string` | — | 流程所属的租户。 |
+| `flowCode` | `string \| null` | — | 要发起的流程；`null` 保持抽屉关闭。在用户所在租户中解析：先取该租户自己的同编码流程，没有再取全局流程。 |
 | `businessRef` | `string` | — | 从宿主业务页面发起业务绑定流程时预填的业务引用。 |
 | `onClose` | `() => void` | — | 关闭处理函数。 |
 | `onStarted` | `() => void` | — | 提交被确认后、抽屉关闭之后触发。 |
@@ -91,7 +91,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<CategoryPermissionCodes>` | `APPROVAL_PERMISSIONS.category` | 覆盖页面用于门控其 CRUD 操作的权限码。 |
-| `tenantId` | `string` | `"default"` | 新分类创建到哪个租户下。多租户宿主传当前租户。 |
+| `tenantId` | `string` | `"default"` | 页面所管理的租户：树中显示该租户的分类，新分类也创建在它下面。分类跨租户管理，由权限把关；传 `SHARED_TENANT_ID` 管理全局分类。 |
 | `columnStorageKey` | `string` | `"approval.category"` | 列设置面板的存储键。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在表格上方。 |
 
@@ -106,7 +106,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<FlowPermissionCodes>` | `APPROVAL_PERMISSIONS.flow` | 覆盖页面用于门控其操作的权限码。 |
-| `tenantId` | `string` | `"default"` | 新流程创建到哪个租户下。 |
+| `tenantId` | `string` | `"default"` | 页面所管理的租户：列表显示该租户的流程，新流程也创建在它下面。流程跨租户管理，由权限把关；传 `SHARED_TENANT_ID` 管理全局流程。 |
 | `columnStorageKey` | `string` | `"approval.flow"` | 列设置面板的存储键。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在表格上方。 |
 
@@ -147,6 +147,7 @@ export const Route = createFileRoute("/_layout/approval/task-center")({
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<DelegationPermissionCodes>` | `APPROVAL_PERMISSIONS.delegation` | 覆盖页面用于门控其 CRUD 操作的权限码。 |
+| `tenantId` | `string` | — | 分类范围选择器提供哪个租户的分类（另加全局分类）；省略则提供所有租户的分类。 |
 | `columnStorageKey` | `string` | `"approval.delegation"` | 列设置面板的存储键。 |
 | `title` | `ReactNode` | — | 可选的页面标题，渲染在表格上方。 |
 

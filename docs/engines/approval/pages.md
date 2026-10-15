@@ -24,8 +24,9 @@ Each list has its own search (v2.23.0). 待办 filters by title, applicant name,
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `tenantId` | `string` | — | Scope the lists to one tenant; omit for the caller's full view. |
 | `title` | `ReactNode` | — | Optional page title rendered above the lists. |
+
+The lists carry no tenant: they show the current user's own tasks in every tenant. A cross-tenant view of everyone's tasks is the [admin console](#approvaladminpage)'s.
 
 - **Permissions:** none (self-service).
 - **Endpoints:** `approval/my.find_pending_tasks`, `approval/my.find_completed_tasks`, `approval/my.get_pending_counts`; the detail drawer adds `approval/my.get_instance_detail` and the [instance runtime actions](./reference.md#useinstanceapi).
@@ -46,8 +47,9 @@ My submissions and my carbon copies, tabbed (我发起的 / 抄送我的, the CC
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `tenantId` | `string` | — | Scope the lists to one tenant; omit for the caller's full view. |
 | `title` | `ReactNode` | — | Optional page title rendered above the lists. |
+
+Like the task center, the lists show the current user's own submissions and copies in every tenant.
 
 - **Permissions:** none (self-service).
 - **Endpoints:** `approval/my.find_initiated`, `approval/my.find_cc_records`, `approval/my.get_pending_counts`, `approval/instance.mark_cc_read`, plus the detail drawer's endpoints.
@@ -55,11 +57,10 @@ My submissions and my carbon copies, tabbed (我发起的 / 抄送我的, the CC
 
 ### `ApprovalInitiatePage`
 
-The initiation portal: every flow the current user may start, rendered as clickable cards grouped by category (preserving the server's order), searchable by keyword and filterable by flow labels. Clicking a card opens `StartInstanceDrawer`. Pagination appears past 48 flows.
+The initiation portal: every flow the current user may start — the flows of the tenant the user acts in plus the shared ones — rendered as clickable cards grouped by category (preserving the server's order), searchable by keyword and filterable by flow labels. Clicking a card opens `StartInstanceDrawer`. Pagination appears past 48 flows.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `tenantId` | `string` | `"default"` | The tenant whose flows are offered. |
 | `labels` | `Record<string, string>` | — | A fixed label pre-filter (e.g. `{ mobile: "" }` to offer only mobile-initiable flows). Combined with the user's own label filter. |
 | `title` | `string` | `"发起审批"` | Page title. |
 | `onStarted` | `() => void` | — | Fired after an instance is submitted. |
@@ -74,8 +75,7 @@ Exported standalone so a business page can launch an approval about one of its o
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `flowCode` | `string \| null` | — | The flow to start; `null` keeps the drawer closed. |
-| `tenantId` | `string` | — | Tenant the flow belongs to. |
+| `flowCode` | `string \| null` | — | The flow to start; `null` keeps the drawer closed. It is resolved in the tenant the user acts in: that tenant's own flow with the code, else the shared one. |
 | `businessRef` | `string` | — | Prefilled business reference for business-bound flows started from a host business page. |
 | `onClose` | `() => void` | — | Close handler. |
 | `onStarted` | `() => void` | — | Fired with the submission acknowledged, after the drawer closes. |
@@ -91,7 +91,7 @@ Full-page flow-category management: the category tree (`find_tree`, non-paginate
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<CategoryPermissionCodes>` | `APPROVAL_PERMISSIONS.category` | Override the permission codes the page gates its CRUD actions on. |
-| `tenantId` | `string` | `"default"` | The tenant new categories are created under. Multi-tenant hosts pass the current tenant. |
+| `tenantId` | `string` | `"default"` | The tenant whose categories the page manages: the tree shows them and new categories are created under it. Categories are managed across tenants, gated by the permissions; pass `SHARED_TENANT_ID` to manage the shared ones. |
 | `columnStorageKey` | `string` | `"approval.category"` | Storage key for the column-settings panel. |
 | `title` | `ReactNode` | — | Optional page title rendered above the table. |
 
@@ -106,7 +106,7 @@ Full-page flow management: the paginated flow list with keyword / category / act
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<FlowPermissionCodes>` | `APPROVAL_PERMISSIONS.flow` | Override the permission codes the page gates its actions on. |
-| `tenantId` | `string` | `"default"` | The tenant new flows are created under. |
+| `tenantId` | `string` | `"default"` | The tenant whose flows the page manages: the list shows them and new flows are created under it. Flows are managed across tenants, gated by the permissions; pass `SHARED_TENANT_ID` to manage the shared ones. |
 | `columnStorageKey` | `string` | `"approval.flow"` | Storage key for the column-settings panel. |
 | `title` | `ReactNode` | — | Optional page title rendered above the table. |
 
@@ -147,6 +147,7 @@ Full-page delegation management: during a delegation's active window, tasks assi
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `permissions` | `Partial<DelegationPermissionCodes>` | `APPROVAL_PERMISSIONS.delegation` | Override the permission codes the page gates its CRUD actions on. |
+| `tenantId` | `string` | — | The tenant whose categories the category scope offers, beside the shared ones; omit to offer every tenant's. |
 | `columnStorageKey` | `string` | `"approval.delegation"` | Storage key for the column-settings panel. |
 | `title` | `ReactNode` | — | Optional page title rendered above the table. |
 
