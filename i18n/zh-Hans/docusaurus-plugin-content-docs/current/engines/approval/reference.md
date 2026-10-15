@@ -64,6 +64,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | `formGlobals` | `FormGlobalDefinition[]` | — | 后端向审批表单暴露的宿主全局变量（其全局变量解析器实现了 `FormGlobalsExposer`），在此声明后，表单设计器会把它们作为 `$globals.<key>` 系统变量，与内置的 `$applicant` 属性并列提供。请让这些 key 与解析器的 `FormGlobalKeys` 保持一致——见[表单系统变量](./overview.md#表单系统变量)。 |
 | `dataSourceResolver` | `DataSourceResolver` | — | 在每一次表单渲染以及表单设计器的预览中，把表单的远程数据源请求解析为选项；未设置时，审批表单中的每个远程来源都解析为空列表。 |
 | `dataSourceApis` | `DataSourceApi[]` | — | 宿主的选项接口目录：表单设计器的远程数据源会以针对它的选择器打头，而不是手填接口地址与字段映射。选中的结果以请求本身的形式存储，因此 `dataSourceResolver` 必须能服务目录中列出的每一个接口——见[提供接口目录](../../editors/form-editor/embedding.md#提供接口目录)。 |
+| `codeSets` | `CodeSetDescriptor[]` | — | 宿主的数据字典目录：表单设计器的「数据字典」选项来源会提供针对它的可搜索选择器，而不是手填 key。选中的结果只保存 key；表单通过应用的 `AppContext.codeSetQueryFn` 加载字典，它必须能服务目录中列出的每个 key——见[数据字典](../../editors/form-editor/embedding.md#数据字典)。 |
 | `evaluators` | `LinkageEvaluators` | 内置 JavaScript evaluator | 覆盖表单联动和绑定数据源参数中的表达式 / 脚本求值（内置求值器的作用域中有 `$form` / `$vars` / `$applicant` / `$globals`），并为 `alert` / `api_call` / `navigate` 提供 `dispatchEffect`。 |
 | `renderBusinessRef` | `(businessRef: string) => ReactNode` | 纯文本 | 把实例的不透明业务引用渲染为宿主可导航的元素（指向业务记录的链接、抽屉触发器……）。 |
 

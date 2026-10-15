@@ -147,18 +147,20 @@ declare module "@vef-framework-react/form-editor" {
 
 ## 选项与数据源
 
-选择类字段的 `dataSource: FieldOptionSource` 是以下三者之一：
+选择类字段的 `dataSource: FieldOptionSource` 是以下四者之一：
 
 ```ts
 type FieldOptionSource =
   | { kind: "static"; options: FieldOption[] }             // inline, resolved synchronously
   | { kind: "ref"; dataSourceId: string }                   // points at FormSchema.dataSources
-  | { kind: "remote"; request: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }; // inline RPC
+  | { kind: "remote"; request: RemoteDataSourceRequest; mapping?: RemoteOptionMapping } // inline RPC
+  | { kind: "codeSet"; codeSet: string };                  // a host data dictionary
 ```
 
 - **`static`**——选项是内联的，同步解析。没有 `dataSource` 的选择类字段相当于一个空的静态列表。
 - **`ref`**——按 id 指向 `FormSchema.dataSources` 中的一个条目。指向静态条目的 `ref` 同步解析；指向远程条目的 `ref` 通过宿主的解析器解析，并且是 `refresh_data_source` 动作唯一能够重新获取的来源类型。悬空的 id 解析为空列表（校验器会给出警告：`data_source_ref_unknown`）。
 - **`remote`**——一个内联请求，通过宿主的解析器解析。
+- **`codeSet`**——宿主数据字典的字典项，按字典 key 引用（设计器里的「数据字典」）。一张表单用到的所有字典通过 `codeSetQueryFn` 一次批量加载——默认是应用的 `AppContext.codeSetQueryFn`——并且只有字典的第一层字典项会成为选项。key 为空时校验器给出警告（`code_set_empty`），解析为空列表。见 [Embedding → 数据字典](./embedding.md#数据字典)。
 
 `FormSchema.dataSources: FormDataSource[]` 保存表单全局、可复用的数据源——`{ id, name, kind: "static", options }` 或 `{ id, name, kind: "remote", request, mapping? }`——供 `ref` 来源指向。设计器在表单配置抽屉的「数据源」页编辑它们；在那里删除一个数据源时，会在同一个撤销步骤中清理所有指向它的 `ref` 以及所有引用它的 `refresh_data_source` 动作。
 

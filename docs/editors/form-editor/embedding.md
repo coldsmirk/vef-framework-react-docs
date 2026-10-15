@@ -43,6 +43,7 @@ Notable `FormEditorProps` (the full table is in the [Reference](./reference.md#f
 - **`evaluators`**, **`dataSourceResolver`**, and **`evaluationContext`** forward into the editor's live preview and its JSON split view, so a custom expression engine, real remote options, and the host's context behave there exactly as at runtime — see [Linkage](./linkage.md) and [Loading remote options](#loading-remote-options). Without a host `dispatchEffect`, the preview shows `alert` / `navigate` / `api_call` effects as toasts.
 - **`contextSources`** declares the host's **system variables** — the context paths (`$applicant.departmentId`, `$globals.region`, …) the 变量 tab lists with preview values and the condition builder offers as sources. See [Linkage → System variables in the designer](./linkage.md#system-variables-in-the-designer).
 - **`dataSourceApis`** turns remote option sources into a pick from the host's API catalog — see [Offering an API catalog](#offering-an-api-catalog).
+- **`codeSets`** and **`codeSetQueryFn`** are the host's data-dictionary catalog, which the 数据字典 option source picks from, and the loader the canvas and the preview read dictionaries through — see [Data dictionaries](#data-dictionaries).
 - **`validate`** adds the host's own checks to the editor's diagnostics and publish gate — see [Host diagnostics](#host-diagnostics).
 
 The built-in toolbar, palette, properties panel, and drawers ship with Chinese UI text (labels like "发布" / "导入" / "导出"). `brand`, `publishText`, and `onPublish` are the toolbar's customization points; a host that needs different chrome copy throughout composes its own shell (below) around the same panels, or supplies its own toolbar entirely.
@@ -216,6 +217,7 @@ Notable `FormRendererProps` (full table in the [Reference](./reference.md#formre
 - **`fieldPermissions`** (v2.10.0) is a server-resolved clamp per field key (`Record<string, FieldPermission>`) — the outer bound that linkage may narrow within but never widen past (`"hidden"` unmounts a field entirely, `"visible"` renders it read-only, `"required"` forces the empty check, `"editable"` is unclamped). The clamp also gates every programmatic write (`assign` / `set_field`) and filters the submit payload down to writable keys. The canonical source is the approval engine resolving one approval node's permission matrix for the current viewer, but any host-resolved map works. See [Linkage → Field permission clamp](./linkage.md#field-permission-clamp).
 - **`apiRef`** exposes `FormRendererApi`: `submit()` (runs the same pipeline as a schema `submit` button), `reset()`, `getValues()` (the raw live state), and `getSubmitValues()` (the exact filtered payload `onSubmit` would receive — v2.10.0) — for host chrome like a modal footer's confirm button.
 - **`evaluators`**, **`dataSourceResolver`**, **`evaluationContext`** mirror the editor's props of the same name and drive the exact same linkage engine — see [Linkage](./linkage.md). The renderer reads `evaluationContext` slot by slot, so passing an inline object literal does not re-render the form each time, and `variables` re-seeds `$vars` only when its content changes.
+- **`codeSetQueryFn`** loads the data dictionaries `codeSet` option sources read, all of them in one call; it defaults to `AppContext.codeSetQueryFn` — see [Data dictionaries](#data-dictionaries).
 - **`containOverlays`** pins mobile overlay pickers (masks/sheets) to the renderer's own box instead of the browser viewport — only meaningful with `device="mobile"`, for a desktop "phone frame" preview.
 
 ### Default values
@@ -416,6 +418,41 @@ With a catalog, both remote-source editors — a form-global data source in the 
 The catalog is **design-time only**. A pick is stored as the request itself, so the schema stays self-contained: the runtime resolver, the [approval projection](../approval-form-bridge.md#remote-option-sources), and every other consumer read the stored request and never need the catalog. A stored request is recognized as an API again by its endpoint — `resource` + `action` + `version`, with an omitted and an empty version the same — so list each endpoint once; a request that matches no entry opens as 自定义接口. Because a pick resolves through `dataSourceResolver` like any request, the resolver must serve every endpoint the catalog lists.
 
 Parameter names, in both editors, are committed when the row loses focus or on Enter, and only when the name is non-blank and not already taken — a "参数名已存在" hint shows while a draft collides — so a rename in progress can never collapse two rows into one or store a parameter named `""`. A new row waits locally until it is named.
+
+## Data dictionaries
+
+A data dictionary (code set) is the most common option source of a business form — gender, employment type, a status list — and an application usually loads its dictionaries through `AppContext.codeSetQueryFn` already, for `useCodeSetQuery`. A selection field reads one directly: choose **数据字典** as its option source and pick the dictionary.
+
+```ts
+{ kind: "codeSet", codeSet: "sys.user.gender" }
+```
+
+- **One batched load per form.** There is no list of dictionaries to declare on the form. `FormRenderer` collects every key its presentation's fields read, subform templates included, and loads them in one call through `codeSetQueryFn`: the prop, otherwise `AppContext.codeSetQueryFn`. The call runs through TanStack Query under the key `useCodeSetQuery` builds for the same dictionaries, so a dictionary already loaded elsewhere in the application is served from the cache. A form that reads no dictionary never touches the query client, and without a query function a `codeSet` field has no options.
+- **Top-level entries only.** Each entry's `label` and `value` become an option; a tree dictionary's `children` are not flattened in, since a select would otherwise list every node of, say, an administrative-division tree.
+- **Table subforms too.** The columns of a table-variant subform read the loaded dictionaries as well, which a remote source cannot offer there.
+
+`codeSetQueryFn` has the `AppContext` contract, `QueryFunction<Record<string, DataOption[]>, string[]>`: given the keys, it answers each key's entries.
+
+```tsx
+// Usually nothing to pass: the application's AppContext.codeSetQueryFn is the default.
+<FormRenderer schema={schema} />
+
+// A form whose dictionaries come from somewhere else.
+<FormRenderer codeSetQueryFn={findFormDictionaries} schema={schema} />
+```
+
+In the designer, `codeSets` (`CodeSetDescriptor[]`, each `{ codeSet, name, group? }`) turns the key into a pick from the host's catalog, searchable by name and key and grouped by `group`. Without a catalog the key is typed, and committed on blur or Enter rather than per keystroke: every committed key is a dictionary the canvas loads. Like `dataSourceApis`, the catalog is design-time only — the schema stores the key alone. `FormEditor`'s own `codeSetQueryFn` is forwarded to the canvas and the preview, so a dictionary-backed select shows its real entries while designing.
+
+```tsx
+const CODE_SETS: CodeSetDescriptor[] = [
+  { codeSet: "sys.user.gender", name: "性别", group: "人事" },
+  { codeSet: "sys.employment_type", name: "用工类型", group: "人事" }
+];
+
+<FormEditor codeSets={CODE_SETS} />;
+```
+
+The [approval projection](../approval-form-bridge.md#data-dictionary-sources) carries a dictionary as `optionSource: { kind: "codeSet", codeSet }`, and the Go backend checks a submitted value against the dictionary when the host registers a `mold.CodeSetLoader` — unlike a remote source, whose values it accepts unchecked.
 
 ## Building custom field renderers
 

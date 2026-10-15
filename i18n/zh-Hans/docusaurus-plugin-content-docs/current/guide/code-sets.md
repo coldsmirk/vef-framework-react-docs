@@ -166,6 +166,8 @@ createEditableColumn<Member>("gender", {
 
 布尔开关是唯一不走码集的枚举——请用 `Bool` / `field.Bool`（固定的 true/false 标签）渲染，而不是定义一个只有两项的码集。
 
+用[表单设计器](../editors/form-editor/overview.md)搭建的表单不需要这些：它的选择类字段直接把码集设为选项来源，表单通过同一个 `codeSetQueryFn` 一次加载它用到的所有码集，并与 `useCodeSetQuery` 共用缓存——见[表单设计器 → 数据字典](../editors/form-editor/embedding.md#数据字典)。
+
 ## 为码集键名提供类型
 
 默认情况下 `CodeSetKey` 就是 `string`——任何键名都能通过编译，拼写错误只会在运行时表现为一个空的下拉框。hooks 包提供了一个扩展注册表来弥补这一缺口：为 `Register` 扩充 `codeSetKeys` 成员后，所有码集 hook 都会收窄到该联合类型，并在 IDE 中获得键名自动补全：

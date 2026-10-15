@@ -54,6 +54,7 @@ And the host feeds the designer what only it knows:
 
 - **System variables** — `contextSources` declares the context paths the host supplies at runtime (the initiator as `$applicant.*`, host globals as `$globals.*`, …). The designer lists them beside the form's own variables, with preview values, and offers them as condition sources — see [Linkage → Host context and system variables](./linkage.md#host-context-and-system-variables).
 - **An API catalog** — `dataSourceApis` turns a remote option source from a hand-typed endpoint and field mapping into a pick from the endpoints the host maintains — see [Embedding → Offering an API catalog](./embedding.md#offering-an-api-catalog).
+- **Data dictionaries** — a selection field reads a host dictionary directly, picked from the host's `codeSets` catalog; every dictionary a form reads loads in one batched call through `AppContext.codeSetQueryFn` — see [Embedding → Data dictionaries](./embedding.md#data-dictionaries).
 - **Its own checks** — `validate` adds the host's contract (say, field types a backend rejects) to the designer's diagnostics and publish gate — see [Embedding → Host diagnostics](./embedding.md#host-diagnostics).
 
 ## Where it fits

@@ -43,6 +43,7 @@ function FormDesignerPage() {
 - **`evaluators`**、**`dataSourceResolver`**、**`evaluationContext`** 会转发给编辑器的实时预览及其 JSON 分屏视图，因此自定义表达式引擎、真实的远程选项和宿主上下文在那里的表现与运行时完全一致——见 [Linkage](./linkage.md) 与[加载远程选项](#加载远程选项)。在宿主没有提供 `dispatchEffect` 时，预览会把 `alert` / `navigate` / `api_call` 副作用显示为提示消息。
 - **`contextSources`** 声明宿主的**系统变量**——「变量」页会连同预览值一起列出、条件构建器会作为来源提供的那些上下文路径（`$applicant.departmentId`、`$globals.region`……）。见 [Linkage → 设计器中的系统变量](./linkage.md#设计器中的系统变量)。
 - **`dataSourceApis`** 把远程选项来源变成从宿主接口目录中挑选——见[提供接口目录](#提供接口目录)。
+- **`codeSets`** 和 **`codeSetQueryFn`** 分别是宿主的数据字典目录（「数据字典」选项来源从中挑选）和画布、预览读取字典所用的加载函数——见[数据字典](#数据字典)。
 - **`validate`** 把宿主自己的检查加进编辑器的诊断与发布关卡——见[宿主诊断](#宿主诊断)。
 
 内置的工具栏、组件面板、属性面板与各个抽屉的 UI 文案都是中文（例如"发布" / "导入" / "导出"这类标签）。`brand`、`publishText` 和 `onPublish` 是工具栏的定制入口；如果宿主需要在全局范围内替换不同的界面文案，可以围绕相同的面板组合出自己的外壳（见下文），或者完全提供自己的工具栏。
@@ -216,6 +217,7 @@ function ApplicationForm({ schema }: { schema: FormSchema }) {
 - **`fieldPermissions`**（v2.10.0）是服务端为每个字段 key 解析出的钳制（`Record<string, FieldPermission>`）——它是联动可以在其内部收窄、但永远不能突破的外层边界（`"hidden"` 会彻底卸载该字段，`"visible"` 会将其渲染为只读，`"required"` 会强制执行非空校验，`"editable"` 则不受钳制）。这层钳制同样把关每一次程序化写入（`assign` / `set_field`），并把提交负载过滤到只剩可写的 key。其标准来源是审批引擎为当前查看者解析出的某个审批节点的权限矩阵，但任何宿主侧解析出的映射都可以。见 [Linkage → 字段权限钳制](./linkage.md#字段权限钳制)。
 - **`apiRef`** 暴露 `FormRendererApi`：`submit()`（运行与 schema 中 `submit` 按钮相同的流程）、`reset()`、`getValues()`（原始的实时状态），以及 `getSubmitValues()`（`onSubmit` 此刻将收到的、经过滤后的精确载荷——v2.10.0）——供模态框底部确认按钮之类的宿主界面元素使用。
 - **`evaluators`**、**`dataSourceResolver`**、**`evaluationContext`** 与编辑器同名属性一一对应，驱动的是完全相同的联动引擎——见 [Linkage](./linkage.md)。渲染器按插槽逐个读取 `evaluationContext`，因此传入内联对象字面量不会让表单每次都重新渲染；`variables` 也只有在内容变化时才会重新播种 `$vars`。
+- **`codeSetQueryFn`** 加载 `codeSet` 选项来源引用的数据字典，一次加载全部；默认是 `AppContext.codeSetQueryFn`——见[数据字典](#数据字典)。
 - **`containOverlays`** 会将移动端浮层选择器（遮罩/弹出层）固定在渲染器自身的盒子内，而不是浏览器视口——只在 `device="mobile"` 时有意义，用于桌面端的"手机边框"预览场景。
 
 ### 默认值
@@ -416,6 +418,41 @@ const FORM_DATA_SOURCE_APIS: DataSourceApi[] = [
 接口目录**只在设计时使用**。选中的结果以请求本身的形式存储，因此 schema 是自包含的：运行时解析器、[审批投影](../approval-form-bridge.md#远程选项来源)以及其他所有消费者读的都是存下来的请求，永远不需要接口目录。一个已存储的请求靠接口地址——`resource` + `action` + `version`，其中省略的 version 与空 version 视为相同——被重新识别为某个接口，因此每个接口地址在目录中只应出现一次；不匹配任何条目的请求会以「自定义接口」打开。由于选中的接口与其他请求一样经由 `dataSourceResolver` 解析，解析器必须能服务目录中列出的每一个接口。
 
 两种编辑器中的参数名都在失焦或按回车时才提交，并且只有在非空且未被占用时才会提交——草稿与已有参数名冲突时会显示"参数名已存在"——因此改名进行到一半时，永远不会把两行合并成一行，也不会存下一个名为 `""` 的参数。新添加的行在命名之前只保存在本地。
+
+## 数据字典
+
+数据字典（code set）是业务表单最常见的选项来源——性别、用工类型、各种状态——而应用通常已经通过 `AppContext.codeSetQueryFn` 为 `useCodeSetQuery` 加载字典了。选择类字段可以直接读取字典：把选项来源选为 **数据字典**，再选中具体的字典。
+
+```ts
+{ kind: "codeSet", codeSet: "sys.user.gender" }
+```
+
+- **每张表单只批量加载一次。** 表单上不需要声明字典列表。`FormRenderer` 会收集当前展示中所有字段（含子表单模板）引用的字典 key，通过 `codeSetQueryFn` 一次加载：优先用该属性，否则用 `AppContext.codeSetQueryFn`。加载走 TanStack Query，查询 key 与 `useCodeSetQuery` 为相同字典构造的一致，所以应用里别处已经加载过的字典直接命中缓存。不引用任何字典的表单完全不会用到 query client；没有查询函数时，`codeSet` 字段没有选项。
+- **只取第一层字典项。** 每个字典项的 `label` 和 `value` 成为一个选项；树形字典的 `children` 不会被展开进来，否则一个下拉框会列出比如整棵行政区划树的所有节点。
+- **表格子表单同样可用。** 表格形态子表单的列也会读取已加载的字典——远程来源在那里做不到这一点。
+
+`codeSetQueryFn` 与 `AppContext` 中的约定相同，即 `QueryFunction<Record<string, DataOption[]>, string[]>`：传入一组 key，返回每个 key 的字典项。
+
+```tsx
+// 通常什么都不用传：默认就是应用的 AppContext.codeSetQueryFn。
+<FormRenderer schema={schema} />
+
+// 字典来自别处的表单。
+<FormRenderer codeSetQueryFn={findFormDictionaries} schema={schema} />
+```
+
+在设计器里，`codeSets`（`CodeSetDescriptor[]`，每项为 `{ codeSet, name, group? }`）把 key 变成从宿主字典目录中挑选，支持按名称和 key 搜索，并按 `group` 分组。没有目录时手工输入 key，在失焦或回车时提交而不是每次按键提交：每个已提交的 key 都是画布要加载的字典。与 `dataSourceApis` 一样，目录只在设计期使用——schema 只保存 key。`FormEditor` 自己的 `codeSetQueryFn` 会转发给画布和预览，因此设计时，基于字典的下拉框就能显示真实的字典项。
+
+```tsx
+const CODE_SETS: CodeSetDescriptor[] = [
+  { codeSet: "sys.user.gender", name: "性别", group: "人事" },
+  { codeSet: "sys.employment_type", name: "用工类型", group: "人事" }
+];
+
+<FormEditor codeSets={CODE_SETS} />;
+```
+
+[审批投影](../approval-form-bridge.md#数据字典来源)把字典输出为 `optionSource: { kind: "codeSet", codeSet }`；宿主注册了 `mold.CodeSetLoader` 时，Go 后端会按字典校验提交的值——这一点与远程来源不同，远程来源的值后端不做校验。
 
 ## 构建自定义字段渲染器
 

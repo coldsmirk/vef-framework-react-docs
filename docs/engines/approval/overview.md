@@ -62,6 +62,7 @@ The resolved plugin set (`ResolvedApprovalPlugins`) always contains form `regist
 | `formGlobals` | The form designer's system variables, offered as `$globals.<key>` beside the built-in `$applicant` attributes | Only the applicant attributes offered |
 | `dataSourceResolver` | Every form render and the form designer's preview — resolves remote option sources | Remote sources resolve to an empty list |
 | `dataSourceApis` | The form designer's remote option sources, which lead with a picker over the catalog | Endpoints and field mappings are typed by hand |
+| `codeSets` | The form designer's 数据字典 option source, which picks from the catalog | Dictionary keys are typed by hand |
 | `evaluators` | Every form render and the form designer's preview — expression / script evaluation and host effects | The built-in JavaScript evaluator; `alert` / `api_call` / `navigate` are no-ops at runtime |
 | `renderBusinessRef` | Instance detail headers | Business ref rendered as plain code text |
 
@@ -71,7 +72,7 @@ The resolved plugin set (`ResolvedApprovalPlugins`) always contains form `regist
 
 The flow designer inside [`ApprovalFlowPage`](./pages.md#approvalflowpage) is a four-step wizard (settings → form → flow → review) that embeds:
 
-- [`FormEditor`](../../editors/form-editor/overview.md) for the form step, wired from the provider: its `registries`, `dataSourceResolver`, `dataSourceApis`, and `evaluators`, the [form system variables](#form-system-variables) as `contextSources`, and [`validateApprovalProjection`](../../editors/approval-form-bridge.md#validateapprovalprojection) as `validate` — so approval-contract problems appear in the editor's own status bar, each one clickable to its field;
+- [`FormEditor`](../../editors/form-editor/overview.md) for the form step, wired from the provider: its `registries`, `dataSourceResolver`, `dataSourceApis`, `codeSets`, and `evaluators`, the [form system variables](#form-system-variables) as `contextSources`, and [`validateApprovalProjection`](../../editors/approval-form-bridge.md#validateapprovalprojection) as `validate` — so approval-contract problems appear in the editor's own status bar, each one clickable to its field;
 - [`ApprovalFlowEditor`](../../editors/approval-flow-editor/overview.md) for the flow step;
 - [`approval-form-bridge`](../../editors/approval-form-bridge.md)'s `projectFormSchema` / `validateApprovalSchema` as the seam between them — the projected `FormFieldDefinition[]` feeds the flow editor's condition/permission surfaces, and both editors' validations gate the wizard's step transitions.
 

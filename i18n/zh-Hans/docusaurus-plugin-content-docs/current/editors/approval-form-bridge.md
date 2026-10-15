@@ -86,10 +86,10 @@ interface ProjectionResult {
 | `ApprovalFieldKind` | `"input" \| "textarea" \| "select" \| "number" \| "date" \| "upload" \| "table"` |
 | `ApprovalFieldOption` | `{ label: string; value: unknown }` |
 | `ApprovalValidationRule` | `{ minLength?, maxLength?, min?, max?, pattern?, message? }`——在 `table` 字段上，`minLength` / `maxLength` 约束的是行数，而不是字符串长度 |
-| `ApprovalFieldOptionSource` | `{ kind: ApprovalOptionSourceKind; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }`——`request` / `mapping` 直接复用 form-editor 自己的类型，原样转发 |
-| `ApprovalOptionSourceKind` | `"remote"`——刻意比设计器的数据源联合类型更窄，见[远程选项来源](#远程选项来源) |
+| `ApprovalFieldOptionSource` | `{ kind: ApprovalOptionSourceKind; request?: RemoteDataSourceRequest; mapping?: RemoteOptionMapping; codeSet?: string }`——`request` / `mapping` 直接复用 form-editor 自己的类型，原样转发 |
+| `ApprovalOptionSourceKind` | `"remote" \| "codeSet"`——刻意比设计器的数据源联合类型更窄，见[远程选项来源](#远程选项来源)与[数据字典来源](#数据字典来源) |
 
-`options` 只会在一个 `select` 字段的数据源是内联的 `static` 列表、或指向某个表单全局 `static` 数据源的 `ref` 时才会被填充。一个选项无法被枚举出来的数据源——`remote` 数据源，无论是内联的还是经由 `ref` 抵达的——转而投影出 [`optionSource`](#远程选项来源)；而一个悬空的 `ref` 或未知 kind 则两者都不投影。以上每一种情况仍然会抛出 `options_not_static`，后端也仍然会接受该字段提交的任意值，因为它的 select 校验只读 `options`。`columnType` 对应后端的 `ColumnDataType`，只在 `table` 存储模式下才有意义；设计器的显式覆盖值总是被尊重，但一个没有配置 `precision` 的 number 字段会刻意**不**输出 `columnType`（按控件推断出的 `"integer"` 会让 Go 运行时拒绝小数值，因此后端会回退到一个不设门槛的数值列）。一个没有配置 `precision` 的 `decimal` 列会抛出 `decimal_scale_missing`（一个 warning——存储层会四舍五入到 0 位小数）；配置了正数 `precision` 时，它会作为 `scale` 输出。`defaultValue` 和 `props` 存在于线上格式契约中，但投影器永远不会输出它们——声明它们是为了让手工构建或经宿主补充的定义能够无损往返。
+`options` 只会在一个 `select` 字段的数据源是内联的 `static` 列表、或指向某个表单全局 `static` 数据源的 `ref` 时才会被填充。一个选项无法被枚举出来的数据源——`remote` 数据源，无论是内联的还是经由 `ref` 抵达的——转而投影出 [`optionSource`](#远程选项来源)；而一个悬空的 `ref` 或未知 kind 则两者都不投影。以上每一种情况仍然会抛出 `options_not_static`，后端也仍然会接受该字段提交的任意值，因为它的 select 校验只读 `options`。[数据字典](#数据字典来源)同样投影出 `optionSource`，但不会抛出任何 issue：后端会按字典校验它的值。`columnType` 对应后端的 `ColumnDataType`，只在 `table` 存储模式下才有意义；设计器的显式覆盖值总是被尊重，但一个没有配置 `precision` 的 number 字段会刻意**不**输出 `columnType`（按控件推断出的 `"integer"` 会让 Go 运行时拒绝小数值，因此后端会回退到一个不设门槛的数值列）。一个没有配置 `precision` 的 `decimal` 列会抛出 `decimal_scale_missing`（一个 warning——存储层会四舍五入到 0 位小数）；配置了正数 `precision` 时，它会作为 `scale` 输出。`defaultValue` 和 `props` 存在于线上格式契约中，但投影器永远不会输出它们——声明它们是为了让手工构建或经宿主补充的定义能够无损往返。
 
 ### 远程选项来源
 
@@ -112,6 +112,16 @@ interface ApprovalFieldOptionSource {
 这份描述符服务的消费场景是**展示，不是校验**。一个列表视图渲染已存储的 `select` 值时，手上只有 id（`"dept-7"`），需要的是标签（`"Cardiology"`）。静态数据源的标签就摆在 `options` 里；而远程数据源过去在定义里什么都没留下，于是列表要么显示原始 id，要么把设计器早已写好的那个请求再硬编码一遍。`optionSource` 把两半都交了出来——要调用的 request，以及读取响应所需的 `labelKey` / `valueKey` 映射。
 
 后端依旧永远不会去解析它，它也不会让某个值变得"被校验过"：远程数据源的字段仍然接受任意提交值，和以前完全一样。
+
+### 数据字典来源
+
+选项来自宿主数据字典的字段（`{ kind: "codeSet", codeSet }`——见[数据字典](./form-editor/embedding.md#数据字典)）会投影出它引用的字典：
+
+```ts
+{ kind: "codeSet", codeSet: "sys.user.gender" }
+```
+
+与远程来源不同，它会被校验：宿主注册了 `mold.CodeSetLoader` 时，Go 后端会拒绝不在字典编码中的提交值——多选的每一项、明细表格的每个单元格都一样——所以投影不会抛出 `options_not_static`。列表视图翻译已存储的值时，一个字典查一次就能翻译整列，因为字典没有参数。设计器里尚未选择字典的字段依然会被输出，形如不带 key 的 `{ kind: "codeSet" }`（Go 的 `omitempty` 会去掉空 key），这样 Go 的部署校验才能点名它。
 
 ## `validateApprovalSchema`
 
@@ -192,7 +202,7 @@ function ApprovalFormDesigner() {
 | `cross_device_kind_mismatch` | error | 同一个字段 key 在 pc 与 mobile 上映射到了不同的 kind。 |
 | `cross_device_table_mismatch` | error | 某个子表单的列集合在 pc 与 mobile 之间不一致。 |
 | `decimal_scale_missing` | warning | 某个 `decimal` 列没有配置精度；存储时会四舍五入到 0 位小数。 |
-| `options_not_static` | warning | 某个 select 字段的选项来自非 static 数据源；投影会省略它们——数据源是远程时会输出 [`optionSource`](#远程选项来源)——后端会接受任意提交值。 |
+| `options_not_static` | warning | 某个 select 字段的选项来自数据字典以外的非 static 数据源；投影会省略它们——数据源是远程时会输出 [`optionSource`](#远程选项来源)——后端会接受任意提交值。 |
 | `linkage_not_projected` | warning | 该字段带有审批后端不会求值的联动规则——一个被联动隐藏的字段仍会从提交负载中丢掉自己的值，这可能与一个静态的 `isRequired` 相冲突。 |
 
 ## 端到端示例

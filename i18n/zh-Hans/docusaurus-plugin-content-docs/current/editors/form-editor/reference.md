@@ -39,6 +39,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `evaluators` | `LinkageEvaluators` | 转发给实时预览与 JSON 视图——见 [Linkage](./linkage.md#可插拔求值器)。没有 `dispatchEffect` 时，预览会把 `alert` / `navigate` / `api_call` 显示为提示消息。 |
 | `dataSourceResolver` | `DataSourceResolver` | 转发给实时预览与 JSON 视图——见 [Embedding](./embedding.md#加载远程选项)。 |
 | `dataSourceApis` | `DataSourceApi[]` | 宿主的选项接口目录；远程选项来源会以针对它的选择器打头。仅在设计时使用——见 [Embedding → 提供接口目录](./embedding.md#提供接口目录)。 |
+| `codeSets` | `CodeSetDescriptor[]` | 宿主的数据字典目录；「数据字典」选项来源从中挑选，而不是手填 key。仅在设计时使用——见 [Embedding → 数据字典](./embedding.md#数据字典)。 |
+| `codeSetQueryFn` | `CodeSetQueryFn` | 转发给画布、实时预览与 JSON 视图。默认 `AppContext.codeSetQueryFn`——见 [Embedding → 数据字典](./embedding.md#数据字典)。 |
 | `evaluationContext` | `EvaluationContext` | 转发给实时预览与 JSON 视图，并叠加「变量」页中的预览值——见 [Linkage](./linkage.md#宿主上下文与系统变量)。 |
 | `contextSources` | `LinkageContextSource[]` | 表单的系统变量：在「变量」页中连同预览值一起列出，并由条件构建器作为来源提供——见 [Linkage](./linkage.md#设计器中的系统变量)。仅在设计时使用。 |
 | `validate` | `SchemaValidator` | 宿主自己的检查，只在 schema 没有结构性 error 时调用；它的问题会进入状态栏诊断与发布关卡。请传入稳定的函数——见 [Embedding → 宿主诊断](./embedding.md#宿主诊断)。 |
@@ -82,6 +84,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `fieldPermissions` | `Record<string, FieldPermission>` | 服务端解析的钳制——见 [Linkage](./linkage.md#字段权限钳制)。 |
 | `evaluators` | `LinkageEvaluators` | 见 [Linkage](./linkage.md#可插拔求值器)。 |
 | `dataSourceResolver` | `DataSourceResolver` | 见 [Embedding](./embedding.md#加载远程选项)。默认 `noopDataSourceResolver`。 |
+| `codeSetQueryFn` | `CodeSetQueryFn` | 一次加载表单中 `codeSet` 来源引用的全部数据字典。默认 `AppContext.codeSetQueryFn`——见 [Embedding → 数据字典](./embedding.md#数据字典)。 |
 | `evaluationContext` | `EvaluationContext` | 见 [Linkage](./linkage.md#宿主上下文与系统变量)。按插槽逐个读取；`variables` 只在内容变化时重新播种 `$vars`。 |
 | `onSubmit` | `(values: Record<string, unknown>) => void \| Promise<void>` | 在校验与 `beforeSubmit` 之后收到过滤后的载荷——见 [Embedding → 提交](./embedding.md#提交)。 |
 | `apiRef` | `Ref<FormRendererApi>` | 见下文。 |
@@ -248,6 +251,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `RemoteOptionMapping`（类型） | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` —— `labelKey` / `valueKey` 默认为 `"label"` / `"value"` |
 | `normalizeOptionMapping` | `(mapping: RemoteOptionMapping \| undefined) => RemoteOptionMapping \| undefined` —— 去掉空白与只含空白的 key，其余去除首尾空白，什么都不剩时返回 `undefined`；见 [Schema → 选项与数据源](./schema.md#选项与数据源) |
 | `DataSourceApi`（类型） | `{ label: string; description?: string; group?: string; resource: string; action: string; version?: string; mapping?: RemoteOptionMapping; params?: DataSourceApiParam[] }` —— 设计器接口目录中的一个条目；见 [Embedding → 提供接口目录](./embedding.md#提供接口目录) |
+| `CodeSetQueryFn`（类型） | `QueryFunction<Record<string, DataOption[]>, string[]>`——即 `AppContext.codeSetQueryFn` 的约定：传入一组字典 key，返回每个 key 的字典项 |
+| `CodeSetDescriptor`（类型） | `{ codeSet: string; name: string; group?: string }`——设计器数据字典目录中的一项 |
 | `DataSourceApiParam`（类型） | `{ name: string; label?: string; description?: string; required?: boolean; defaultValue?: DynamicValue }` —— 接口声明的一个参数 |
 
 ## 移动端
@@ -286,7 +291,8 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `StackSlot` | `{ width?: CssLength; minWidth?: CssLength; maxWidth?: CssLength; align?: "start" \| "center" \| "end" }` |
 | `ColumnDataType` | `"string" \| "text" \| "integer" \| "decimal" \| "boolean" \| "date" \| "datetime" \| "json"` |
 | `FieldOption` | `{ label: string; value: string \| number }` |
-| `FieldOptionSource` | `StaticOptionSource \| RefOptionSource \| RemoteOptionSource`（`kind: "static" \| "ref" \| "remote"`） |
+| `FieldOptionSource` | `StaticOptionSource \| RefOptionSource \| RemoteOptionSource \| CodeSetOptionSource`（`kind: "static" \| "ref" \| "remote" \| "codeSet"`） |
+| `CodeSetOptionSource` | `{ kind: "codeSet"; codeSet: string }`——按 key 引用的宿主数据字典；见 [Embedding → 数据字典](./embedding.md#数据字典) |
 | `FormDataSource` | `StaticDataSource \| RemoteDataSource`（各自为 `{ id, name, kind, ... }`） |
 | `FormVariable` | `{ id, name, type: "string" \| "number" \| "boolean" \| "json", defaultValue? }` —— `name` 为标识符形态（`^[A-Za-z_]\w*$`）且唯一；见 [Schema → 表单变量](./schema.md#表单变量) |
 
@@ -498,6 +504,7 @@ description: "@vef-framework-react/form-editor 的精简导出、属性与类型
 | `target_key_unresolved` | warning | `set_field` 的目标在规则的值作用域中找不到对应的带 key 节点。 |
 | `variable_empty` | warning | `set_variable` 没有填写变量名。 |
 | `data_source_id_empty` | warning | `refresh_data_source` 动作或 `ref` 选项来源尚未选择数据源。 |
+| `code_set_empty` | warning | `codeSet` 选项来源尚未选择字典。 |
 | `value_malformed` | error | 动作取值不是 `literal` / `expression` 形态。 |
 | `alert_level_invalid` | error | `alert` 的 `level` 不在 `ALERT_LEVELS` 中。 |
 | `retrigger_invalid` | error | `retrigger` 不是 `"edge"` / `"always"`。 |

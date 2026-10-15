@@ -13,6 +13,30 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
+## v2.29.0（2026-10-15）
+
+选择类字段可以直接读取宿主数据字典。无破坏性变更；后端按字典校验取值需要 vef-framework-go v0.63.0 或更高版本。
+
+### 新特性
+
+- **form-editor** — 新增第四种选项来源「数据字典」：`{ kind: "codeSet", codeSet }` 引用一个宿主数据字典（code set），可用于下拉、单选、多选，明细表格列也可以。表单不需要声明字典列表：`FormRenderer` 收集所有字段引用的 key，通过新的 `codeSetQueryFn` 属性一次加载——默认是应用的 `AppContext.codeSetQueryFn`，查询 key 与 `useCodeSetQuery` 构造的一致，已加载过的字典直接命中缓存。只有字典的第一层字典项会成为选项。尚未选择字典时校验器给出警告（`code_set_empty`）。见[数据字典](../editors/form-editor/embedding.md#数据字典)。
+
+  ```tsx
+  // 字段
+  { id: "Field_gender", type: "select", key: "gender", label: "性别", dataSource: { kind: "codeSet", codeSet: "sys.user.gender" } }
+
+  // 运行时：已配置 AppContext.codeSetQueryFn 时无需额外接线
+  <FormRenderer schema={schema} />
+  ```
+- **form-editor** — `FormEditor.codeSets`（`CodeSetDescriptor[]`）是宿主的字典目录：「数据字典」来源从中挑选，支持按名称和 key 搜索；没有目录时手工输入 key。`FormEditor.codeSetQueryFn` 会传到画布和预览，基于字典的下拉框在设计时就显示真实字典项。
+- **approval** — `ApprovalPlugins.codeSets` 把字典目录交给流程设计器的表单步骤。
+- **approval-form-bridge** — 字典投影为 `optionSource: { kind: "codeSet", codeSet }`（`ApprovalOptionSourceKind` 新增 `"codeSet"`），不会抛出 `options_not_static`：Go 后端会按字典校验提交的值。见[数据字典来源](../editors/approval-form-bridge.md#数据字典来源)。
+
+### 值得关注的修复
+
+- **form-editor** — 选项来源切换项改为 静态选项 / 数据源 / 远程请求 / 数据字典：原来的「引用数据源」按它所指向的「数据源」页改名，属性面板才放得下四个选项。
+- **form-editor** — 对 `FieldOptionSource["kind"]`（或 `ApprovalOptionSourceKind`）做穷举 `switch` 的代码需要补上 `"codeSet"` 分支。
+
 ## v2.28.0（2026-10-15）
 
 全局流程改为由所属租户共享出来的流程，而不再是保留租户下的流程。approval 包有破坏性变更，需要 vef-framework-go v0.62.0 或更高版本。

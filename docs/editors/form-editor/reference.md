@@ -39,6 +39,8 @@ Extends `FormEditorProviderProps` (below) plus:
 | `evaluators` | `LinkageEvaluators` | Forwarded to the live preview and JSON view — see [Linkage](./linkage.md#pluggable-evaluators). Without a `dispatchEffect`, the preview shows `alert` / `navigate` / `api_call` as toasts. |
 | `dataSourceResolver` | `DataSourceResolver` | Forwarded to the live preview and JSON view — see [Embedding](./embedding.md#loading-remote-options). |
 | `dataSourceApis` | `DataSourceApi[]` | The host's option-API catalog; remote option sources lead with a picker over it. Design-time only — see [Embedding → Offering an API catalog](./embedding.md#offering-an-api-catalog). |
+| `codeSets` | `CodeSetDescriptor[]` | The host's data-dictionary catalog; the 数据字典 option source picks from it instead of a typed key. Design-time only — see [Embedding → Data dictionaries](./embedding.md#data-dictionaries). |
+| `codeSetQueryFn` | `CodeSetQueryFn` | Forwarded to the canvas, the live preview and the JSON view. Default `AppContext.codeSetQueryFn` — see [Embedding → Data dictionaries](./embedding.md#data-dictionaries). |
 | `evaluationContext` | `EvaluationContext` | Forwarded to the live preview and JSON view, with the 变量 tab's preview values laid over it — see [Linkage](./linkage.md#host-context-and-system-variables). |
 | `contextSources` | `LinkageContextSource[]` | The form's system variables: listed in the 变量 tab with preview values and offered by the condition builder — see [Linkage](./linkage.md#system-variables-in-the-designer). Design-time only. |
 | `validate` | `SchemaValidator` | The host's own checks, called only for a schema free of structural errors; its issues join the status-bar diagnostics and the publish gate. Pass a stable function — see [Embedding → Host diagnostics](./embedding.md#host-diagnostics). |
@@ -82,6 +84,7 @@ Extends `FormEditorProviderProps` (below) plus:
 | `fieldPermissions` | `Record<string, FieldPermission>` | Server-resolved clamp — see [Linkage](./linkage.md#field-permission-clamp). |
 | `evaluators` | `LinkageEvaluators` | See [Linkage](./linkage.md#pluggable-evaluators). |
 | `dataSourceResolver` | `DataSourceResolver` | See [Embedding](./embedding.md#loading-remote-options). Default `noopDataSourceResolver`. |
+| `codeSetQueryFn` | `CodeSetQueryFn` | Loads every data dictionary the form's `codeSet` sources read, in one call. Default `AppContext.codeSetQueryFn` — see [Embedding → Data dictionaries](./embedding.md#data-dictionaries). |
 | `evaluationContext` | `EvaluationContext` | See [Linkage](./linkage.md#host-context-and-system-variables). Read slot by slot; `variables` re-seeds `$vars` only on a content change. |
 | `onSubmit` | `(values: Record<string, unknown>) => void \| Promise<void>` | Receives the filtered payload after validation and `beforeSubmit` — see [Embedding → Submission](./embedding.md#submission). |
 | `apiRef` | `Ref<FormRendererApi>` | See below. |
@@ -248,6 +251,8 @@ Built-in property-entry renderer components (each `FC<EntryComponentProps>`), re
 | `RemoteOptionMapping` (type) | `{ labelKey?: string; valueKey?: string; disabledKey?: string; descriptionKey?: string }` — `labelKey` / `valueKey` default to `"label"` / `"value"` |
 | `normalizeOptionMapping` | `(mapping: RemoteOptionMapping \| undefined) => RemoteOptionMapping \| undefined` — drops blank and whitespace-only keys, trims the rest, returns `undefined` when nothing is left; see [Schema → Options and data sources](./schema.md#options-and-data-sources) |
 | `DataSourceApi` (type) | `{ label: string; description?: string; group?: string; resource: string; action: string; version?: string; mapping?: RemoteOptionMapping; params?: DataSourceApiParam[] }` — one entry of the designer's API catalog; see [Embedding → Offering an API catalog](./embedding.md#offering-an-api-catalog) |
+| `CodeSetQueryFn` (type) | `QueryFunction<Record<string, DataOption[]>, string[]>` — the `AppContext.codeSetQueryFn` contract: given code set keys, answers each key's entries |
+| `CodeSetDescriptor` (type) | `{ codeSet: string; name: string; group?: string }` — one entry of the designer's data-dictionary catalog |
 | `DataSourceApiParam` (type) | `{ name: string; label?: string; description?: string; required?: boolean; defaultValue?: DynamicValue }` — a parameter an API declares |
 
 ## Mobile
@@ -286,7 +291,8 @@ See [Schema](./schema.md) for the narrative model. Top-level and supporting type
 | `StackSlot` | `{ width?: CssLength; minWidth?: CssLength; maxWidth?: CssLength; align?: "start" \| "center" \| "end" }` |
 | `ColumnDataType` | `"string" \| "text" \| "integer" \| "decimal" \| "boolean" \| "date" \| "datetime" \| "json"` |
 | `FieldOption` | `{ label: string; value: string \| number }` |
-| `FieldOptionSource` | `StaticOptionSource \| RefOptionSource \| RemoteOptionSource` (`kind: "static" \| "ref" \| "remote"`) |
+| `FieldOptionSource` | `StaticOptionSource \| RefOptionSource \| RemoteOptionSource \| CodeSetOptionSource` (`kind: "static" \| "ref" \| "remote" \| "codeSet"`) |
+| `CodeSetOptionSource` | `{ kind: "codeSet"; codeSet: string }` — a host data dictionary by key; see [Embedding → Data dictionaries](./embedding.md#data-dictionaries) |
 | `FormDataSource` | `StaticDataSource \| RemoteDataSource` (each `{ id, name, kind, ... }`) |
 | `FormVariable` | `{ id, name, type: "string" \| "number" \| "boolean" \| "json", defaultValue? }` — `name` is identifier-shaped (`^[A-Za-z_]\w*$`) and unique; see [Schema → Form variables](./schema.md#form-variables) |
 
@@ -498,6 +504,7 @@ Other types: `FieldLinkage`, `FieldLinkageRule`, `FieldLinkageAction`, `FieldLin
 | `target_key_unresolved` | warning | A `set_field` target names no keyed node in the rule's value scope. |
 | `variable_empty` | warning | A `set_variable` has no variable name. |
 | `data_source_id_empty` | warning | A `refresh_data_source` action, or a `ref` option source, has no data source selected. |
+| `code_set_empty` | warning | A `codeSet` option source has no dictionary selected. |
 | `value_malformed` | error | An action value is not a `literal` / `expression` shape. |
 | `alert_level_invalid` | error | An `alert`'s `level` is not one of `ALERT_LEVELS`. |
 | `retrigger_invalid` | error | `retrigger` is not `"edge"` / `"always"`. |

@@ -153,12 +153,14 @@ A selection field's `dataSource: FieldOptionSource` is one of:
 type FieldOptionSource =
   | { kind: "static"; options: FieldOption[] }             // inline, resolved synchronously
   | { kind: "ref"; dataSourceId: string }                   // points at FormSchema.dataSources
-  | { kind: "remote"; request: RemoteDataSourceRequest; mapping?: RemoteOptionMapping }; // inline RPC
+  | { kind: "remote"; request: RemoteDataSourceRequest; mapping?: RemoteOptionMapping } // inline RPC
+  | { kind: "codeSet"; codeSet: string };                  // a host data dictionary
 ```
 
 - **`static`** — the options are inline and resolve synchronously. A selection field with no `dataSource` has an empty static list.
 - **`ref`** — points at an entry of `FormSchema.dataSources` by id. A `ref` to a static entry resolves synchronously; a `ref` to a remote entry resolves through the host's resolver and is the only kind of source a `refresh_data_source` action can re-fetch. A dangling id resolves to an empty list (the validator warns: `data_source_ref_unknown`).
 - **`remote`** — an inline request, resolved through the host's resolver.
+- **`codeSet`** — the entries of a host data dictionary, named by its key (数据字典 in the designer). Every dictionary a form reads loads in one batched call through `codeSetQueryFn` — by default the application's `AppContext.codeSetQueryFn` — and only a dictionary's top-level entries become options. An empty key is a warning (`code_set_empty`) and resolves to an empty list. See [Embedding → Data dictionaries](./embedding.md#data-dictionaries).
 
 `FormSchema.dataSources: FormDataSource[]` holds the form-global, reusable sources — `{ id, name, kind: "static", options }` or `{ id, name, kind: "remote", request, mapping? }` — that `ref` sources point at. The designer edits them in the 数据源 tab of the form-config drawer, and deleting one there prunes every `ref` to it and every `refresh_data_source` action naming it in the same undo step.
 

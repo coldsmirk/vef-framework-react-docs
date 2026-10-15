@@ -62,6 +62,7 @@ const PLUGINS: ApprovalPlugins = {
 | `formGlobals` | 表单设计器的系统变量，以 `$globals.<key>` 的形式与内置的 `$applicant` 属性并列提供 | 只提供发起人属性 |
 | `dataSourceResolver` | 每一次表单渲染以及表单设计器的预览——解析远程选项来源 | 远程来源解析为空列表 |
 | `dataSourceApis` | 表单设计器的远程选项来源，以针对该目录的选择器打头 | 接口地址与字段映射需要手动填写 |
+| `codeSets` | 表单设计器的「数据字典」选项来源，从目录中挑选 | 字典 key 需要手动填写 |
 | `evaluators` | 每一次表单渲染以及表单设计器的预览——表达式 / 脚本求值与宿主副作用 | 内置的 JavaScript 求值器；运行时 `alert` / `api_call` / `navigate` 不做任何事 |
 | `renderBusinessRef` | 实例详情头部 | 业务引用渲染为纯代码文本 |
 
@@ -71,7 +72,7 @@ const PLUGINS: ApprovalPlugins = {
 
 [`ApprovalFlowPage`](./pages.md#approvalflowpage) 内的流程设计器是一个四步向导（流程设置 → 表单设计 → 流程设计 → 审阅提交），它内嵌了:
 
-- [`FormEditor`](../../editors/form-editor/overview.md) 承担表单步骤，由 provider 接好：它的 `registries`、`dataSourceResolver`、`dataSourceApis` 与 `evaluators`，作为 `contextSources` 的[表单系统变量](#表单系统变量)，以及作为 `validate` 的 [`validateApprovalProjection`](../../editors/approval-form-bridge.md#validateapprovalprojection)——因此审批契约问题会出现在编辑器自己的状态栏里，每一个都可以点击定位到对应字段；
+- [`FormEditor`](../../editors/form-editor/overview.md) 承担表单步骤，由 provider 接好：它的 `registries`、`dataSourceResolver`、`dataSourceApis`、`codeSets` 与 `evaluators`，作为 `contextSources` 的[表单系统变量](#表单系统变量)，以及作为 `validate` 的 [`validateApprovalProjection`](../../editors/approval-form-bridge.md#validateapprovalprojection)——因此审批契约问题会出现在编辑器自己的状态栏里，每一个都可以点击定位到对应字段；
 - [`ApprovalFlowEditor`](../../editors/approval-flow-editor/overview.md) 承担流程步骤；
 - [`approval-form-bridge`](../../editors/approval-form-bridge.md) 的 `projectFormSchema` / `validateApprovalSchema` 作为两者之间的接缝——投影出的 `FormFieldDefinition[]` 喂给流程编辑器的条件/权限界面，而两个编辑器的校验共同把关向导的步骤切换。
 

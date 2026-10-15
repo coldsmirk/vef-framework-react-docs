@@ -13,6 +13,30 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
+## v2.29.0 (2026-10-15)
+
+Selection fields can read a host data dictionary directly. No breaking changes; the backend check of dictionary values needs vef-framework-go v0.63.0 or later.
+
+### Features
+
+- **form-editor** — a fourth option source, 数据字典: `{ kind: "codeSet", codeSet }` names a host data dictionary (code set), on a select, a radio group or a checkbox group, a detail-table column included. A form declares no list of dictionaries: `FormRenderer` collects every key its fields read and loads them in one call through the new `codeSetQueryFn` prop — by default the application's `AppContext.codeSetQueryFn`, under the query key `useCodeSetQuery` builds, so a dictionary already loaded is served from the cache. Only a dictionary's top-level entries become options. An unpicked dictionary is a warning (`code_set_empty`). See [Data dictionaries](../editors/form-editor/embedding.md#data-dictionaries).
+
+  ```tsx
+  // The field
+  { id: "Field_gender", type: "select", key: "gender", label: "性别", dataSource: { kind: "codeSet", codeSet: "sys.user.gender" } }
+
+  // The runtime: nothing to wire where AppContext.codeSetQueryFn is set
+  <FormRenderer schema={schema} />
+  ```
+- **form-editor** — `FormEditor.codeSets` (`CodeSetDescriptor[]`) is the host's dictionary catalog: the 数据字典 source picks from it, searchable by name and key. Without one the key is typed. `FormEditor.codeSetQueryFn` reaches the canvas and the preview, where a dictionary-backed select shows its real entries.
+- **approval** — `ApprovalPlugins.codeSets` hands the catalog to the flow designer's form step.
+- **approval-form-bridge** — a dictionary projects as `optionSource: { kind: "codeSet", codeSet }` (`ApprovalOptionSourceKind` gains `"codeSet"`) and raises no `options_not_static`: the Go backend checks a submitted value against the dictionary. See [Data-dictionary sources](../editors/approval-form-bridge.md#data-dictionary-sources).
+
+### Fixes worth knowing
+
+- **form-editor** — the option-source switch reads 静态选项 / 数据源 / 远程请求 / 数据字典: the reference to a form data source, formerly 引用数据源, is named after the 数据源 tab it points at, so four options fit the properties panel.
+- **form-editor** — code that switches exhaustively over `FieldOptionSource["kind"]` (or `ApprovalOptionSourceKind`) needs a `"codeSet"` branch.
+
 ## v2.28.0 (2026-10-15)
 
 A shared flow is now a flow its owner shares rather than a flow of a reserved tenant. Breaking changes in the approval package, which needs vef-framework-go v0.62.0 or later.

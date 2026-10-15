@@ -166,6 +166,8 @@ createEditableColumn<Member>("gender", {
 
 Boolean flags are the one enumeration that does not go through code sets — render those with `Bool` / `field.Bool` (fixed true/false labels) instead of a two-entry code set.
 
+A form built in the [form designer](../editors/form-editor/overview.md) needs none of this: its selection fields name a code set as their option source, and the form loads every code set it reads in one call through the same `codeSetQueryFn`, sharing `useCodeSetQuery`'s cache — see [Form designer → Data dictionaries](../editors/form-editor/embedding.md#data-dictionaries).
+
 ## Typing Code Set Keys
 
 By default `CodeSetKey` is just `string` — any key compiles, and a typo surfaces only at runtime as an empty select. The hooks package exposes an extension registry to close that gap: augment `Register` with a `codeSetKeys` member and every code-set hook narrows to that union, with IDE autocomplete on keys:

@@ -54,6 +54,7 @@ description: 一款专为数百字段规模的表单打造的可视化拖拽式�
 
 - **系统变量**——`contextSources` 声明宿主在运行时提供的上下文路径（发起人作为 `$applicant.*`、宿主全局变量作为 `$globals.*`……）。设计器把它们连同预览值一起列在表单自身变量旁边，并作为条件来源提供——见 [Linkage → 宿主上下文与系统变量](./linkage.md#宿主上下文与系统变量)。
 - **接口目录**——`dataSourceApis` 把远程选项来源从手填接口与字段映射，变成从宿主维护的接口中挑选——见 [Embedding → 提供接口目录](./embedding.md#提供接口目录)。
+- **数据字典**——选择类字段直接读取宿主字典，从宿主的 `codeSets` 目录中挑选；一张表单用到的所有字典通过 `AppContext.codeSetQueryFn` 一次批量加载——见 [Embedding → 数据字典](./embedding.md#数据字典)。
 - **它自己的检查**——`validate` 把宿主的契约（比如后端不接受的字段类型）加进设计器的诊断与发布关卡——见 [Embedding → 宿主诊断](./embedding.md#宿主诊断)。
 
 ## 定位
