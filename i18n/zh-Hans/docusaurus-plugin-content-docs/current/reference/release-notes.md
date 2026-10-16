@@ -13,6 +13,37 @@ description: 每个已发布版本以及未发布变更的破坏性变更、新�
 
 版本按从新到旧排列，最前面是已合并但尚未发布的变更。每个版本先列破坏性变更，其次是新特性，最后是值得关注的修复。内部 playground 演示和仓库工具链的变更不在此列出。
 
+## v2.30.0（2026-10-15）
+
+全局流程现在可以指定具体的人员，并按租户选择。approval 相关包有破坏性变更，需要 vef-framework-go v0.64.0 或更高版本：后端不再拒绝部署指定用户、角色或部门的全局流程，并允许被派到任务或抄送的人员在自己所属的租户里处理。
+
+### 破坏性变更
+
+- **approval-flow-editor** — 全局模式不再禁止任何配置。`EditorPlugins.shared` 不再禁用任何审批人 / 抄送类型，也不再禁用无审批人或超时处理方式；`FlowValidationContext.shared` 被移除，`FlowValidationCode` 去掉了 `shared_assignee_names_people`、`shared_cc_names_people`、`shared_fallback_users`、`shared_node_admins` 和 `shared_timeout_to_admins`——对它做穷举 `switch` 的代码需要删掉这些分支。请不要再传这个选项:
+
+  ```ts
+  // 之前
+  validateFlowDefinition(definition, { formFields, shared: flow.isShared });
+
+  // 之后
+  validateFlowDefinition(definition, { formFields });
+  ```
+
+### 新特性
+
+- **approval-flow-editor** — 在全局流程中，选取用户或部门的审批人 / 抄送规则会先要求选择租户。`EditorPlugins.tenants`（`TenantOption[]`，每项 `{ value, label }`）提供租户列表，规则行显示「机构」下拉框，所选租户通过新增的 `PickerProps.tenantId` 交给选择器——选定之前选择器处于禁用状态。选择结果保存在规则的 `tenantId` 上（`AssigneeDefinition.tenantId`、`CcDefinition.tenantId`）：后端随流程定义保存它，但从不读取。更换租户会清空已选 id；规则行在用户与部门之间切换时保留租户；角色和宿主目录不分租户，选择方式不变。没有提供 `tenants` 时，全局流程通过普通选择器选人。节点管理员和转交人员名单暂不区分租户。见[宿主集成](../editors/approval-flow-editor/host-integration.md)。
+
+  ```tsx
+  const UserPicker: FC<PickerProps> = ({ tenantId, value, onChange, disabled }) => {
+    const { data } = useQuery({ queryKey: ["users", tenantId], queryFn: () => findUserOptions({ tenantId }) });
+
+    return <Select disabled={disabled} mode="multiple" options={data ?? []} value={value} onChange={onChange} />;
+  };
+
+  <ApprovalProvider plugins={{ pickers: { user: UserPicker, department: DepartmentPicker }, tenants }}>
+  ```
+- **approval** — `ApprovalPlugins.tenants` 把租户列表交给流程设计器。设计器基础信息步骤里「全局流程」开关的提示改为：该流程的审批人与抄送人可以从其他机构选择。
+
 ## v2.29.0（2026-10-15）
 
 选择类字段可以直接读取宿主数据字典。无破坏性变更；后端按字典校验取值需要 vef-framework-go v0.63.0 或更高版本。

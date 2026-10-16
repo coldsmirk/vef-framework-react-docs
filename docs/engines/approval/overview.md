@@ -57,6 +57,7 @@ The resolved plugin set (`ResolvedApprovalPlugins`) always contains form `regist
 | Plugin | Used by | Fallback when unset |
 | --- | --- | --- |
 | `pickers` | Flow designer (assignees, CC, initiators) and runtime dialogs (transfer, add assignee, CC) via `PrincipalSelect` | Plain id-tags input — pages stay functional |
+| `tenants` | The flow designer's user and department rules of a shared flow, which pick the tenant first and hand it to the picker | A shared flow picks people through the plain pickers |
 | `registries` | Form design step and every form render (`InstanceFormPanel`) | `createApprovalRegistries()` created once per mount |
 | `globalSubjects` | The flow designer's condition editor, alongside built-in applicant attributes | Only built-in subjects offered |
 | `formGlobals` | The form designer's system variables, offered as `$globals.<key>` beside the built-in `$applicant` attributes | Only the applicant attributes offered |

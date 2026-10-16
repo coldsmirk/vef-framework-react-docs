@@ -29,7 +29,7 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 
 | 导出 | 种类 | 说明 |
 | --- | --- | --- |
-| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects?, shared? }`——见 [宿主集成](./host-integration.md#plugins-editorplugins)。 |
+| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects?, shared?, tenants? }`——见 [宿主集成](./host-integration.md#plugins-editorplugins)。 |
 | `PickerProps` | type | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }`。 |
 | `PrincipalKind` | type | `"user" \| "role" \| "department"`。 |
 | `PRINCIPAL_KINDS` | const | `readonly ["user", "role", "department"]`。 |
@@ -84,9 +84,9 @@ description: "@vef-framework-react/approval-flow-editor 导出的组件、类型
 
 | 导出 | 结构 |
 | --- | --- |
-| `AssigneeDefinition` | `{ kind: AssigneeKind; ids?: string[]; formField?: string; sortOrder: number }` |
+| `AssigneeDefinition` | `{ kind: AssigneeKind; ids?: string[]; formField?: string; sortOrder: number; tenantId?: string }` |
 | `AssigneeKind` | `string`——设计为开放标识符；可部署值是后端注册了 `approval.AssigneeResolver` 的 kind |
-| `CcDefinition` | `{ kind: CcKind; ids?: string[]; formField?: string; timing?: CcTiming }` |
+| `CcDefinition` | `{ kind: CcKind; ids?: string[]; formField?: string; timing?: CcTiming; tenantId?: string }` |
 | `CcKind` | `string`——设计为开放标识符；可部署值是后端注册了 `approval.CCResolver` 的 kind |
 | `CcTiming` | `"always" \| "on_approve" \| "on_reject"` |
 | `FieldPermission` | `"visible" \| "editable" \| "hidden" \| "required"` |
@@ -128,7 +128,7 @@ function validateFlowDefinition(
 ): FlowValidationError[];
 ```
 
-`FlowValidationContext` 的结构是 `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[]; shared?: boolean }`。省略 kind 目录时回退到框架内置目录；注册了应用自定义 kind 的宿主必须传入 `approval/flow.list_kind_options` 返回的目录。`shared`（v2.26.0）加上后端对全局流程的部署规则——即下文的 `shared_*` 代码。
+`FlowValidationContext` 的结构是 `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[] }`。省略 kind 目录时回退到框架内置目录；注册了应用自定义 kind 的宿主必须传入 `approval/flow.list_kind_options` 返回的目录。
 
 `FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`。`message` 是与编辑器 UI 语言一致的人类可读中文产品文案；请针对 `code` 和各个 id 字段编程。
 
@@ -223,16 +223,6 @@ function validateFlowDefinition(
 | --- | --- |
 | `handle_execution_auto_reject` | 某个 handle 节点的 `executionType` 是 `"auto_reject"`（不支持）。 |
 | `handle_timeout_auto_reject` | 某个 handle 节点的 `timeoutAction` 是 `"auto_reject"`（不支持）。 |
-
-**全局流程**（仅在 `shared: true` 时，v2.26.0）——对应后端的 `ValidateSharedFlowNodes`：全局流程在每个租户中运行，因此不能把任何工作派给某一个租户的人。规则判断的是处理方式，而不是残留的管理员或指定人员列表——只要没有处理方式指向它，这份列表就不会把任务交给任何人。
-
-| 代码 | 含义 |
-| --- | --- |
-| `shared_assignee_names_people` | 某个审批人的 kind 选取用户、角色或部门（其 `selection` 是 `PrincipalKind`）。 |
-| `shared_cc_names_people` | 某个抄送人的 kind 选取用户、角色或部门——无论在任务节点还是抄送节点上。 |
-| `shared_fallback_users` | `emptyAssigneeAction: "transfer_specified"`。 |
-| `shared_node_admins` | `emptyAssigneeAction: "transfer_admin"`。 |
-| `shared_timeout_to_admins` | 设置了时限的节点 `timeoutAction` 为 `"transfer_admin"`。 |
 
 ## 序列化
 

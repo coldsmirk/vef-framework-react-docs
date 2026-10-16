@@ -57,6 +57,7 @@ const PLUGINS: ApprovalPlugins = {
 | 插件 | 使用方 | 未设置时的回退 |
 | --- | --- | --- |
 | `pickers` | 流程设计器（审批人、抄送、发起人）与运行时对话框（转办、加签、抄送），经由 `PrincipalSelect` | 纯 id 标签输入——页面仍然可用 |
+| `tenants` | 流程设计器中全局流程的用户、部门规则，先选择租户再把它交给选择器 | 全局流程通过普通选择器选人 |
 | `registries` | 表单设计步骤与每一次表单渲染（`InstanceFormPanel`） | 每次挂载创建一次的 `createApprovalRegistries()` |
 | `globalSubjects` | 流程设计器的条件编辑器，与内置的申请人属性并列提供 | 只提供内置变量 |
 | `formGlobals` | 表单设计器的系统变量，以 `$globals.<key>` 的形式与内置的 `$applicant` 属性并列提供 | 只提供发起人属性 |

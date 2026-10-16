@@ -59,6 +59,7 @@ description: "@vef-framework-react/approval 每一个导出的详尽参考——
 | 字段 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `pickers` | `Partial<Record<string, FC<PickerProps>>>` | — | 按规则 kind 解析具体 id 的选择器。查找会回退到该 kind 的 `selection` 模式，因此内置 `user` / `role` / `department` 选择器也能服务选择同类对象的自定义 kind。未设置的 kind 降级为纯 id 标签输入。 |
+| `tenants` | `TenantOption[]` | — | 全局流程的规则可以从中选人的租户，每项 `{ value, label }`。全局流程面向所有租户发起，并把工作派给发起租户以外的其他租户的人员，所以设计器先选择租户，再把它作为 `PickerProps.tenantId` 交给 `user` / `department` 选择器；角色和宿主目录不分租户。未提供时，全局流程通过普通选择器选人。 |
 | `registries` | `DeviceRegistries` | `createApprovalRegistries()` | 渲染与设计审批表单所用的表单字段注册表。默认取 [`approval-form-bridge`](../../editors/approval-form-bridge.md) 的审批 profile，它排除了后端解析器会拒绝的字段类型。 |
 | `globalSubjects` | `FormFieldDefinition[]` | — | 宿主定义的全局变量，流程设计器的条件编辑器把它们与内置的申请人属性并列提供——实例发起时由服务端从 `Instance.Globals` 解析。 |
 | `formGlobals` | `FormGlobalDefinition[]` | — | 后端向审批表单暴露的宿主全局变量（其全局变量解析器实现了 `FormGlobalsExposer`），在此声明后，表单设计器会把它们作为 `$globals.<key>` 系统变量，与内置的 `$applicant` 属性并列提供。请让这些 key 与解析器的 `FormGlobalKeys` 保持一致——见[表单系统变量](./overview.md#表单系统变量)。 |

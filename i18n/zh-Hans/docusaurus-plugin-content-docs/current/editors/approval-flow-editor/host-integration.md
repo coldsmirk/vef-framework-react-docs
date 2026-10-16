@@ -30,7 +30,7 @@ const plugins: EditorPlugins = {
 <ApprovalFlowEditor plugins={plugins} value={definition} onChange={setDefinition} />;
 ```
 
-`EditorPlugins` 有六个可选字段:
+`EditorPlugins` 有七个可选字段:
 
 | 字段 | 类型 | 用途 |
 | --- | --- | --- |
@@ -39,7 +39,8 @@ const plugins: EditorPlugins = {
 | `ccKinds` | `ReadonlyArray<KindDescriptor<CcKind>>` | 同一后端动作返回的抄送目录；省略时使用 `BUILTIN_CC_KINDS`。 |
 | `formFields` | `FormFieldDefinition[]` | 表单的顶层字段清单——供条件编辑器、字段权限表以及 `validateFlowDefinition` 的 `fieldPermissions` 交叉校验使用。保留为 `undefined` 表示"没有可用的字段清单"，与 `[]` 含义不同——见下方 [`formFields`](#formfields)。 |
 | `globalSubjects` | `FormFieldDefinition[]` | 宿主声明的变量，条件编辑器会把它们与内置的申请人属性和 `formFields` 一起提供给用户选择。 |
-| `shared` | `boolean` | 正在编辑的是全局流程——归属一个租户、由每个租户运行（即后端的 `Flow.IsShared`）。编辑器会禁用 `selection` 选取用户、角色或部门的审批人 / 抄送 kind，以及把任务转交节点管理员或指定人员的无审批人 / 超时处理方式；它们仍会列出，已加载的定义照样显示为其标签，并由 `validateFlowDefinition({ shared: true })` 标出（v2.26.0）。 |
+| `shared` | `boolean` | 正在编辑的是全局流程——面向所有租户发起（即后端的 `Flow.IsShared`），它的工作可以派给发起租户以外的其他租户的人员。不会因此禁用或标出任何配置；已提供 `tenants` 时，选取用户或部门的审批人 / 抄送规则会先要求选择租户。 |
+| `tenants` | `ReadonlyArray<TenantOption>` | 全局流程的用户、部门规则可以选择的租户，每项 `{ value, label }`。编辑器自己不认识任何租户，由宿主提供列表；未设置 `shared` 时忽略（v2.30.0）。 |
 
 ### 选择器
 
@@ -50,8 +51,11 @@ interface PickerProps {
   value: string[];
   onChange: (ids: string[]) => void;
   disabled?: boolean;
+  tenantId?: string;
 }
 ```
+
+只有宿主提供了 `tenants` 的全局流程里，用户或部门选择器才会收到 `tenantId`：用户和部门只属于某一个租户，所以设计器先让设计者选择租户（「机构」下拉框，选择结果以 `tenantId` 保存在规则上），再把它交给选择器，选择器应只列出该租户的人员。选定租户之前选择器处于禁用状态，更换租户会清空已选 id。角色和 `custom` 目录不会收到 `tenantId`。未提供时，按宿主给该选择器设定的默认范围列出即可。
 
 ```tsx
 import type { PickerProps } from "@vef-framework-react/approval-flow-editor";

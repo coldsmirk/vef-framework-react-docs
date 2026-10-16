@@ -13,6 +13,37 @@ The package *set* itself can change between releases: v2.7.0 removed `@vef-frame
 
 Versions are listed newest-first, starting with changes that are merged but not yet released. Each version leads with breaking changes, then features, then fixes worth knowing. Changes to the internal playground demo and repository tooling are omitted.
 
+## v2.30.0 (2026-10-15)
+
+A shared flow may now name specific people, picked by tenant. Breaking changes in the approval packages, which need vef-framework-go v0.64.0 or later: the backend no longer refuses to deploy a shared flow that names users, roles or departments, and lets the people a task or copy was routed to act on it from their own tenant.
+
+### Breaking changes
+
+- **approval-flow-editor** — shared mode no longer forbids anything. `EditorPlugins.shared` disables no assignee / CC kind and no empty-assignee or timeout action, `FlowValidationContext.shared` is removed, and `FlowValidationCode` loses `shared_assignee_names_people`, `shared_cc_names_people`, `shared_fallback_users`, `shared_node_admins` and `shared_timeout_to_admins`; code that switches exhaustively over it drops those branches. Stop passing the option:
+
+  ```ts
+  // Before
+  validateFlowDefinition(definition, { formFields, shared: flow.isShared });
+
+  // After
+  validateFlowDefinition(definition, { formFields });
+  ```
+
+### Features
+
+- **approval-flow-editor** — in a shared flow, an assignee or CC rule that picks users or departments asks for the tenant first. `EditorPlugins.tenants` (`TenantOption[]`, each `{ value, label }`) lists the tenants, the row shows a 机构 select, and the picker is handed the choice as the new `PickerProps.tenantId` — disabled until one is picked. The pick is stored as `tenantId` on the rule (`AssigneeDefinition.tenantId`, `CcDefinition.tenantId`): the backend keeps it with the definition and never reads it. Changing the tenant clears the ids; switching a row between user and department keeps it; roles and host catalogs are not per tenant and are picked as before. Without `tenants` a shared flow picks people through the plain pickers. The node-admin and fallback-user lists are not tenant-aware yet. See [Host Integration](../editors/approval-flow-editor/host-integration.md).
+
+  ```tsx
+  const UserPicker: FC<PickerProps> = ({ tenantId, value, onChange, disabled }) => {
+    const { data } = useQuery({ queryKey: ["users", tenantId], queryFn: () => findUserOptions({ tenantId }) });
+
+    return <Select disabled={disabled} mode="multiple" options={data ?? []} value={value} onChange={onChange} />;
+  };
+
+  <ApprovalProvider plugins={{ pickers: { user: UserPicker, department: DepartmentPicker }, tenants }}>
+  ```
+- **approval** — `ApprovalPlugins.tenants` hands the tenant list to the flow designer. The 全局流程 switch of the designer's basic step now says the flow's approvers and CC recipients may be picked from other tenants.
+
 ## v2.29.0 (2026-10-15)
 
 Selection fields can read a host data dictionary directly. No breaking changes; the backend check of dictionary values needs vef-framework-go v0.63.0 or later.

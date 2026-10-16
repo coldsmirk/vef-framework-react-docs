@@ -29,7 +29,7 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 
 | Export | Kind | Description |
 | --- | --- | --- |
-| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects?, shared? }` — see [Host Integration](./host-integration.md#plugins-editorplugins). |
+| `EditorPlugins` | type | `{ pickers?, assigneeKinds?, ccKinds?, formFields?, globalSubjects?, shared?, tenants? }` — see [Host Integration](./host-integration.md#plugins-editorplugins). |
 | `PickerProps` | type | `{ value: string[]; onChange: (ids: string[]) => void; disabled?: boolean }`. |
 | `PrincipalKind` | type | `"user" \| "role" \| "department"`. |
 | `PRINCIPAL_KINDS` | const | `readonly ["user", "role", "department"]`. |
@@ -84,9 +84,9 @@ Dry signature reference for `@vef-framework-react/approval-flow-editor`. For nar
 
 | Export | Shape |
 | --- | --- |
-| `AssigneeDefinition` | `{ kind: AssigneeKind; ids?: string[]; formField?: string; sortOrder: number }` |
+| `AssigneeDefinition` | `{ kind: AssigneeKind; ids?: string[]; formField?: string; sortOrder: number; tenantId?: string }` |
 | `AssigneeKind` | `string` — open by design; deployable values are the kinds with a backend `approval.AssigneeResolver` |
-| `CcDefinition` | `{ kind: CcKind; ids?: string[]; formField?: string; timing?: CcTiming }` |
+| `CcDefinition` | `{ kind: CcKind; ids?: string[]; formField?: string; timing?: CcTiming; tenantId?: string }` |
 | `CcKind` | `string` — open by design; deployable values are the kinds with a backend `approval.CCResolver` |
 | `CcTiming` | `"always" \| "on_approve" \| "on_reject"` |
 | `FieldPermission` | `"visible" \| "editable" \| "hidden" \| "required"` |
@@ -128,7 +128,7 @@ function validateFlowDefinition(
 ): FlowValidationError[];
 ```
 
-`FlowValidationContext` is `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[]; shared?: boolean }`. Omitted kind catalogs fall back to the framework built-ins; a host with application-registered kinds must pass the catalog served by `approval/flow.list_kind_options`. `shared` (v2.26.0) adds the backend's deploy rule for a shared flow — the `shared_*` codes below.
+`FlowValidationContext` is `{ formFields?: FormFieldDefinition[]; assigneeKinds?: readonly KindDescriptor[]; ccKinds?: readonly KindDescriptor[] }`. Omitted kind catalogs fall back to the framework built-ins; a host with application-registered kinds must pass the catalog served by `approval/flow.list_kind_options`.
 
 `FlowValidationError`: `{ code: FlowValidationCode; message: string; nodeId?: string; edgeId?: string; branchId?: string }`. `message` is human-readable Chinese product copy matching the editor's UI language; program against `code` and the id fields.
 
@@ -223,16 +223,6 @@ function validateFlowDefinition(
 | --- | --- |
 | `handle_execution_auto_reject` | A handle node's `executionType` is `"auto_reject"` (unsupported). |
 | `handle_timeout_auto_reject` | A handle node's `timeoutAction` is `"auto_reject"` (unsupported). |
-
-**Shared flows** (only with `shared: true`, v2.26.0) — mirrors the backend's `ValidateSharedFlowNodes`: a shared flow runs in every tenant, so it routes no work to people of one tenant. The rule judges the actions, never a leftover admin or fallback list, which hands nothing to anyone while no action routes to it.
-
-| Code | Meaning |
-| --- | --- |
-| `shared_assignee_names_people` | An assignee's kind picks users, roles or departments (its `selection` is a `PrincipalKind`). |
-| `shared_cc_names_people` | A CC recipient's kind picks users, roles or departments — on a task node or a CC node. |
-| `shared_fallback_users` | `emptyAssigneeAction: "transfer_specified"`. |
-| `shared_node_admins` | `emptyAssigneeAction: "transfer_admin"`. |
-| `shared_timeout_to_admins` | A node with a deadline has `timeoutAction: "transfer_admin"`. |
 
 ## Serialization
 

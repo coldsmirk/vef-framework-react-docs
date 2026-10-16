@@ -30,7 +30,7 @@ const plugins: EditorPlugins = {
 <ApprovalFlowEditor plugins={plugins} value={definition} onChange={setDefinition} />;
 ```
 
-`EditorPlugins` has six optional fields:
+`EditorPlugins` has seven optional fields:
 
 | Field | Type | Purpose |
 | --- | --- | --- |
@@ -39,7 +39,8 @@ const plugins: EditorPlugins = {
 | `ccKinds` | `ReadonlyArray<KindDescriptor<CcKind>>` | The CC catalog served by the same backend action; omitting it uses `BUILTIN_CC_KINDS`. |
 | `formFields` | `FormFieldDefinition[]` | The form's top-level field inventory — feeds the condition editor, the field-permission table, and `validateFlowDefinition`'s `fieldPermissions` cross-check. Leaving it `undefined` means "no inventory available" and is distinct from `[]` — see [`formFields`](#formfields) below. |
 | `globalSubjects` | `FormFieldDefinition[]` | Host-declared variables the condition editor offers alongside the built-in applicant attributes and `formFields`. |
-| `shared` | `boolean` | The flow is shared — owned by one tenant and run by every tenant (the backend's `Flow.IsShared`). The editor disables the assignee / CC kinds whose `selection` picks users, roles or departments and the empty-assignee / timeout actions handing a task to node admins or named fallback users; they stay listed, so a loaded definition still reads as its labels, and `validateFlowDefinition({ shared: true })` flags them (v2.26.0). |
+| `shared` | `boolean` | The flow is shared — offered to every tenant (the backend's `Flow.IsShared`), so its work may be routed to people of other tenants than the one that starts it. Nothing is disabled or flagged for it; with `tenants` wired, an assignee or CC rule that picks users or departments asks for the tenant first. |
+| `tenants` | `ReadonlyArray<TenantOption>` | The tenants a shared flow's user and department rules can pick from, each `{ value, label }`. The editor knows no tenant of its own, so the host lists them; ignored unless `shared` is set (v2.30.0). |
 
 ### Pickers
 
@@ -50,8 +51,11 @@ interface PickerProps {
   value: string[];
   onChange: (ids: string[]) => void;
   disabled?: boolean;
+  tenantId?: string;
 }
 ```
+
+`tenantId` is set only for a user or department picker of a shared flow whose host wired `tenants`: a user or department belongs to one tenant, so the designer picks the tenant first (a 机构 select, which stores the choice as `tenantId` on the rule) and hands it to the picker, which should list that tenant's people. The picker is disabled until a tenant is chosen, and changing the tenant clears the picked ids. Roles and `custom` catalogs get no `tenantId`. Omitted, list whatever the host scopes the picker to by default.
 
 ```tsx
 import type { PickerProps } from "@vef-framework-react/approval-flow-editor";
